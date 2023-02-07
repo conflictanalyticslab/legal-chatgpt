@@ -6,6 +6,8 @@
     "dependencies": {
         "@azure/msal-browser": "^2.32.2",
         "@azure/msal-react": "^1.5.2",
+        "@elastic/react-search-ui": "^1.19.0",
+        "@elastic/search-ui-workplace-search-connector": "^1.19.0",
         "@emotion/react": "^11.10.5",
         "@emotion/styled": "^11.10.5",
         "@mui/icons-material": "^5.11.0",

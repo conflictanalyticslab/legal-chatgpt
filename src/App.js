@@ -14,9 +14,34 @@ import {
 } from "@mui/material";
 import { Send, ThumbUp, ThumbDown, Refresh } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
+import WorkplaceSearchAPIConnector from "@elastic/search-ui-workplace-search-connector";
+import {
+    SearchProvider,
+    SearchBox,
+    Results,
+    Paging,
+    WithSearch,
+    PagingInfo,
+    ResultsPerPage,
+} from "@elastic/react-search-ui";
+import { Layout } from "@elastic/react-search-ui-views";
+import "@elastic/react-search-ui-views/lib/styles/styles.css";
+
 import { db } from "./firebase";
 import { addDoc, collection } from "firebase/firestore";
 import { dummyData } from "./dummyData";
+
+const connector = new WorkplaceSearchAPIConnector({
+    kibanaBase: process.env.REACT_APP_APP_KIBANA_BASE,
+    enterpriseSearchBase: process.env.REACT_APP_APP_ENTERPRISE_SEARCH_BASE,
+    redirectUri: "http://localhost:3000/legal-chatgpt",
+    clientId: process.env.REACT_APP_APP_ELASTIC_CLIENT_ID,
+});
+
+const config = {
+    apiConnector: connector,
+    alwaysSearchOnInitialLoad: true,
+};
 
 function App() {
     const [userInputs, setUserInputs] = useState([]);
@@ -132,6 +157,58 @@ function App() {
 
     return (
         <div className="App">
+            <SearchProvider config={config}>
+                <WithSearch
+                    mapContextToProps={({
+                        authorizeUrl,
+                        isLoggedIn,
+                        logout,
+                        wasSearched,
+                    }) => ({
+                        authorizeUrl,
+                        isLoggedIn,
+                        logout,
+                        wasSearched,
+                    })}
+                >
+                    {({ authorizeUrl, isLoggedIn, logout, wasSearched }) => {
+                        return (
+                            <div>
+                                {isLoggedIn ? (
+                                    <button onClick={logout}>Log out</button>
+                                ) : (
+                                    <a href={authorizeUrl}>Log in</a>
+                                )}
+                                <Layout
+                                    header={
+                                        <SearchBox
+                                            autocompleteMinimumCharacters={3}
+                                            //searchAsYouType={true}
+                                            autocompleteResults={{
+                                                linkTarget: "_blank",
+                                                sectionTitle: "Results",
+                                                titleField: "title",
+                                                shouldTrackClickThrough: true,
+                                                clickThroughTags: ["test"],
+                                            }}
+                                            autocompleteSuggestions={true}
+                                            debounceLength={0}
+                                        />
+                                    }
+                                    bodyContent={<Results titleField="title" />}
+                                    bodyHeader={
+                                        <>
+                                            {wasSearched && <PagingInfo />}
+                                            {wasSearched && <ResultsPerPage />}
+                                        </>
+                                    }
+                                    bodyFooter={<Paging />}
+                                />
+                            </div>
+                        );
+                    }}
+                </WithSearch>
+            </SearchProvider>
             <div>
                 <Button
                     variant="contained"
