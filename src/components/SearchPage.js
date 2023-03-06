@@ -20,6 +20,7 @@ import {
 } from "@elastic/react-search-ui-views";
 import "@elastic/react-search-ui-views/lib/styles/styles.css";
 import { SearchDriverOptions } from "@elastic/search-ui";
+import axios from "axios";
 
 const connector = new AppSearchAPIConnector({
     searchKey: process.env.REACT_APP_PUBLIC_SEARCH_KEY,
@@ -51,6 +52,31 @@ const config = {
 };
 
 const SearchPage = () => {
+    const handleSearch = (searchTerm, setSearchTerm) => {
+        // config reference: https://github.com/scholarsportal/text-mining/blob/main/corpus-builder.py
+        const page = 1;
+        const pageLength = 20;
+        const dataType = "full";
+        const url = `/search?q=((${searchTerm}))&page=${page}&page_length=${pageLength}&data=${dataType}&format=json`;
+
+        axios.get(url).then(async (res) => {
+            const results = res["data"]["response"]["results"]["result"];
+            console.log(results);
+
+            const elasticUrl = process.env.REACT_APP_ELASTICSEARCH_URL;
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${process.env.REACT_APP_PRIVATE_SEARCH_KEY}`,
+                },
+            };
+            axios.post(elasticUrl, results, config).then((res) => {
+                setTimeout(function () {
+                    setSearchTerm(searchTerm);
+                }, 500);
+            });
+        });
+    };
     return (
         <SearchProvider config={config}>
             <WithSearch
@@ -68,10 +94,10 @@ const SearchPage = () => {
                                         <SearchBox
                                             debounceLength={0}
                                             onSubmit={(searchTerm) => {
-                                                setTimeout(function () {
-                                                    console.log("hi");
-                                                    setSearchTerm(searchTerm);
-                                                }, 5000);
+                                                handleSearch(
+                                                    searchTerm,
+                                                    setSearchTerm
+                                                );
                                             }}
                                         />
                                     }
