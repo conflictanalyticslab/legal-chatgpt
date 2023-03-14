@@ -30,6 +30,7 @@ function ChatPage() {
     const [endSession, setEndSession] = useState(false);
     const [num, setNum] = useState(2);
     const [alert, setAlert] = useState("");
+    const [email, setEmail] = useState(""); // manage the email input
 
     const findRefs = (texts, keyword) => {
         var allRefs = [];
@@ -117,22 +118,55 @@ function ChatPage() {
         setAlert("");
     };
     const query = async (data) => {
-        const response = await fetch(
-            "https://api-inference.huggingface.co/models/microsoft/DialoGPT-large",
-            {
-                headers: {
-                    Authorization: `Bearer ${process.env.REACT_APP_MODEL_API_KEY}`,
-                },
-                method: "POST",
-                body: JSON.stringify(data),
-            }
-        );
+        const response = await fetch('/api/query', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
         const result = await response.json();
         return result;
+      };
+      
+    const handleEmailSubmit = async () => {
+        try {
+            const response = await fetch('/authenticate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email }),
+            });
+
+            if (response.status === 200) {
+            alert('Authentication successful!');
+            } else {
+            const errorMessage = await response.text();
+            alert(errorMessage);
+            }
+        } catch (error) {
+            alert('Error processing the request');
+        }
     };
 
     return (
         <div className="App">
+            {/*Add this email input field and submit button*/}
+            <div>
+                <TextField
+                label="Email"
+                variant="outlined"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                />
+                <Button
+                variant="contained"
+                onClick={handleEmailSubmit}
+                >
+                Authenticate
+                </Button>
+            </div>
             <div>
                 <Button
                     variant="contained"
