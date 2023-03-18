@@ -1,9 +1,8 @@
 .App {
-    padding-inline: 200px;
+    /* padding-inline: 100px; */
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 40px;
+    flex-direction: row;
+    height: 100vh;
 }
 
 .App-logo {
@@ -39,4 +38,23 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+.sui-layout-sidebar {
+    width: 0 !important;
+    padding: 0 !important;
+}
+
+.sui-result__details {
+    width: 100% !important;
+}
+.sui-result__title {
+    font-size: 1.2em !important;
+}
+.sui-layout-body__inner {
+    justify-content: center !important;
+}
+.sui-layout-main {
+    width: 90% !important;
+    padding: 32px 0 0 0 !important;
 }

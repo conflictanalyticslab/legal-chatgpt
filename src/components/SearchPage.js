@@ -1,5 +1,4 @@
 import React from "react";
-import "../App.css";
 import AppSearchAPIConnector from "@elastic/search-ui-app-search-connector";
 import {
     ErrorBoundary,
@@ -19,7 +18,7 @@ import {
     SingleSelectFacet,
 } from "@elastic/react-search-ui-views";
 import "@elastic/react-search-ui-views/lib/styles/styles.css";
-import { SearchDriverOptions } from "@elastic/search-ui";
+import "../App.css";
 import axios from "axios";
 
 const connector = new AppSearchAPIConnector({
@@ -29,7 +28,7 @@ const connector = new AppSearchAPIConnector({
 });
 
 const config = {
-    alwaysSearchOnInitialLoad: true,
+    alwaysSearchOnInitialLoad: false,
     apiConnector: connector,
     hasA11yNotifications: true,
     searchQuery: {
@@ -37,6 +36,13 @@ const config = {
             title: {
                 snippet: {
                     fallback: true,
+                    size: 100,
+                },
+            },
+            abstract: {
+                snippet: {
+                    fallback: true,
+                    size: 500,
                 },
             },
             body: {
@@ -44,6 +50,7 @@ const config = {
                     fallback: true,
                 },
             },
+            url: { raw: {} },
         },
         search_fields: { title: {} },
         disjunctiveFacets: [""],
@@ -59,23 +66,29 @@ const SearchPage = () => {
         const dataType = "full";
         const url = `/search?q=((${searchTerm}))&page=${page}&page_length=${pageLength}&data=${dataType}&format=json`;
 
-        axios.get(url).then(async (res) => {
-            const results = res["data"]["response"]["results"]["result"];
-            console.log(results);
+        axios
+            .get(url)
+            .then(async (res) => {
+                const results = res["data"]["response"]["results"]["result"];
+                console.log(results);
 
-            const elasticUrl = process.env.REACT_APP_ELASTICSEARCH_URL;
-            const config = {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${process.env.REACT_APP_PRIVATE_SEARCH_KEY}`,
-                },
-            };
-            axios.post(elasticUrl, results, config).then((res) => {
-                setTimeout(function () {
-                    setSearchTerm(searchTerm);
-                }, 500);
+                const elasticUrl = process.env.REACT_APP_ELASTICSEARCH_URL;
+                const config = {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${process.env.REACT_APP_PRIVATE_SEARCH_KEY}`,
+                    },
+                };
+                axios.post(elasticUrl, results, config).then((res) => {
+                    setTimeout(function () {
+                        setSearchTerm(searchTerm);
+                    }, 500);
+                });
+            })
+            .catch((err) => {
+                console.log(err);
+                setSearchTerm(searchTerm);
             });
-        });
     };
     return (
         <SearchProvider config={config}>
@@ -87,38 +100,35 @@ const SearchPage = () => {
             >
                 {({ wasSearched, setSearchTerm }) => {
                     return (
-                        <div className="App">
-                            <ErrorBoundary>
-                                <Layout
-                                    header={
-                                        <SearchBox
-                                            debounceLength={0}
-                                            onSubmit={(searchTerm) => {
-                                                handleSearch(
-                                                    searchTerm,
-                                                    setSearchTerm
-                                                );
-                                            }}
-                                        />
-                                    }
-                                    sideContent={<div></div>}
-                                    bodyContent={
-                                        <Results
-                                            titleField="title"
-                                            urlField="url"
-                                            shouldTrackClickThrough
-                                        />
-                                    }
-                                    bodyHeader={
-                                        <>
-                                            {wasSearched && <PagingInfo />}
-                                            {wasSearched && <ResultsPerPage />}
-                                        </>
-                                    }
-                                    bodyFooter={<Paging />}
-                                />
-                            </ErrorBoundary>
-                        </div>
+                        <ErrorBoundary>
+                            <Layout
+                                header={
+                                    <SearchBox
+                                        debounceLength={0}
+                                        onSubmit={(searchTerm) => {
+                                            handleSearch(
+                                                searchTerm,
+                                                setSearchTerm
+                                            );
+                                        }}
+                                    />
+                                }
+                                bodyContent={
+                                    <Results
+                                        titleField="title"
+                                        urlField="url"
+                                        shouldTrackClickThrough={true}
+                                    />
+                                }
+                                bodyHeader={
+                                    <>
+                                        {wasSearched && <PagingInfo />}
+                                        {wasSearched && <ResultsPerPage />}
+                                    </>
+                                }
+                                bodyFooter={<Paging />}
+                            />
+                        </ErrorBoundary>
                     );
                 }}
             </WithSearch>

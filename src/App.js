@@ -5,8 +5,19 @@ import SearchPage from "./components/SearchPage";
 function App() {
     return (
         <div className="App">
-            <SearchPage></SearchPage>
-            <ChatPage></ChatPage>
+            <div style={{ width: "30%", height: "%100%", overflow: "scroll" }}>
+                <SearchPage></SearchPage>
+            </div>
+            <div
+                style={{
+                    width: "70%",
+                    height: "100%",
+                    overflow: "scroll",
+                    justifyContent: "center",
+                }}
+            >
+                <ChatPage></ChatPage>
+            </div>
         </div>
     );
 }
