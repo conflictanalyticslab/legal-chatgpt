@@ -12,6 +12,7 @@ import {
     InputAdornment,
     OutlinedInput,
 } from "@mui/material";
+
 import { Send, ThumbUp, ThumbDown, Refresh } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 
@@ -129,26 +130,27 @@ function ChatPage() {
         return result;
       };
       
-    const handleEmailSubmit = async () => {
+      const handleEmailSubmit = async () => {
         try {
-            const response = await fetch('/authenticate', {
+          const response = await fetch('/authenticate', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+              'Content-Type': 'application/json',
             },
             body: JSON.stringify({ email }),
-            });
-
-            if (response.status === 200) {
-            alert('Authentication successful!');
-            } else {
+          });
+      
+          if (response.status === 200) {
+            window.alert('Authentication successful!');
+          } else {
             const errorMessage = await response.text();
-            alert(errorMessage);
-            }
+            window.alert(errorMessage);
+          }
         } catch (error) {
-            alert('Error processing the request');
+          window.alert('Error processing the request');
         }
-    };
+      };
+      
 
     return (
         <div className="App">

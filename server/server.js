@@ -1,5 +1,5 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const cors = require('cors');
 const dotenv = require('dotenv');
 const Joi = require('joi'); // Add this line to import Joi
@@ -9,9 +9,8 @@ dotenv.config();
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 //authentication schema
 const emailSchema = Joi.object({

@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/legal-chatgpt/static/css/main.55b435bb.css",
+    "main.js": "/legal-chatgpt/static/js/main.0c8d6020.js",
+    "static/js/787.f4329a82.chunk.js": "/legal-chatgpt/static/js/787.f4329a82.chunk.js",
+    "index.html": "/legal-chatgpt/index.html",
+    "main.55b435bb.css.map": "/legal-chatgpt/static/css/main.55b435bb.css.map",
+    "main.0c8d6020.js.map": "/legal-chatgpt/static/js/main.0c8d6020.js.map",
+    "787.f4329a82.chunk.js.map": "/legal-chatgpt/static/js/787.f4329a82.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.55b435bb.css",
+    "static/js/main.0c8d6020.js"
+  ]
+}
