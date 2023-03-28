@@ -71,7 +71,7 @@ const styles = (theme) => {
       fontSize: '18px',
     },
     title: {
-      paddingBottom: '15px',
+      paddingBottom: '5px',
     },
     subtitle: {
       opacity: '0.7',
@@ -98,7 +98,7 @@ const styles = (theme) => {
       alignItems: 'center',
       justifyContent: 'center',
       width: '100%',
-      minHeight: '500px',
+      minHeight: '300px',
     },
     sectionGridItem: {
       backgroundColor: '#f2f0f1',

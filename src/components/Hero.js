@@ -11,20 +11,19 @@ const Hero = () => {
     <div className={classes.appBackground}>
     <Box className={classes.heroBox} textAlign="center">
       <Grid container spacing={7} className={classes.gridContainer} >
-      <Grid item xs={12} md={7}>
-          <img src={logo} alt="My Team" className={classes.medImage} />
+      <Grid item xs={12} md={7} margin = '0px'>
+          <img src={logo} alt="logo" className={classes.medImage} />
         </Grid>
         <Grid item xs={12} md={7}>
-          <Typography variant="h3" fontWeight={700} className={classes.title} textAlign="center">
+          <Typography variant="h4" fontWeight={700} className={classes.title} textAlign="center">
             Experience ChatGPT
           </Typography>
-          <Typography variant="h3" fontWeight={700} className={classes.title} textAlign="center">
+          <Typography variant="h4" fontWeight={700} className={classes.title} textAlign="center">
             Designed for Law
           </Typography>
           <Typography variant="h6" className={classes.subtitle2} sx = {{ marginTop: '60px' }}  >
               Our advanced AI algorithms are designed to streamline and optimize 
             </Typography>
-            
             <Typography variant="h6" className={classes.subtitle}>
             legal processes, allowing you to focus on what really matters: your case.
             </Typography>
