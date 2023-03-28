@@ -1,4 +1,3 @@
-import "../App.css";
 import { useState } from "react";
 import {
     Button,
@@ -11,9 +10,14 @@ import {
     TextField,
     InputAdornment,
     OutlinedInput,
+    FormGroup,
+    FormControlLabel,
+    FormControl,
+    Checkbox,
+    DialogTitle,
+    CircularProgress,
 } from "@mui/material";
-
-import { Send, ThumbUp, ThumbDown, Refresh } from "@mui/icons-material";
+import { Send, ThumbUp, ThumbDown, Refresh, Save } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 
 import { db } from "../firebase";
@@ -22,6 +26,7 @@ import { dummyData } from "../dummyData";
 
 function ChatPage() {
     const [userInputs, setUserInputs] = useState([]);
+    const [conversation, setConversation] = useState([]);
     const [responses, setResponses] = useState([]);
     const [currentInput, setCurrentInput] = useState("");
     const [keyword, setKeyword] = useState("");
@@ -29,9 +34,21 @@ function ChatPage() {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [endSession, setEndSession] = useState(false);
-    const [num, setNum] = useState(2);
+    const [num, setNum] = useState(10);
     const [alert, setAlert] = useState("");
     const [email, setEmail] = useState(""); // manage the email input
+    const [feedbackState, setFeedbackState] = useState({
+        index: null,
+        dialogOpen: false,
+        isSatisfactory: null,
+        message: null,
+    });
+    const [feedbackSelect, setFeedbackSelect] = useState({
+        "Superficial Response": false,
+        "Lacks Reasoning": false,
+        "Lacks Relevant Facts": false,
+        "Lacks Citation": false,
+    });
 
     const findRefs = (texts, keyword) => {
         var allRefs = [];
@@ -73,36 +90,76 @@ function ChatPage() {
                 keyword: keyword,
                 refs: findRefs(dummyData, keyword.toLowerCase()),
             });
+
         setUserInputs([...userInputs, currentInput]);
+        const newConversation = [
+            ...conversation,
+            { role: "user", content: currentInput },
+        ];
+        setConversation(newConversation);
         setCurrentInput("");
         setKeyword("");
         setNum(num - 1);
+        //console.log(newConversation);
         if (num > 0) {
             await query({
-                inputs: {
-                    past_user_inputs: userInputs,
-                    generated_responses: responses.map((res) => res.response),
-                    text: currentInput,
-                },
+                model: "gpt-3.5-turbo",
+                messages: newConversation,
             }).then((res) => {
+                console.log(res);
                 setResponses([
                     ...responses,
                     {
-                        response: res.generated_text ? res.generated_text : "",
+                        response: res.choices[0].message.content,
                         is_satisfactory: "N/A",
+                        feedback: "N/A",
                     },
                 ]);
+                setConversation([...newConversation, res.choices[0].message]);
             });
         }
 
         setLoading(false);
     };
 
+    const submitFeedback = () => {
+        setResponses(
+            responses.map((res, idx) =>
+                idx !== feedbackState.index
+                    ? res
+                    : {
+                          ...res,
+                          feedback: {
+                              message: feedbackState.message
+                                  ? feedbackState.message
+                                  : "",
+                              reasons: feedbackSelect,
+                          },
+                      }
+            )
+        );
+        setFeedbackState({
+            index: null,
+            dialogOpen: false,
+            isSatisfactory: true,
+            message: null,
+        });
+    };
+    const extractUserInput = (convo) => {
+        const userInput = [];
+        for (let i = 0; i < convo.length; i++) {
+            if (convo[i]["role"] === "user") {
+                userInput.push(convo[i]["content"]);
+            }
+        }
+        return userInput;
+    };
+
     const handleSave = async () => {
-        // console.log({ userInputs, responses });
+        console.log({ userInputs, responses });
         setSaving(true);
         try {
-            console.log(userInputs, responses);
+            //console.log(userInputs, responses);
             const docRef = await addDoc(collection(db, "conversations"), {
                 userInputs: userInputs,
                 responses: responses,
@@ -118,14 +175,21 @@ function ChatPage() {
     const handleAlertClose = () => {
         setAlert("");
     };
+    const handleFeedbackClose = () => {
+        setFeedbackState({ ...feedbackState, dialogOpen: false });
+    };
     const query = async (data) => {
-        const response = await fetch('/api/query', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
+        const response = await fetch(
+            "https://api.openai.com/v1/chat/completions",
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.REACT_APP_MODEL_API_KEY}`,
+                    "Content-Type": "application/json",
+                },
+                method: "POST",
+                body: JSON.stringify(data),
+            }
+        );
         const result = await response.json();
         return result;
       };
@@ -153,8 +217,24 @@ function ChatPage() {
       
 
     return (
-        <div className="App">
-            {/*Add this email input field and submit button*/}
+        <div
+            style={{
+                paddingBlock: 32,
+                paddingInline: 60,
+                display: "flex",
+                justifyContent: "center",
+            }}
+        >
+            <div
+                style={{
+                    position: "absolute",
+                    right: 50,
+                    zIndex: 10,
+                    display: "flex",
+                    flexDirection: "row",
+                }}
+            >
+                {/*Add this email input field and submit button*/}
             <div>
                 <TextField
                 label="Email"
@@ -169,17 +249,31 @@ function ChatPage() {
                 Authenticate
                 </Button>
             </div>
-            <div>
+            <LoadingButton
+                    onClick={handleSave}
+                    loading={saving}
+                    variant="contained"
+                    endIcon={<Save></Save>}
+                    style={{ marginRight: 10 }}
+                >
+                    Save Conversation
+                </LoadingButton>
                 <Button
                     variant="contained"
-                    style={{ position: "absolute", right: 200, zIndex: 10 }}
                     onClick={() => window.location.reload()}
                     endIcon={<Refresh></Refresh>}
                 >
                     Start Over
                 </Button>
             </div>
-            <div style={{ width: "100%", maxHeight: 650, overflow: "scroll" }}>
+            <div
+                style={{
+                    maxHeight: 800,
+                    overflow: "scroll",
+                    width: "100%",
+                    paddingBlockStart: 20,
+                }}
+            >
                 {userInputs &&
                     userInputs.map((input, i) => (
                         <div>
@@ -239,7 +333,11 @@ function ChatPage() {
                                                                           }
                                                             )
                                                         );
-                                                        setEndSession(true);
+                                                        setFeedbackState({
+                                                            index: i,
+                                                            dialogOpen: true,
+                                                            isSatisfactory: true,
+                                                        });
                                                         setKwRefs(null);
                                                     }}
                                                 >
@@ -258,9 +356,11 @@ function ChatPage() {
                                                                           }
                                                             )
                                                         );
-                                                        setCurrentInput(
-                                                            "I don't like this answer. "
-                                                        );
+                                                        setFeedbackState({
+                                                            index: i,
+                                                            dialogOpen: true,
+                                                            isSatisfactory: false,
+                                                        });
                                                     }}
                                                 >
                                                     <ThumbDown></ThumbDown>
@@ -281,7 +381,7 @@ function ChatPage() {
                             )}
                         </div>
                     ))}
-                <div
+                {/* <div
                     style={{
                         maxHeight: 400,
                         overflow: "scroll",
@@ -320,19 +420,21 @@ function ChatPage() {
                         ) : (
                             <i>No references found</i>
                         ))}
-                </div>
+                </div> */}
+                {loading && <CircularProgress></CircularProgress>}
             </div>
 
             <div
                 style={{
                     position: "fixed",
-                    bottom: "60px",
-                    width: "80%",
+                    bottom: "50px",
+                    width: "60%",
+                    alignSelf: "center",
                 }}
             >
                 {!endSession && num >= 0 ? (
                     <>
-                        <TextField
+                        {/* <TextField
                             label="Keyword"
                             variant="standard"
                             value={keyword}
@@ -342,7 +444,7 @@ function ChatPage() {
                                     handleSubmit();
                                 }
                             }}
-                        />
+                        /> */}
                         <div style={{ height: 20 }}></div>
                         <OutlinedInput
                             fullWidth
@@ -379,18 +481,73 @@ function ChatPage() {
                         </p>
                     </>
                 ) : (
-                    <LoadingButton
-                        onClick={handleSave}
-                        loading={saving}
-                        variant="contained"
-                    >
-                        Save Conversation
-                    </LoadingButton>
+                    <></>
                 )}
             </div>
             <Dialog open={alert} onClose={handleAlertClose}>
                 <DialogContent>
                     <DialogContentText>{alert}</DialogContentText>
+                </DialogContent>
+            </Dialog>
+            <Dialog
+                open={feedbackState.dialogOpen}
+                onClose={handleFeedbackClose}
+                fullWidth
+            >
+                <DialogContent
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        flexDirection: "column",
+                    }}
+                >
+                    <h3>Provide additional feedback</h3>
+                    <TextField
+                        fullWidth
+                        label={
+                            feedbackState.isSatisfactory
+                                ? "What do you like about the response?"
+                                : "What was the issue with the response? How could it be improved?"
+                        }
+                        variant="outlined"
+                        multiline
+                        value={feedbackState.message}
+                        onChange={(e) =>
+                            setFeedbackState({
+                                ...feedbackState,
+                                message: e.target.value,
+                            })
+                        }
+                    />
+                    {!feedbackState.isSatisfactory && (
+                        <FormControl component="fieldset" variant="standard">
+                            <FormGroup>
+                                {Object.keys(feedbackSelect).map((key) => (
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={feedbackSelect[key]}
+                                                onChange={(e) =>
+                                                    setFeedbackSelect({
+                                                        ...feedbackSelect,
+                                                        [e.target.name]:
+                                                            e.target.checked,
+                                                    })
+                                                }
+                                                name={key}
+                                            ></Checkbox>
+                                        }
+                                        label={key}
+                                    ></FormControlLabel>
+                                ))}
+                            </FormGroup>
+                        </FormControl>
+                    )}
+                    <br></br>
+                    <Button variant="contained" onClick={submitFeedback}>
+                        Submit feedback
+                    </Button>
+                    <br></br>
                 </DialogContent>
             </Dialog>
         </div>
