@@ -23,13 +23,13 @@ const theme = createTheme({
 function App() {
     return (
       <>
-      <ThemeProvider theme={theme}>
+      {/*<ThemeProvider theme={theme}>
         <CssBaseline />
         <Header />
         <Hero />
         <Footer />
         </ThemeProvider>
-        {/*
+        */}
         <div style={{ width: "30%", height: "%100%", overflow: "scroll" }}>
                 <SearchPage></SearchPage>
             </div>
@@ -43,7 +43,7 @@ function App() {
             >
                 <ChatPage></ChatPage>
             </div>
-              */}
+              
       </>
   
     );
