@@ -3,7 +3,6 @@
     "version": "0.1.0",
     "private": true,
     "homepage": "https://Olivia-Chen-Xu.github.io/legal-chatgpt/",
-    "proxy": "https://journals.scholarsportal.info",
     "dependencies": {
         "@azure/msal-browser": "^2.32.2",
         "@azure/msal-react": "^1.5.2",
