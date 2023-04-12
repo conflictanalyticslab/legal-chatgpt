@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Button,
     ButtonGroup,
@@ -93,7 +93,12 @@ function ChatPage() {
         setUserInputs([...userInputs, currentInput]);
         const newConversation = [
             ...conversation,
-            { role: "user", content: currentInput },
+            {
+                role: "user",
+                content:
+                    currentInput +
+                    " You answer should be no longer than 500 words.",
+            },
         ];
         setConversation(newConversation);
         setCurrentInput("");
@@ -105,7 +110,7 @@ function ChatPage() {
                 model: "gpt-3.5-turbo",
                 messages: newConversation,
             }).then((res) => {
-                console.log(res);
+                //console.log(res);
                 setResponses([
                     ...responses,
                     {
@@ -117,7 +122,27 @@ function ChatPage() {
                 setConversation([...newConversation, res.choices[0].message]);
             });
         }
+        // const url = new URL(window.location);
+        // //url.searchParams.set("q", "law");
+        // //window.history.pushState(null, "", url.toString());
+        // var searchInput = document.getElementById("downshift-1-input");
 
+        // searchInput.focus();
+
+        // setTimeout(console.log(""), 1000);
+        // // searchInput = document.getElementsByClassName(
+        // //     "sui-search-box__text-input focus"
+        // // );
+        // searchInput = document.getElementById("downshift-1-input");
+        // document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
+        // searchInput.value = "law";
+        // searchInput.setAttribute("value", "law");
+        // console.log(searchInput);
+        // searchInput.dispatchEvent(new Event("change"));
+        // const searchBtn = document.getElementsByClassName(
+        //     "sui-search-box__submit"
+        // )[0];
+        // //searchBtn.click();
         setLoading(false);
     };
 
@@ -155,7 +180,6 @@ function ChatPage() {
     };
 
     const handleSave = async () => {
-        console.log({ userInputs, responses });
         setSaving(true);
         try {
             //console.log(userInputs, responses);
@@ -163,14 +187,16 @@ function ChatPage() {
                 userInputs: userInputs,
                 responses: responses,
             });
-            setAlert(
-                `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
-            );
+            // setAlert(
+            //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
+            // );
+            window.location.reload();
         } catch (e) {
             setAlert(`Error saving conversation: ${e}`);
         }
         setSaving(false);
     };
+
     const handleAlertClose = () => {
         setAlert("");
     };
@@ -192,7 +218,9 @@ function ChatPage() {
         const result = await response.json();
         return result;
     };
-
+    // useEffect(() => {
+    //     window.addEventListener("beforeunload", handleSave);
+    // }, []);
     return (
         <div
             style={{
@@ -211,22 +239,22 @@ function ChatPage() {
                     flexDirection: "row",
                 }}
             >
-                <LoadingButton
+                {/* <LoadingButton
                     onClick={handleSave}
-                    loading={saving}
                     variant="contained"
                     endIcon={<Save></Save>}
                     style={{ marginRight: 10 }}
                 >
                     Save Conversation
-                </LoadingButton>
-                <Button
+                </LoadingButton> */}
+                <LoadingButton
                     variant="contained"
-                    onClick={() => window.location.reload()}
+                    loading={saving}
+                    onClick={handleSave}
                     endIcon={<Refresh></Refresh>}
                 >
                     Start Over
-                </Button>
+                </LoadingButton>
             </div>
             <div
                 style={{

@@ -41,8 +41,7 @@
 }
 
 .sui-layout-sidebar {
-    width: 0 !important;
-    padding: 0 !important;
+    align-self: flex-start;
 }
 
 .sui-result__details {
@@ -52,7 +51,8 @@
     font-size: 1.2em !important;
 }
 .sui-layout-body__inner {
-    justify-content: center !important;
+    align-items: center !important;
+    flex-direction: column !important;
 }
 .sui-layout-main {
     width: 90% !important;
