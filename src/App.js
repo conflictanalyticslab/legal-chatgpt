@@ -1,3 +1,4 @@
+import React from "react";
 import "./App.css";
 import ChatPage from "./components/ChatPage";
 import SearchPage from "./components/SearchPage";
