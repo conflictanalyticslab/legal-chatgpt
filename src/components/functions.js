@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const handleSearch = (searchTerm, setSearchTerm) => {
+export const handleSearch = async (searchTerm, setSearchTerm) => {
     // Scholars Portal
     // reference: https://github.com/scholarsportal/text-mining/blob/main/corpus-builder.py
     const page = 1;
@@ -60,9 +60,9 @@ export const handleSearch = (searchTerm, setSearchTerm) => {
                     },
                 };
                 axios.post(elasticUrl, results, config).then((res) => {
-                    setTimeout(function () {
+                    setTimeout(function() {
                         setSearchTerm(searchTerm);
-                    }, 1000);
+                    }, 500);
                 });
             })
         )
