@@ -23,8 +23,9 @@ import { LoadingButton } from "@mui/lab";
 import { db } from "../firebase";
 import { addDoc, collection } from "firebase/firestore";
 import { dummyData } from "../dummyData";
+import { handleSearch } from "./functions";
 
-function ChatPage() {
+function ChatPage({ setSearchTerm }) {
     const [userInputs, setUserInputs] = useState([]);
     const [conversation, setConversation] = useState([]);
     const [responses, setResponses] = useState([]);
@@ -109,12 +110,30 @@ function ChatPage() {
             await query({
                 model: "gpt-3.5-turbo",
                 messages: newConversation,
-            }).then((res) => {
-                //console.log(res);
+            }).then(async (res) => {
+                const resContent = res.choices[0].message.content;
+                if (num === 10) {
+                    await query({
+                        model: "gpt-3.5-turbo",
+                        messages: [
+                            {
+                                role: "user",
+                                content:
+                                    resContent +
+                                    "Summarize the given text in 2 words. Output these words in lower case, no punctuation. ",
+                            },
+                        ],
+                    }).then((res) => {
+                        handleSearch(
+                            res.choices[0].message.content,
+                            setSearchTerm
+                        );
+                    });
+                }
                 setResponses([
                     ...responses,
                     {
-                        response: res.choices[0].message.content,
+                        response: resContent,
                         is_satisfactory: "N/A",
                         feedback: "N/A",
                     },
@@ -143,6 +162,7 @@ function ChatPage() {
         //     "sui-search-box__submit"
         // )[0];
         // //searchBtn.click();
+
         setLoading(false);
     };
 

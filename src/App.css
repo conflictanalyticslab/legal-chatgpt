@@ -42,6 +42,7 @@
 
 .sui-layout-sidebar {
     align-self: flex-start;
+    width: 100% !important;
 }
 
 .sui-result__details {
