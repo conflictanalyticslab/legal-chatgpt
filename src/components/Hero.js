@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Typography, Button, Box } from '@mui/material';
 import useStyles from '../styles/styles';
-import logo from '../images/OpenJustice Basic Logo.svg';
+import mid_logo from '../images/OpenJustice_Middle.svg';
 
 
 const Hero = () => {
@@ -12,7 +12,7 @@ const Hero = () => {
     <Box className={classes.heroBox} textAlign="center">
       <Grid container spacing={7} className={classes.gridContainer} >
       <Grid item xs={12} md={7} margin = '0px'>
-          <img src={logo} alt="logo" className={classes.medImage} />
+          <img src={mid_logo} alt="logo" className={classes.medImage} />
         </Grid>
         <Grid item xs={12} md={7}>
           <Typography variant="h4" fontWeight={700} className={classes.title} textAlign="center">
