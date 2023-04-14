@@ -127,18 +127,22 @@ function ChatPage({ setSearchTerm }) {
                         await handleSearch(
                             res.choices[0].message.content,
                             setSearchTerm
-                        );
+                        ).then(() => {
+                            setResponses([
+                                ...responses,
+                                {
+                                    response: resContent,
+                                    is_satisfactory: "N/A",
+                                    feedback: "N/A",
+                                },
+                            ]);
+                            setConversation([
+                                ...newConversation,
+                                res.choices[0].message,
+                            ]);
+                        });
                     });
                 }
-                setResponses([
-                    ...responses,
-                    {
-                        response: resContent,
-                        is_satisfactory: "N/A",
-                        feedback: "N/A",
-                    },
-                ]);
-                setConversation([...newConversation, res.choices[0].message]);
             });
         }
         // const url = new URL(window.location);
