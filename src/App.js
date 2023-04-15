@@ -1,7 +1,7 @@
 import "./App.css";
 import ChatPage from "./components/ChatPage";
 import SearchPage from "./components/SearchPage";
-
+import React from 'react';
 import Hero from "./components/Hero"
 import Header from "./components/Header"
 import Footer from "./components/Footer"
