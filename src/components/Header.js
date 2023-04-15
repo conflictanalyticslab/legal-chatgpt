@@ -13,7 +13,6 @@ import {
 } from '@mui/material';
 import React from 'react';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
-import PropTypes from 'prop-types';
 import MenuIcon from '@mui/icons-material/Menu';
 import useStyles from '../styles/styles';
 import { useTheme } from '@mui/material/styles';
