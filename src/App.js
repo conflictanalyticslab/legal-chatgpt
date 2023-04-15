@@ -1,7 +1,4 @@
 import "./App.css";
-import ChatPage from "./components/ChatPage";
-import SearchPage from "./components/SearchPage";
-import React from 'react';
 import Hero from "./components/Hero"
 import Header from "./components/Header"
 import Footer from "./components/Footer"
@@ -29,21 +26,6 @@ function App() {
         <Hero />
         <Footer />
         </ThemeProvider>
-       
-        {/* <div style={{ width: "30%", height: "%100%", overflow: "scroll" }}>
-                <SearchPage></SearchPage>
-            </div>
-            <div
-                style={{
-                    width: "70%",
-                    height: "100%",
-                    overflow: "scroll",
-                    justifyContent: "center",
-                }}
-            >
-                <ChatPage></ChatPage>
-            </div> */}
-              
       </>
   
     );

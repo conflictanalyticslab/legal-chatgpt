@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/legal-chatgpt/static/css/main.eb0f17ac.css",
-    "main.js": "/legal-chatgpt/static/js/main.9900b12b.js",
+    "main.css": "/legal-chatgpt/static/css/main.131b2890.css",
+    "main.js": "/legal-chatgpt/static/js/main.f9b8d372.js",
     "static/js/787.f4329a82.chunk.js": "/legal-chatgpt/static/js/787.f4329a82.chunk.js",
     "static/media/roboto-all-500-normal.woff": "/legal-chatgpt/static/media/roboto-all-500-normal.0ab669b7a0d19b178f57.woff",
     "static/media/roboto-all-700-normal.woff": "/legal-chatgpt/static/media/roboto-all-700-normal.a457fde362a540fcadff.woff",
@@ -36,13 +36,14 @@
     "static/media/roboto-greek-ext-300-normal.woff2": "/legal-chatgpt/static/media/roboto-greek-ext-300-normal.35b9d6be04b95f0f0530.woff2",
     "static/media/roboto-greek-ext-700-normal.woff2": "/legal-chatgpt/static/media/roboto-greek-ext-700-normal.bd9854c751441ccc1a70.woff2",
     "static/media/OpenJustice Basic Logo.svg": "/legal-chatgpt/static/media/OpenJustice Basic Logo.149394e9f3a8c2b79bde2531d584ffdf.svg",
+    "static/media/OpenJustice_Middle.svg": "/legal-chatgpt/static/media/OpenJustice_Middle.4b4aa8dd45a92caa14ab5105bff4790a.svg",
     "index.html": "/legal-chatgpt/index.html",
-    "main.eb0f17ac.css.map": "/legal-chatgpt/static/css/main.eb0f17ac.css.map",
-    "main.9900b12b.js.map": "/legal-chatgpt/static/js/main.9900b12b.js.map",
+    "main.131b2890.css.map": "/legal-chatgpt/static/css/main.131b2890.css.map",
+    "main.f9b8d372.js.map": "/legal-chatgpt/static/js/main.f9b8d372.js.map",
     "787.f4329a82.chunk.js.map": "/legal-chatgpt/static/js/787.f4329a82.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.eb0f17ac.css",
-    "static/js/main.9900b12b.js"
+    "static/css/main.131b2890.css",
+    "static/js/main.f9b8d372.js"
   ]
 }

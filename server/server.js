@@ -2,7 +2,7 @@ const express = require('express');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const cors = require('cors');
 const dotenv = require('dotenv');
-const Joi = require('joi'); // Add this line to import Joi
+const Joi = require('joi');
 
 dotenv.config();
 
