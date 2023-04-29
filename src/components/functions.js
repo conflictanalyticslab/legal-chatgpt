@@ -12,6 +12,8 @@ export const handleSearch = async (searchTerm, setSearchTerm) => {
     // reference: https://serpapi.com/search-api
     const urlSerpAPI = `/serpapi/search?engine=google&q="${searchTerm} site:www.canlii.org"&api_key=${process.env.REACT_APP_SERPAPI_KEY}`;
 
+    // Google Search API
+    // reference: https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list
     const urlGoogleSearch = `/googlesearch/customsearch/v1/siterestrict?cx=${process.env.REACT_APP_GOOGLE_SEARCH_ID}&q=${searchTerm}&key=${process.env.REACT_APP_GOOGLE_SEARCH_KEY}`;
 
     // Court Listener
