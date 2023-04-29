@@ -1,4 +1,4 @@
-const createProxyMiddleware = require("http-proxy-middleware");
+const { createProxyMiddleware } = require("http-proxy-middleware");
 
 module.exports = function(app) {
     app.use(
@@ -31,6 +31,18 @@ module.exports = function(app) {
             changeOrigin: true,
             pathRewrite: {
                 "^/courtlistener": "",
+            },
+            headers: {
+                Connection: "keep-alive",
+            },
+        })
+    );
+    app.use(
+        createProxyMiddleware("/googlesearch", {
+            target: "https://www.googleapis.com", // API endpoint 4
+            changeOrigin: true,
+            pathRewrite: {
+                "^/googlesearch": "",
             },
             headers: {
                 Connection: "keep-alive",
