@@ -69,7 +69,7 @@ export const handleSearch = async (searchTerm, setSearchTerm) => {
                     axios.post(elasticUrl, results, config).then((res) => {
                         setTimeout(function() {
                             setSearchTerm(searchTerm);
-                        }, 500);
+                        }, 1000);
                     });
                 }
             )
