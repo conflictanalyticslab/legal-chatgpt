@@ -20,7 +20,7 @@ import {
 import "@elastic/react-search-ui-views/lib/styles/styles.css";
 import "../App.css";
 
-const SearchPage = ({ wasSearched, setSearchTerm }) => {
+const Search = ({ wasSearched, setSearchTerm }) => {
     return (
         <ErrorBoundary>
             <Layout
@@ -61,4 +61,4 @@ const SearchPage = ({ wasSearched, setSearchTerm }) => {
     );
 };
 
-export default SearchPage;
+export default Search;

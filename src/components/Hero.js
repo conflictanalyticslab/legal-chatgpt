@@ -9,6 +9,11 @@ import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
   const classes = useStyles();
+  const navigate = useNavigate();
+  
+  const handleClick = () => {
+    navigate("/chat");
+}
 
   return (
     <div className={classes.appBackground}>
@@ -43,6 +48,7 @@ const Hero = () => {
             
             <Box className={classes.Box} sx={{ display: 'flex', justifyContent: 'center'}}>
           <Button
+            onClick={handleClick}
             variant="contained"
             className={classes.formHeading}
             sx={{ width: '200px', height: '50px', fontSize: '16px', marginTop: '30px', backgroundColor: '#11335D', color: 'white',  textTransform: 'none', mr: '2px'}}

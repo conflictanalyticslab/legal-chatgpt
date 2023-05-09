@@ -25,7 +25,7 @@ import { addDoc, collection } from "firebase/firestore";
 import { dummyData } from "../dummyData";
 import { handleSearch } from "./functions";
 
-function ChatPage({ setSearchTerm }) {
+function Chat({ setSearchTerm }) {
     const [userInputs, setUserInputs] = useState([]);
     const [conversation, setConversation] = useState([]);
     const [responses, setResponses] = useState([]);
@@ -564,4 +564,4 @@ function ChatPage({ setSearchTerm }) {
     );
 }
 
-export default ChatPage;
+export default Chat;
