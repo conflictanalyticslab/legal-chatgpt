@@ -3,14 +3,24 @@ import { Grid, Typography, Button, Box } from '@mui/material';
 import useStyles from '../styles/styles';
 import mid_logo from '../images/OpenJustice_Middle.svg';
 
+import left_tri from '../images/leftTriangle.svg';
+import right_tri from '../images/rightTriangle.svg';
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
   const classes = useStyles();
 
   return (
     <div className={classes.appBackground}>
+      {/* <Grid item xs={12} md={7} margin = '0px' >
+        <img src={left_tri} alt="left_tri" className={classes.medImage} />
+      </Grid>    
+      <Grid item xs={12} md={7} margin = '0px'>
+        <img src={right_tri} alt="right_tri" className={classes.medImage} />
+      </Grid> */}
     <Box className={classes.heroBox} textAlign="center">
       <Grid container spacing={7} className={classes.gridContainer} >
+      
       <Grid item xs={12} md={7} margin = '0px'>
           <img src={mid_logo} alt="logo" className={classes.medImage} />
         </Grid>
@@ -50,6 +60,7 @@ const Hero = () => {
         </Grid>
       </Grid>
     </Box>
+
     </div>
   );
 };

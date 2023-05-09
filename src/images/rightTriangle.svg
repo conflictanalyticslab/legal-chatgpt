@@ -2,20 +2,20 @@
 <desc>Created with Fabric.js 3.5.0</desc>
 <defs>
 </defs>
-<rect x="0" y="0" width="100%" height="100%" fill="#ffffff"/>
+<!-- <rect x="0" y="0" width="100%" height="100%" fill="#ffffff"/> -->
 <g transform="matrix(-0.762 0 0 -0.762 500.0221 500.0216)" id="424506">
 <g style="" vector-effect="non-scaling-stroke">
 		<g transform="matrix(0.3746 0.9272 -0.9272 0.3746 150.5004 -29.5003)" id="Polygon_1">
 <path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: rgb(26,59,99); fill-rule: nonzero; opacity: 1;" transform=" translate(-524.5, -333.5)" d="M 524.5 0 L 1049 667 H 0 Z" stroke-linecap="round"/>
 </g>
 		<g transform="matrix(0.3746 0.9272 -0.9272 0.3746 17.5004 14.4997)" id="Polygon_2">
-<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: rgb(255,255,255); fill-rule: nonzero; opacity: 1;" transform=" translate(-524.5, -333.5)" d="M 524.5 0 L 1049 667 H 0 Z" stroke-linecap="round"/>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: rgb(245,245,247); fill-rule: nonzero; opacity: 1;" transform=" translate(-524.5, -333.5)" d="M 524.5 0 L 1049 667 H 0 Z" stroke-linecap="round"/>
 </g>
 		<g transform="matrix(0.3746 0.9272 -0.9272 0.3746 -63.4996 14.4997)" id="Polygon_3">
 <path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: rgb(26,59,99); fill-rule: nonzero; opacity: 1;" transform=" translate(-524.5, -333.5)" d="M 524.5 0 L 1049 667 H 0 Z" stroke-linecap="round"/>
 </g>
 		<g transform="matrix(0.3746 0.9272 -0.9272 0.3746 -150.4996 29.4997)" id="Polygon_4">
-<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: rgb(255,255,255); fill-rule: nonzero; opacity: 1;" transform=" translate(-524.5, -333.5)" d="M 524.5 0 L 1049 667 H 0 Z" stroke-linecap="round"/>
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: rgb(245,245,247); fill-rule: nonzero; opacity: 1;" transform=" translate(-524.5, -333.5)" d="M 524.5 0 L 1049 667 H 0 Z" stroke-linecap="round"/>
 </g>
 </g>
 </g>

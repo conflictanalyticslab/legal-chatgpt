@@ -18,6 +18,7 @@ import useStyles from '../styles/styles';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import logo from '../images/OpenJustice Basic Logo.svg';
+import { useNavigate } from "react-router-dom";
 
 function ElevationScroll(props) {
   const { children, window } = props;
@@ -41,7 +42,7 @@ const Header = (props) => {
     { id: 1, route: 'About Us', url: 'https://myopencourt.org/about-us/' },
     { id: 2, route: 'Blogs', url: 'https://myopencourt.org/blog/' },
     { id: 3, route: 'FAQs', url: 'https://myopencourt.org/faqs/' },
-    { id: 4, route: 'Sign In', url: '' },
+    { id: 4, route: 'Sign In', url: '/login' },
   ];
 
   const [state, setState] = React.useState({
