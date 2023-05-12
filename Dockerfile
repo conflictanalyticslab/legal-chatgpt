@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 
 COPY * /usr/src/app/
 
-RUN npm install --legacy-peer-deps
+RUN npm install
 
 EXPOSE 3000
 
