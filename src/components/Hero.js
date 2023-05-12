@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 const Hero = () => {
   const classes = useStyles();
   const navigate = useNavigate();
+
+  const checkAuth = require('../auth/checkAuthMiddleware');
   
   const handleClick = () => {
     navigate("/chat");
