@@ -5,10 +5,10 @@
                      entityID="https://openjustice.ai">
     <md:SPSSODescriptor AuthnRequestsSigned="false" WantAssertionsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
         <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-                                Location="https://openjustice.ai/logoutsuccess" />
+                                Location="https://openjustice.ai/logout" />
         <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
         <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-                                     Location="https://openjustice.ai/loginsuccess"
+                                     Location="https://openjustice.ai/callback"
                                      index="1" />
         
     </md:SPSSODescriptor>
