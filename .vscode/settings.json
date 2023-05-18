@@ -1,0 +1,10 @@
+{
+    "appService.deploySubpath": "./landing",
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}",
+        ".env{,/**}",
+        "build{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "None"
+}
