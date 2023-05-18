@@ -30,7 +30,7 @@
         "web-vitals": "^2.1.4"
     },
     "scripts": {
-        "start": "export PORT=8080 node_modules/react-scripts/bin/react-scripts.js start",
+        "start": "export PORT=8080; node_modules/react-scripts/bin/react-scripts.js start",
         "build": "react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
