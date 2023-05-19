@@ -79,13 +79,19 @@ const Header = (props) => {
 
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.down('sm'));
+  
+  const navigate = useNavigate();
+  const goHome = () => {
+    navigate("/");
+  }
+
 
   return (
     <Box sx={{ marginBottom: '70px' }}>
       <ElevationScroll {...props}>
         <AppBar>
           <Toolbar className={classes.toolBar}>
-          <Grid item xs={12} md={7}>
+          <Grid item xs={12} md={7} onClick={goHome}>
           <img src={logo} alt="My Team" className={classes.smallImage} />
           </Grid>
 

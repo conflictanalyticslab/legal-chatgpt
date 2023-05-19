@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 // import Main from "./components/Main";
 import WebFont from "webfontloader";
@@ -13,36 +13,48 @@ import {
     Route,
     useLocation,
     redirect,
+    useLoaderData,
+    Navigate
   } from "react-router-dom";
 
+import LoginPage from './components/pages/LoginPage';
 import LandingPage from './components/pages/LandingPage';
-// import ChatPage from './components/pages/ChatPage';
+import { onAuthStateChanged, setPersistence, browserLocalPersistence } from "firebase/auth";
 
-function NoMatch() {
-    let location = useLocation();
-  
-    return (
-      <div>
-        <h3>
-          No match for <code>{location.pathname}</code>
-        </h3>
-      </div>
-    );
-  }
 
-const ChatRoute = () => {
-    window.location.replace('https://chat.openjustice.ai');
-    return null; };
-  
+import { auth } from "./firebase";
+
+
+
 function App() {
+
+  var current_user = null;
+  const ChatRoute = () => {
+  
+    window.location.replace('https://' + process.env.REACT_APP_LOGIN_REDIRECT_URL );
+    return null; 
+  
+  };
+  onAuthStateChanged(auth, (user) => {
+    console.log('auth state changed');
+      if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/firebase.User
+        const uid = user.uid;
+        auth.updateCurrentUser(user);
+
+        // ...
+      } else {
+        // User is signed out
+        // ...
+      }
+  });
     return (
-              
         <Routes> {/* The Switch decides which component to show based on the current URL.*/}
             <Route path='/' element={<LandingPage />} />
-
-            <Route path='/chat' element={<ChatRoute />} />
+            <Route path="/login" loader={() => console.log(auth.currentUser)} element={auth.currentUser ? <ChatRoute /> : <LoginPage />} />
             
-            <Route component={NoMatch} />
+            <Route path="*" element={<Navigate to="/" replace />} />
             <Route onEnter={() => window.location.reload()} />
         </Routes>
             );

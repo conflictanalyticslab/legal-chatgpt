@@ -10,7 +10,8 @@ const Hero = () => {
   const navigate = useNavigate();
   
   const handleClick = () => {
-    navigate("/chat");
+    
+    window.open('https://chat.openjustice.ai', '_blank').focus();
 }
 
   return (
