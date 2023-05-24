@@ -5,6 +5,20 @@ import SearchPage from "./components/SearchPage";
 import AppSearchAPIConnector from "@elastic/search-ui-app-search-connector";
 import { SearchProvider, WithSearch } from "@elastic/react-search-ui";
 
+import { auth } from "./firebase";
+
+import { onAuthStateChanged, setPersistence, browserLocalPersistence } from "firebase/auth";
+import {
+    Routes,
+    Route,
+    useLocation,
+    redirect,
+    useNavigate,
+    useLoaderData,
+    useRouteLoaderData,
+    Navigate
+  } from "react-router-dom";
+
 const connector = new AppSearchAPIConnector({
     searchKey: process.env.REACT_APP_PUBLIC_SEARCH_KEY,
     engineName: "open-justice-meta",
@@ -44,9 +58,10 @@ const config = {
     },
 };
 
-function App() {
-    return (
-        <SearchProvider config={config}>
+export var loggedin = true;
+
+function LoadPage() {
+    return (<SearchProvider config={config}>
             <WithSearch
                 mapContextToProps={({ wasSearched, setSearchTerm }) => ({
                     wasSearched,
@@ -78,14 +93,48 @@ function App() {
                             >
                                 <ChatPage
                                     setSearchTerm={setSearchTerm}
+                                    // loggedin={loggedin}
                                 ></ChatPage>
                             </div>
                         </div>
                     );
                 }}
             </WithSearch>
-        </SearchProvider>
-    );
+        </SearchProvider>);
+}
+
+function App() {
+    // return docSnap.data();
+
+    setPersistence(auth, browserLocalPersistence);
+    onAuthStateChanged(auth, (user) => {
+        console.log('auth state changed');
+        // console.log(user)
+          if (user) {
+            // User is signed in, see docs for a list of available properties
+            // https://firebase.google.com/docs/reference/js/firebase.User
+    
+            // ...
+          } else {
+            // User is signed out
+            // ...
+            window.location.replace('https://' + process.env.REACT_APP_LOGIN_REDIRECT_URL );
+          }
+      });
+
+      const ChatRoute = () => {
+  
+        window.location.replace('https://' + process.env.REACT_APP_LOGIN_REDIRECT_URL );
+        return null; 
+      
+      };
+    return (
+        <Routes> {/* The Switch decides which component to show based on the current URL.*/}
+            <Route path='/' id="root" loader={() => {    console.log(auth.currentUser);}} element={<LoadPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route onEnter={() => window.location.reload()} />
+        </Routes>
+            );
 }
 
 export default App;

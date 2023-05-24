@@ -20,12 +20,23 @@ import {
 import { Send, ThumbUp, ThumbDown, Refresh, Save } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 
-import { db } from "../firebase";
-import { addDoc, collection } from "firebase/firestore";
+import { auth, db } from "../firebase";
+import { addDoc, collection, getDoc, doc, updateDoc, arrayUnion} from "firebase/firestore";
 import { dummyData } from "../dummyData";
 import { handleSearch } from "./functions";
 
-function ChatPage({ setSearchTerm }) {
+import { userConverter } from "../User";
+
+import { onAuthStateChanged, setPersistence, browserLocalPersistence } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
+
+var t = 1000;
+
+
+
+
+function ChatPage({ setSearchTerm, loggedin }) {
+    
     const [userInputs, setUserInputs] = useState([]);
     const [conversation, setConversation] = useState([]);
     const [responses, setResponses] = useState([]);
@@ -35,8 +46,58 @@ function ChatPage({ setSearchTerm }) {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [endSession, setEndSession] = useState(false);
-    const [num, setNum] = useState(10);
+    const [num, setNum] = useState(-1);
+    const [totalQuota, setTotalQuota] = useState(0);
+
+    function errorHandler(err) {
+        setAlert("Error verifying user. Returning you to the sign in page");
+        console.error(err);
+        window.open('https://' + process.env.REACT_APP_LOGIN_REDIRECT_URL, '_blank').focus();
+    }
+
+    function rejectDelay(reason) {
+        // console.log(reason);
+        return new Promise(function(resolve, reject) {
+            setTimeout(reject.bind(null, reason), t); 
+        });
+    }
     const [alert, setAlert] = useState("");
+
+    useEffect(() => {
+        const USER_DATA_PROMISE = async() => {
+            setAlert("Authenticating user info...");
+            // console.log(auth.currentUser);
+            if (!auth.currentUser) {
+                console.log("User not signed in");
+                throw new FirebaseError; 
+            } else if (!auth.currentUser.emailVerified){
+                console.log("User email not verified");
+                throw new FirebaseError;
+            } else {
+                const docRef = doc(db, "users", auth.currentUser.uid).withConverter(userConverter);
+                const docSnap = await getDoc(docRef);
+            
+                if (docSnap.exists()) {
+                    // console.debug("Document data:", docSnap.data());
+
+                    // console.log(Number(docSnap.data().prompts_allowed) - Number(docSnap.data().prompts_used))
+                    return (Number(docSnap.data().prompts_left));
+                    } else {
+                    // docSnap.data() will be undefined in this case
+                    console.log("No such document!");
+                    return 0;
+                }
+            } 
+        };
+        var max = 5;
+        var p = Promise.reject();
+        for(var i=0; i<max; i++) {
+            p = p.catch(USER_DATA_PROMISE).catch(rejectDelay);
+        }
+        p = p.then(setNum).then(handleAlertClose).catch(errorHandler);
+        // We don't have to worry about rejection, because you've set it
+        // up not to reject
+    }, []);
     const [feedbackState, setFeedbackState] = useState({
         index: null,
         dialogOpen: false,
@@ -81,6 +142,7 @@ function ChatPage({ setSearchTerm }) {
     };
 
     const handleSubmit = async () => {
+        const docRef = doc(db, "users", auth.currentUser.uid).withConverter(userConverter);
         setLoading(true);
         setKwRefs(null);
         //console.log(findRefs(dummyData, keyword.toLowerCase()));
@@ -105,6 +167,7 @@ function ChatPage({ setSearchTerm }) {
         setCurrentInput("");
         setKeyword("");
         setNum(num - 1);
+        await updateDoc(docRef, {'prompts_left': num-1});
         //console.log(newConversation);
         if (num > 0) {
             await query({
@@ -207,6 +270,7 @@ function ChatPage({ setSearchTerm }) {
                 userInputs: userInputs,
                 responses: responses,
             });
+            const userDocRef = await updateDoc(doc(db, "users", auth.currentUser.uid), {"conversations": arrayUnion(docRef.id)});
             // setAlert(
             //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
             // );
@@ -238,6 +302,8 @@ function ChatPage({ setSearchTerm }) {
         const result = await response.json();
         return result;
     };
+
+    
     // useEffect(() => {
     //     window.addEventListener("beforeunload", handleSave);
     // }, []);
@@ -259,14 +325,14 @@ function ChatPage({ setSearchTerm }) {
                     flexDirection: "row",
                 }}
             >
-                {/* <LoadingButton
+                <LoadingButton
                     onClick={handleSave}
                     variant="contained"
                     endIcon={<Save></Save>}
                     style={{ marginRight: 10 }}
                 >
                     Save Conversation
-                </LoadingButton> */}
+                </LoadingButton>
                 <LoadingButton
                     variant="contained"
                     loading={saving}
@@ -499,6 +565,7 @@ function ChatPage({ setSearchTerm }) {
                     <DialogContentText>{alert}</DialogContentText>
                 </DialogContent>
             </Dialog>
+            
             <Dialog
                 open={feedbackState.dialogOpen}
                 onClose={handleFeedbackClose}

@@ -13,7 +13,7 @@ import {
     Route,
     useLocation,
     redirect,
-    useLoaderData,
+    useNavigate,
     Navigate
   } from "react-router-dom";
 
@@ -27,8 +27,7 @@ import { auth } from "./firebase";
 
 
 function App() {
-
-  var current_user = null;
+  const navigate = useNavigate();
   const ChatRoute = () => {
   
     window.location.replace('https://' + process.env.REACT_APP_LOGIN_REDIRECT_URL );
@@ -36,6 +35,7 @@ function App() {
   
   };
   onAuthStateChanged(auth, (user) => {
+    setPersistence(auth, browserLocalPersistence);
     console.log('auth state changed');
       if (user) {
         // User is signed in, see docs for a list of available properties
@@ -47,12 +47,13 @@ function App() {
       } else {
         // User is signed out
         // ...
+        // navigate("/");
       }
   });
     return (
         <Routes> {/* The Switch decides which component to show based on the current URL.*/}
             <Route path='/' element={<LandingPage />} />
-            <Route path="/login" loader={() => console.log(auth.currentUser)} element={auth.currentUser ? <ChatRoute /> : <LoginPage />} />
+            <Route path="/login" loader={() => console.log("Email verified: " +  auth.currentUser.emailVerified)} element={auth.currentUser ? <ChatRoute /> : <LoginPage />} />
             
             <Route path="*" element={<Navigate to="/" replace />} />
             <Route onEnter={() => window.location.reload()} />

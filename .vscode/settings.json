@@ -1,5 +1,5 @@
 {
-    "appService.deploySubpath": "./landing",
+    "appService.deploySubpath": "./chat",
     "appService.zipIgnorePattern": [
         "node_modules{,/**}",
         ".vscode{,/**}",

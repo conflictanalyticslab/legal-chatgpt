@@ -121,7 +121,7 @@ function Login () {
       try {
           //console.log(userInputs, responses);
           const user_doc = doc(db, "users", user.uid).withConverter(userConverter);
-          const docRef = await setDoc(user_doc, new User(user.email, [], "default", 10, 0));
+          const docRef = await setDoc(user_doc, new User(user.email, [], "default", 10, 10));
           // setAlert(
           //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
           // );
@@ -139,8 +139,7 @@ function Login () {
         console.log(errors);
         if (!errors) {
           
-          createUserWithEmailAndPassword(auth, email, password)
-          .then(async(userCredential) => {
+          createUserWithEmailAndPassword(auth, email, password).then(async(userCredential) => {
             // Signed in 
             const user = userCredential.user;
 
