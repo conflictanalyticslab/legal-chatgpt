@@ -1,9 +1,25 @@
 import React from "react";
 import "./App.css";
-import ChatPage from "./components/ChatPage";
-import SearchPage from "./components/SearchPage";
 import AppSearchAPIConnector from "@elastic/search-ui-app-search-connector";
 import { SearchProvider, WithSearch } from "@elastic/react-search-ui";
+
+import { auth } from "./firebase";
+import LoginPage from './components/LoginPage';
+import LandingPage from "./components/LandingPage";
+import ChatPage from "./components/ChatPage";
+
+import { onAuthStateChanged, setPersistence, browserSessionPersistence, signInWithCustomToken } from "firebase/auth";
+import {
+    Routes,
+    Route,
+    useLocation,
+    redirect,
+    useNavigate,
+    useLoaderData,
+    useRouteLoaderData,
+    Navigate,
+    useSearchParams
+  } from "react-router-dom";
 
 const connector = new AppSearchAPIConnector({
     searchKey: process.env.REACT_APP_PUBLIC_SEARCH_KEY,
@@ -45,47 +61,34 @@ const config = {
 };
 
 function App() {
+    // return docSnap.data();
+    const [authToken, setAuthToken] = useSearchParams();
+
+    onAuthStateChanged(auth, (user) => {
+        console.log('auth state changed');
+        // console.log(user)
+          if (user) {
+            // User is signed in, see docs for a list of available properties
+            // https://firebase.google.com/docs/reference/js/firebase.User
+            console.log('signed in')
+    
+            // ...
+          } else {
+            // User is signed out
+            // ...
+          }
+      });
     return (
-        <SearchProvider config={config}>
-            <WithSearch
-                mapContextToProps={({ wasSearched, setSearchTerm }) => ({
-                    wasSearched,
-                    setSearchTerm,
-                })}
-            >
-                {({ wasSearched, setSearchTerm }) => {
-                    return (
-                        <div className="App">
-                            <div
-                                style={{
-                                    width: "30%",
-                                    height: "%100%",
-                                    overflow: "scroll",
-                                }}
-                            >
-                                <SearchPage
-                                    wasSearched={wasSearched}
-                                    setSearchTerm={setSearchTerm}
-                                ></SearchPage>
-                            </div>
-                            <div
-                                style={{
-                                    width: "70%",
-                                    height: "100%",
-                                    overflow: "scroll",
-                                    justifyContent: "center",
-                                }}
-                            >
-                                <ChatPage
-                                    setSearchTerm={setSearchTerm}
-                                ></ChatPage>
-                            </div>
-                        </div>
-                    );
-                }}
-            </WithSearch>
-        </SearchProvider>
-    );
+        <Routes> {/* The Switch decides which component to show based on the current URL.*/}
+            <Route path='/' element={<LandingPage />} />
+            <Route path='/chat' loader={() => console.log("User: " +  auth.currentUser.email)} element={auth.currentUser ? <ChatPage /> : <Navigate to="/login" replace />} />
+            
+            <Route path="/login" loader={() => console.log("Email verified: " +  auth.currentUser.emailVerified)} element={<LoginPage />} />
+            
+            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route onEnter={() => window.location.reload()} />
+        </Routes>
+            );
 }
 
 export default App;

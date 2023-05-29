@@ -18,7 +18,7 @@ import {
     SingleSelectFacet,
 } from "@elastic/react-search-ui-views";
 import "@elastic/react-search-ui-views/lib/styles/styles.css";
-import "../App.css";
+import "../../App.css";
 
 const SearchPage = ({ wasSearched, setSearchTerm }) => {
     return (
