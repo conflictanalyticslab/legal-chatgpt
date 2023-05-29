@@ -1,0 +1,57 @@
+{
+    "name": "legal-chatgpt",
+    "version": "0.1.0",
+    "private": true,
+    "homepage": ".",
+    "dependencies": {
+        "@azure/msal-browser": "^2.37.0",
+        "@azure/msal-react": "^1.5.7",
+        "@elastic/react-search-ui": "^1.20.2",
+        "@elastic/search-ui-app-search-connector": "^1.20.2",
+        "@elastic/search-ui-workplace-search-connector": "^1.20.2",
+        "@emotion/react": "^11.11.0",
+        "@emotion/styled": "^11.11.0",
+        "@mui/icons-material": "^5.11.16",
+        "@mui/lab": "^5.0.0-alpha.113",
+        "@mui/material": "^5.13.0",
+        "@mui/styles": "^5.12.3",
+        "axios": "^1.4.0",
+        "core-js": "^3.30.2",
+        "cors": "^2.8.5",
+        "dotenv": "^16.0.3",
+        "dotenv-safe": "^8.2.0",
+        "firebase": "^9.22.0",
+        "firebaseui": "^6.0.2",
+        "gh-pages": "^4.0.0",
+        "joi": "^17.9.2",
+        "joi-password-complexity": "^5.1.0",
+        "node-fetch": "^3.3.1",
+        "react": "^17.0.0",
+        "react-dom": "^17.0.2",
+        "react-router": "^6.11.1",
+        "react-router-dom": "^6.11.1",
+        "react-scripts": "^5.0.1",
+        "web-vitals": "^2.1.4",
+        "webfontloader": "^1.6.28"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject",
+        "predeploy": "npm run build",
+        "deploy": "gh-pages -d build"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    }
+}

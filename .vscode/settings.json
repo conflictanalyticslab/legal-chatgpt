@@ -1,10 +1,10 @@
 {
-    "appService.deploySubpath": "./chat",
+    "appService.defaultWebAppToDeploy": "/subscriptions/f4a03fb5-49ee-41d3-af28-44136fd2dbf1/resourceGroups/appsvc_linux_centralus_basic/providers/Microsoft.Web/sites/openjustice-test",
+    "appService.deploySubpath": ".",
     "appService.zipIgnorePattern": [
         "node_modules{,/**}",
         ".vscode{,/**}",
         ".env{,/**}",
         "build{,/**}"
-    ],
-    "appService.defaultWebAppToDeploy": "None"
+    ]
 }
