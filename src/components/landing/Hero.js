@@ -23,16 +23,16 @@ const Hero = () => {
       
     <Box className={classes.heroBox} textAlign="center">
       <Grid container spacing={0} className={classes.gridContainer} 
-  direction="column"
-  justifyContent="center"
-  alignItems="center"
-  height='100%'
->
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        height='100%'
+      >   
       
       <Grid item xs={12} md={7} width = '40%'>
           <img src={mid_logo} alt="logo" className={classes.medImage} />
         </Grid>
-        <Grid item xs={12} md={7} width = '40%'>
+        <Grid item xs={12} md={7} width = '40%' sx={{paddingBottom: '20px'}}>
           <Typography variant="h4" fontWeight={700} className={classes.title} textAlign="center">
           Experience ChatGPT <br /> Designed for Law
           </Typography>
@@ -63,10 +63,7 @@ OpenJustice is continuously learning and evolving. Please let us know if the ans
             </Box>
 
         </Grid>
-        <Grid item xs={12} md={7} margin = '0px'width='90%'>
-        </Grid>
       </Grid>
-        {/* <img src={rightTriangle} width='30%'/> */}
     </Box>
 
     </div>
