@@ -1,7 +1,6 @@
 import { makeStyles } from '@mui/styles';
 import { styled } from '@mui/system';
 
-
 const styles = (theme) => {
   return {
     appBackground: {
@@ -9,7 +8,7 @@ const styles = (theme) => {
       minHeight: '85vh',
     },
     toolBar: {
-      height: '5vh',
+      height: '10vh',
       display: 'flex',
       justifyContent: 'space-between',
       padding: '20px',
@@ -23,7 +22,11 @@ const styles = (theme) => {
       color: "#000",
       fontWeight: 'bold !important',
     },
-    
+    calLogo: {
+      marginTop: '0px',
+      width: '80%',
+      marginLeft: '50px',
+    },
     menuIcon: {
       color: '#000',
     },
@@ -88,8 +91,8 @@ const styles = (theme) => {
       width: '100%',
     },
     medImage: {
-      marginTop: '90px',
-      width: '50%',
+      marginTop: '120px',
+      // width: '50%',
     },
     smallImage: {
       marginTop: '0px',

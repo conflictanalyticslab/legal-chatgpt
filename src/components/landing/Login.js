@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Grid, Typography, Button, Box } from '@mui/material';
 import useStyles from '../../styles/styles';
-import mid_logo from '../../images/OpenJustice_Middle.svg';
+import mid_logo from '../../images/OpenMiddleLogo.png';
 
 import { useNavigate } from "react-router-dom";
 import TextField from '@mui/material/TextField';
