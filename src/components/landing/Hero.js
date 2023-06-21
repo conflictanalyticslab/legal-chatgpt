@@ -30,7 +30,7 @@ const Hero = () => {
         height='100%'
       >   
       
-      <Grid item xs={12} md={7} width = '40%'>
+      <Grid item xs={12} md={7} maxWidth={'468'}>
           <img src={mid_logo} alt="logo" className={classes.medImage} />
         </Grid>
         <Grid item xs={12} md={7} width = '40%' sx={{paddingBottom: '20px'}}>

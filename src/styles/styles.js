@@ -94,6 +94,7 @@ const styles = (theme) => {
     medImage: {
       marginTop: '120px',
       // width: '50%',
+      alignItems: 'center'
     },
     smallImage: {
       marginTop: '0px',
