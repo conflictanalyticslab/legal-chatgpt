@@ -57,5 +57,5 @@ jobs:
         with:
           app-name: 'openjustice-test'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E379F3DCEB58491881FA666A6A99ED79 }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
