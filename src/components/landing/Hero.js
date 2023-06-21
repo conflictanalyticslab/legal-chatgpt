@@ -22,7 +22,8 @@ const Hero = () => {
     <div className={classes.appBackground} style={{ backgroundImage: `url('${leftRight}')`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center center'} }>
       
     <Box className={classes.heroBox} textAlign="center">
-      <Grid container spacing={0} className={classes.gridContainer} 
+      <Grid container spacing={0} 
+        className={classes.gridContainer} 
         direction="column"
         justifyContent="center"
         alignItems="center"

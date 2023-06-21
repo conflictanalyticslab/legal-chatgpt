@@ -21,10 +21,11 @@ const styles = (theme) => {
     link: {
       color: "#000",
       fontWeight: 'bold !important',
+      paddingRight: '12px'
     },
     calLogo: {
-      marginTop: '0px',
-      width: '80%',
+      margin: 'auto',
+      width: '70%',
       marginLeft: '50px',
     },
     menuIcon: {
