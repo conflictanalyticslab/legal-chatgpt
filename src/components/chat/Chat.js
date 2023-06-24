@@ -21,22 +21,31 @@ import { Send, ThumbUp, ThumbDown, Refresh, Save } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 
 import { auth, db } from "../../firebase";
-import { addDoc, collection, getDoc, doc, updateDoc, arrayUnion} from "firebase/firestore";
+import {
+    addDoc,
+    collection,
+    getDoc,
+    doc,
+    updateDoc,
+    arrayUnion,
+} from "firebase/firestore";
 import { dummyData } from "../../dummyData";
 import { handleSearch } from "./functions";
 
 import { userConverter } from "../../styles/User";
 
-import { onAuthStateChanged, setPersistence, browserLocalPersistence } from "firebase/auth";
+import {
+    onAuthStateChanged,
+    setPersistence,
+    browserLocalPersistence,
+} from "firebase/auth";
 import { FirebaseError } from "firebase/app";
+
+import { query } from "./functions";
 
 var t = 1000;
 
-
-
-
 function Chat({ setSearchTerm, loggedin }) {
-    
     const [userInputs, setUserInputs] = useState([]);
     const [conversation, setConversation] = useState([]);
     const [responses, setResponses] = useState([]);
@@ -52,46 +61,55 @@ function Chat({ setSearchTerm, loggedin }) {
     function errorHandler(err) {
         setAlert("Error verifying user. Returning you to the sign in page");
         console.error(err);
-        window.open('https://' + process.env.REACT_APP_LOGIN_REDIRECT_URL, '_blank').focus();
+        window
+            .open(
+                "https://" + process.env.REACT_APP_LOGIN_REDIRECT_URL,
+                "_blank"
+            )
+            .focus();
     }
 
     function rejectDelay(reason) {
         // console.log(reason);
-        return new Promise(function(resolve, reject) {
-            setTimeout(reject.bind(null, reason), t); 
+        return new Promise(function (resolve, reject) {
+            setTimeout(reject.bind(null, reason), t);
         });
     }
     const [alert, setAlert] = useState("");
 
     useEffect(() => {
-        const USER_DATA_PROMISE = async() => {
+        const USER_DATA_PROMISE = async () => {
             setAlert("Authenticating user info...");
             // console.log(auth.currentUser);
             if (!auth.currentUser) {
                 console.log("User not signed in");
-                throw new FirebaseError; 
-            } else if (!auth.currentUser.emailVerified){
+                throw new FirebaseError();
+            } else if (!auth.currentUser.emailVerified) {
                 console.log("User email not verified");
-                throw new FirebaseError;
+                throw new FirebaseError();
             } else {
-                const docRef = doc(db, "users", auth.currentUser.uid).withConverter(userConverter);
+                const docRef = doc(
+                    db,
+                    "users",
+                    auth.currentUser.uid
+                ).withConverter(userConverter);
                 const docSnap = await getDoc(docRef);
-            
+
                 if (docSnap.exists()) {
                     // console.debug("Document data:", docSnap.data());
 
                     // console.log(Number(docSnap.data().prompts_allowed) - Number(docSnap.data().prompts_used))
-                    return (Number(docSnap.data().prompts_left));
-                    } else {
+                    return Number(docSnap.data().prompts_left);
+                } else {
                     // docSnap.data() will be undefined in this case
                     console.log("No such document!");
                     return 0;
                 }
-            } 
+            }
         };
         var max = 5;
         var p = Promise.reject();
-        for(var i=0; i<max; i++) {
+        for (var i = 0; i < max; i++) {
             p = p.catch(USER_DATA_PROMISE).catch(rejectDelay);
         }
         p = p.then(setNum).then(handleAlertClose).catch(errorHandler);
@@ -142,7 +160,9 @@ function Chat({ setSearchTerm, loggedin }) {
     };
 
     const handleSubmit = async () => {
-        const docRef = doc(db, "users", auth.currentUser.uid).withConverter(userConverter);
+        const docRef = doc(db, "users", auth.currentUser.uid).withConverter(
+            userConverter
+        );
         setLoading(true);
         setKwRefs(null);
         //console.log(findRefs(dummyData, keyword.toLowerCase()));
@@ -167,7 +187,7 @@ function Chat({ setSearchTerm, loggedin }) {
         setCurrentInput("");
         setKeyword("");
         setNum(num - 1);
-        await updateDoc(docRef, {'prompts_left': num-1});
+        await updateDoc(docRef, { prompts_left: num - 1 });
         //console.log(newConversation);
         if (num > 0) {
             await query({
@@ -270,7 +290,10 @@ function Chat({ setSearchTerm, loggedin }) {
                 userInputs: userInputs,
                 responses: responses,
             });
-            const userDocRef = await updateDoc(doc(db, "users", auth.currentUser.uid), {"conversations": arrayUnion(docRef.id)});
+            const userDocRef = await updateDoc(
+                doc(db, "users", auth.currentUser.uid),
+                { conversations: arrayUnion(docRef.id) }
+            );
             // setAlert(
             //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
             // );
@@ -287,23 +310,7 @@ function Chat({ setSearchTerm, loggedin }) {
     const handleFeedbackClose = () => {
         setFeedbackState({ ...feedbackState, dialogOpen: false });
     };
-    const query = async (data) => {
-        const response = await fetch(
-            "https://api.openai.com/v1/chat/completions",
-            {
-                headers: {
-                    Authorization: `Bearer ${process.env.REACT_APP_MODEL_API_KEY}`,
-                    "Content-Type": "application/json",
-                },
-                method: "POST",
-                body: JSON.stringify(data),
-            }
-        );
-        const result = await response.json();
-        return result;
-    };
 
-    
     // useEffect(() => {
     //     window.addEventListener("beforeunload", handleSave);
     // }, []);
@@ -565,7 +572,7 @@ function Chat({ setSearchTerm, loggedin }) {
                     <DialogContentText>{alert}</DialogContentText>
                 </DialogContent>
             </Dialog>
-            
+
             <Dialog
                 open={feedbackState.dialogOpen}
                 onClose={handleFeedbackClose}
