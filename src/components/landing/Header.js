@@ -17,7 +17,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import useStyles from '../../styles/styles';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import logo from '../../images/OpenJustice Basic Logo.svg';
+import logo from '../../images/RobotoLogo.png';
 import { useNavigate } from "react-router-dom";
 
 function ElevationScroll(props) {
@@ -92,7 +92,7 @@ const Header = (props) => {
         <AppBar>
           <Toolbar className={classes.toolBar}>
           <Grid item xs={12} md={7} onClick={goHome}>
-          <img src={logo} alt="My Team" className={classes.smallImage} />
+          <img src={logo} alt="My Team" className={classes.calLogo} />
           </Grid>
 
             {matches ? (
@@ -120,11 +120,12 @@ const Header = (props) => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 flexGrow: '0.1',
+                marginRight: '60px',
               }}
             >
               {links.map((link) => (
                 <Link href={link.url} target="_blank" underline="none" key={link.id}>
-                  <Typography className={classes.link}>{link.route}</Typography>
+                  <Typography sx = {{fontSize: '1.3rem'}} className={classes.link}>{link.route}</Typography>
                 </Link>
               ))}
             </Box>}
