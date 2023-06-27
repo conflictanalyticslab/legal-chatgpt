@@ -70,23 +70,26 @@ function Chat({ setSearchTerm, loggedin }) {
             if (!auth.currentUser) {
                 console.log("User not signed in");
                 throw new FirebaseError; 
-            } else if (!auth.currentUser.emailVerified){
-                console.log("User email not verified");
-                throw new FirebaseError;
-            } else {
+            }  else {
                 const docRef = doc(db, "users", auth.currentUser.uid).withConverter(userConverter);
                 const docSnap = await getDoc(docRef);
             
-                if (docSnap.exists()) {
+                if (docSnap.exists() ) {
+                    if (docSnap.data().verified) {
                     // console.debug("Document data:", docSnap.data());
 
                     // console.log(Number(docSnap.data().prompts_allowed) - Number(docSnap.data().prompts_used))
-                    return (Number(docSnap.data().prompts_left));
+                        return (Number(docSnap.data().prompts_left));
                     } else {
+                        console.log("User not verified");
+                        return 0;
+                    }
+                } else {
                     // docSnap.data() will be undefined in this case
                     console.log("No such document!");
                     return 0;
-                }
+                
+                } 
             } 
         };
         var max = 5;
