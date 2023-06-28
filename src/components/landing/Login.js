@@ -47,6 +47,7 @@ function Login () {
     email: Joi.string()
       .email({tlds: false})
       .pattern(/^[a-zA-Z0-9._%+-]+@queensu\.ca$/)
+      .allow('athibault@aplust.co')
       .messages({
         'string.pattern.base': 'Email must be a valid queensu.ca email address.',
       }),

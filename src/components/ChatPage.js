@@ -47,7 +47,8 @@ const config = {
 export var loggedin = true;
 
 function ChatPage() {
-    return (<SearchProvider config={config}>
+    return (
+        <SearchProvider config={config}>
             <WithSearch
                 mapContextToProps={({ wasSearched, setSearchTerm }) => ({
                     wasSearched,
@@ -86,7 +87,8 @@ function ChatPage() {
                     );
                 }}
             </WithSearch>
-        </SearchProvider>);
+        </SearchProvider>
+    );
 }
 
 export default ChatPage;
