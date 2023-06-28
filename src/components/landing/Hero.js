@@ -22,14 +22,15 @@ const Hero = () => {
     <div className={classes.appBackground} style={{ backgroundImage: `url('${leftRight}')`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center center'} }>
       
     <Box className={classes.heroBox} textAlign="center">
-      <Grid container spacing={0} className={classes.gridContainer} 
+      <Grid container spacing={0} 
+        className={classes.gridContainer} 
         direction="column"
         justifyContent="center"
         alignItems="center"
         height='100%'
       >   
       
-      <Grid item xs={12} md={7} width = '40%'>
+      <Grid item xs={12} md={7} maxWidth={'468'}>
           <img src={mid_logo} alt="logo" className={classes.medImage} />
         </Grid>
         <Grid item xs={12} md={7} width = '40%' sx={{paddingBottom: '20px'}}>

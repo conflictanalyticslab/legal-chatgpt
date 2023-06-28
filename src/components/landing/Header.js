@@ -125,7 +125,7 @@ const Header = (props) => {
             >
               {links.map((link) => (
                 <Link href={link.url} target="_blank" underline="none" key={link.id}>
-                  <Typography sx = {{fontSize: '1.3rem'}} className={classes.link}>{link.route}</Typography>
+                  <Typography sx = {{fontSize: '1.2rem'}} className={classes.link}>{link.route}</Typography>
                 </Link>
               ))}
             </Box>}

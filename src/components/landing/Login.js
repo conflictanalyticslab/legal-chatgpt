@@ -1,9 +1,9 @@
-
-
 import React, { useState } from "react";
 import { Grid, Typography, Button, Box } from '@mui/material';
 import useStyles from '../../styles/styles';
 import mid_logo from '../../images/OpenMiddleLogo.png';
+import google_logo from '../../images/loginGoogle.png';
+import microsoft_logo from '../../images/loginMicrosoft.png';
 
 import { useNavigate } from "react-router-dom";
 import TextField from '@mui/material/TextField';
@@ -199,7 +199,6 @@ function Login () {
           
         }
     }
-
     // console.log(auth.currentUser)
   return <div className={classes.appBackground}>
     <Box className={classes.heroBox} textAlign="center">
@@ -209,18 +208,22 @@ function Login () {
         alignItems="center"
         height='100%'
       >
-        <Grid item xs={12} md={7} width='80%'>
-          <img src={mid_logo} alt="logo" className={classes.medImage} />
-        </Grid>
-        <Grid item xs={12} md={7} zeroMinWidth width='40%'>
+        <div style={{marginTop: '18vh', marginBottom: '24px'}}>
+          <Typography variant="h3" fontWeight={700} className={classes.title} textAlign="center">
+          Welcome back
+          </Typography>
+        </div>
+
+        <div style={{width: '40%', alignItems: 'center'}}>
           <Box
             component="form"
             sx={{
               '& .MuiTextField-root': { m: 1, width: '25ch' },
+              alignItems: 'center',
             }}
             autoComplete="off"
           >
-            <div>
+            <div style={{maxWidth: '500px', textAlign: 'center', margin: 'auto' }}>
               <TextField
                 id="email-input"
                 label="Email"
@@ -228,8 +231,9 @@ function Login () {
                 value={email}
                 error={emailError}
                 onChange={e => setEmail(e.target.value)}
+                style={{width: '300px'}}
               />
-              <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined">
+              <FormControl sx={{ m: 1, width: '300px' }} variant="outlined">
                 <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
                 <OutlinedInput
                   id="outlined-adornment-password"
@@ -257,22 +261,37 @@ function Login () {
                 type="submit"
                 onClick={handleSignin}
                 variant="contained"
-                className={classes.formHeading}
-                sx={{ width: '200px', height: '50px', fontSize: '16px', marginTop: '30px', backgroundColor: '#11335D', color: 'white',  textTransform: 'none', mr: '2px'}}
-              >Login
+                sx={{ alignItems: 'center', width: '300px', height: '50px', fontSize: '16px', marginTop: '30px', backgroundColor: '#11335D', color: 'white',  textTransform: 'none', mr: '2px'}}
+              >Continue
+              </Button>
+              <div style={{marginTop: '8px', marginBottom: '8px'}}>
+                Don't have an account?&nbsp;
+                <a onClick={handleSignup} style={{textDecoration: 'underline', fontWeight: 'bold'}}>
+                   Sign up
+                </a>
+              </div>
+
+              <div style={{ margin: 'auto', width: '350px', height: '15px', borderBottom: '2px solid #11335D', textAlign: 'center', alignItems: 'center'}}>
+                  <span style={{fontSize: '20px', backgroundColor: '#F3F5F6', padding: '0 10px', fontWeight: 'bold'}}>OR</span>
+              </div>
+
+              <Button
+              sx={{ width: '300px', height: '50px', fontSize: '16px', marginTop: '30px', backgroundColor: '#FFFFFF', color: 'black',  textTransform: 'none', mr: '2px', alignItems: 'center'}}
+              >
+                <img src={google_logo} style={{width: '14px', height: '14px', marginRight: '6px'}}/>
+                Continue with Google
               </Button>
               <Button
-                type="submit"
-                onClick={handleSignup}
-                variant=""
-                className={classes.formHeading}
-                sx={{ width: '160px', fontSize: '16px', marginTop: '30px', color: 'black',  textTransform: 'none',  textDecoration: 'underline', fontWeight: 'bold'}}
-              >  <Typography fontWeight= 'bold'>Sign Up</Typography>
+                sx={{ alignItems: 'center', width: '300px', height: '50px', fontSize: '16px', marginTop: '30px', backgroundColor: '#FFFFFF', color: 'black',  textTransform: 'none', mr: '2px', alignItems: 'center'}}             
+              >
+                <img src={microsoft_logo} style={{width: '14px', height: '14px', marginRight: '6px'}}/>
+                Continue with Microsoft
               </Button>
+
               <FormHelperText error={generalError}>{generalHelper}</FormHelperText>
             </div>
           </Box>
-        </Grid>
+        </div>
         <Grid item xs={12} md={7} margin = '0px'width='90%'>
         </Grid>
       </Grid>
