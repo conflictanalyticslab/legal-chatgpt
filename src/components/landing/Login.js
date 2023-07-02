@@ -27,6 +27,8 @@ import { doc, setDoc, collection } from "firebase/firestore";
 
 import User, { userConverter } from '../../styles/User';
 
+import { getDatabase, ref, child, get } from "firebase/database";
+
 function Login () {
   
   const Joi = require('joi');
@@ -81,14 +83,28 @@ function Login () {
   const [generalError, setGeneralError] = useState("")
   const [generalHelper, setGeneralHelper] = useState("")
 
-
+  const readWhitelistEmails = async() => {
+    return new Promise((resolve) => {
+      const dbRef = ref(getDatabase());
+      get(child(dbRef, `whitelist-emails`)).then((snapshot) => {
+        if (snapshot.exists()) {
+          resolve(snapshot.val());
+        } else {
+          console.log("No whitelist email available");
+          resolve("No white list email available");
+        }
+      }).catch((error) => {
+        console.error(error);
+        resolve(error);
+      });
+    }); 
+  }
+  
 
   const validateUser = async() => {
     setEmailError(false);
-      
     setEmailHelper("Please use a queensu email");
     setPasswordError(false);
-    
     setPassHelper("");
 
     try {
@@ -100,7 +116,6 @@ function Login () {
 
 
           for (let msg of value.error.details) {
-            // console.log(msg);
             if (msg.context.key=='email') {
               // check if email is in white list and return right away
               console.log('Accessing whitelist emails on Firebase');
@@ -132,7 +147,7 @@ function Login () {
           console.log(err)
           setGeneralError(err)
       }
-        // console.log({emailError, passwordError})
+      console.log({emailError, passwordError});
 
       return (emailError || passwordError);
   }
