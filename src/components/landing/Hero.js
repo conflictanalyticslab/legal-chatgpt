@@ -35,7 +35,7 @@ const Hero = () => {
         </Grid>
         <Grid item xs={12} md={7} width = '40%' sx={{paddingBottom: '20px'}}>
           <Typography variant="h4" fontWeight={700} className={classes.title} textAlign="center">
-          Experience ChatGPT <br /> Designed for Law
+          Experience Generative AI <br /> Designed for Law and Dispute Resolution
           </Typography>
           <Typography variant="h6" className={classes.subtitle2} sx = {{ marginTop: '30px', fontSize: '18px', textAlign: 'left' }}  >
           OpenJustice is an open-access AI technology designed to efficiently address legal queries and provide comprehensive answers by drawing upon diverse legal sources and narratives.
