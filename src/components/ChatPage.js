@@ -4,6 +4,8 @@ import SearchPage from "./chat/SearchPage";
 import Chat from "./chat/Chat";
 import AppSearchAPIConnector from "@elastic/search-ui-app-search-connector";
 import { SearchProvider, WithSearch } from "@elastic/react-search-ui";
+import SideBar from "./chat/SideBar";
+import ChatPageOJ from "../images/ChatPageOJ.png"
 
 const connector = new AppSearchAPIConnector({
     searchKey: process.env.REACT_APP_PUBLIC_SEARCH_KEY,
@@ -44,6 +46,7 @@ const config = {
     },
 };
 
+
 export var loggedin = true;
 
 function ChatPage() {
@@ -58,6 +61,26 @@ function ChatPage() {
                 {({ wasSearched, setSearchTerm }) => {
                     return (
                         <div className="App">
+                            {/* <div>
+                                <button onClick={toggleMenu}>Toggle Menu</button>
+                                <SideMenu isOpen={isMenuOpen} onClose={toggleMenu} />
+                            </div> */}
+                            <SideBar />
+                            <div
+                                style={{
+                                    width: "70%",
+                                    height: "100%",
+                                    overflow: "scroll",
+                                    justifyContent: "center",
+                                    diplay: 'flex',
+                                }}
+                            >
+                                <Chat
+                                    setSearchTerm={setSearchTerm}
+                                    // loggedin={loggedin}
+                                >
+                                </Chat>
+                            </div>
                             <div
                                 style={{
                                     width: "30%",
@@ -70,19 +93,7 @@ function ChatPage() {
                                     setSearchTerm={setSearchTerm}
                                 ></SearchPage>
                             </div>
-                            <div
-                                style={{
-                                    width: "70%",
-                                    height: "100%",
-                                    overflow: "scroll",
-                                    justifyContent: "center",
-                                }}
-                            >
-                                <Chat
-                                    setSearchTerm={setSearchTerm}
-                                    // loggedin={loggedin}
-                                ></Chat>
-                            </div>
+                            
                         </div>
                     );
                 }}

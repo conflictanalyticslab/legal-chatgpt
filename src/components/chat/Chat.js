@@ -325,7 +325,6 @@ function Chat({ setSearchTerm, loggedin }) {
             <div
                 style={{
                     position: "absolute",
-                    right: 50,
                     zIndex: 10,
                     display: "flex",
                     flexDirection: "row",
@@ -355,7 +354,7 @@ function Chat({ setSearchTerm, loggedin }) {
                     width: "100%",
                     paddingBlockStart: 20,
                 }}
-            >
+            > 
                 {userInputs &&
                     userInputs.map((input, i) => (
                         <div>
