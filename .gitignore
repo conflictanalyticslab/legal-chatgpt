@@ -16,6 +16,7 @@
 # misc
 .DS_Store
 */.env
+*/.venv
 .env
 .env.local
 .env.development.local
@@ -27,3 +28,5 @@ yarn-debug.log*
 yarn-error.log*
 
 .vscode
+
+/functions
