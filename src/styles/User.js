@@ -1,5 +1,5 @@
 export default class User {
-    constructor (email, conversations, role, prompts_allowed, prompts_left, verified ) {
+    constructor (email, conversations, role, prompts_allowed, prompts_left, verified) {
         this.email = email;
         this.conversations = conversations;
         this.role = role;
@@ -19,7 +19,8 @@ export const userConverter = {
             conversations: User.conversations,
             role: User.role,
             prompts_left: User.prompts_left,
-            prompts_allowed: User.prompts_allowed
+            prompts_allowed: User.prompts_allowed,
+            verified: User.verified
             };
     },
     fromFirestore: (snapshot, options) => {

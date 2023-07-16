@@ -18,6 +18,7 @@ import FormHelperText from '@mui/material/FormHelperText';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import IconButton from '@mui/material/IconButton';
+// import PasswordStrengthBar from 'react-password-strength-bar';
 
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, deleteUser, setPersistence, browserLocalPersistence, createCustomToken } from "firebase/auth";
 
@@ -32,6 +33,7 @@ function Login () {
   const [saving, setSaving] = useState(false);
 
   const navigate = useNavigate();
+  const passwordComplexity = require("joi-password-complexity");
 
   const complexityOptions = {
       min: 5,
@@ -47,7 +49,6 @@ function Login () {
     email: Joi.string()
       .email({tlds: false})
       .pattern(/^[a-zA-Z0-9._%+-]+@queensu\.ca$/)
-      .allow('openjusticedemo@gmail.com')
       .messages({
         'string.pattern.base': 'Email must be a valid queensu.ca email address.',
       }),
@@ -91,19 +92,37 @@ function Login () {
     setPassHelper("");
 
     try {
-        const value = await emailSchema.validate({ email: email, password: password}, {'abortEarly': false});
+        const value = emailSchema.validate({ email: email, password: password}, {'abortEarly': false});
+        // console.log(value);
         if (value.error) {
+          setEmailHelper('Checking your email...');
+          setEmailError(false);
+
+
           for (let msg of value.error.details) {
             // console.log(msg);
             if (msg.context.key=='email') {
-                
-              const err_str = msg.message;
-              setEmailHelper(err_str);
-              setEmailError(true);
+              // check if email is in white list and return right away
+              console.log('Accessing whitelist emails on Firebase');
+              
+              readWhitelistEmails().then((whiteListEmails) => {
+                if (whiteListEmails.includes(email)) {
+                  console.log("Email is in whitelist");
+                  setEmailError(false);
+                  setEmailHelper("");
+                } else {
+                  setEmailHelper(msg.message);
+                  setEmailError(true);
+                }
+              });
+
+              
+          // setGeneralHelper("");
+              // console.log(whiteListEmails);
+              // console.log(email);
+              
             } else if (msg.context.key=='password') {
-                
-              const err_str = msg.message;
-              setPassHelper(err_str);
+              setPassHelper(msg.message);
               setPasswordError(true);
             }
           }
@@ -116,22 +135,27 @@ function Login () {
         // console.log({emailError, passwordError})
 
       return (emailError || passwordError);
-    }
+  }
 
-    const saveUser = async (user) => {
-      console.log('saving user')
-      setSaving(true);
-      try {
-          //console.log(userInputs, responses);
-          const user_doc = doc(db, "users", user.uid).withConverter(userConverter);
-          const docRef = await setDoc(user_doc, new User(user.email, [], "default", 10, 10));
-          // setAlert(
-          //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
-          // );
-          // window.location.reload();
-      } catch (e) {
-          console.log(`Error saving user: ${e}`);
-      }
+  const saveUser = async (user) => {
+    console.log('saving user')
+    setSaving(true);
+    try {
+        //console.log(userInputs, responses);
+        const user_doc = doc(db, "users", user.uid).withConverter(userConverter);
+
+        var valid_user = false;
+
+        if (user.email.endsWith("queensu.ca")) {valid_user = true;}
+        
+        const docRef = await setDoc(user_doc, new User(user.email, [], "default", 10, 10, valid_user));
+        // setAlert(
+        //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
+        // );
+        // window.location.reload();
+    } catch (e) {
+        console.log(`Error saving user: ${e}`);
+    }
       setSaving(false);
   };
 
@@ -161,14 +185,14 @@ function Login () {
             return null;
           });
 
-          sendEmailVerification(auth.currentUser)
-          .then(setGeneralHelper("Email verification sent. Please confirm your email to finish registration"))
-          .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorMessage);
-            setGeneralError(errorMessage);
-          });
+          // sendEmailVerification(auth.currentUser)
+          // .then(setGeneralHelper("Email verification sent. Please confirm your email to finish registration"); )
+          // .catch((error) => {
+          //   const errorCode = error.code;
+          //   const errorMessage = error.message;
+          //   console.log(errorMessage);
+          //   setGeneralError(errorMessage);
+          // });
 
         }
     }
@@ -176,9 +200,9 @@ function Login () {
     const handleSignin = async(event) => {
       event.preventDefault();
       
-        const valid = await validateUser();
-        console.log(valid);
-        if (!valid) {
+        const errors = await validateUser();
+        console.log(errors);
+        if (!errors) {
           
           signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
@@ -255,6 +279,7 @@ function Login () {
                   error={passwordError}
                   onChange={e => setPassword(e.target.value)}
                 />
+                {/* <PasswordStrengthBar password={password} /> */}
                 <FormHelperText error={passwordError}>{passHelper}</FormHelperText>
               </FormControl>
               <Button
@@ -271,7 +296,14 @@ function Login () {
                 </a>
               </div>
 
-              <div style={{ margin: 'auto', width: '350px', height: '15px', borderBottom: '2px solid #11335D', textAlign: 'center', alignItems: 'center'}}>
+              {/* <div style={{marginTop: '8px', marginBottom: '8px'}}>
+                Having trouble?&nbsp;
+                <a onClick={sendEmailVerification(auth.currentUser)} style={{textDecoration: 'underline', fontWeight: 'bold'}}>
+                Resend verification email.
+                </a>
+              </div> */}
+
+              {/* <div style={{ margin: 'auto', width: '350px', height: '15px', borderBottom: '2px solid #11335D', textAlign: 'center', alignItems: 'center'}}>
                   <span style={{fontSize: '20px', backgroundColor: '#F3F5F6', padding: '0 10px', fontWeight: 'bold'}}>OR</span>
               </div>
 
@@ -286,7 +318,7 @@ function Login () {
               >
                 <img src={microsoft_logo} style={{width: '14px', height: '14px', marginRight: '6px'}}/>
                 Continue with Microsoft
-              </Button>
+              </Button> */}
 
               <FormHelperText error={generalError}>{generalHelper}</FormHelperText>
             </div>
