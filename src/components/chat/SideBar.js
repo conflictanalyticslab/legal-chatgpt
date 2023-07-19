@@ -18,27 +18,23 @@ import LogoutIcon from '@mui/icons-material/Logout';
 const navDataLink = [
     {
         id: 0,
-        // icon: <PeopleIcon/>,
         text: "About Us",
-        link: "/"
+        link: "https://myopencourt.org/about-us/"
     },
     {
         id: 1,
-        // icon: <LibraryBooksIcon/>,
         text: "Blogs",
-        link: "/"
+        link: "https://myopencourt.org/blog/"
     },
     {
         id: 2,
-        // icon: <QuestionAnswerIcon/>,
         text: "FAQs",
-        link: "/"
+        link: "https://myopencourt.org/faqs/"
     },
     {
         id: 3,
-        // icon: <ContactPhoneIcon/>,
         text: "Contact",
-        link: "/"
+        link: "mailto:conflict.analytics@gmail.com"
     }
 ]
 const navDataConvo = [

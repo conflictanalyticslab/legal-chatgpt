@@ -5,7 +5,7 @@ import Chat from "./chat/Chat";
 import AppSearchAPIConnector from "@elastic/search-ui-app-search-connector";
 import { SearchProvider, WithSearch } from "@elastic/react-search-ui";
 import SideBar from "./chat/SideBar";
-import ChatPageOJ from "../images/ChatPageOJ.png"
+
 
 const connector = new AppSearchAPIConnector({
     searchKey: process.env.REACT_APP_PUBLIC_SEARCH_KEY,
@@ -73,6 +73,7 @@ function ChatPage() {
                                     overflow: "scroll",
                                     justifyContent: "center",
                                     diplay: 'flex',
+                                    backgroundColor: "#F5F5F7"
                                 }}
                             >
                                 <Chat

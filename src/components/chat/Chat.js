@@ -42,6 +42,7 @@ import {
 import { FirebaseError } from "firebase/app";
 
 import { query } from "./functions";
+import ChatPageOJ from "../../images/ChatPageOJ.png";
 
 var t = 1000;
 
@@ -309,10 +310,6 @@ function Chat({ setSearchTerm, loggedin }) {
     const handleFeedbackClose = () => {
         setFeedbackState({ ...feedbackState, dialogOpen: false });
     };
-
-    // useEffect(() => {
-    //     window.addEventListener("beforeunload", handleSave);
-    // }, []);
     return (
         <div
             style={{
@@ -322,30 +319,8 @@ function Chat({ setSearchTerm, loggedin }) {
                 justifyContent: "center",
             }}
         >
-            <div
-                style={{
-                    position: "absolute",
-                    zIndex: 10,
-                    display: "flex",
-                    flexDirection: "row",
-                }}
-            >
-                <LoadingButton
-                    onClick={handleSave}
-                    variant="contained"
-                    endIcon={<Save></Save>}
-                    style={{ marginRight: 10 }}
-                >
-                    Save Conversation
-                </LoadingButton>
-                <LoadingButton
-                    variant="contained"
-                    loading={saving}
-                    onClick={handleSave}
-                    endIcon={<Refresh></Refresh>}
-                >
-                    Start Over
-                </LoadingButton>
+            <div>
+                <img src={ChatPageOJ} style={{alignItems: 'center'}}/>
             </div>
             <div
                 style={{
@@ -528,7 +503,8 @@ function Chat({ setSearchTerm, loggedin }) {
                         /> */}
                         <div style={{ height: 20 }}></div>
                         <OutlinedInput
-                            fullWidth
+                            // fullWidth
+                            style={{width: '95%', margin: 'auto', display: 'flex'}}
                             required
                             placeholder="Prompt"
                             value={currentInput}
@@ -554,6 +530,8 @@ function Chat({ setSearchTerm, loggedin }) {
                                 fontStyle: "italic",
                                 fontSize: 14,
                                 color: "gray",
+                                marginLeft: '1.5rem'
+
                             }}
                         >
                             {num === 0
