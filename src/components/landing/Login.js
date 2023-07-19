@@ -311,13 +311,6 @@ function Login () {
                 </a>
               </div>
 
-              {/* <div style={{marginTop: '8px', marginBottom: '8px'}}>
-                Having trouble?&nbsp;
-                <a onClick={sendEmailVerification(auth.currentUser)} style={{textDecoration: 'underline', fontWeight: 'bold'}}>
-                Resend verification email.
-                </a>
-              </div> */}
-
               {/* <div style={{ margin: 'auto', width: '350px', height: '15px', borderBottom: '2px solid #11335D', textAlign: 'center', alignItems: 'center'}}>
                   <span style={{fontSize: '20px', backgroundColor: '#F3F5F6', padding: '0 10px', fontWeight: 'bold'}}>OR</span>
               </div>

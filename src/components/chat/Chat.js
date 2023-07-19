@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { Send, ThumbUp, ThumbDown, Refresh, Save } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
+import {Typography} from '@mui/material';
 
 import { auth, db } from "../../firebase";
 import {
@@ -43,6 +44,8 @@ import { FirebaseError } from "firebase/app";
 
 import { query } from "./functions";
 import ChatPageOJ from "../../images/ChatPageOJ.png";
+import Whatis from "../../images/Whatis.png";
+import Howto from "../../images/Howto.png";
 
 var t = 1000;
 
@@ -317,15 +320,38 @@ function Chat({ setSearchTerm, loggedin }) {
                 paddingInline: 60,
                 display: "flex",
                 justifyContent: "center",
+                flexDirection: 'column'
             }}
         >
-            <div>
-                <img src={ChatPageOJ} style={{alignItems: 'center'}}/>
+            <div style={{marginTop: '10rem'}}>
+                <img src={ChatPageOJ} style={{display: 'block', margin: 'auto', width: '50%'}}/>
+                <div style={{margin: 'auto', width: '70%'}}>
+                    <Typography variant="h5" sx={{fontWeight: 'bold'}}> 
+                        <img src={Whatis} style={{paddingRight: '27px'}}/> 
+                        What is AI?
+                    </Typography>
+                    <p style={{textAlign: 'justify', marginTop: '0px'}}>
+                        AI, or Artificial Intelligence, refers to the simulation of human intelligence in machines that are
+                        programmed to perform tasks that normally require human intelligence, such as speech recognition, 
+                        decision-making, and natural language processing.
+                    </p>
+
+                    <Typography variant="h5" sx={{fontWeight: 'bold'}}>
+                        <img src={Howto} style={{paddingRight: '27px'}}/>
+                        How to use OpenJustice
+                    </Typography>
+                    <p style={{textAlign: 'justify', marginTop: '0px'}}>
+                        OpenJustice can help you with a wide variety of tasks, including answering legal questions, 
+                        providing information on your case, and more. To use OpenJustice, simply type your question
+                        or prompt in the chat box and it will generate a response for you.
+                    </p>
+                </div>
             </div>
+                
             <div
                 style={{
                     maxHeight: 800,
-                    overflow: "scroll",
+                    // overflow: "scroll",
                     width: "100%",
                     paddingBlockStart: 20,
                 }}

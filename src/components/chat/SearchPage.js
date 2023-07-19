@@ -32,30 +32,30 @@ const SearchPage = ({ wasSearched, setSearchTerm }) => {
                         }}
                     />
                 }
-                sideContent={
-                    <div>
-                        <Facet
-                            field="source"
-                            label="Source"
-                            view={SingleLinksFacet}
-                        />
-                    </div>
-                }
-                bodyContent={
-                    <Results
-                        titleField="title"
-                        urlField="url"
-                        shouldTrackClickThrough={true}
-                        clickThroughTags={["user1"]}
-                    />
-                }
-                bodyHeader={
-                    <>
-                        {wasSearched && <PagingInfo />}
-                        {wasSearched && <ResultsPerPage />}
-                    </>
-                }
-                bodyFooter={<Paging />}
+                // sideContent={
+                //     <div>
+                //         <Facet
+                //             field="source"
+                //             label="Source"
+                //             view={SingleLinksFacet}
+                //         />
+                //     </div>
+                // }
+                // bodyContent={
+                //     <Results
+                //         titleField="title"
+                //         urlField="url"
+                //         shouldTrackClickThrough={true}
+                //         clickThroughTags={["user1"]}
+                //     />
+                // }
+                // bodyHeader={
+                //     <>
+                //         {wasSearched && <PagingInfo />}
+                //         {wasSearched && <ResultsPerPage />}
+                //     </>
+                // }
+                // bodyFooter={<Paging />}
             />
         </ErrorBoundary>
     );
