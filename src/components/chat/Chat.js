@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { Send, ThumbUp, ThumbDown, Refresh, Save } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
+import {Typography} from '@mui/material';
 
 import { auth, db } from "../../firebase";
 import {
@@ -42,6 +43,9 @@ import {
 import { FirebaseError } from "firebase/app";
 
 import { query } from "./functions";
+import ChatPageOJ from "../../images/ChatPageOJ.png";
+import Whatis from "../../images/Whatis.png";
+import Howto from "../../images/Howto.png";
 
 var t = 1000;
 
@@ -83,29 +87,28 @@ function Chat({ setSearchTerm, loggedin }) {
             // console.log(auth.currentUser);
             if (!auth.currentUser) {
                 console.log("User not signed in");
-                throw new FirebaseError();
-            } else if (!auth.currentUser.emailVerified) {
-                console.log("User email not verified");
-                throw new FirebaseError();
-            } else {
-                const docRef = doc(
-                    db,
-                    "users",
-                    auth.currentUser.uid
-                ).withConverter(userConverter);
+                throw new FirebaseError; 
+            }  else {
+                const docRef = doc(db, "users", auth.currentUser.uid).withConverter(userConverter);
                 const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
+            
+                if (docSnap.exists() ) {
+                    if (docSnap.data().verified) {
                     // console.debug("Document data:", docSnap.data());
 
                     // console.log(Number(docSnap.data().prompts_allowed) - Number(docSnap.data().prompts_used))
-                    return Number(docSnap.data().prompts_left);
+                        return (Number(docSnap.data().prompts_left));
+                    } else {
+                        console.log("User not verified");
+                        return 0;
+                    }
                 } else {
                     // docSnap.data() will be undefined in this case
                     console.log("No such document!");
                     return 0;
-                }
-            }
+                
+                } 
+            } 
         };
         var max = 5;
         var p = Promise.reject();
@@ -310,10 +313,6 @@ function Chat({ setSearchTerm, loggedin }) {
     const handleFeedbackClose = () => {
         setFeedbackState({ ...feedbackState, dialogOpen: false });
     };
-
-    // useEffect(() => {
-    //     window.addEventListener("beforeunload", handleSave);
-    // }, []);
     return (
         <div
             style={{
@@ -321,42 +320,42 @@ function Chat({ setSearchTerm, loggedin }) {
                 paddingInline: 60,
                 display: "flex",
                 justifyContent: "center",
+                flexDirection: 'column'
             }}
         >
-            <div
-                style={{
-                    position: "absolute",
-                    right: 50,
-                    zIndex: 10,
-                    display: "flex",
-                    flexDirection: "row",
-                }}
-            >
-                <LoadingButton
-                    onClick={handleSave}
-                    variant="contained"
-                    endIcon={<Save></Save>}
-                    style={{ marginRight: 10 }}
-                >
-                    Save Conversation
-                </LoadingButton>
-                <LoadingButton
-                    variant="contained"
-                    loading={saving}
-                    onClick={handleSave}
-                    endIcon={<Refresh></Refresh>}
-                >
-                    Start Over
-                </LoadingButton>
+            <div style={{marginTop: '10rem'}}>
+                <img src={ChatPageOJ} style={{display: 'block', margin: 'auto', width: '50%'}}/>
+                <div style={{margin: 'auto', width: '70%'}}>
+                    <Typography variant="h5" sx={{fontWeight: 'bold'}}> 
+                        <img src={Whatis} style={{paddingRight: '27px'}}/> 
+                        What is AI?
+                    </Typography>
+                    <p style={{textAlign: 'justify', marginTop: '0px'}}>
+                        AI, or Artificial Intelligence, refers to the simulation of human intelligence in machines that are
+                        programmed to perform tasks that normally require human intelligence, such as speech recognition, 
+                        decision-making, and natural language processing.
+                    </p>
+
+                    <Typography variant="h5" sx={{fontWeight: 'bold'}}>
+                        <img src={Howto} style={{paddingRight: '27px'}}/>
+                        How to use OpenJustice
+                    </Typography>
+                    <p style={{textAlign: 'justify', marginTop: '0px'}}>
+                        OpenJustice can help you with a wide variety of tasks, including answering legal questions, 
+                        providing information on your case, and more. To use OpenJustice, simply type your question
+                        or prompt in the chat box and it will generate a response for you.
+                    </p>
+                </div>
             </div>
+                
             <div
                 style={{
                     maxHeight: 800,
-                    overflow: "scroll",
+                    // overflow: "scroll",
                     width: "100%",
                     paddingBlockStart: 20,
                 }}
-            >
+            > 
                 {userInputs &&
                     userInputs.map((input, i) => (
                         <div>
@@ -530,7 +529,8 @@ function Chat({ setSearchTerm, loggedin }) {
                         /> */}
                         <div style={{ height: 20 }}></div>
                         <OutlinedInput
-                            fullWidth
+                            // fullWidth
+                            style={{width: '95%', margin: 'auto', display: 'flex'}}
                             required
                             placeholder="Prompt"
                             value={currentInput}
@@ -556,6 +556,8 @@ function Chat({ setSearchTerm, loggedin }) {
                                 fontStyle: "italic",
                                 fontSize: 14,
                                 color: "gray",
+                                marginLeft: '1.5rem'
+
                             }}
                         >
                             {num === 0
