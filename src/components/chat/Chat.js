@@ -324,8 +324,8 @@ function Chat({ setSearchTerm, loggedin }) {
             }}
         >
             <div style={{marginTop: '10rem'}}>
-                <img src={ChatPageOJ} style={{display: 'block', margin: 'auto', width: '50%'}}/>
-                <div style={{margin: 'auto', width: '70%'}}>
+                <img src={ChatPageOJ} style={{display: 'block', margin: 'auto', width: '25%', marginBottom: '2rem'}}/>
+                <div style={{margin: 'auto', width: '35%'}}>
                     <Typography variant="h5" sx={{fontWeight: 'bold'}}> 
                         <img src={Whatis} style={{paddingRight: '27px'}}/> 
                         What is AI?

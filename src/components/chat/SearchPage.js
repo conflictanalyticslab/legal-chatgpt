@@ -17,22 +17,22 @@ import {
     SingleLinksFacet,
     SingleSelectFacet,
 } from "@elastic/react-search-ui-views";
+import { Modal, Typography, Box } from "@mui/material";
 import "@elastic/react-search-ui-views/lib/styles/styles.css";
 import "../../App.css";
 
+
 const SearchPage = ({ wasSearched, setSearchTerm }) => {
+
     return (
         <ErrorBoundary>
-            <Layout
-                header={
-                    <SearchBox
-                        debounceLength={0}
-                        onSubmit={(searchTerm) => {
-                            handleSearch(searchTerm, setSearchTerm);
-                        }}
-                    />
-                }
-                // sideContent={
+            <SearchBox
+                debounceLength={0}
+                onSubmit={(searchTerm) => {
+                    handleSearch(searchTerm, setSearchTerm);
+                }}
+            />
+            {/* // sideContent={
                 //     <div>
                 //         <Facet
                 //             field="source"
@@ -55,8 +55,7 @@ const SearchPage = ({ wasSearched, setSearchTerm }) => {
                 //         {wasSearched && <ResultsPerPage />}
                 //     </>
                 // }
-                // bodyFooter={<Paging />}
-            />
+                // bodyFooter={<Paging />} */}
         </ErrorBoundary>
     );
 };
