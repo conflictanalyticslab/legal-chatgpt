@@ -6,6 +6,8 @@ import AppSearchAPIConnector from "@elastic/search-ui-app-search-connector";
 import { SearchProvider, WithSearch } from "@elastic/react-search-ui";
 import SideBar from "./chat/SideBar";
 import { Button } from "@mui/material";
+import { Modal, Box, Typography } from "@mui/material";
+import { useState } from "react";
 
 
 const connector = new AppSearchAPIConnector({
@@ -47,10 +49,26 @@ const config = {
     },
 };
 
+const style = {
+    position: 'absolute', 
+    top: '50%', 
+    left: '50%', 
+    width: '85%', 
+    height: '85%',
+    transform: 'translate(-50%, -50%)', 
+    backgroundColor: 'background.paper', 
+    border: '2px solid #000', 
+    boxShadow: 24, 
+    p: 4
+};
 
 export var loggedin = true;
 
 function ChatPage() {
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
     return (
         <SearchProvider config={config}>
             <WithSearch
@@ -68,7 +86,7 @@ function ChatPage() {
                             <SideBar />
                             <div
                                 style={{
-                                    // width: "70%",
+                                    width: "100%",
                                     height: "100%",
                                     overflow: "scroll",
                                     justifyContent: "center",
@@ -93,10 +111,21 @@ function ChatPage() {
                                         border: "1px solid rgb(218, 226, 237)",
                                         cursor: "pointer",
                                         width: '20rem',
-                                    }}>
+                                    }}
+                                        onClick={handleOpen}
+                                    >
                                         Search
                                     </Button>
+                                    <Modal
+                                        open = {open}
+                                        onClose={handleClose}
+                                    >
+                                         <Box sx = {style}>
+                                             <Typography>Text in a modal</Typography>
+                                         </Box>
+                                    </Modal>
                                 </div>
+
                                 <Chat
                                     setSearchTerm={setSearchTerm}
                                     // loggedin={loggedin}
