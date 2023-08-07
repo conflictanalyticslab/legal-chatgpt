@@ -313,27 +313,27 @@ function Chat({ setSearchTerm, loggedin }) {
     const handleFeedbackClose = () => {
         setFeedbackState({ ...feedbackState, dialogOpen: false });
     };
+
+    
     
     const [showStartupImage, setShowStartupImage] = useState(true);
 
     useEffect(() => {
         // Check if Startup image flag is already set in local Storage
-        const isStartupImageHidden = localStorage.getItem('isStartupImageHidden');
+        const isStartupImageHidden = sessionStorage.getItem('isStartupImageHidden');
         if (isStartupImageHidden === 'true') {
             setShowStartupImage(false);
         }
     }, []);
 
     const hideStartupImage = () => {
-        // Set the flag in localStorage to hide the image on subsequent text submission
-        localStorage.setItem('isStartupImageHidden', 'true');
+        // Set the flag in sessionStorage to hide the image on subsequent text submission
+        sessionStorage.setItem('isStartupImageHidden', 'true');
         setShowStartupImage(false);
     }
 
     const handleKeyDownImage = (event) => {
-        if (event.keyCode === 13 && showStartupImage) {
-            hideStartupImage();
-        }
+        hideStartupImage();
     };
 
     const handleButtonClickImage = () => {
@@ -345,8 +345,6 @@ function Chat({ setSearchTerm, loggedin }) {
         handleSubmit();
         handleButtonClickImage();
     }
-
-
     return (
         <div
             style={{
@@ -575,7 +573,7 @@ function Chat({ setSearchTerm, loggedin }) {
                             onKeyPress={(e) => {
                                 if (e.key === "Enter") {
                                     handleSubmit();
-                                    handleKeyDownImage;
+                                    handleKeyDownImage();
                                 }
                             }}
                             endAdornment={
