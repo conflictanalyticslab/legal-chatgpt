@@ -26,37 +26,73 @@ const SearchPage = ({ wasSearched, setSearchTerm }) => {
 
     return (
         <ErrorBoundary>
-            <SearchBox
-                debounceLength={0}
-                onSubmit={(searchTerm) => {
-                    handleSearch(searchTerm, setSearchTerm);
-                }}
+            <Layout
+                header={
+                    <SearchBox
+                        debounceLength={0}
+                        onSubmit={(searchTerm) => {
+                            handleSearch(searchTerm, setSearchTerm);
+                        }}
+                    />
+                }
+                sideContent={
+                    <div>
+                        <Facet
+                            field="source"
+                            label="Source"
+                            view={SingleLinksFacet}
+                        />
+                    </div>
+                }
+                bodyContent={
+                    <Results
+                        titleField="title"
+                        urlField="url"
+                        shouldTrackClickThrough={true}
+                        clickThroughTags={["user1"]}
+                    />
+                }
+                bodyHeader={
+                    <>
+                        {wasSearched && <PagingInfo />}
+                        {wasSearched && <ResultsPerPage />}
+                    </>
+                }
+                bodyFooter={<Paging />}
             />
-            {/* // sideContent={
-                //     <div>
-                //         <Facet
-                //             field="source"
-                //             label="Source"
-                //             view={SingleLinksFacet}
-                //         />
-                //     </div>
-                // }
-                // bodyContent={
-                //     <Results
-                //         titleField="title"
-                //         urlField="url"
-                //         shouldTrackClickThrough={true}
-                //         clickThroughTags={["user1"]}
-                //     />
-                // }
-                // bodyHeader={
-                //     <>
-                //         {wasSearched && <PagingInfo />}
-                //         {wasSearched && <ResultsPerPage />}
-                //     </>
-                // }
-                // bodyFooter={<Paging />} */}
         </ErrorBoundary>
+        // <ErrorBoundary>
+        //     <SearchBox
+        //         debounceLength={0}
+        //         onSubmit={(searchTerm) => {
+        //             handleSearch(searchTerm, setSearchTerm);
+        //         }}
+        //     />
+        //     {/* // sideContent={
+        //         //     <div>
+        //         //         <Facet
+        //         //             field="source"
+        //         //             label="Source"
+        //         //             view={SingleLinksFacet}
+        //         //         />
+        //         //     </div>
+        //         // }
+        //         // bodyContent={
+        //         //     <Results
+        //         //         titleField="title"
+        //         //         urlField="url"
+        //         //         shouldTrackClickThrough={true}
+        //         //         clickThroughTags={["user1"]}
+        //         //     />
+        //         // }
+        //         // bodyHeader={
+        //         //     <>
+        //         //         {wasSearched && <PagingInfo />}
+        //         //         {wasSearched && <ResultsPerPage />}
+        //         //     </>
+        //         // }
+        //         // bodyFooter={<Paging />} */}
+        // </ErrorBoundary>
     );
 };
 

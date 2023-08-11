@@ -17,9 +17,9 @@ const style = {
 };
 
 const SearchModal = ({wasSearched, setSearchTerm}) => {
-    const [open, setOpen] = React.useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const [modalOpen, setmodalOpen] = React.useState(false);
+    const handleOpen = () => setmodalOpen(true);
+    const handleClose = () => setmodalOpen(false);
 
     return (
         <div
@@ -44,7 +44,7 @@ const SearchModal = ({wasSearched, setSearchTerm}) => {
                 <Typography style= {{marginRight: 'auto'}}>Search ... </Typography>
             </Button>
             <Modal
-                open = {open}
+                open = {modalOpen}
                 onClose={handleClose}
             >
                     <Box sx = {style}>
