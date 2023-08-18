@@ -45,7 +45,7 @@ const styles = (theme) => {
     },
     formHeading: {
       textAlign: 'center',
-      margin: '90px ',
+      margin: '30px ',
       
     },
     heroBox: {

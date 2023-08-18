@@ -386,7 +386,8 @@ function Chat({ setSearchTerm, loggedin }) {
             <div
                 style={{
                     maxHeight: 800,
-                    overflow: "scroll",
+                    // overflow: "scroll",
+                    overflowY: 'auto',
                     width: "100%",
                     paddingBlockStart: 20,
                 }}

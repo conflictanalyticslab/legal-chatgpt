@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Typography, Modal, Box } from '@mui/material';
 import SearchPage from './SearchPage';
 import SearchIcon from "../../images/search-icon.png"
+import { boolean } from 'joi';
 
 const style = {
     position: 'absolute', 
@@ -18,8 +19,8 @@ const style = {
 
 const SearchModal = ({wasSearched, setSearchTerm}) => {
     const [modalOpen, setmodalOpen] = React.useState(false);
-    const handleOpen = () => setmodalOpen(true);
-    const handleClose = () => setmodalOpen(false);
+    const handleOpen = () => {setmodalOpen(true)};
+    const handleClose = () => {setmodalOpen(false)};
 
     return (
         <div
