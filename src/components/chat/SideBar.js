@@ -18,10 +18,14 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { auth } from "../../firebase";
 import { useNavigate } from 'react-router-dom';
 
-const handleLogout = () => {
-    console.log('handle logout');
+const handleLogout = async () => {
+    try {
+        auth.signOut();
+        console.log('handle logout');
+    }catch (error) {
+        console.log(error)
+    }
 };
-const navigate = useNavigate();
 
 const navDataLink = [
     {
@@ -50,7 +54,6 @@ const navDataConvo = [
         id: 4,
         icon: <RefreshIcon/>,
         text: "Refresh Conversation",
-        onClick: navigate('/chat'),
     },
     {
         id: 5,
@@ -76,6 +79,7 @@ const navDataConvo = [
         id: 9,
         icon: <LogoutIcon/>,
         text: "Logout",
+        onClick: {handleLogout}
     }
 ]
 

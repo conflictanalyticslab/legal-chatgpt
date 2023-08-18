@@ -13,8 +13,8 @@ const Hero = () => {
   const navigate = useNavigate();
   
   const handleClick = () => {
-    
-    navigate("/chat");
+    // if user -> chat else log in
+    navigate("/login");
 }
 
   return (

@@ -76,6 +76,7 @@ function App() {
           } else {
             // User is signed out
             // ...
+            console.log('signed out')
           }
       });
     return (
