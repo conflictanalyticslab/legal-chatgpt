@@ -82,7 +82,7 @@ function App() {
     return (
         <Routes> {/* The Switch decides which component to show based on the current URL.*/}
             <Route path='/' element={<LandingPage />} />
-            <Route path='/chat' loader={() => console.log("User: " +  auth.currentUser.email)} element={auth.currentUser ? <ChatPage /> : <Navigate to="/login" replace />} />
+            <Route path='/chat' loader={() => console.log("User: " +  auth.currentUser.email)} element={<ChatPage />} />
             
             <Route path="/login" loader={() => console.log("Email verified: " +  auth.currentUser.emailVerified)} element={<LoginPage />} />
             
