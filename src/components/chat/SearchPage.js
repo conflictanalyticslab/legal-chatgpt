@@ -17,10 +17,13 @@ import {
     SingleLinksFacet,
     SingleSelectFacet,
 } from "@elastic/react-search-ui-views";
+import { Modal, Typography, Box } from "@mui/material";
 import "@elastic/react-search-ui-views/lib/styles/styles.css";
 import "../../App.css";
 
+
 const SearchPage = ({ wasSearched, setSearchTerm }) => {
+
     return (
         <ErrorBoundary>
             <Layout
@@ -32,32 +35,64 @@ const SearchPage = ({ wasSearched, setSearchTerm }) => {
                         }}
                     />
                 }
-                // sideContent={
-                //     <div>
-                //         <Facet
-                //             field="source"
-                //             label="Source"
-                //             view={SingleLinksFacet}
-                //         />
-                //     </div>
-                // }
-                // bodyContent={
-                //     <Results
-                //         titleField="title"
-                //         urlField="url"
-                //         shouldTrackClickThrough={true}
-                //         clickThroughTags={["user1"]}
-                //     />
-                // }
-                // bodyHeader={
-                //     <>
-                //         {wasSearched && <PagingInfo />}
-                //         {wasSearched && <ResultsPerPage />}
-                //     </>
-                // }
-                // bodyFooter={<Paging />}
+                sideContent={
+                    <div>
+                        <Facet
+                            field="source"
+                            label="Source"
+                            view={SingleLinksFacet}
+                        />
+                    </div>
+                }
+                bodyContent={
+                    <Results
+                        titleField="title"
+                        urlField="url"
+                        shouldTrackClickThrough={true}
+                        clickThroughTags={["user1"]}
+                    />
+                }
+                bodyHeader={
+                    <>
+                        {wasSearched && <PagingInfo />}
+                        {wasSearched && <ResultsPerPage />}
+                    </>
+                }
+                bodyFooter={<Paging />}
             />
         </ErrorBoundary>
+        // <ErrorBoundary>
+        //     <SearchBox
+        //         debounceLength={0}
+        //         onSubmit={(searchTerm) => {
+        //             handleSearch(searchTerm, setSearchTerm);
+        //         }}
+        //     />
+        //     {/* // sideContent={
+        //         //     <div>
+        //         //         <Facet
+        //         //             field="source"
+        //         //             label="Source"
+        //         //             view={SingleLinksFacet}
+        //         //         />
+        //         //     </div>
+        //         // }
+        //         // bodyContent={
+        //         //     <Results
+        //         //         titleField="title"
+        //         //         urlField="url"
+        //         //         shouldTrackClickThrough={true}
+        //         //         clickThroughTags={["user1"]}
+        //         //     />
+        //         // }
+        //         // bodyHeader={
+        //         //     <>
+        //         //         {wasSearched && <PagingInfo />}
+        //         //         {wasSearched && <ResultsPerPage />}
+        //         //     </>
+        //         // }
+        //         // bodyFooter={<Paging />} */}
+        // </ErrorBoundary>
     );
 };
 

@@ -50,9 +50,9 @@ function Login () {
   const emailSchema = Joi.object({
     email: Joi.string()
       .email({tlds: false})
-      .pattern(/^[a-zA-Z0-9._%+-]+@queensu\.ca$/)
+      .pattern(/^[a-zA-Z0-9._%+-]+@(queensu\.ca|uiowa\.edu|port\.ac\.uk|law\.ucla\.edu|law\.upenn\.edu|lakeheadu\.ca)$/)
       .messages({
-        'string.pattern.base': 'Email must be a valid queensu.ca email address.',
+        'string.pattern.base': 'Email must be from an approved domain.',
       }),
 
     password: Joi.string()
@@ -74,7 +74,7 @@ function Login () {
 
   const [email, setEmail] = useState("")
   
-  const [emailHelper, setEmailHelper] = useState("Please use a queensu email")
+  const [emailHelper, setEmailHelper] = useState("Please use an approved email. For access, please contact us for assistance.")
   
   const [passHelper, setPassHelper] = useState("")
   const [password, setPassword] = useState("")
@@ -103,7 +103,7 @@ function Login () {
 
   const validateUser = async() => {
     setEmailError(false);
-    setEmailHelper("Please use a queensu email");
+    setEmailHelper("Please use an institutional email. For access, please contact us for assistance.");
     setPasswordError(false);
     setPassHelper("");
 

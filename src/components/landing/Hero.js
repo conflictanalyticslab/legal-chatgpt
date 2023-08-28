@@ -13,8 +13,8 @@ const Hero = () => {
   const navigate = useNavigate();
   
   const handleClick = () => {
-    
-    navigate("/chat");
+    // if user -> chat else log in
+    navigate("/login");
 }
 
   return (
@@ -51,7 +51,7 @@ OpenJustice is continuously learning and evolving. Please let us know if the ans
             onClick={handleClick}
             variant="contained"
             className={classes.formHeading}
-            sx={{ width: '200px', height: '50px', fontSize: '16px', marginTop: '30px', backgroundColor: '#11335D', color: 'white',  textTransform: 'none', mr: '2px'}}
+            sx={{ width: '200px', height: '50px', fontSize: '16px', backgroundColor: '#11335D', color: 'white',  textTransform: 'none', mr: '2px', margin: '60px'}}
           > Get Started
           </Button>
           

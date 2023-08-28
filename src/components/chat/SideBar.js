@@ -15,6 +15,18 @@ import SaveIcon from '@mui/icons-material/Save';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import LogoutIcon from '@mui/icons-material/Logout';
 
+import { auth } from "../../firebase";
+import { useNavigate } from 'react-router-dom';
+
+const handleLogout = async () => {
+    try {
+        auth.signOut();
+        console.log('handle logout');
+    }catch (error) {
+        console.log(error)
+    }
+};
+
 const navDataLink = [
     {
         id: 0,
@@ -42,37 +54,32 @@ const navDataConvo = [
         id: 4,
         icon: <RefreshIcon/>,
         text: "Refresh Conversation",
-        link: "/"
     },
     {
         id: 5,
         icon: <AddIcon/>,
         text: "New Conversation",
-        link: "/"
     },
     {
         id: 6,
         icon: <CloseIcon/>,
         text: "Clear Conversation",
-        link: "/"
     },
     {
         id: 7,
         icon: <SaveIcon/>,
         text: "Save Conversation",
-        link: "/"
     },
     {
         id: 8,
         icon: <FeedbackIcon/>,
         text: "Feedback",
-        link: "/"
     },
     {
         id: 9,
         icon: <LogoutIcon/>,
         text: "Logout",
-        link: "/"
+        onClick: {handleLogout}
     }
 ]
 
@@ -100,10 +107,10 @@ export default function SideBar() {
 
             <div className={styles.convoBar}>
                 {navDataConvo.map(item =>{
-                    return <NavLink key={item.id} className={styles.sideitemConvo} to={item.link}>
+                    return <NavLink key={item.id} className={styles.sideitemConvo} onClick={item.onClick}>
                     {item.icon}
                     <span className={styles.linkText}>{item.text}</span>
-                </NavLink>
+                        </NavLink>
                 })}
             </div>
             
