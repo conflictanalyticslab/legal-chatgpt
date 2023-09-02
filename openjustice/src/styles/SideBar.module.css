@@ -1,0 +1,79 @@
+.sidenav {
+  width: 300px;
+  transition: width 0.2s ease-in-out;
+  height: 100vh;
+  background-color: rgb(10, 25, 41);
+  padding-top: 28px;
+  display: flex;
+  flex-direction: column;
+}
+.sidenavClosed {
+  composes: sidenav;
+  transition: width 0.2s ease-in-out;
+  width: 60px;
+  display: flex;
+  flex-direction: column;
+}
+.aboutBar {
+  margin-top: 8rem;
+  margin-bottom: 5rem;
+}
+.convoBar {
+  margin-top: auto;
+  margin-bottom: 2rem;
+}
+.sideitemConvo {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  cursor: pointer;
+  color: #b2bac2;
+  text-decoration: none;
+  overflow: hidden;
+  background-color: transparent;
+  border: none;
+}
+.sideitemLink {
+  display: flex;
+  align-items: center;
+  /* padding-bottom: 20px;
+    padding-left: 25px; */
+  padding: 10px 20px;
+  cursor: pointer;
+  color: #b2bac2;
+  text-decoration: none;
+  overflow: hidden;
+  text-wrap: nowrap;
+}
+.sideitemLink:hover {
+  background-color: #244f7d1c;
+}
+.linkText {
+  padding-left: 15px;
+  text-wrap: nowrap;
+}
+.linkTextAbout {
+  padding-left: 15px;
+  font-weight: bold;
+}
+.sideitemConvo:hover {
+  background-color: #244f7d1c;
+}
+.menuOpen {
+  margin-left: auto;
+  color: #b2bac2;
+  background-color: transparent;
+  cursor: pointer;
+  border: none;
+  margin-right: 20px;
+}
+.menuBtn {
+  align-self: center;
+  align-self: flex-start;
+  justify-self: flex-end;
+  color: #b2bac2;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding-left: 20px;
+}

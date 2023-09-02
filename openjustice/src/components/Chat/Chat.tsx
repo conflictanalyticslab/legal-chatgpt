@@ -1,0 +1,678 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import {
+  Button,
+  ButtonGroup,
+  Dialog,
+  DialogContent,
+  DialogContentText,
+  Divider,
+  IconButton,
+  TextField,
+  InputAdornment,
+  OutlinedInput,
+  FormGroup,
+  FormControlLabel,
+  FormControl,
+  Checkbox,
+  CircularProgress,
+  Paper,
+} from "@mui/material";
+import { Send, ThumbUp, ThumbDown } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
+import { Typography } from "@mui/material";
+
+import { auth, db } from "@/firebase";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import { dummyData } from "@/util/dummyData";
+import { queryOpenAi } from "@/util/requests/queryOpenAi";
+import { handleSearch } from "@/util/requests/handleSearch";
+
+import ChatPageOJ from "@/images/ChatPageOJ.png";
+import Whatis from "@/images/Whatis.png";
+import Howto from "@/images/Howto.png";
+import { userConverter } from "@/util/User";
+import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
+
+type FeedbackReasonsI = {
+  "Superficial Response": boolean;
+  "Lacks Reasoning": boolean;
+  "Lacks Relevant Facts": boolean;
+  "Lacks Citation": boolean;
+};
+
+export function Chat({
+  setSearchTerm,
+}: {
+  setSearchTerm: (searchTerm: string) => void;
+}) {
+  const router = useRouter();
+  const [userInputs, setUserInputs] = useState<string[]>([]);
+  const [conversation, setConversation] = useState<
+    {
+      role: string;
+      content: string;
+    }[]
+  >([]);
+  const [responses, setResponses] = useState<
+    {
+      response: string;
+      is_satisfactory: boolean | "N/A";
+      feedback: {
+        message: string;
+        reasons: FeedbackReasonsI;
+      };
+    }[]
+  >([]);
+  const [currentInput, setCurrentInput] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [kwRefs, setKwRefs] = useState<{
+    keyword: String;
+    refs: { name: String; kwLen: number; excerpts: string[] }[];
+  } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [endSession, setEndSession] = useState(false);
+  const [num, setNum] = useState(-1);
+  const [totalQuota, setTotalQuota] = useState(0);
+
+  useEffect(() => {
+    setAlert("Authenticating user...");
+    getAuthenticatedUser()
+      .then((user) => {
+        if (user) {
+          setNum(user.prompts_left);
+          handleAlertClose();
+        }
+      })
+      .catch((e) => {
+        router.push("/login");
+      });
+  }, []);
+
+  const [alert, setAlert] = useState("");
+
+  const [feedbackState, setFeedbackState] = useState<{
+    index: number | null;
+    dialogOpen: boolean;
+    isSatisfactory: boolean | null;
+    message: string | null;
+  }>({
+    index: null,
+    dialogOpen: false,
+    isSatisfactory: null,
+    message: null,
+  });
+  const [feedbackSelect, setFeedbackSelect] = useState<FeedbackReasonsI>({
+    "Superficial Response": false,
+    "Lacks Reasoning": false,
+    "Lacks Relevant Facts": false,
+    "Lacks Citation": false,
+  });
+
+  const findRefs = (
+    texts: { name: string; text: string }[],
+    keyword: string
+  ) => {
+    var allRefs = [];
+    for (const text of texts) {
+      var indexes = [];
+      var excerpts = [];
+      const textLower = text.text.toLowerCase();
+      var pos = textLower.indexOf(keyword);
+      const kwLen = keyword.length;
+      const prev = 300;
+      const after = 500;
+      while (pos !== -1) {
+        indexes.push(pos);
+        const start = pos - prev > -1 ? pos - prev : 0;
+        const end =
+          pos + after < text.text.length ? pos + after : text.text.length;
+        excerpts.push(text.text.substring(start, end));
+        pos = text.text.indexOf(keyword, pos + 1);
+      }
+      indexes.length > 0 &&
+        allRefs.push({
+          name: text.name,
+          kwLen: kwLen,
+          excerpts: excerpts,
+        });
+    }
+    return allRefs;
+  };
+
+  const handleSubmit = async () => {
+    if (!auth.currentUser) {
+      throw Error("auth.currentUser was null");
+    }
+
+    const docRef = doc(db, "users", auth.currentUser.uid).withConverter(
+      userConverter
+    );
+    setLoading(true);
+    setKwRefs(null);
+    //console.log(findRefs(dummyData, keyword.toLowerCase()));
+
+    keyword &&
+      setKwRefs({
+        keyword: keyword,
+        refs: findRefs(dummyData, keyword.toLowerCase()),
+      });
+
+    setUserInputs([...userInputs, currentInput]);
+    const newConversation = [
+      ...conversation,
+      {
+        role: "user",
+        content:
+          currentInput + " You answer should be no longer than 500 words.",
+      },
+    ];
+    setConversation(newConversation);
+    setCurrentInput("");
+    setKeyword("");
+    setNum(num - 1);
+    await updateDoc(docRef, { prompts_left: num - 1 });
+    //console.log(newConversation);
+    if (num > 0) {
+      await queryOpenAi({
+        model: "gpt-3.5-turbo",
+        messages: newConversation,
+      }).then(async (res) => {
+        const resContent = res.choices[0].message.content;
+        if (num === 10) {
+          await queryOpenAi({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "user",
+                content:
+                  resContent +
+                  "Summarize the given text in 2 words. Output these words in lower case, no punctuation.",
+              },
+            ],
+          }).then(async (res) => {
+            await handleSearch(res.choices[0].message.content, setSearchTerm);
+          });
+        }
+        setResponses([
+          ...responses,
+          {
+            response: resContent,
+            is_satisfactory: "N/A",
+            feedback: {
+              message: "",
+              reasons: {
+                "Superficial Response": false,
+                "Lacks Citation": false,
+                "Lacks Reasoning": false,
+                "Lacks Relevant Facts": false,
+              },
+            },
+          },
+        ]);
+        setConversation([...newConversation, res.choices[0].message]);
+      });
+    }
+    // const url = new URL(window.location);
+    // //url.searchParams.set("q", "law");
+    // //window.history.pushState(null, "", url.toString());
+    // var searchInput = document.getElementById("downshift-1-input");
+
+    // searchInput.focus();
+
+    // setTimeout(console.log(""), 1000);
+    // // searchInput = document.getElementsByClassName(
+    // //     "sui-search-box__text-input focus"
+    // // );
+    // searchInput = document.getElementById("downshift-1-input");
+    // document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
+    // searchInput.value = "law";
+    // searchInput.setAttribute("value", "law");
+    // console.log(searchInput);
+    // searchInput.dispatchEvent(new Event("change"));
+    // const searchBtn = document.getElementsByClassName(
+    //     "sui-search-box__submit"
+    // )[0];
+    // //searchBtn.click();
+
+    setLoading(false);
+  };
+
+  const submitFeedback = () => {
+    setResponses(
+      responses.map((res, idx) =>
+        idx !== feedbackState.index
+          ? res
+          : {
+              ...res,
+              feedback: {
+                message: feedbackState.message ? feedbackState.message : "",
+                reasons: feedbackSelect,
+              },
+            }
+      )
+    );
+    setFeedbackState({
+      index: null,
+      dialogOpen: false,
+      isSatisfactory: true,
+      message: null,
+    });
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      //console.log(userInputs, responses);
+      const docRef = await addDoc(collection(db, "conversations"), {
+        userInputs: userInputs,
+        responses: responses,
+      });
+      // const userDocRef = await updateDoc(
+      //   doc(db, "users", auth.currentUser.uid),
+      //   { conversations: arrayUnion(docRef.id) }
+      // );
+      // setAlert(
+      //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
+      // );
+      window.location.reload();
+    } catch (e) {
+      setAlert(`Error saving conversation: ${e}`);
+    }
+    setSaving(false);
+  };
+
+  const handleAlertClose = () => {
+    setAlert("");
+  };
+  const handleFeedbackClose = () => {
+    setFeedbackState({ ...feedbackState, dialogOpen: false });
+  };
+
+  const [showStartupImage, setShowStartupImage] = useState(true);
+
+  useEffect(() => {
+    // Check if Startup image flag is already set in local Storage
+    const isStartupImageHidden = sessionStorage.getItem("isStartupImageHidden");
+    if (isStartupImageHidden === "true") {
+      setShowStartupImage(false);
+    }
+  }, []);
+
+  const hideStartupImage = () => {
+    // Set the flag in sessionStorage to hide the image on subsequent text submission
+    sessionStorage.setItem("isStartupImageHidden", "true");
+    setShowStartupImage(false);
+  };
+
+  const handleKeyDownImage = () => {
+    hideStartupImage();
+  };
+
+  const handleButtonClickImage = () => {
+    if (showStartupImage) {
+      hideStartupImage();
+    }
+  };
+
+  const textBoxSubmission = () => {
+    handleSubmit();
+    handleButtonClickImage();
+  };
+
+  return (
+    <div
+      style={{
+        paddingBlock: 32,
+        paddingInline: 60,
+        display: "flex",
+        justifyContent: "center",
+        flexDirection: "column",
+      }}
+    >
+      {showStartupImage && (
+        <div style={{ marginTop: "10rem" }}>
+          <Image
+            src={ChatPageOJ}
+            style={{
+              display: "block",
+              margin: "auto",
+              maxWidth: "25%",
+              maxHeight: "auto",
+              objectFit: "contain",
+              marginBottom: "2rem",
+            }}
+            alt="Open Justice Powered by the Conflict Analytics Lab"
+          />
+          <div style={{ margin: "auto", width: "35%" }}>
+            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+              <Image
+                src={Whatis}
+                style={{ marginRight: "27px" }}
+                alt="Question marks"
+                height={30}
+                width={30}
+              />
+              What is AI?
+            </Typography>
+            <p style={{ textAlign: "justify", marginTop: "0px" }}>
+              AI, or Artificial Intelligence, refers to the simulation of human
+              intelligence in machines that are programmed to perform tasks that
+              normally require human intelligence, such as speech recognition,
+              decision-making, and natural language processing.
+            </p>
+
+            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+              <Image
+                src={Howto}
+                style={{ marginRight: "27px" }}
+                alt="Text bubbles"
+                height={30}
+                width={30}
+              />
+              How to use OpenJustice
+            </Typography>
+            <p style={{ textAlign: "justify", marginTop: "0px" }}>
+              OpenJustice can help you with a wide variety of tasks, including
+              answering legal questions, providing information on your case, and
+              more. To use OpenJustice, simply type your question or prompt in
+              the chat box and it will generate a response for you.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div
+        style={{
+          maxHeight: 800,
+          // overflow: "scroll",
+          overflowY: "auto",
+          width: "100%",
+          paddingBlockStart: 20,
+          scrollbarGutter: "stable",
+        }}
+      >
+        {userInputs &&
+          userInputs.map((input, i) => (
+            <div key={input}>
+              {i !== 0 && <Divider></Divider>}
+              <div
+                style={{
+                  marginBlock: 40,
+                  overflowWrap: "break-word",
+                }}
+              >
+                <strong
+                  style={{
+                    marginRight: 10,
+                  }}
+                >
+                  You:
+                </strong>
+                {input}
+              </div>
+
+              {i < responses.length && (
+                <>
+                  <Divider></Divider>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBlock: 32,
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    <div>
+                      <strong
+                        style={{
+                          marginRight: 10,
+                        }}
+                      >
+                        Bot:
+                      </strong>
+                      {responses[i].response}
+                    </div>
+
+                    {responses[i].is_satisfactory === "N/A" ? (
+                      <ButtonGroup>
+                        <IconButton
+                          onClick={() => {
+                            setResponses(
+                              responses.map((res, idx) =>
+                                idx !== i
+                                  ? res
+                                  : {
+                                      ...res,
+                                      is_satisfactory: true,
+                                    }
+                              )
+                            );
+                            setFeedbackState({
+                              index: i,
+                              dialogOpen: true,
+                              isSatisfactory: true,
+                              message: null,
+                            });
+                            setKwRefs(null);
+                          }}
+                        >
+                          <ThumbUp></ThumbUp>
+                        </IconButton>
+                        <IconButton
+                          onClick={() => {
+                            setResponses(
+                              responses.map((res, idx) =>
+                                idx !== i
+                                  ? res
+                                  : {
+                                      ...res,
+                                      is_satisfactory: false,
+                                    }
+                              )
+                            );
+                            setFeedbackState({
+                              index: i,
+                              dialogOpen: true,
+                              isSatisfactory: false,
+                              message: null,
+                            });
+                          }}
+                        >
+                          <ThumbDown></ThumbDown>
+                        </IconButton>
+                      </ButtonGroup>
+                    ) : (
+                      <IconButton disabled>
+                        {responses[i].is_satisfactory ? (
+                          <ThumbUp></ThumbUp>
+                        ) : (
+                          <ThumbDown></ThumbDown>
+                        )}
+                      </IconButton>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        {/* <div
+                    style={{
+                        maxHeight: 400,
+                        overflow: "scroll",
+                        color: "gray",
+                    }}
+                >
+                    {kwRefs &&
+                        (kwRefs.refs.length !== 0 ? (
+                            <div>
+                                <p>{`Found ${kwRefs.refs
+                                    .map((ref) => ref.excerpts.length)
+                                    .reduce((a, b) => a + b)} matches`}</p>
+                                {kwRefs.refs.map((ref) =>
+                                    ref.excerpts.map((excerpt) => (
+                                        <div style={{}}>
+                                            <i>{ref.name}</i>
+                                            <p>
+                                                {'"...' +
+                                                    excerpt.substring(0, 300)}
+                                                <strong
+                                                    style={{ color: "black" }}
+                                                >
+                                                    {excerpt.substring(
+                                                        300,
+                                                        300 + ref.kwLen
+                                                    )}
+                                                </strong>
+                                                {excerpt.substring(
+                                                    300 + ref.kwLen
+                                                ) + '..."'}
+                                            </p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        ) : (
+                            <i>No references found</i>
+                        ))}
+                </div> */}
+        {loading && <CircularProgress></CircularProgress>}
+      </div>
+
+      <Paper
+        elevation={1}
+        style={{
+          position: "fixed",
+          bottom: "50px",
+          width: "60%",
+          alignSelf: "center",
+        }}
+      >
+        {!endSession && num >= 0 ? (
+          <>
+            {/* <TextField
+                            label="Keyword"
+                            variant="standard"
+                            value={keyword}
+                            onChange={(e) => setKeyword(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === "Enter") {
+                                    handleSubmit();
+                                }
+                            }}
+                        /> */}
+            <div style={{ height: 20 }}></div>
+            <OutlinedInput
+              // fullWidth
+              style={{ width: "95%", margin: "auto", display: "flex" }}
+              required
+              placeholder="Prompt"
+              value={currentInput}
+              onChange={(e) => setCurrentInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  handleSubmit();
+                  handleKeyDownImage();
+                }
+              }}
+              endAdornment={
+                <InputAdornment position="end">
+                  <LoadingButton onClick={textBoxSubmission} loading={loading}>
+                    <Send></Send>
+                  </LoadingButton>
+                </InputAdornment>
+              }
+            ></OutlinedInput>{" "}
+            <p
+              style={{
+                fontStyle: "italic",
+                fontSize: 14,
+                color: "gray",
+                marginLeft: "1.5rem",
+              }}
+            >
+              {num === 0
+                ? "No more prompts allowed. Please enter your final feedback."
+                : `Prompts left: ${num}`}
+            </p>
+          </>
+        ) : (
+          <></>
+        )}
+      </Paper>
+
+      <Dialog open={!!alert} onClose={handleAlertClose}>
+        <DialogContent>
+          <DialogContentText>{alert}</DialogContentText>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={feedbackState.dialogOpen}
+        onClose={handleFeedbackClose}
+        fullWidth
+      >
+        <DialogContent
+          style={{
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "column",
+          }}
+        >
+          <h3>Provide additional feedback</h3>
+          <TextField
+            fullWidth
+            label={
+              feedbackState.isSatisfactory
+                ? "What do you like about the response?"
+                : "What was the issue with the response? How could it be improved?"
+            }
+            variant="outlined"
+            multiline
+            value={feedbackState.message}
+            onChange={(e) =>
+              setFeedbackState({
+                ...feedbackState,
+                message: e.target.value,
+              })
+            }
+          />
+          {!feedbackState.isSatisfactory && (
+            <FormControl component="fieldset" variant="standard">
+              <FormGroup>
+                {Object.keys(feedbackSelect).map((key) => (
+                  <FormControlLabel
+                    key={key}
+                    control={
+                      <Checkbox
+                        checked={feedbackSelect[key as keyof FeedbackReasonsI]}
+                        onChange={(e) =>
+                          setFeedbackSelect({
+                            ...feedbackSelect,
+                            [e.target.name]: e.target.checked,
+                          })
+                        }
+                        name={key}
+                      ></Checkbox>
+                    }
+                    label={key}
+                  ></FormControlLabel>
+                ))}
+              </FormGroup>
+            </FormControl>
+          )}
+          <br></br>
+          <Button variant="contained" onClick={submitFeedback}>
+            Submit feedback
+          </Button>
+          <br></br>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

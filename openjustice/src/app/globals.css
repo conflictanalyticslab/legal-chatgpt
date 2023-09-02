@@ -1,0 +1,23 @@
+body {
+  margin: 0px;
+}
+
+.sui-layout-sidebar {
+  align-self: flex-start;
+  width: 100% !important;
+}
+
+.sui-result__details {
+  width: 100% !important;
+}
+.sui-result__title {
+  font-size: 1.2em !important;
+}
+.sui-layout-body__inner {
+  align-items: center !important;
+  flex-direction: column !important;
+}
+.sui-layout-main {
+  width: 90% !important;
+  padding: 32px 0 0 0 !important;
+}
