@@ -64,7 +64,7 @@ export default function SideBar({ onLogout }: { onLogout: () => void }) {
       id: 9,
       icon: <LogoutIcon />,
       text: "Logout",
-      onClick: { onLogout },
+      onClick: onLogout,
     },
   ] as {
     id: number;

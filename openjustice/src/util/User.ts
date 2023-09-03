@@ -1,5 +1,4 @@
 export type UserI = {
-  uid: string;
   email: string;
   conversations: any[];
   role: string;

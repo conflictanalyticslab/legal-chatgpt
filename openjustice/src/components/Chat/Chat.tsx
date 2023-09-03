@@ -25,17 +25,13 @@ import { Send, ThumbUp, ThumbDown } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import { Typography } from "@mui/material";
 
-import { auth, db } from "@/firebase";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
-import { dummyData } from "@/util/dummyData";
-import { queryOpenAi } from "@/util/requests/queryOpenAi";
-import { handleSearch } from "@/util/requests/handleSearch";
+import { auth } from "@/firebase";
 
 import ChatPageOJ from "@/images/ChatPageOJ.png";
 import Whatis from "@/images/Whatis.png";
 import Howto from "@/images/Howto.png";
-import { userConverter } from "@/util/User";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
+import { postConversation } from "@/util/requests/postConversation";
 
 type FeedbackReasonsI = {
   "Superficial Response": boolean;
@@ -146,100 +142,60 @@ export function Chat({
 
   const handleSubmit = async () => {
     if (!auth.currentUser) {
-      throw Error("auth.currentUser was null");
+      setAlert("Missing auth.currentUser");
+      return;
     }
 
-    const docRef = doc(db, "users", auth.currentUser.uid).withConverter(
-      userConverter
-    );
     setLoading(true);
-    setKwRefs(null);
-    //console.log(findRefs(dummyData, keyword.toLowerCase()));
 
-    keyword &&
-      setKwRefs({
-        keyword: keyword,
-        refs: findRefs(dummyData, keyword.toLowerCase()),
-      });
+    try {
+      const fullConversation = conversation.concat([
+        {
+          role: "user",
+          content: currentInput,
+        },
+      ]);
+      setConversation(fullConversation);
+      setUserInputs(userInputs.concat([currentInput]));
+      setCurrentInput("");
+      setNum(num - 1);
 
-    setUserInputs([...userInputs, currentInput]);
-    const newConversation = [
-      ...conversation,
-      {
-        role: "user",
-        content:
-          currentInput + " You answer should be no longer than 500 words.",
-      },
-    ];
-    setConversation(newConversation);
-    setCurrentInput("");
-    setKeyword("");
-    setNum(num - 1);
-    await updateDoc(docRef, { prompts_left: num - 1 });
-    //console.log(newConversation);
-    if (num > 0) {
-      await queryOpenAi({
-        model: "gpt-3.5-turbo",
-        messages: newConversation,
-      }).then(async (res) => {
-        const resContent = res.choices[0].message.content;
-        if (num === 10) {
-          await queryOpenAi({
-            model: "gpt-3.5-turbo",
-            messages: [
-              {
-                role: "user",
-                content:
-                  resContent +
-                  "Summarize the given text in 2 words. Output these words in lower case, no punctuation.",
-              },
-            ],
-          }).then(async (res) => {
-            await handleSearch(res.choices[0].message.content, setSearchTerm);
-          });
-        }
-        setResponses([
-          ...responses,
-          {
-            response: resContent,
-            is_satisfactory: "N/A",
-            feedback: {
-              message: "",
-              reasons: {
-                "Superficial Response": false,
-                "Lacks Citation": false,
-                "Lacks Reasoning": false,
-                "Lacks Relevant Facts": false,
-              },
+      const response = await postConversation(fullConversation);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setAlert(errorData.error);
+        setLoading(false);
+        return;
+      }
+
+      const { latestBotResponse } = await response.json();
+
+      setResponses([
+        ...responses,
+        {
+          response: latestBotResponse,
+          is_satisfactory: "N/A",
+          feedback: {
+            message: "",
+            reasons: {
+              "Superficial Response": false,
+              "Lacks Citation": false,
+              "Lacks Reasoning": false,
+              "Lacks Relevant Facts": false,
             },
           },
-        ]);
-        setConversation([...newConversation, res.choices[0].message]);
-      });
+        },
+      ]);
+      setConversation(
+        conversation.concat([{ role: "assistant", content: latestBotResponse }])
+      );
+    } catch (error) {
+      console.error(error);
+      setAlert("An unexpected error occured");
+    } finally {
+      setLoading(false);
     }
-    // const url = new URL(window.location);
-    // //url.searchParams.set("q", "law");
-    // //window.history.pushState(null, "", url.toString());
-    // var searchInput = document.getElementById("downshift-1-input");
-
-    // searchInput.focus();
-
-    // setTimeout(console.log(""), 1000);
-    // // searchInput = document.getElementsByClassName(
-    // //     "sui-search-box__text-input focus"
-    // // );
-    // searchInput = document.getElementById("downshift-1-input");
-    // document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
-    // searchInput.value = "law";
-    // searchInput.setAttribute("value", "law");
-    // console.log(searchInput);
-    // searchInput.dispatchEvent(new Event("change"));
-    // const searchBtn = document.getElementsByClassName(
-    //     "sui-search-box__submit"
-    // )[0];
-    // //searchBtn.click();
-
-    setLoading(false);
   };
 
   const submitFeedback = () => {
@@ -267,11 +223,12 @@ export function Chat({
   const handleSave = async () => {
     setSaving(true);
     try {
+      // TO DO: Move saving logic to an API route
       //console.log(userInputs, responses);
-      const docRef = await addDoc(collection(db, "conversations"), {
-        userInputs: userInputs,
-        responses: responses,
-      });
+      // const docRef = await addDoc(collection(db, "conversations"), {
+      //   userInputs: userInputs,
+      //   responses: responses,
+      // });
       // const userDocRef = await updateDoc(
       //   doc(db, "users", auth.currentUser.uid),
       //   { conversations: arrayUnion(docRef.id) }
@@ -389,10 +346,10 @@ export function Chat({
       <div
         style={{
           maxHeight: 800,
-          // overflow: "scroll",
           overflowY: "auto",
           width: "100%",
           paddingBlockStart: 20,
+          paddingBottom: 200,
           scrollbarGutter: "stable",
         }}
       >
@@ -462,7 +419,7 @@ export function Chat({
                             setKwRefs(null);
                           }}
                         >
-                          <ThumbUp></ThumbUp>
+                          <ThumbUp />
                         </IconButton>
                         <IconButton
                           onClick={() => {
@@ -484,15 +441,15 @@ export function Chat({
                             });
                           }}
                         >
-                          <ThumbDown></ThumbDown>
+                          <ThumbDown />
                         </IconButton>
                       </ButtonGroup>
                     ) : (
                       <IconButton disabled>
                         {responses[i].is_satisfactory ? (
-                          <ThumbUp></ThumbUp>
+                          <ThumbUp />
                         ) : (
-                          <ThumbDown></ThumbDown>
+                          <ThumbDown />
                         )}
                       </IconButton>
                     )}

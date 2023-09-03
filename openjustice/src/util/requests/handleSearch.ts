@@ -1,4 +1,4 @@
-import { queryOpenAi } from "./queryOpenAi";
+import { queryOpenAi } from "../api/queryOpenAi";
 
 const callSearchAPI = async (searchTerm: string) => {
   // Scholars Portal

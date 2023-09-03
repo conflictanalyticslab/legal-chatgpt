@@ -1,7 +1,7 @@
 export const queryOpenAi = async (data: object) => {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_MODEL_API_KEY}`,
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       "Content-Type": "application/json",
     },
     method: "POST",

@@ -14,6 +14,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
 import {
+  UserCredential,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
@@ -23,7 +24,7 @@ import { doc, setDoc } from "firebase/firestore";
 
 import { getDatabase, ref, child, get } from "firebase/database";
 import { AppBackground, GridContainer, HeroBox } from "@/styles/styles";
-import User, { UserI, userConverter } from "@/util/User";
+import User, { userConverter } from "@/util/User";
 
 export default function Login() {
   const Joi = require("joi");
@@ -136,7 +137,7 @@ export default function Login() {
     return emailError || passwordError;
   };
 
-  const saveUser = async (user: UserI) => {
+  const saveUser = async (user: { email: string; uid: string }) => {
     console.log("saving user");
     setSaving(true);
     try {
@@ -170,7 +171,7 @@ export default function Login() {
     console.log(errors);
     if (!errors) {
       createUserWithEmailAndPassword(auth, email, password)
-        .then(async (userCredential: any) => {
+        .then(async (userCredential: UserCredential) => {
           // Signed in
           const user = userCredential.user;
           const err = await saveUser(user);

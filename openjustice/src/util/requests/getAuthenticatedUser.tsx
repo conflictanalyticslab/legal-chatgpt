@@ -1,17 +1,9 @@
 import { auth, db } from "@/firebase";
-import { userConverter } from "@/util/User";
+import { UserI, userConverter } from "@/util/User";
 import { FirebaseError } from "firebase/app";
 import { getDoc, doc } from "firebase/firestore";
 
-function rejectDelay(reason: any) {
-  // console.log(reason);
-  const t = 1000;
-  return new Promise(function (resolve, reject) {
-    setTimeout(reject.bind(null, reason), t);
-  });
-}
-
-export async function getAuthenticatedUser() {
+export async function getAuthenticatedUser(): Promise<UserI | null> {
   const userDataPromise = async () => {
     console.log("Authenticating user info...");
     // console.log(auth.currentUser);
