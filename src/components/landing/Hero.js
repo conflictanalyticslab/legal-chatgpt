@@ -56,9 +56,8 @@ OpenJustice is continuously learning and evolving. Please let us know if the ans
           </Button>
           
           <Button
-            variant=""
             className={classes.formHeading}
-            sx={{ width: '160px', fontSize: '16px', marginTop: '30px', color: 'black',  textTransform: 'none',  textDecoration: 'none', fontWeight: 'bold'}}
+            sx={{ width: '200px', height: '50px', fontSize: '16px', color: 'black',  textTransform: 'none',  textDecoration: 'none', fontWeight: 'bold', margin: '60px'}}
           >  <Typography fontWeight= 'bold'>Learn More</Typography>
           </Button>
             </Box>

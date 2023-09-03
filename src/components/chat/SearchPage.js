@@ -17,7 +17,6 @@ import {
     SingleLinksFacet,
     SingleSelectFacet,
 } from "@elastic/react-search-ui-views";
-import { Modal, Typography, Box } from "@mui/material";
 import "@elastic/react-search-ui-views/lib/styles/styles.css";
 import "../../App.css";
 
@@ -50,6 +49,7 @@ const SearchPage = ({ wasSearched, setSearchTerm }) => {
                         urlField="url"
                         shouldTrackClickThrough={true}
                         clickThroughTags={["user1"]}
+                        // style={{padding: '100px'}}
                     />
                 }
                 bodyHeader={

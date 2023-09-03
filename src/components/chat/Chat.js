@@ -346,13 +346,13 @@ function Chat({ setSearchTerm, loggedin }) {
         handleButtonClickImage();
     }
     return (
+        
         <div
             style={{
-                paddingBlock: 32,
                 paddingInline: 60,
                 display: "flex",
                 justifyContent: "center",
-                flexDirection: 'column'
+                flexDirection: 'column',
             }}
         >
             {showStartupImage && (
@@ -385,11 +385,9 @@ function Chat({ setSearchTerm, loggedin }) {
                 
             <div
                 style={{
-                    maxHeight: 800,
-                    // overflow: "scroll",
+                    height: 'calc(100vh - 250px)',
                     overflowY: 'auto',
                     width: "100%",
-                    paddingBlockStart: 20,
                 }}
             > 
                 {userInputs &&
@@ -545,9 +543,13 @@ function Chat({ setSearchTerm, loggedin }) {
             <div
                 style={{
                     position: "fixed",
+                    // position: 'absolute',
+                    // position: 'relative',
                     bottom: "50px",
                     width: "60%",
                     alignSelf: "center",
+                    // backgroundColor: 'white',
+                    // borderRadius: '0.75rem',
                 }}
             >
                 {!endSession && num >= 0 ? (
@@ -566,7 +568,7 @@ function Chat({ setSearchTerm, loggedin }) {
                         <div style={{ height: 20 }}></div>
                         <OutlinedInput
                             // fullWidth
-                            style={{width: '95%', margin: 'auto', display: 'flex'}}
+                            style={{width: '95%', margin: 'auto', display: 'flex', maxHeight: '200px', backgroundColor: 'white'}}
                             required
                             placeholder="Prompt"
                             value={currentInput}
@@ -606,6 +608,7 @@ function Chat({ setSearchTerm, loggedin }) {
                     <></>
                 )}
             </div>
+
             <Dialog open={alert} onClose={handleAlertClose}>
                 <DialogContent>
                     <DialogContentText>{alert}</DialogContentText>
