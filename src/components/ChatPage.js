@@ -5,12 +5,6 @@ import Chat from "./chat/Chat";
 import AppSearchAPIConnector from "@elastic/search-ui-app-search-connector";
 import { SearchProvider, WithSearch } from "@elastic/react-search-ui";
 import SideBar from "./chat/SideBar";
-import { Button } from "@mui/material";
-import { Modal, Box, Typography } from "@mui/material";
-import { useState } from "react";
-import SearchIcon from "../images/search-icon.png";
-import ChatPageOJ from "../images/ChatPageOJ.png";
-import SearchModal from "./chat/SearchModal";
 
 
 const connector = new AppSearchAPIConnector({
@@ -81,13 +75,8 @@ function ChatPage() {
                                     backgroundColor: "#F5F5F7"
                                 }}
                             >
-                                <SearchModal
-                                    wasSearched={wasSearched}
-                                    setSearchTerm={setSearchTerm}
-                                >
-                                </SearchModal>
-
                                 <Chat
+                                    wasSearched={wasSearched}
                                     setSearchTerm={setSearchTerm}
                                     // loggedin={loggedin}
                                 >
