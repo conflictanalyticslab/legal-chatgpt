@@ -12,7 +12,7 @@ import {
 } from "@elastic/react-search-ui";
 import { Layout, SingleLinksFacet } from "@elastic/react-search-ui-views";
 import "@elastic/react-search-ui-views/lib/styles/styles.css";
-import { handleSearch } from "@/util/requests/handleSearch";
+import { postSearch } from "@/util/requests/postSearch";
 
 const SearchPage = ({
   wasSearched,
@@ -28,7 +28,8 @@ const SearchPage = ({
           <SearchBox
             debounceLength={0}
             onSubmit={(searchTerm) => {
-              handleSearch(searchTerm, setSearchTerm);
+              // TO DO: Display the results.
+              postSearch(searchTerm);
             }}
           />
         }
