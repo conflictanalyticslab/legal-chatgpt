@@ -73,6 +73,8 @@ const callSearchAPI = async (searchTerm: string) => {
   }
 };
 
+// TO DO: handleSearch should be an API endpoint
+// Need to discuss what the UX for search should be like.
 export const handleSearch = async (
   searchTerm: string,
   setSearchTerm: (searchTerm: string) => void

@@ -174,9 +174,11 @@ export default function Login() {
         .then(async (userCredential: UserCredential) => {
           // Signed in
           const user = userCredential.user;
-          const err = await saveUser(user);
-          console.log("success");
-          auth.updateCurrentUser(user);
+          if (user.email != null && user.uid != null) {
+            await saveUser(user as { email: string; uid: string });
+            console.log("success");
+            auth.updateCurrentUser(user);
+          }
         })
         .catch((error: any) => {
           const errorMessage = error.message;
