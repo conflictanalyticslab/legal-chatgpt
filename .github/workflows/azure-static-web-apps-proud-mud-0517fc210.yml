@@ -24,7 +24,6 @@ jobs:
         run: |
           touch openjustice/.env
           echo NEXT_PUBLIC_FIREBASE_API_KEY=$NEXT_PUBLIC_FIREBASE_API_KEY >> openjustice/.env
-          echo ENV_VAR_2=$ENV_VAR_2 >> openjustice/.env
           echo NEXT_PUBLIC_AUTH_DOMAIN=$NEXT_PUBLIC_FIREBASE_API_KEY >> openjustice/.env
           echo NEXT_PUBLIC_PROJECT_ID=$NEXT_PUBLIC_PROJECT_ID >> openjustice/.env
           echo NEXT_PUBLIC_STORAGE_BUCKET=$NEXT_PUBLIC_STORAGE_BUCKET >> openjustice/.env
@@ -39,7 +38,7 @@ jobs:
           echo NEXT_PUBLIC_GOOGLE_SEARCH_ID=$NEXT_PUBLIC_GOOGLE_SEARCH_ID >> openjustice/.env
           echo NEXT_PUBLIC_GOOGLE_SEARCH_KEY=$NEXT_PUBLIC_GOOGLE_SEARCH_KEY >> openjustice/.env
           echo OPENAI_API_KEY=$OPENAI_API_KEY >> openjustice/.env
-          echo FIREBASE_ADMIN_SERVICE_ACCOUNT=$FIREBASE_ADMIN_SERVICE_ACCOUNT = >> openjustice/.env
+          echo FIREBASE_ADMIN_SERVICE_ACCOUNT=$FIREBASE_ADMIN_SERVICE_ACCOUNT >> openjustice/.env
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY = ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
           NEXT_PUBLIC_AUTH_DOMAIN = ${{ secrets.NEXT_PUBLIC_AUTH_DOMAIN }}
