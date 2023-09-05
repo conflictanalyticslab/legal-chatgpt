@@ -557,13 +557,9 @@ function Chat({ wasSearched, setSearchTerm, loggedin }) {
                 <div
                     style={{
                         position: "fixed",
-                        // position: 'absolute',
-                        // position: 'relative',
                         bottom: "50px",
                         width: "60%",
                         alignSelf: "center",
-                        // backgroundColor: 'white',
-                        // borderRadius: '0.75rem',
                     }}
                 >
                     {!endSession && num >= 0 ? (
@@ -579,10 +575,9 @@ function Chat({ wasSearched, setSearchTerm, loggedin }) {
                                     }
                                 }}
                             /> */}
-                            <div style={{ height: 20 }}></div>
                             <OutlinedInput
-                                // fullWidth
-                                style={{width: '95%', margin: 'auto', display: 'flex', maxHeight: '200px', backgroundColor: 'white'}}
+                                // fullWidth  
+                                style={{width: '95%', margin: 'auto', display: 'flex', backgroundColor: 'white', overflowY: 'scroll'}}
                                 required
                                 placeholder="Prompt"
                                 value={currentInput}
@@ -593,6 +588,8 @@ function Chat({ wasSearched, setSearchTerm, loggedin }) {
                                         handleKeyDownImage();
                                     }
                                 }}
+                                multiline = 'true'
+                                maxRows={4}
                                 endAdornment={
                                     <InputAdornment>
                                         <LoadingButton
@@ -603,7 +600,8 @@ function Chat({ wasSearched, setSearchTerm, loggedin }) {
                                         </LoadingButton>
                                     </InputAdornment>
                                 }
-                            ></OutlinedInput>{" "}
+                            ></OutlinedInput>
+                            {" "}
                             <p
                                 style={{
                                     fontStyle: "italic",
