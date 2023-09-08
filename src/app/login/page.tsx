@@ -13,30 +13,22 @@ import FormHelperText from "@mui/material/FormHelperText";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
-import {
-  UserCredential,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
-import { auth, db } from "@/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { auth } from "@/firebase";
 
 import { getDatabase, ref, child, get } from "firebase/database";
 import { AppBackground, GridContainer, HeroBox } from "@/styles/styles";
-import User, { userConverter } from "@/util/User";
+import { validEmailRegex } from "@/util/signup/validEmailRegex";
 
 export default function Login() {
   const Joi = require("joi");
   const router = useRouter();
-  const [saving, setSaving] = useState(false);
 
   const emailSchema = Joi.object({
     email: Joi.string()
       .email({ tlds: false })
-      .pattern(
-        /^[a-zA-Z0-9._%+-]+@(queensu\.ca|uiowa\.edu|port\.ac\.uk|law\.ucla\.edu|law\.upenn\.edu|lakeheadu\.ca|mcgill\.ca|ualberta\.ca|umanitoba\.ca|utoronto\.ca|law\.fsu\.edu|law\.leidenuniv\.nl|library\.ledidenuniv\.nl|univ\-catholille\.fr|law\.harvard\.edu|fas\.harvard\.edu|law\.northwestern\.edu|kellogg\.northwestern\.edu)$/
-      )
+      .pattern(validEmailRegex)
       .messages({
         "string.pattern.base": "Email must be from an approved domain.",
       }),
@@ -137,64 +129,34 @@ export default function Login() {
     return emailError || passwordError;
   };
 
-  const saveUser = async (user: { email: string; uid: string }) => {
-    console.log("saving user");
-    setSaving(true);
-    try {
-      //console.log(userInputs, responses);
-      const user_doc = doc(db, "users", user.uid).withConverter(userConverter);
-
-      var valid_user = false;
-
-      if (user.email.endsWith("queensu.ca")) {
-        valid_user = true;
-      }
-
-      const docRef = await setDoc(
-        user_doc,
-        new User(user.email, [], "default", 10, 10, valid_user)
-      );
-      // setAlert(
-      //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
-      // );
-      // window.location.reload();
-    } catch (e) {
-      console.log(`Error saving user: ${e}`);
-    }
-    setSaving(false);
-  };
-
   const handleSignup = async (event: any) => {
     event.preventDefault();
 
     const errors = await validateUser();
     console.log(errors);
     if (!errors) {
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(async (userCredential: UserCredential) => {
-          // Signed in
-          const user = userCredential.user;
-          if (user.email != null && user.uid != null) {
-            await saveUser(user as { email: string; uid: string });
-            console.log("success");
-            auth.updateCurrentUser(user);
-          }
-        })
-        .catch((error: any) => {
-          const errorMessage = error.message;
-          console.log(errorMessage);
-          setGeneralHelper(errorMessage);
-          return null;
-        });
-
-      // sendEmailVerification(auth.currentUser)
-      // .then(setGeneralHelper("Email verification sent. Please confirm your email to finish registration"); )
-      // .catch((error) => {
-      //   const errorCode = error.code;
-      //   const errorMessage = error.message;
-      //   console.log(errorMessage);
-      //   setGeneralError(errorMessage);
-      // });
+      const userSignupRes = await fetch("/api/user/signup", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+      if (userSignupRes.status === 403) {
+        setEmailError(true);
+        setEmailHelper(
+          "Please use an institutional email. For access, please contact us for assistance."
+        );
+      } else if (userSignupRes.status === 400) {
+        const { error }: { error: string } = await userSignupRes.json();
+        if (error.includes("email")) {
+          setEmailError(true);
+          setEmailHelper(error);
+        } else {
+          setPasswordError(true);
+          setPassHelper(error);
+        }
+      } else {
+        console.log("Successfully registered! Signing in...");
+        handleSignin(event);
+      }
     }
   };
 
@@ -215,7 +177,7 @@ export default function Login() {
         });
     }
   };
-  // console.log(auth.currentUser)
+
   return (
     <AppBackground>
       <HeroBox textAlign="center">
