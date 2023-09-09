@@ -3,6 +3,7 @@ import { Button, Typography, Modal, Box } from '@mui/material';
 import SearchPage from './SearchPage';
 import SearchIcon from "../../images/search-icon.png"
 import { boolean } from 'joi';
+import ChatPageOJ from "../../images/ChatPageOJ.png";
 
 const style = {
     position: 'absolute', 

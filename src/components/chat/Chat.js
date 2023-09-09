@@ -41,15 +41,15 @@ import {
     browserLocalPersistence,
 } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
-
-import { query } from "./functions";
 import ChatPageOJ from "../../images/ChatPageOJ.png";
+import { query } from "./functions";
 import Whatis from "../../images/Whatis.png";
 import Howto from "../../images/Howto.png";
+import SearchModal from "./SearchModal";
 
 var t = 1000;
 
-function Chat({ setSearchTerm, loggedin }) {
+function Chat({ wasSearched, setSearchTerm, loggedin }) {
     const [userInputs, setUserInputs] = useState([]);
     const [conversation, setConversation] = useState([]);
     const [responses, setResponses] = useState([]);
@@ -346,333 +346,349 @@ function Chat({ setSearchTerm, loggedin }) {
         handleButtonClickImage();
     }
     return (
-        <div
-            style={{
-                paddingBlock: 32,
-                paddingInline: 60,
-                display: "flex",
-                justifyContent: "center",
-                flexDirection: 'column'
-            }}
-        >
-            {showStartupImage && (
-                <div style={{marginTop: '10rem'}}>
-                    <img src={ChatPageOJ} style={{display: 'block', margin: 'auto', width: '25%', marginBottom: '2rem'}}/>
-                    <div style={{margin: 'auto', width: '35%'}}>
-                        <Typography variant="h5" sx={{fontWeight: 'bold'}}> 
-                            <img src={Whatis} style={{paddingRight: '27px'}}/> 
-                            What is AI?
-                        </Typography>
-                        <p style={{textAlign: 'justify', marginTop: '0px'}}>
-                            AI, or Artificial Intelligence, refers to the simulation of human intelligence in machines that are
-                            programmed to perform tasks that normally require human intelligence, such as speech recognition, 
-                            decision-making, and natural language processing.
-                        </p>
+        <div>
 
-                        <Typography variant="h5" sx={{fontWeight: 'bold'}}>
-                            <img src={Howto} style={{paddingRight: '27px'}}/>
-                            How to use OpenJustice
-                        </Typography>
-                        <p style={{textAlign: 'justify', marginTop: '0px'}}>
-                            OpenJustice can help you with a wide variety of tasks, including answering legal questions, 
-                            providing information on your case, and more. To use OpenJustice, simply type your question
-                            or prompt in the chat box and it will generate a response for you.
-                        </p>
-                    </div>
-                </div>
-            )}
-            
-                
+            <div style={{
+                display: 'flex'
+            }}> 
+                {!showStartupImage && (
+                    <img src={ChatPageOJ} style={{width: '20%', marginLeft: '3rem', marginTop: '1rem'}}/>
+                )}
+                <SearchModal
+                    wasSearched={wasSearched}
+                    setSearchTerm={setSearchTerm}
+                >
+                </SearchModal>
+            </div>
+
             <div
                 style={{
-                    maxHeight: 800,
-                    // overflow: "scroll",
-                    overflowY: 'auto',
-                    width: "100%",
-                    paddingBlockStart: 20,
+                    paddingTop: 20,
+                    paddingInline: 60,
+                    display: "flex",
+                    justifyContent: "center",
+                    flexDirection: 'column',
                 }}
-            > 
-                {userInputs &&
-                    userInputs.map((input, i) => (
-                        <div>
-                            {i !== 0 && <Divider></Divider>}
-                            <div
-                                style={{
-                                    marginBlock: 40,
-                                    overflowWrap: "break-word",
-                                }}
-                            >
-                                <strong
+            >
+                {showStartupImage && (
+                    <div style={{marginTop: '10rem'}}>
+                        <img src={ChatPageOJ} style={{display: 'block', margin: 'auto', width: '25%', marginBottom: '2rem'}}/>
+                        <div style={{margin: 'auto', width: '35%'}}>
+                            <Typography variant="h5" sx={{fontWeight: 'bold'}}> 
+                                <img src={Whatis} style={{paddingRight: '27px'}}/> 
+                                What is AI?
+                            </Typography>
+                            <p style={{textAlign: 'justify', marginTop: '0px'}}>
+                                AI, or Artificial Intelligence, refers to the simulation of human intelligence in machines that are
+                                programmed to perform tasks that normally require human intelligence, such as speech recognition, 
+                                decision-making, and natural language processing.
+                            </p>
+
+                            <Typography variant="h5" sx={{fontWeight: 'bold'}}>
+                                <img src={Howto} style={{paddingRight: '27px'}}/>
+                                How to use OpenJustice
+                            </Typography>
+                            <p style={{textAlign: 'justify', marginTop: '0px'}}>
+                                OpenJustice can help you with a wide variety of tasks, including answering legal questions, 
+                                providing information on your case, and more. To use OpenJustice, simply type your question
+                                or prompt in the chat box and it will generate a response for you.
+                            </p>
+                        </div>
+                    </div>
+                )}
+                    
+                <div
+                    style={{
+                        height: 'calc(100vh - 280px)',
+                        overflowY: 'auto',
+                        width: "100%",
+                    }}
+                > 
+                    {userInputs &&
+                        userInputs.map((input, i) => (
+                            <div>
+                                {i !== 0 && <Divider></Divider>}
+                                <div
                                     style={{
-                                        marginRight: 10,
+                                        marginBlock: 40,
+                                        overflowWrap: "break-word",
                                     }}
                                 >
-                                    You:
-                                </strong>
-                                {input}
-                            </div>
-
-                            {i < responses.length && (
-                                <>
-                                    <Divider></Divider>
-                                    <div
+                                    <strong
                                         style={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                            marginBlock: 32,
-                                            overflowWrap: "break-word",
+                                            marginRight: 10,
                                         }}
                                     >
-                                        <div>
-                                            <strong
-                                                style={{
-                                                    marginRight: 10,
-                                                }}
-                                            >
-                                                Bot:
-                                            </strong>
-                                            {responses[i].response}
-                                        </div>
+                                        You:
+                                    </strong>
+                                    {input}
+                                </div>
 
-                                        {responses[i].is_satisfactory ===
-                                        "N/A" ? (
-                                            <ButtonGroup>
-                                                <IconButton
-                                                    onClick={() => {
-                                                        setResponses(
-                                                            responses.map(
-                                                                (res, idx) =>
-                                                                    idx !== i
-                                                                        ? res
-                                                                        : {
-                                                                              ...res,
-                                                                              is_satisfactory: true,
-                                                                          }
-                                                            )
-                                                        );
-                                                        setFeedbackState({
-                                                            index: i,
-                                                            dialogOpen: true,
-                                                            isSatisfactory: true,
-                                                        });
-                                                        setKwRefs(null);
-                                                    }}
-                                                >
-                                                    <ThumbUp></ThumbUp>
-                                                </IconButton>
-                                                <IconButton
-                                                    onClick={() => {
-                                                        setResponses(
-                                                            responses.map(
-                                                                (res, idx) =>
-                                                                    idx !== i
-                                                                        ? res
-                                                                        : {
-                                                                              ...res,
-                                                                              is_satisfactory: false,
-                                                                          }
-                                                            )
-                                                        );
-                                                        setFeedbackState({
-                                                            index: i,
-                                                            dialogOpen: true,
-                                                            isSatisfactory: false,
-                                                        });
-                                                    }}
-                                                >
-                                                    <ThumbDown></ThumbDown>
-                                                </IconButton>
-                                            </ButtonGroup>
-                                        ) : (
-                                            <IconButton disabled>
-                                                {responses[i]
-                                                    .is_satisfactory ? (
-                                                    <ThumbUp></ThumbUp>
-                                                ) : (
-                                                    <ThumbDown></ThumbDown>
-                                                )}
-                                            </IconButton>
-                                        )}
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    ))}
-                {/* <div
-                    style={{
-                        maxHeight: 400,
-                        overflow: "scroll",
-                        color: "gray",
-                    }}
-                >
-                    {kwRefs &&
-                        (kwRefs.refs.length !== 0 ? (
-                            <div>
-                                <p>{`Found ${kwRefs.refs
-                                    .map((ref) => ref.excerpts.length)
-                                    .reduce((a, b) => a + b)} matches`}</p>
-                                {kwRefs.refs.map((ref) =>
-                                    ref.excerpts.map((excerpt) => (
-                                        <div style={{}}>
-                                            <i>{ref.name}</i>
-                                            <p>
-                                                {'"...' +
-                                                    excerpt.substring(0, 300)}
+                                {i < responses.length && (
+                                    <>
+                                        <Divider></Divider>
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                marginBlock: 32,
+                                                overflowWrap: "break-word",
+                                            }}
+                                        >
+                                            <div>
                                                 <strong
-                                                    style={{ color: "black" }}
+                                                    style={{
+                                                        marginRight: 10,
+                                                    }}
                                                 >
-                                                    {excerpt.substring(
-                                                        300,
-                                                        300 + ref.kwLen
-                                                    )}
+                                                    Bot:
                                                 </strong>
-                                                {excerpt.substring(
-                                                    300 + ref.kwLen
-                                                ) + '..."'}
-                                            </p>
+                                                {responses[i].response}
+                                            </div>
+
+                                            {responses[i].is_satisfactory ===
+                                            "N/A" ? (
+                                                <ButtonGroup>
+                                                    <IconButton
+                                                        onClick={() => {
+                                                            setResponses(
+                                                                responses.map(
+                                                                    (res, idx) =>
+                                                                        idx !== i
+                                                                            ? res
+                                                                            : {
+                                                                                ...res,
+                                                                                is_satisfactory: true,
+                                                                            }
+                                                                )
+                                                            );
+                                                            setFeedbackState({
+                                                                index: i,
+                                                                dialogOpen: true,
+                                                                isSatisfactory: true,
+                                                            });
+                                                            setKwRefs(null);
+                                                        }}
+                                                    >
+                                                        <ThumbUp></ThumbUp>
+                                                    </IconButton>
+                                                    <IconButton
+                                                        onClick={() => {
+                                                            setResponses(
+                                                                responses.map(
+                                                                    (res, idx) =>
+                                                                        idx !== i
+                                                                            ? res
+                                                                            : {
+                                                                                ...res,
+                                                                                is_satisfactory: false,
+                                                                            }
+                                                                )
+                                                            );
+                                                            setFeedbackState({
+                                                                index: i,
+                                                                dialogOpen: true,
+                                                                isSatisfactory: false,
+                                                            });
+                                                        }}
+                                                    >
+                                                        <ThumbDown></ThumbDown>
+                                                    </IconButton>
+                                                </ButtonGroup>
+                                            ) : (
+                                                <IconButton disabled>
+                                                    {responses[i]
+                                                        .is_satisfactory ? (
+                                                        <ThumbUp></ThumbUp>
+                                                    ) : (
+                                                        <ThumbDown></ThumbDown>
+                                                    )}
+                                                </IconButton>
+                                            )}
                                         </div>
-                                    ))
+                                    </>
                                 )}
                             </div>
-                        ) : (
-                            <i>No references found</i>
                         ))}
-                </div> */}
-                {loading && <CircularProgress></CircularProgress>}
-            </div>
+                    {/* <div
+                        style={{
+                            maxHeight: 400,
+                            overflow: "scroll",
+                            color: "gray",
+                        }}
+                    >
+                        {kwRefs &&
+                            (kwRefs.refs.length !== 0 ? (
+                                <div>
+                                    <p>{`Found ${kwRefs.refs
+                                        .map((ref) => ref.excerpts.length)
+                                        .reduce((a, b) => a + b)} matches`}</p>
+                                    {kwRefs.refs.map((ref) =>
+                                        ref.excerpts.map((excerpt) => (
+                                            <div style={{}}>
+                                                <i>{ref.name}</i>
+                                                <p>
+                                                    {'"...' +
+                                                        excerpt.substring(0, 300)}
+                                                    <strong
+                                                        style={{ color: "black" }}
+                                                    >
+                                                        {excerpt.substring(
+                                                            300,
+                                                            300 + ref.kwLen
+                                                        )}
+                                                    </strong>
+                                                    {excerpt.substring(
+                                                        300 + ref.kwLen
+                                                    ) + '..."'}
+                                                </p>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            ) : (
+                                <i>No references found</i>
+                            ))}
+                    </div> */}
+                    {loading && <CircularProgress></CircularProgress>}
+                </div>
 
-            <div
-                style={{
-                    position: "fixed",
-                    bottom: "50px",
-                    width: "60%",
-                    alignSelf: "center",
-                }}
-            >
-                {!endSession && num >= 0 ? (
-                    <>
-                        {/* <TextField
-                            label="Keyword"
-                            variant="standard"
-                            value={keyword}
-                            onChange={(e) => setKeyword(e.target.value)}
-                            onKeyPress={(e) => {
-                                if (e.key === "Enter") {
-                                    handleSubmit();
-                                }
-                            }}
-                        /> */}
-                        <div style={{ height: 20 }}></div>
-                        <OutlinedInput
-                            // fullWidth
-                            style={{width: '95%', margin: 'auto', display: 'flex'}}
-                            required
-                            placeholder="Prompt"
-                            value={currentInput}
-                            onChange={(e) => setCurrentInput(e.target.value)}
-                            onKeyPress={(e) => {
-                                if (e.key === "Enter") {
-                                    handleSubmit();
-                                    handleKeyDownImage();
-                                }
-                            }}
-                            endAdornment={
-                                <InputAdornment>
-                                    <LoadingButton
-                                        onClick={textBoxSubmission}
-                                        loading={loading}
-                                    >
-                                        <Send></Send>
-                                    </LoadingButton>
-                                </InputAdornment>
-                            }
-                        ></OutlinedInput>{" "}
-                        <p
-                            style={{
-                                fontStyle: "italic",
-                                fontSize: 14,
-                                color: "gray",
-                                marginLeft: '1.5rem'
-
-                            }}
-                        >
-                            {num === 0
-                                ? "No more prompts allowed. Please enter your final feedback."
-                                : `Prompts left: ${num}`}
-                        </p>
-                    </>
-                ) : (
-                    <></>
-                )}
-            </div>
-            <Dialog open={alert} onClose={handleAlertClose}>
-                <DialogContent>
-                    <DialogContentText>{alert}</DialogContentText>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog
-                open={feedbackState.dialogOpen}
-                onClose={handleFeedbackClose}
-                fullWidth
-            >
-                <DialogContent
+                <div
                     style={{
-                        display: "flex",
-                        alignItems: "center",
-                        flexDirection: "column",
+                        position: "fixed",
+                        bottom: "50px",
+                        width: "60%",
+                        alignSelf: "center",
                     }}
                 >
-                    <h3>Provide additional feedback</h3>
-                    <TextField
-                        fullWidth
-                        label={
-                            feedbackState.isSatisfactory
-                                ? "What do you like about the response?"
-                                : "What was the issue with the response? How could it be improved?"
-                        }
-                        variant="outlined"
-                        multiline
-                        value={feedbackState.message}
-                        onChange={(e) =>
-                            setFeedbackState({
-                                ...feedbackState,
-                                message: e.target.value,
-                            })
-                        }
-                    />
-                    {!feedbackState.isSatisfactory && (
-                        <FormControl component="fieldset" variant="standard">
-                            <FormGroup>
-                                {Object.keys(feedbackSelect).map((key) => (
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={feedbackSelect[key]}
-                                                onChange={(e) =>
-                                                    setFeedbackSelect({
-                                                        ...feedbackSelect,
-                                                        [e.target.name]:
-                                                            e.target.checked,
-                                                    })
-                                                }
-                                                name={key}
-                                            ></Checkbox>
-                                        }
-                                        label={key}
-                                    ></FormControlLabel>
-                                ))}
-                            </FormGroup>
-                        </FormControl>
+                    {!endSession && num >= 0 ? (
+                        <>
+                            {/* <TextField
+                                label="Keyword"
+                                variant="standard"
+                                value={keyword}
+                                onChange={(e) => setKeyword(e.target.value)}
+                                onKeyPress={(e) => {
+                                    if (e.key === "Enter") {
+                                        handleSubmit();
+                                    }
+                                }}
+                            /> */}
+                            <OutlinedInput
+                                // fullWidth  
+                                style={{width: '95%', margin: 'auto', display: 'flex', backgroundColor: 'white', overflowY: 'scroll'}}
+                                required
+                                placeholder="Prompt"
+                                value={currentInput}
+                                onChange={(e) => setCurrentInput(e.target.value)}
+                                onKeyPress={(e) => {
+                                    if (e.key === "Enter") {
+                                        handleSubmit();
+                                        handleKeyDownImage();
+                                    }
+                                }}
+                                multiline = 'true'
+                                maxRows={4}
+                                endAdornment={
+                                    <InputAdornment>
+                                        <LoadingButton
+                                            onClick={textBoxSubmission}
+                                            loading={loading}
+                                        >
+                                            <Send></Send>
+                                        </LoadingButton>
+                                    </InputAdornment>
+                                }
+                            ></OutlinedInput>
+                            {" "}
+                            <p
+                                style={{
+                                    fontStyle: "italic",
+                                    fontSize: 14,
+                                    color: "gray",
+                                    marginLeft: '1.5rem'
+
+                                }}
+                            >
+                                {num === 0
+                                    ? "No more prompts allowed. Please enter your final feedback."
+                                    : `Prompts left: ${num}`}
+                            </p>
+                        </>
+                    ) : (
+                        <></>
                     )}
-                    <br></br>
-                    <Button variant="contained" onClick={submitFeedback}>
-                        Submit feedback
-                    </Button>
-                    <br></br>
-                </DialogContent>
-            </Dialog>
+                </div>
+
+                <Dialog open={alert} onClose={handleAlertClose}>
+                    <DialogContent>
+                        <DialogContentText>{alert}</DialogContentText>
+                    </DialogContent>
+                </Dialog>
+
+                <Dialog
+                    open={feedbackState.dialogOpen}
+                    onClose={handleFeedbackClose}
+                    fullWidth
+                >
+                    <DialogContent
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            flexDirection: "column",
+                        }}
+                    >
+                        <h3>Provide additional feedback</h3>
+                        <TextField
+                            fullWidth
+                            label={
+                                feedbackState.isSatisfactory
+                                    ? "What do you like about the response?"
+                                    : "What was the issue with the response? How could it be improved?"
+                            }
+                            variant="outlined"
+                            multiline
+                            value={feedbackState.message}
+                            onChange={(e) =>
+                                setFeedbackState({
+                                    ...feedbackState,
+                                    message: e.target.value,
+                                })
+                            }
+                        />
+                        {!feedbackState.isSatisfactory && (
+                            <FormControl component="fieldset" variant="standard">
+                                <FormGroup>
+                                    {Object.keys(feedbackSelect).map((key) => (
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={feedbackSelect[key]}
+                                                    onChange={(e) =>
+                                                        setFeedbackSelect({
+                                                            ...feedbackSelect,
+                                                            [e.target.name]:
+                                                                e.target.checked,
+                                                        })
+                                                    }
+                                                    name={key}
+                                                ></Checkbox>
+                                            }
+                                            label={key}
+                                        ></FormControlLabel>
+                                    ))}
+                                </FormGroup>
+                            </FormControl>
+                        )}
+                        <br></br>
+                        <Button variant="contained" onClick={submitFeedback}>
+                            Submit feedback
+                        </Button>
+                        <br></br>
+                    </DialogContent>
+                </Dialog>
+            </div>
         </div>
     );
 }
