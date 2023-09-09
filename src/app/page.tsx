@@ -81,14 +81,13 @@ function Hero() {
                 href="/login"
                 variant="contained"
                 sx={{
-                  width: "200px",
-                  height: "50px",
+                  width: "160px",
                   fontSize: "16px",
-                  backgroundColor: "#11335D",
-                  color: "white",
+                  marginTop: "30px",
+                  color: "black",
                   textTransform: "none",
-                  mr: "2px",
-                  margin: "60px",
+                  textDecoration: "none",
+                  fontWeight: "bold",
                 }}
               >
                 Get Started
