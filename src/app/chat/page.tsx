@@ -5,7 +5,6 @@ import SideBar from "@/components/Chat/SideBar";
 import { WithSearch } from "@elastic/react-search-ui";
 
 import { auth } from "@/firebase";
-import SearchModal from "@/components/Chat/SearchModal";
 import SearchProviderShell from "@/components/Chat/SearchProviderShell";
 
 export default function Page() {
@@ -40,15 +39,16 @@ export default function Page() {
                 height: "100%",
                 overflow: "scroll",
                 justifyContent: "center",
+                display: 'flex',
                 backgroundColor: "#F5F5F7",
               }}
             >
-              <SearchModal
+              <Chat
                 wasSearched={wasSearched}
                 setSearchTerm={setSearchTerm}
-              ></SearchModal>
-              <Chat setSearchTerm={setSearchTerm} />
-            </div>
+              />
+                                
+                            </div>
           </div>
         )}
       </WithSearch>

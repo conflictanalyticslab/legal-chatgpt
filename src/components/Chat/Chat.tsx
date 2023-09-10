@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+
+import SearchModal from "@/components/Chat/SearchModal";
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -41,8 +43,9 @@ type FeedbackReasonsI = {
 };
 
 export function Chat({
-  setSearchTerm,
+  wasSearched, setSearchTerm,
 }: {
+  wasSearched: boolean
   setSearchTerm: (searchTerm: string) => void;
 }) {
   const router = useRouter();
@@ -282,6 +285,27 @@ export function Chat({
   };
 
   return (
+    <div>
+    <div style={{
+                display: 'flex'
+            }}> 
+                {!showStartupImage && (
+                    <Image 
+                      src={ChatPageOJ} 
+                      style={{
+                        width: '30%', 
+                        marginLeft: '3rem', 
+                        marginTop: '1rem',
+                        maxHeight: "auto",
+                        objectFit: "contain",}}
+                      alt="Open Justice Powered by the Conflict Analytics Lab"
+                    />
+                )}
+                <SearchModal
+                    wasSearched={wasSearched}
+                    setSearchTerm={setSearchTerm}
+                />
+            </div>
     <div
       style={{
         paddingBlock: 32,
@@ -345,7 +369,7 @@ export function Chat({
 
       <div
         style={{
-          maxHeight: 800,
+          height: 'calc(100vh - 280px)',
           overflowY: "auto",
           width: "100%",
           paddingBlockStart: 20,
@@ -526,7 +550,7 @@ export function Chat({
             <div style={{ height: 20 }}></div>
             <OutlinedInput
               // fullWidth
-              style={{ width: "95%", margin: "auto", display: "flex" }}
+              style={{width: "95%", margin: "auto", display: "flex"}}
               required
               placeholder="Prompt"
               value={currentInput}
@@ -537,6 +561,8 @@ export function Chat({
                   handleKeyDownImage();
                 }
               }}
+              multiline={true}
+              maxRows={4}
               endAdornment={
                 <InputAdornment position="end">
                   <LoadingButton onClick={textBoxSubmission} loading={loading}>
@@ -630,6 +656,7 @@ export function Chat({
           <br></br>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }
