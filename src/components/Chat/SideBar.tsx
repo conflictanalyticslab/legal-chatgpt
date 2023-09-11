@@ -1,16 +1,25 @@
-import { MouseEventHandler, useState } from "react";
-import Link from "next/link";
-import styles from "../../styles/SideBar.module.css";
+"use client";
 
+import { useState } from "react";
+import { auth } from "@/firebase";
+import Link from "next/link";
+import styles from "@/styles/SideBar.module.css";
+
+import ArticleIcon from "@mui/icons-material/Article";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import MenuIcon from "@mui/icons-material/Menu";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
-import SaveIcon from "@mui/icons-material/Save";
-import FeedbackIcon from "@mui/icons-material/Feedback";
 import LogoutIcon from "@mui/icons-material/Logout";
 
-export default function SideBar({ onLogout }: { onLogout: () => void }) {
+export default function SideBar() {
+  const onLogout = () => {
+    try {
+      auth.signOut();
+      console.log("handle logout");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const navDataLink = [
     {
       id: 0,
@@ -34,51 +43,15 @@ export default function SideBar({ onLogout }: { onLogout: () => void }) {
     },
   ];
 
-  const navDataConvo = [
-    {
-      id: 4,
-      icon: <RefreshIcon />,
-      text: "Refresh Conversation",
-    },
-    {
-      id: 5,
-      icon: <AddIcon />,
-      text: "New Conversation",
-    },
-    {
-      id: 6,
-      icon: <CloseIcon />,
-      text: "Clear Conversation",
-    },
-    {
-      id: 7,
-      icon: <SaveIcon />,
-      text: "Save Conversation",
-    },
-    {
-      id: 8,
-      icon: <FeedbackIcon />,
-      text: "Feedback",
-    },
-    {
-      id: 9,
-      icon: <LogoutIcon />,
-      text: "Logout",
-      onClick: onLogout,
-    },
-  ] as {
-    id: number;
-    icon: any;
-    text: string;
-    onClick?: MouseEventHandler<HTMLButtonElement>;
-  }[];
-
-  const [open, setopen] = useState(false);
+  const [open, setOpen] = useState(false);
   const toggleOpen = () => {
-    setopen(!open);
+    setOpen(!open);
   };
   return (
-    <div className={open ? styles.sidenav : styles.sidenavClosed}>
+    <div
+      className={open ? styles.sidenav : styles.sidenavClosed}
+      style={{ overflow: "hidden" }}
+    >
       <button
         className={open ? styles.menuOpen : styles.menuBtn}
         onClick={toggleOpen}
@@ -101,18 +74,36 @@ export default function SideBar({ onLogout }: { onLogout: () => void }) {
       </div>
 
       <div className={styles.convoBar}>
-        {navDataConvo.map((item) => {
-          return (
-            <button
-              key={item.id}
-              className={styles.sideitemConvo}
-              onClick={item.onClick}
-            >
-              {item.icon}
-              <span className={styles.linkText}>{item.text}</span>
-            </button>
-          );
-        })}
+        <Link
+          href="/chat"
+          key="chat-page-link"
+          className={styles.sideitemConvo}
+          onClick={() => {
+            setOpen(false);
+          }}
+        >
+          <ChatBubbleIcon />
+          <span className={styles.linkText}>Chat</span>
+        </Link>
+        <Link
+          href="/chat/documents"
+          key="documents-page-link"
+          className={styles.sideitemConvo}
+          onClick={() => {
+            setOpen(false);
+          }}
+        >
+          <ArticleIcon />
+          <span className={styles.linkText}>Documents</span>
+        </Link>
+        <button
+          key="logout-button"
+          className={styles.sideitemConvo}
+          onClick={onLogout}
+        >
+          <LogoutIcon />
+          <span className={styles.linkText}>Logout</span>
+        </button>
       </div>
     </div>
   );

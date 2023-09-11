@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { MouseEventHandler, useEffect, useState } from "react";
 import Image from "next/image";
 
 import SearchModal from "@/components/Chat/SearchModal";
@@ -22,7 +22,12 @@ import {
   Checkbox,
   CircularProgress,
   Paper,
+  Tooltip,
 } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import SaveIcon from "@mui/icons-material/Save";
 import { Send, ThumbUp, ThumbDown } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import { Typography } from "@mui/material";
@@ -43,9 +48,10 @@ type FeedbackReasonsI = {
 };
 
 export function Chat({
-  wasSearched, setSearchTerm,
+  wasSearched,
+  setSearchTerm,
 }: {
-  wasSearched: boolean
+  wasSearched: boolean;
   setSearchTerm: (searchTerm: string) => void;
 }) {
   const router = useRouter();
@@ -284,205 +290,233 @@ export function Chat({
     handleButtonClickImage();
   };
 
+  const chatActions = [
+    {
+      id: 1,
+      icon: <RefreshIcon />,
+      title: "Refresh Conversation",
+    },
+    {
+      id: 2,
+      icon: <AddIcon />,
+      title: "New Conversation",
+    },
+    {
+      id: 3,
+      icon: <CloseIcon />,
+      title: "Clear Conversation",
+    },
+    {
+      id: 4,
+      icon: <SaveIcon />,
+      title: "Save Conversation",
+    },
+  ] as {
+    id: number;
+    icon: any;
+    onClick?: MouseEventHandler<HTMLButtonElement>;
+    title: string;
+  }[];
+
   return (
     <div>
-    <div style={{
-                display: 'flex'
-            }}> 
-                {!showStartupImage && (
-                    <Image 
-                      src={ChatPageOJ} 
-                      style={{
-                        width: '30%', 
-                        marginLeft: '3rem', 
-                        marginTop: '1rem',
-                        maxHeight: "auto",
-                        objectFit: "contain",}}
-                      alt="Open Justice Powered by the Conflict Analytics Lab"
-                    />
-                )}
-                <SearchModal
-                    wasSearched={wasSearched}
-                    setSearchTerm={setSearchTerm}
-                />
-            </div>
-    <div
-      style={{
-        paddingBlock: 32,
-        paddingInline: 60,
-        display: "flex",
-        justifyContent: "center",
-        flexDirection: "column",
-      }}
-    >
-      {showStartupImage && (
-        <div style={{ marginTop: "10rem" }}>
+      <div
+        style={{
+          display: "flex",
+        }}
+      >
+        {!showStartupImage && (
           <Image
             src={ChatPageOJ}
             style={{
-              display: "block",
-              margin: "auto",
-              maxWidth: "25%",
+              width: "30%",
+              marginLeft: "3rem",
+              marginTop: "1rem",
               maxHeight: "auto",
               objectFit: "contain",
-              marginBottom: "2rem",
             }}
             alt="Open Justice Powered by the Conflict Analytics Lab"
           />
-          <div style={{ margin: "auto", width: "35%" }}>
-            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-              <Image
-                src={Whatis}
-                style={{ marginRight: "27px" }}
-                alt="Question marks"
-                height={30}
-                width={30}
-              />
-              What is AI?
-            </Typography>
-            <p style={{ textAlign: "justify", marginTop: "0px" }}>
-              AI, or Artificial Intelligence, refers to the simulation of human
-              intelligence in machines that are programmed to perform tasks that
-              normally require human intelligence, such as speech recognition,
-              decision-making, and natural language processing.
-            </p>
-
-            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-              <Image
-                src={Howto}
-                style={{ marginRight: "27px" }}
-                alt="Text bubbles"
-                height={30}
-                width={30}
-              />
-              How to use OpenJustice
-            </Typography>
-            <p style={{ textAlign: "justify", marginTop: "0px" }}>
-              OpenJustice can help you with a wide variety of tasks, including
-              answering legal questions, providing information on your case, and
-              more. To use OpenJustice, simply type your question or prompt in
-              the chat box and it will generate a response for you.
-            </p>
-          </div>
-        </div>
-      )}
-
+        )}
+        <SearchModal wasSearched={wasSearched} setSearchTerm={setSearchTerm} />
+      </div>
       <div
         style={{
-          height: 'calc(100vh - 280px)',
-          overflowY: "auto",
-          width: "100%",
-          paddingBlockStart: 20,
-          paddingBottom: 200,
-          scrollbarGutter: "stable",
+          paddingBlock: 32,
+          paddingInline: 60,
+          display: "flex",
+          justifyContent: "center",
+          flexDirection: "column",
         }}
       >
-        {userInputs &&
-          userInputs.map((input, i) => (
-            <div key={input}>
-              {i !== 0 && <Divider></Divider>}
-              <div
-                style={{
-                  marginBlock: 40,
-                  overflowWrap: "break-word",
-                }}
-              >
-                <strong
+        {showStartupImage && (
+          <div style={{ marginTop: "10rem" }}>
+            <Image
+              src={ChatPageOJ}
+              style={{
+                display: "block",
+                margin: "auto",
+                maxWidth: "25%",
+                maxHeight: "auto",
+                objectFit: "contain",
+                marginBottom: "2rem",
+              }}
+              alt="Open Justice Powered by the Conflict Analytics Lab"
+            />
+            <div style={{ margin: "auto", width: "35%" }}>
+              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                <Image
+                  src={Whatis}
+                  style={{ marginRight: "27px" }}
+                  alt="Question marks"
+                  height={30}
+                  width={30}
+                />
+                What is AI?
+              </Typography>
+              <p style={{ textAlign: "justify", marginTop: "0px" }}>
+                AI, or Artificial Intelligence, refers to the simulation of
+                human intelligence in machines that are programmed to perform
+                tasks that normally require human intelligence, such as speech
+                recognition, decision-making, and natural language processing.
+              </p>
+
+              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                <Image
+                  src={Howto}
+                  style={{ marginRight: "27px" }}
+                  alt="Text bubbles"
+                  height={30}
+                  width={30}
+                />
+                How to use OpenJustice
+              </Typography>
+              <p style={{ textAlign: "justify", marginTop: "0px" }}>
+                OpenJustice can help you with a wide variety of tasks, including
+                answering legal questions, providing information on your case,
+                and more. To use OpenJustice, simply type your question or
+                prompt in the chat box and it will generate a response for you.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div
+          style={{
+            height: "calc(100vh - 280px)",
+            overflowY: "auto",
+            width: "100%",
+            paddingBlockStart: 20,
+            paddingBottom: 200,
+            scrollbarGutter: "stable",
+          }}
+        >
+          {userInputs &&
+            userInputs.map((input, i) => (
+              <div key={input}>
+                {i !== 0 && <Divider></Divider>}
+                <div
                   style={{
-                    marginRight: 10,
+                    marginBlock: 40,
+                    overflowWrap: "break-word",
                   }}
                 >
-                  You:
-                </strong>
-                {input}
-              </div>
-
-              {i < responses.length && (
-                <>
-                  <Divider></Divider>
-                  <div
+                  <strong
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBlock: 32,
-                      overflowWrap: "break-word",
+                      marginRight: 10,
                     }}
                   >
-                    <div>
-                      <strong
-                        style={{
-                          marginRight: 10,
-                        }}
-                      >
-                        Bot:
-                      </strong>
-                      {responses[i].response}
-                    </div>
+                    You:
+                  </strong>
+                  {input}
+                </div>
 
-                    {responses[i].is_satisfactory === "N/A" ? (
-                      <ButtonGroup>
-                        <IconButton
-                          onClick={() => {
-                            setResponses(
-                              responses.map((res, idx) =>
-                                idx !== i
-                                  ? res
-                                  : {
-                                      ...res,
-                                      is_satisfactory: true,
-                                    }
-                              )
-                            );
-                            setFeedbackState({
-                              index: i,
-                              dialogOpen: true,
-                              isSatisfactory: true,
-                              message: null,
-                            });
-                            setKwRefs(null);
+                {i < responses.length && (
+                  <>
+                    <Divider></Divider>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBlock: 32,
+                        overflowWrap: "break-word",
+                      }}
+                    >
+                      <div>
+                        <strong
+                          style={{
+                            marginRight: 10,
                           }}
                         >
-                          <ThumbUp />
+                          Bot:
+                        </strong>
+                        {responses[i].response}
+                      </div>
+
+                      {responses[i].is_satisfactory === "N/A" ? (
+                        <ButtonGroup>
+                          <IconButton
+                            onClick={() => {
+                              setResponses(
+                                responses.map((res, idx) =>
+                                  idx !== i
+                                    ? res
+                                    : {
+                                        ...res,
+                                        is_satisfactory: true,
+                                      }
+                                )
+                              );
+                              setFeedbackState({
+                                index: i,
+                                dialogOpen: true,
+                                isSatisfactory: true,
+                                message: null,
+                              });
+                              setKwRefs(null);
+                            }}
+                          >
+                            <ThumbUp />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => {
+                              setResponses(
+                                responses.map((res, idx) =>
+                                  idx !== i
+                                    ? res
+                                    : {
+                                        ...res,
+                                        is_satisfactory: false,
+                                      }
+                                )
+                              );
+                              setFeedbackState({
+                                index: i,
+                                dialogOpen: true,
+                                isSatisfactory: false,
+                                message: null,
+                              });
+                            }}
+                          >
+                            <ThumbDown />
+                          </IconButton>
+                        </ButtonGroup>
+                      ) : (
+                        <IconButton disabled>
+                          {responses[i].is_satisfactory ? (
+                            <ThumbUp />
+                          ) : (
+                            <ThumbDown />
+                          )}
                         </IconButton>
-                        <IconButton
-                          onClick={() => {
-                            setResponses(
-                              responses.map((res, idx) =>
-                                idx !== i
-                                  ? res
-                                  : {
-                                      ...res,
-                                      is_satisfactory: false,
-                                    }
-                              )
-                            );
-                            setFeedbackState({
-                              index: i,
-                              dialogOpen: true,
-                              isSatisfactory: false,
-                              message: null,
-                            });
-                          }}
-                        >
-                          <ThumbDown />
-                        </IconButton>
-                      </ButtonGroup>
-                    ) : (
-                      <IconButton disabled>
-                        {responses[i].is_satisfactory ? (
-                          <ThumbUp />
-                        ) : (
-                          <ThumbDown />
-                        )}
-                      </IconButton>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
-        {/* <div
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          {/* <div
                     style={{
                         maxHeight: 400,
                         overflow: "scroll",
@@ -522,21 +556,21 @@ export function Chat({
                             <i>No references found</i>
                         ))}
                 </div> */}
-        {loading && <CircularProgress></CircularProgress>}
-      </div>
+          {loading && <CircularProgress></CircularProgress>}
+        </div>
 
-      <Paper
-        elevation={1}
-        style={{
-          position: "fixed",
-          bottom: "50px",
-          width: "60%",
-          alignSelf: "center",
-        }}
-      >
-        {!endSession && num >= 0 ? (
-          <>
-            {/* <TextField
+        <Paper
+          elevation={1}
+          style={{
+            position: "fixed",
+            bottom: "50px",
+            width: "60%",
+            alignSelf: "center",
+          }}
+        >
+          {!endSession && num >= 0 ? (
+            <>
+              {/* <TextField
                             label="Keyword"
                             variant="standard"
                             value={keyword}
@@ -547,116 +581,142 @@ export function Chat({
                                 }
                             }}
                         /> */}
-            <div style={{ height: 20 }}></div>
-            <OutlinedInput
-              // fullWidth
-              style={{width: "95%", margin: "auto", display: "flex"}}
-              required
-              placeholder="Prompt"
-              value={currentInput}
-              onChange={(e) => setCurrentInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  handleSubmit();
-                  handleKeyDownImage();
+              <div style={{ height: 20 }}></div>
+              <OutlinedInput
+                // fullWidth
+                style={{ width: "95%", margin: "auto", display: "flex" }}
+                required
+                placeholder="Prompt"
+                value={currentInput}
+                onChange={(e) => setCurrentInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleSubmit();
+                    handleKeyDownImage();
+                  }
+                }}
+                multiline={true}
+                maxRows={4}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <LoadingButton
+                      onClick={textBoxSubmission}
+                      loading={loading}
+                    >
+                      <Send></Send>
+                    </LoadingButton>
+                  </InputAdornment>
                 }
-              }}
-              multiline={true}
-              maxRows={4}
-              endAdornment={
-                <InputAdornment position="end">
-                  <LoadingButton onClick={textBoxSubmission} loading={loading}>
-                    <Send></Send>
-                  </LoadingButton>
-                </InputAdornment>
-              }
-            ></OutlinedInput>{" "}
-            <p
-              style={{
-                fontStyle: "italic",
-                fontSize: 14,
-                color: "gray",
-                marginLeft: "1.5rem",
-              }}
-            >
-              {num === 0
-                ? "No more prompts allowed. Please enter your final feedback."
-                : `Prompts left: ${num}`}
-            </p>
-          </>
-        ) : (
-          <></>
-        )}
-      </Paper>
+              ></OutlinedInput>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <p
+                  style={{
+                    fontStyle: "italic",
+                    fontSize: 14,
+                    color: "gray",
+                    marginLeft: "1.5rem",
+                  }}
+                >
+                  {num === 0
+                    ? "No more prompts allowed. Please enter your final feedback."
+                    : `Prompts left: ${num}`}
+                </p>
 
-      <Dialog open={!!alert} onClose={handleAlertClose}>
-        <DialogContent>
-          <DialogContentText>{alert}</DialogContentText>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={feedbackState.dialogOpen}
-        onClose={handleFeedbackClose}
-        fullWidth
-      >
-        <DialogContent
-          style={{
-            display: "flex",
-            alignItems: "center",
-            flexDirection: "column",
-          }}
-        >
-          <h3>Provide additional feedback</h3>
-          <TextField
-            fullWidth
-            label={
-              feedbackState.isSatisfactory
-                ? "What do you like about the response?"
-                : "What was the issue with the response? How could it be improved?"
-            }
-            variant="outlined"
-            multiline
-            value={feedbackState.message}
-            onChange={(e) =>
-              setFeedbackState({
-                ...feedbackState,
-                message: e.target.value,
-              })
-            }
-          />
-          {!feedbackState.isSatisfactory && (
-            <FormControl component="fieldset" variant="standard">
-              <FormGroup>
-                {Object.keys(feedbackSelect).map((key) => (
-                  <FormControlLabel
-                    key={key}
-                    control={
-                      <Checkbox
-                        checked={feedbackSelect[key as keyof FeedbackReasonsI]}
-                        onChange={(e) =>
-                          setFeedbackSelect({
-                            ...feedbackSelect,
-                            [e.target.name]: e.target.checked,
-                          })
-                        }
-                        name={key}
-                      ></Checkbox>
-                    }
-                    label={key}
-                  ></FormControlLabel>
-                ))}
-              </FormGroup>
-            </FormControl>
+                <div>
+                  {chatActions.map((action) => (
+                    <Tooltip title={action.title}>
+                      <IconButton
+                        key={action.id}
+                        onClick={action.onClick}
+                        style={{ marginRight: "24px" }}
+                      >
+                        {action.icon}
+                      </IconButton>
+                    </Tooltip>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            <></>
           )}
-          <br></br>
-          <Button variant="contained" onClick={submitFeedback}>
-            Submit feedback
-          </Button>
-          <br></br>
-        </DialogContent>
-      </Dialog>
-    </div>
+        </Paper>
+
+        <Dialog open={!!alert} onClose={handleAlertClose}>
+          <DialogContent>
+            <DialogContentText>{alert}</DialogContentText>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={feedbackState.dialogOpen}
+          onClose={handleFeedbackClose}
+          fullWidth
+        >
+          <DialogContent
+            style={{
+              display: "flex",
+              alignItems: "center",
+              flexDirection: "column",
+            }}
+          >
+            <h3>Provide additional feedback</h3>
+            <TextField
+              fullWidth
+              label={
+                feedbackState.isSatisfactory
+                  ? "What do you like about the response?"
+                  : "What was the issue with the response? How could it be improved?"
+              }
+              variant="outlined"
+              multiline
+              value={feedbackState.message}
+              onChange={(e) =>
+                setFeedbackState({
+                  ...feedbackState,
+                  message: e.target.value,
+                })
+              }
+            />
+            {!feedbackState.isSatisfactory && (
+              <FormControl component="fieldset" variant="standard">
+                <FormGroup>
+                  {Object.keys(feedbackSelect).map((key) => (
+                    <FormControlLabel
+                      key={key}
+                      control={
+                        <Checkbox
+                          checked={
+                            feedbackSelect[key as keyof FeedbackReasonsI]
+                          }
+                          onChange={(e) =>
+                            setFeedbackSelect({
+                              ...feedbackSelect,
+                              [e.target.name]: e.target.checked,
+                            })
+                          }
+                          name={key}
+                        ></Checkbox>
+                      }
+                      label={key}
+                    ></FormControlLabel>
+                  ))}
+                </FormGroup>
+              </FormControl>
+            )}
+            <br></br>
+            <Button variant="contained" onClick={submitFeedback}>
+              Submit feedback
+            </Button>
+            <br></br>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
