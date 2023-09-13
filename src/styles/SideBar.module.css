@@ -1,9 +1,11 @@
 .sidenav {
   width: 300px;
   transition: width 0.2s ease-in-out;
-  height: 100vh;
+  height: 100%;
+  box-sizing: border-box;
   background-color: rgb(10, 25, 41);
   padding-top: 28px;
+  padding-bottom: 28px;
   display: flex;
   flex-direction: column;
 }
@@ -20,7 +22,6 @@
 }
 .convoBar {
   margin-top: auto;
-  margin-bottom: 2rem;
 }
 .sideitemConvo {
   display: flex;
@@ -51,6 +52,7 @@
 .linkText {
   padding-left: 15px;
   text-wrap: nowrap;
+  font-size: 1rem;
 }
 .linkTextAbout {
   padding-left: 15px;
