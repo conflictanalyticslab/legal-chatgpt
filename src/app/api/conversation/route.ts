@@ -1,3 +1,5 @@
+import { generatePromptFromDocuments } from "@/util/api/generatePromptFromDocuments";
+import { getDocumentText } from "@/util/api/getDocuments";
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { loadUser } from "@/util/api/middleware/loadUser";
 import { queryOpenAi } from "@/util/api/queryOpenAi";
@@ -16,7 +18,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const { fullConversation } = await req.json();
+  const { fullConversation, includedDocuments } = await req.json();
   if (fullConversation.length === 0) {
     return NextResponse.json(
       { error: "fullConversation is empty" },
@@ -25,6 +27,8 @@ export async function POST(req: Request) {
   }
 
   const { user, userRef } = await loadUser(decodedToken);
+  const documents = await getDocumentText(includedDocuments);
+  const documentPrompt = generatePromptFromDocuments(documents);
 
   if (user && user.prompts_left > 0) {
     await userRef.update({ prompts_left: user.prompts_left - 1 });
@@ -33,7 +37,9 @@ export async function POST(req: Request) {
       messages: [
         {
           role: "system",
-          content: "Answer in 500 words or less. Short answers are better.",
+          content:
+            "Answer in 500 words or less. Short answers are better.\n\n" +
+            documentPrompt,
         },
         ...fullConversation,
       ],
@@ -57,7 +63,8 @@ export async function POST(req: Request) {
       ],
     });
 
-    // When we actually run searches, we will need to add another prompt to incorporate the information.
+    // When we actually run searches, we will need to add another prompt to incorporate the information. Make
+    // sure the prompt adds documentPrompt to the system prompt.
     // We will also need to abstract the search logic out of /api/search so we can call it here as a function.
     console.log(
       "Search keywords (TO DO: Actually run a search)",
