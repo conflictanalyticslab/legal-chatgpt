@@ -97,17 +97,19 @@ const callSearchAPI = async (searchTerm: string) => {
         source: "U.S. Case Law",
       });
     }
-    const elasticUrl = process.env.NEXT_PUBLIC_ELASTICSEARCH_URL || "";
-    const elasticResults = await fetch(elasticUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_PRIVATE_SEARCH_KEY}`,
-      },
-      body: JSON.stringify(results), // Assuming 'results' is the data you want to send
-    });
 
-    return elasticResults;
+    // Upload results to ElasticCloud
+    // const elasticUrl = process.env.NEXT_PUBLIC_ELASTICSEARCH_URL || "";
+    // await fetch(elasticUrl, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${process.env.NEXT_PUBLIC_PRIVATE_SEARCH_KEY}`,
+    //   },
+    //   body: JSON.stringify(results),
+    // });
+
+    return results;
   } catch (e) {
     console.error(e);
   }
