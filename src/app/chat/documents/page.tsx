@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useFilePicker } from "use-file-picker";
 import ScannerIcon from "@mui/icons-material/DocumentScanner";
 import styles from "@/styles/DocumentsPage.module.css";
 import {
@@ -9,6 +10,9 @@ import {
   Card,
   CardActions,
   CardContent,
+  Dialog,
+  DialogContent,
+  DialogContentText,
   Grid,
   IconButton,
   Tooltip,
@@ -25,12 +29,34 @@ import {
   getDocumentsOwnedByUser,
 } from "@/util/requests/getDocumentsOwnedByUser";
 import { useIncludedDocuments } from "@/hooks/useIncludedDocuments";
+import {
+  FileAmountLimitValidator,
+  FileSizeValidator,
+} from "use-file-picker/validators";
+import { uploadPdfDocument } from "@/util/requests/uploadPdfDocument";
 
 export default function Page() {
   const router = useRouter();
 
+  const [alert, setAlert] = useState("");
   const [documents, setDocuments] = useState<UserDocument[]>([]);
   const { includedDocuments, setIncludedDocuments } = useIncludedDocuments();
+  const { openFilePicker } = useFilePicker({
+    accept: ".pdf",
+    validators: [
+      new FileAmountLimitValidator({ max: 1 }),
+      new FileSizeValidator({ maxFileSize: 5 * 1024 * 1024 /* 5 megabytes */ }),
+    ],
+    onFilesRejected: ({ errors }) => {
+      console.log(errors);
+      setAlert("File is too big. We have a 5 Mb limit.");
+    },
+    onFilesSuccessfullySelected: ({ plainFiles, filesContent }: any) => {
+      // this callback is called when there were no validation errors
+      console.log("onFilesSuccessfullySelected", plainFiles, filesContent);
+      uploadPdfDocument(filesContent[0]);
+    },
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,6 +74,11 @@ export default function Page() {
 
   return (
     <div className={styles.pageWrapper}>
+      <Dialog open={!!alert} onClose={() => setAlert("")}>
+        <DialogContent>
+          <DialogContentText>{alert}</DialogContentText>
+        </DialogContent>
+      </Dialog>
       <article>
         <div className={styles.alignIconWithinCenteredTitle}>
           <ScannerIcon />
@@ -61,8 +92,19 @@ export default function Page() {
         <Typography paragraph textAlign={"center"}>
           Upload documents to chat with them.
         </Typography>
+        <Typography paragraph textAlign={"center"}>
+          Please refresh the page to see documents you just uploaded. It can
+          take a few minutes to process new documents.
+        </Typography>
         <Box textAlign="center">
-          <Button variant="contained">Upload</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              openFilePicker();
+            }}
+          >
+            Upload
+          </Button>
         </Box>
       </article>
       <Grid container spacing={4} columns={4}>
