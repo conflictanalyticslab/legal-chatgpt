@@ -43,6 +43,8 @@ export default function Page() {
   const { includedDocuments, setIncludedDocuments } = useIncludedDocuments();
   const { openFilePicker } = useFilePicker({
     accept: ".pdf",
+    // ArrayBuffer takes exactly as much space as the original file. DataURL, the default, would make it bigger.
+    readAs: "ArrayBuffer",
     validators: [
       new FileAmountLimitValidator({ max: 1 }),
       new FileSizeValidator({ maxFileSize: 5 * 1024 * 1024 /* 5 megabytes */ }),
@@ -51,10 +53,12 @@ export default function Page() {
       console.log(errors);
       setAlert("File is too big. We have a 5 Mb limit.");
     },
-    onFilesSuccessfullySelected: ({ plainFiles, filesContent }: any) => {
+    onFilesSuccessfullySelected: async ({ plainFiles, filesContent }: any) => {
       // this callback is called when there were no validation errors
       console.log("onFilesSuccessfullySelected", plainFiles, filesContent);
-      uploadPdfDocument(filesContent[0]);
+      const newDoc = await uploadPdfDocument(filesContent[0]);
+      setDocuments([...documents, newDoc]);
+      setIncludedDocuments([...includedDocuments, newDoc.uid]);
     },
   });
 
@@ -93,8 +97,7 @@ export default function Page() {
           Upload documents to chat with them.
         </Typography>
         <Typography paragraph textAlign={"center"}>
-          Please refresh the page to see documents you just uploaded. It can
-          take a few minutes to process new documents.
+          Your document will appear below when the upload is complete.
         </Typography>
         <Box textAlign="center">
           <Button
@@ -102,6 +105,7 @@ export default function Page() {
             onClick={() => {
               openFilePicker();
             }}
+            style={{ marginBottom: "32px" }}
           >
             Upload
           </Button>
@@ -124,9 +128,10 @@ export default function Page() {
                           )
                         );
                       } else {
-                        setIncludedDocuments(
-                          includedDocuments.concat([document.uid])
-                        );
+                        setIncludedDocuments([
+                          ...includedDocuments,
+                          document.uid,
+                        ]);
                       }
                     }}
                     style={{ color: "#006400" }}

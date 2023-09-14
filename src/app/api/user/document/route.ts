@@ -1,6 +1,8 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
+import { ocr } from "@/util/api/ocr";
+import { newDocument } from "@/util/api/newDocument";
 
 // Get all documents owned by the user in the authentication header
 export async function GET(_: Request) {
@@ -52,10 +54,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "File is missing" }, { status: 400 });
   }
 
-  // Set the maximum file size to 20MB (20 * 1024 * 1024 bytes)
-  // The frontend has a limit of 5 Mb instead of 20 Mb because the uncompressed
-  // blob is a different size
-  const maxSizeInBytes = 20 * 1024 * 1024;
+  // Set the maximum file size to 5 MB (5 * 1024 * 1024 bytes)
+  const maxSizeInBytes = 5 * 1024 * 1024;
 
   if (file.size > maxSizeInBytes) {
     return NextResponse.json(
@@ -69,8 +69,9 @@ export async function POST(req: Request) {
     );
   }
 
-  // TO DO: POST to Microsoft Azure OCR
-  console.log("Test");
+  const rawFile = await file.arrayBuffer();
+  const docText = await ocr(rawFile);
+  const newDoc = await newDocument(docText, file.name, decodedToken.user_id);
 
-  return NextResponse.json({}, { status: 202 });
+  return NextResponse.json(newDoc, { status: 200 });
 }

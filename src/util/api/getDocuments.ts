@@ -10,5 +10,7 @@ export async function getDocumentText(
   const querySnapshot = await getFirestore().getAll(
     ...documentIds.map((id) => getFirestore().doc(`documents/${id}`))
   );
-  return querySnapshot.map((doc) => doc.data() ?? {}) as any;
+  return querySnapshot
+    .map((doc) => doc.data() || null)
+    .filter((doc) => doc != null) as any;
 }

@@ -4,7 +4,6 @@ export type UserDocument = {
   uid: string;
   name: string;
   text: string;
-  uploadCompleted: boolean;
   userUid: string;
 };
 
