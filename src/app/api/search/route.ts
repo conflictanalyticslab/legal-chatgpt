@@ -35,12 +35,9 @@ export async function POST(req: Request) {
   //     },
   //     body: JSON.stringify({ synonyms: synonyms }),
   //   });
-  synonyms.map((s) => {
-    callSearchAPI(s);
-  });
+  const results = synonyms.flatMap((s) => callSearchAPI(s));
 
-  // TO DO: We need to decide what response we want.
-  return NextResponse.json({});
+  return NextResponse.json({ results });
 }
 
 const callSearchAPI = async (searchTerm: string) => {
@@ -49,19 +46,19 @@ const callSearchAPI = async (searchTerm: string) => {
   const page = 1;
   const pageLength = 20;
   const dataType = "full";
-  // const urlScholarsPortal = `/scholarsportal/search?q=((${searchTerm}))&page=${page}&page_length=${pageLength}&data=${dataType}&format=json`;
+  // const urlScholarsPortal = `https://journals.scholarsportal.info/search?q=((${searchTerm}))&page=${page}&page_length=${pageLength}&data=${dataType}&format=json`;
 
   // SerpAPI (Google Search)
   // reference: https://serpapi.com/search-api
-  // const urlSerpAPI = `/serpapi/search?engine=google&q="${searchTerm} site:www.canlii.org"&api_key=${process.env.NEXT_PUBLIC_SERPAPI_KEY}`;
+  // const urlSerpAPI = `https://serpapi.com/search?engine=google&q="${searchTerm} site:www.canlii.org"&api_key=${process.env.NEXT_PUBLIC_SERPAPI_KEY}`;
 
   // Google Search API
   // reference: https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list
-  const urlGoogleSearch = `/googlesearch/customsearch/v1/siterestrict?cx=${process.env.NEXT_PUBLIC_GOOGLE_SEARCH_ID}&q=${searchTerm}&key=${process.env.NEXT_PUBLIC_GOOGLE_SEARCH_KEY}`;
+  const urlGoogleSearch = `https://www.googleapis.com/customsearch/v1/siterestrict?cx=${process.env.NEXT_PUBLIC_GOOGLE_SEARCH_ID}&q=${searchTerm}&key=${process.env.NEXT_PUBLIC_GOOGLE_SEARCH_KEY}`;
 
   // Court Listener
   // reference: https://www.courtlistener.com/help/api/rest/#search-endpoint
-  const urlCourtListener = `/courtlistener/api/rest/v3/search/?q=${searchTerm}`;
+  const urlCourtListener = `https://www.courtlistener.com/api/rest/v3/search/?q=${searchTerm}`;
 
   try {
     const [resGoogleSearch, resCourtListener] = await Promise.all([
@@ -110,7 +107,7 @@ const callSearchAPI = async (searchTerm: string) => {
       body: JSON.stringify(results), // Assuming 'results' is the data you want to send
     });
 
-    console.log(elasticResults);
+    return elasticResults;
   } catch (e) {
     console.error(e);
   }
