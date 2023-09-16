@@ -182,8 +182,8 @@ function Chat({ wasSearched, setSearchTerm, loggedin }) {
             {
                 role: "user",
                 content:
-                    currentInput +
-                    " You answer should be no longer than 500 words.",
+                    currentInput 
+                    + " Should your response involve multiple scenarios, enumerate each scenario and present them on separate lines for better organization and clarity. At the beginning of each scenario, summarize the scenario. "
             },
         ];
         setConversation(newConversation);
@@ -410,13 +410,17 @@ function Chat({ wasSearched, setSearchTerm, loggedin }) {
                                 {i !== 0 && <Divider></Divider>}
                                 <div
                                     style={{
-                                        marginBlock: 40,
+                                        // marginBlock: 40,
+                                        paddingBlock: 40,
                                         overflowWrap: "break-word",
+                                        background: 'white',
+
                                     }}
                                 >
                                     <strong
                                         style={{
                                             marginRight: 10,
+                                            // marginLeft: 20
                                         }}
                                     >
                                         You:
