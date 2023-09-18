@@ -39,6 +39,7 @@ import Whatis from "@/images/Whatis.png";
 import Howto from "@/images/Howto.png";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { postConversation } from "@/util/requests/postConversation";
+import { useIncludedDocuments } from "@/hooks/useIncludedDocuments";
 
 type FeedbackReasonsI = {
   "Superficial Response": boolean;
@@ -55,6 +56,7 @@ export function Chat({
   setSearchTerm: (searchTerm: string) => void;
 }) {
   const router = useRouter();
+  const { includedDocuments } = useIncludedDocuments();
   const [userInputs, setUserInputs] = useState<string[]>([]);
   const [conversation, setConversation] = useState<
     {
@@ -169,7 +171,10 @@ export function Chat({
       setCurrentInput("");
       setNum(num - 1);
 
-      const response = await postConversation(fullConversation);
+      const response = await postConversation(
+        fullConversation,
+        includedDocuments
+      );
 
       if (!response.ok) {
         const errorData = await response.json();

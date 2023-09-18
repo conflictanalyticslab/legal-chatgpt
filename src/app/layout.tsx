@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
+import { IncludedDocumentsProvider } from "@/hooks/useIncludedDocuments";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -19,7 +20,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={roboto.className}>{children}</body>
+      <body className={roboto.className}>
+        <IncludedDocumentsProvider>{children}</IncludedDocumentsProvider>
+      </body>
     </html>
   );
 }
