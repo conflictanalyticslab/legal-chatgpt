@@ -319,7 +319,11 @@ export function Chat({
   }[];
 
   return (
-    <div>
+    <div
+      style={{
+        width: '100%'
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -329,7 +333,7 @@ export function Chat({
           <Image
             src={ChatPageOJ}
             style={{
-              width: "30%",
+              width: "22%",
               marginLeft: "3rem",
               marginTop: "1rem",
               maxHeight: "auto",
