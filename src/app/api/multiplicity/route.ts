@@ -4,7 +4,7 @@ import { queryOpenAi } from "@/util/api/queryOpenAi";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const { earlyResponse, decodedToken } = await authenticateApiUser();
+    const { earlyResponse, decodedToken } = await authenticateApiUser();
   if (earlyResponse) {
     return earlyResponse;
   }
@@ -33,7 +33,8 @@ export async function POST(req: Request) {
       messages: [
         {
           role: "system",
-          content: "Answer in 400 words or less. Short answers are better.",
+        //   content: "Reply like Snoop Dog"
+          content: "If your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses. If your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses.",
         },
         ...fullConversation,
       ],
@@ -66,6 +67,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       latestBotResponse: firstReplyContent,
+    //   latestBotResponse: firstReplyContent.replace(/(\d+\.\s+)/g, "$1\n"),
     });
   }
 
