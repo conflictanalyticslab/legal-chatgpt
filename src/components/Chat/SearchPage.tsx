@@ -22,7 +22,7 @@ const SearchPage = ({
   setSearchTerm: (searchTerm: string) => void;
 }) => {
 
-  const handleSearch = async (searchTerm: string) => {
+  const handleSearch = async (searchTerm: string, setSearchTerm: (searchTerm: string) => void) => {
     
     const searchResults = await postSearch(searchTerm);
     const results = await searchResults.json();
