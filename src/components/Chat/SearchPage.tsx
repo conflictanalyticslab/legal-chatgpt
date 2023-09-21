@@ -21,6 +21,25 @@ const SearchPage = ({
   wasSearched: boolean;
   setSearchTerm: (searchTerm: string) => void;
 }) => {
+
+  const handleSearch = async (searchTerm: string) => {
+    
+    const searchResults = await postSearch(searchTerm);
+    const results = await searchResults.json();
+    console.log(results);
+    const elasticUrl = process.env.NEXT_PUBLIC_ELASTICSEARCH_URL || "";
+    const elasticResults = await fetch(elasticUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_PRIVATE_SEARCH_KEY}`,
+      },
+      body: JSON.stringify(results), // Assuming 'results' is the data you want to send
+    });
+    
+    setSearchTerm(searchTerm);
+
+  }
   return (
     <ErrorBoundary>
       <Layout
@@ -29,7 +48,7 @@ const SearchPage = ({
             debounceLength={0}
             onSubmit={(searchTerm) => {
               // TO DO: Display the results.
-              postSearch(searchTerm);
+              handleSearch(searchTerm, setSearchTerm)
             }}
           />
         }
