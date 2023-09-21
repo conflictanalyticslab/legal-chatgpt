@@ -36,25 +36,30 @@ export async function POST(req: Request) {
   //     },
   //     body: JSON.stringify({ synonyms: synonyms }),
   //   });
-<<<<<<< Updated upstream
-  const results = synonyms.flatMap((s) => runSearch(s));
-
-  return NextResponse.json({ results });
-}
-=======
-  let results = [];
+  let results: any[] = [];
   for (const s of synonyms) {
     console.log(s)
     results = results.concat(await callSearchAPI(s));
     
   }
+
+  
+  const elasticUrl = process.env.NEXT_PUBLIC_ELASTICSEARCH_URL || "";
+  const elasticResults = await fetch(elasticUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_PRIVATE_SEARCH_KEY}`,
+    },
+    body: JSON.stringify(results), // Assuming 'results' is the data you want to send
+  });
   // synonyms.map((s) => {
   //   callSearchAPI(s);
   // });
   
-  console.log(results);
+  // console.log(results);
   // TO DO: We need to decide what response we want.
-  return NextResponse.json({results: results});
+  return NextResponse.json({});
 }
 
 const callSearchAPI = async (searchTerm: string) => {
@@ -78,12 +83,12 @@ const callSearchAPI = async (searchTerm: string) => {
   const urlCourtListener = `https://www.courtlistener.com/api/rest/v3/search/?q=${searchTerm}`;
 
   var results = [];
-  try {
-    const [resGoogleSearch, resCourtListener] = await Promise.all([
-      // fetch(urlScholarsPortal),
-      fetch(urlGoogleSearch),
-      fetch(urlCourtListener),
-    ]);
+
+  const [resGoogleSearch, resCourtListener] = await Promise.all([
+    // fetch(urlScholarsPortal),
+    fetch(urlGoogleSearch),
+    fetch(urlCourtListener),
+  ]);
     // const scholarsPortalJson = await resScholarsPortal.json();
     // for (const res of scholarsPortalJson.response.results
     //     .result) {
@@ -95,17 +100,21 @@ const callSearchAPI = async (searchTerm: string) => {
     //         source: "Journal Articles",
     //     });
     // }
-    // const googleJson = await resGoogleSearch.json();
-    // console.log(googleJson)
-    // for (const res of googleJson.items) {
-    //   results.push({
-    //     url: res.link,
-    //     abstract: res.snippet,
-    //     title: res.title,
-    //     source: "Canadian Case Law",
-    //   });
-    // }
-
+  try {
+    const googleJson = await resGoogleSearch.json();
+    console.log(googleJson)
+    for (const res of googleJson.items) {
+      results.push({
+        url: res.link,
+        abstract: res.snippet,
+        title: res.title,
+        source: "Canadian Case Law",
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  try {
     const courtListenerJson = await resCourtListener.json();
     for (const res of courtListenerJson.results) {
       results.push({
@@ -116,12 +125,11 @@ const callSearchAPI = async (searchTerm: string) => {
       });
     }
 
-    // console.log(results)
+  // console.log(results)
 
-    // console.log(elasticResults);
+  // console.log(elasticResults);
   } catch (e) {
-    console.error(e);
+  console.error(e);
   }
   return results;
 };
->>>>>>> Stashed changes
