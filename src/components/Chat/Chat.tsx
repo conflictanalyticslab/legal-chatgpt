@@ -299,6 +299,13 @@ export function Chat({
     handleButtonClickImage();
   };
 
+  const TextFormatter: React.FC<{ text: string }> = ({ text }) => {
+    const formattedText = text.replace(/(\d+\.\s+)/g, "<br />$1");
+    return (
+      <div dangerouslySetInnerHTML={{ __html: formattedText }} />
+    );
+  }
+
   const chatActions = [
     {
       id: 1,
@@ -464,7 +471,8 @@ export function Chat({
                         >
                           Bot:
                         </strong>
-                        {(responses[i].response).replace(/(\d+\.\s+)/g, "$1\n")}
+                        {/* {(responses[i].response).replace(/(\d+\.\s+)/g, "$1\n")} */}
+                        <TextFormatter text= {responses[i].response} /> 
                       </div>
 
                       {responses[i].is_satisfactory === "N/A" ? (
