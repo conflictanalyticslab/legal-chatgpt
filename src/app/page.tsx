@@ -52,7 +52,7 @@ function Hero() {
             >
               {/* \u00A0 is a non breaking space so text is all on one line but if we need to
                   we will split the text between the word AI and Designed */}
-                            {"Generative\u00A0AI Designed\u00A0for\u00A0Law"}
+              {"Generative\u00A0AI Designed\u00A0for\u00A0Law"}
             </Typography>
             <Typography
               variant="body1"
@@ -83,7 +83,7 @@ function Hero() {
               know if the answers it produces are not what you expect.
             </Typography>
             <Box sx={{ display: "flex", justifyContent: "center" }}>
-              <Button
+              {/* <Button
                 href="/login"
                 variant="contained"
                 sx={{
@@ -97,7 +97,7 @@ function Hero() {
                 }}
               >
                 Get Started
-              </Button>
+              </Button> */}
             </Box>
           </Grid>
         </GridContainer>
