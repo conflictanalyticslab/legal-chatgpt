@@ -21,6 +21,11 @@ const SearchPage = ({
   wasSearched: boolean;
   setSearchTerm: (searchTerm: string) => void;
 }) => {
+
+  const handleSearch = async (searchTerm: string, setSearchTerm: (searchTerm: string) => void) => {
+    const searchResults = await postSearch(searchTerm);
+    setSearchTerm(searchTerm);
+  }
   return (
     <ErrorBoundary>
       <Layout
@@ -29,7 +34,7 @@ const SearchPage = ({
             debounceLength={0}
             onSubmit={(searchTerm) => {
               // TO DO: Display the results.
-              postSearch(searchTerm);
+              handleSearch(searchTerm, setSearchTerm)
             }}
           />
         }

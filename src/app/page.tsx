@@ -52,7 +52,13 @@ function Hero() {
             >
               {/* \u00A0 is a non breaking space so text is all on one line but if we need to
                   we will split the text between the word AI and Designed */}
-              {"Experience\u00A0Generative\u00A0AI Designed\u00A0for\u00A0Law"}
+                            {"Generative\u00A0AI Designed\u00A0for\u00A0Law"}
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ marginTop: "30px", fontSize: "18px", textAlign: "left" }}
+            >
+              Our mission is to make Legal AI Dependable and Accessible.
             </Typography>
             <Typography
               variant="body1"

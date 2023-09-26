@@ -39,6 +39,7 @@ import Whatis from "@/images/Whatis.png";
 import Howto from "@/images/Howto.png";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { postConversation } from "@/util/requests/postConversation";
+import { useIncludedDocuments } from "@/hooks/useIncludedDocuments";
 import { postConversationMult } from "@/util/requests/postConversationMult";
 
 type FeedbackReasonsI = {
@@ -56,6 +57,7 @@ export function Chat({
   setSearchTerm: (searchTerm: string) => void;
 }) {
   const router = useRouter();
+  const { includedDocuments } = useIncludedDocuments();
   const [userInputs, setUserInputs] = useState<string[]>([]);
   const [conversation, setConversation] = useState<
     {
@@ -175,7 +177,10 @@ export function Chat({
       if (conversation.length === 0) {
         response = await postConversationMult(fullConversation);
       } else {
-        response = await postConversation(fullConversation);
+        response = await postConversation(
+          fullConversation,
+          includedDocuments
+        );
       };
       
 

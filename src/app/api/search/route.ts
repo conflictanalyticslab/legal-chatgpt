@@ -1,5 +1,6 @@
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { queryOpenAi } from "@/util/api/queryOpenAi";
+import { runSearch } from "@/util/api/runSearch";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -35,10 +36,28 @@ export async function POST(req: Request) {
   //     },
   //     body: JSON.stringify({ synonyms: synonyms }),
   //   });
-  synonyms.map((s) => {
-    callSearchAPI(s);
-  });
+  let results: any[] = [];
+  for (const s of synonyms) {
+    console.log(s)
+    results = results.concat(await callSearchAPI(s));
+    
+  }
 
+  
+  const elasticUrl = process.env.NEXT_PUBLIC_ELASTICSEARCH_URL || "";
+  const elasticResults = await fetch(elasticUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_PRIVATE_SEARCH_KEY}`,
+    },
+    body: JSON.stringify(results), // Assuming 'results' is the data you want to send
+  });
+  // synonyms.map((s) => {
+  //   callSearchAPI(s);
+  // });
+  
+  // console.log(results);
   // TO DO: We need to decide what response we want.
   return NextResponse.json({});
 }
@@ -57,19 +76,19 @@ const callSearchAPI = async (searchTerm: string) => {
 
   // Google Search API
   // reference: https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list
-  const urlGoogleSearch = `/googlesearch/customsearch/v1/siterestrict?cx=${process.env.NEXT_PUBLIC_GOOGLE_SEARCH_ID}&q=${searchTerm}&key=${process.env.NEXT_PUBLIC_GOOGLE_SEARCH_KEY}`;
+  const urlGoogleSearch = `https://www.googleapis.com/customsearch/v1/siterestrict?cx=${process.env.NEXT_PUBLIC_GOOGLE_SEARCH_ID}&q=${searchTerm}&key=${process.env.NEXT_PUBLIC_GOOGLE_SEARCH_KEY}`;
 
   // Court Listener
   // reference: https://www.courtlistener.com/help/api/rest/#search-endpoint
-  const urlCourtListener = `/courtlistener/api/rest/v3/search/?q=${searchTerm}`;
+  const urlCourtListener = `https://www.courtlistener.com/api/rest/v3/search/?q=${searchTerm}`;
 
-  try {
-    const [resGoogleSearch, resCourtListener] = await Promise.all([
-      // fetch(urlScholarsPortal),
-      fetch(urlGoogleSearch),
-      fetch(urlCourtListener),
-    ]);
-    const results = [];
+  var results = [];
+
+  const [resGoogleSearch, resCourtListener] = await Promise.all([
+    // fetch(urlScholarsPortal),
+    fetch(urlGoogleSearch),
+    fetch(urlCourtListener),
+  ]);
     // const scholarsPortalJson = await resScholarsPortal.json();
     // for (const res of scholarsPortalJson.response.results
     //     .result) {
@@ -81,7 +100,9 @@ const callSearchAPI = async (searchTerm: string) => {
     //         source: "Journal Articles",
     //     });
     // }
+  try {
     const googleJson = await resGoogleSearch.json();
+    console.log(googleJson)
     for (const res of googleJson.items) {
       results.push({
         url: res.link,
@@ -90,7 +111,10 @@ const callSearchAPI = async (searchTerm: string) => {
         source: "Canadian Case Law",
       });
     }
-
+  } catch (e) {
+    console.error(e);
+  }
+  try {
     const courtListenerJson = await resCourtListener.json();
     for (const res of courtListenerJson.results) {
       results.push({
@@ -100,18 +124,12 @@ const callSearchAPI = async (searchTerm: string) => {
         source: "U.S. Case Law",
       });
     }
-    const elasticUrl = process.env.NEXT_PUBLIC_ELASTICSEARCH_URL || "";
-    const elasticResults = await fetch(elasticUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_PRIVATE_SEARCH_KEY}`,
-      },
-      body: JSON.stringify(results), // Assuming 'results' is the data you want to send
-    });
 
-    console.log(elasticResults);
+  // console.log(results)
+
+  // console.log(elasticResults);
   } catch (e) {
-    console.error(e);
+  console.error(e);
   }
+  return results;
 };
