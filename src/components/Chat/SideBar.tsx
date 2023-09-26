@@ -24,20 +24,25 @@ export default function SideBar() {
     {
       id: 0,
       text: "About Us",
-      link: "https://myopencourt.org/about-us/",
+      link: "https://conflictanalytics.queenslaw.ca/",
     },
     {
       id: 1,
+      text: "Publications",
+      link: "https://conflictanalytics.queenslaw.ca/publications",
+    },
+    {
+      id: 2,
       text: "Blogs",
       link: "https://myopencourt.org/blog/",
     },
     {
-      id: 2,
+      id: 3,
       text: "FAQs",
       link: "https://myopencourt.org/faqs/",
     },
     {
-      id: 3,
+      id: 4,
       text: "Contact",
       link: "mailto:conflict.analytics@gmail.com",
     },
