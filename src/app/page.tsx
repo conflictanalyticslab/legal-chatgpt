@@ -52,7 +52,11 @@ function Hero() {
             >
               {/* \u00A0 is a non breaking space so text is all on one line but if we need to
                   we will split the text between the word AI and Designed */}
+<<<<<<< HEAD
               {"Generative\u00A0AI Designed\u00A0for\u00A0Law"}
+=======
+                            {"Generative\u00A0AI Designed\u00A0for\u00A0Law"}
+>>>>>>> 6fa42ffa5750c26104b9359de4c4673b133e46f0
             </Typography>
             <Typography
               variant="body1"

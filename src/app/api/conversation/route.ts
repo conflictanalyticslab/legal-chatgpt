@@ -1,6 +1,9 @@
+import { generatePromptFromDocuments } from "@/util/api/generatePromptFromDocuments";
+import { getDocumentText } from "@/util/api/getDocuments";
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { loadUser } from "@/util/api/middleware/loadUser";
 import { queryOpenAi } from "@/util/api/queryOpenAi";
+import { SearchResult, runSearch } from "@/util/api/runSearch";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -16,7 +19,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const { fullConversation } = await req.json();
+  const { fullConversation, includedDocuments } = await req.json();
   if (fullConversation.length === 0) {
     return NextResponse.json(
       { error: "fullConversation is empty" },
@@ -25,6 +28,8 @@ export async function POST(req: Request) {
   }
 
   const { user, userRef } = await loadUser(decodedToken);
+  const documents = await getDocumentText(includedDocuments);
+  const documentPrompt = generatePromptFromDocuments(documents);
 
   if (user && user.prompts_left > 0) {
     await userRef.update({ prompts_left: user.prompts_left - 1 });
@@ -33,7 +38,9 @@ export async function POST(req: Request) {
       messages: [
         {
           role: "system",
-          content: "Answer in 500 words or less. Short answers are better.",
+          content:
+            "Answer in 500 words or less. Short answers are better.\n\n" +
+            documentPrompt,
         },
         ...fullConversation,
       ],
@@ -57,16 +64,53 @@ export async function POST(req: Request) {
       ],
     });
 
-    // When we actually run searches, we will need to add another prompt to incorporate the information.
-    // We will also need to abstract the search logic out of /api/search so we can call it here as a function.
-    console.log(
-      "Search keywords (TO DO: Actually run a search)",
+    // Can run a search by calling
+    const searchResults = await runSearch(
       summarizeRes.choices[0].message.content
     );
 
-    return NextResponse.json({
-      latestBotResponse: firstReplyContent,
-    });
+    console.log("Search Results", searchResults);
+
+    if (Array.isArray(searchResults) && searchResults.length > 0) {
+      // const searchPrompt = searchResults
+      //   .map(
+      //     (result: SearchResult) =>
+      //       "Document title: " +
+      //       result.title +
+      //       "\n\nAbstract: " +
+      //       result.abstract
+      //   )
+      //   .join("\n\n");
+
+      // The chat context is too short when we include all the results. Revisit this when using a larger model.
+      // Can use tokenLength() to estimate the tokens used so far.
+      const searchPrompt = searchResults[0].abstract;
+
+      const secondReplyRes = await queryOpenAi({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Answer in 500 words or less. Short answers are better.\n\n" +
+              documentPrompt +
+              "\n\n" +
+              searchPrompt,
+          },
+          ...fullConversation,
+        ],
+      });
+
+      console.log("Logging second response from OpenAi", secondReplyRes);
+
+      return NextResponse.json({
+        latestBotResponse: secondReplyRes.choices[0].message.content,
+      });
+    } else {
+      return NextResponse.json({
+        latestBotResponse: firstReplyContent,
+      });
+    }
   }
 
   return NextResponse.json({ error: "No prompts left" }, { status: 403 });

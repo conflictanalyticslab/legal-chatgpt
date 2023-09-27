@@ -39,6 +39,8 @@ import Whatis from "@/images/Whatis.png";
 import Howto from "@/images/Howto.png";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { postConversation } from "@/util/requests/postConversation";
+import { useIncludedDocuments } from "@/hooks/useIncludedDocuments";
+import { postConversationMult } from "@/util/requests/postConversationMult";
 
 type FeedbackReasonsI = {
   "Superficial Response": boolean;
@@ -55,6 +57,7 @@ export function Chat({
   setSearchTerm: (searchTerm: string) => void;
 }) {
   const router = useRouter();
+  const { includedDocuments } = useIncludedDocuments();
   const [userInputs, setUserInputs] = useState<string[]>([]);
   const [conversation, setConversation] = useState<
     {
@@ -161,7 +164,7 @@ export function Chat({
       const fullConversation = conversation.concat([
         {
           role: "user",
-          content: currentInput,
+          content: currentInput,  
         },
       ]);
       setConversation(fullConversation);
@@ -169,7 +172,17 @@ export function Chat({
       setCurrentInput("");
       setNum(num - 1);
 
-      const response = await postConversation(fullConversation);
+      let response;
+      
+      if (conversation.length === 0) {
+        response = await postConversationMult(fullConversation);
+      } else {
+        response = await postConversation(
+          fullConversation,
+          includedDocuments
+        );
+      };
+      
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -178,7 +191,7 @@ export function Chat({
         return;
       }
 
-      const { latestBotResponse } = await response.json();
+      let { latestBotResponse } = await response.json();
 
       setResponses([
         ...responses,
@@ -196,6 +209,7 @@ export function Chat({
           },
         },
       ]);
+
       setConversation(
         conversation.concat([{ role: "assistant", content: latestBotResponse }])
       );
@@ -262,7 +276,7 @@ export function Chat({
   const [showStartupImage, setShowStartupImage] = useState(true);
 
   useEffect(() => {
-    // Check if Startup image flag is already set in local Storage
+    // Check if Startup image flag is already set in session Storage
     const isStartupImageHidden = sessionStorage.getItem("isStartupImageHidden");
     if (isStartupImageHidden === "true") {
       setShowStartupImage(false);
@@ -289,6 +303,13 @@ export function Chat({
     handleSubmit();
     handleButtonClickImage();
   };
+
+  const TextFormatter: React.FC<{ text: string }> = ({ text }) => {
+    const formattedText = text.replace(/(\d+\.\s+)/g, "<br />$1");
+    return (
+      <div dangerouslySetInnerHTML={{ __html: formattedText }} />
+    );
+  }
 
   const chatActions = [
     {
@@ -319,7 +340,11 @@ export function Chat({
   }[];
 
   return (
-    <div>
+    <div
+      style={{
+        width: '100%'
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -329,7 +354,7 @@ export function Chat({
           <Image
             src={ChatPageOJ}
             style={{
-              width: "30%",
+              width: "20%",
               marginLeft: "3rem",
               marginTop: "1rem",
               maxHeight: "auto",
@@ -451,7 +476,8 @@ export function Chat({
                         >
                           Bot:
                         </strong>
-                        {responses[i].response}
+                        {/* {(responses[i].response).replace(/(\d+\.\s+)/g, "$1\n")} */}
+                        <TextFormatter text= {responses[i].response} /> 
                       </div>
 
                       {responses[i].is_satisfactory === "N/A" ? (

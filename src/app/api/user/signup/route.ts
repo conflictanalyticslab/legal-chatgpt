@@ -19,7 +19,7 @@ export async function POST(req: Request) {
       password,
     });
 
-    getFirestore().collection("users").doc(user.uid).set({
+    await getFirestore().collection("users").doc(user.uid).set({
       email,
       conversations: [],
       role: "default",
