@@ -84,7 +84,7 @@ function Hero() {
               know if the answers it produces are not what you expect.
             </Typography>
             <Box sx={{ display: "flex", justifyContent: "center" }}>
-              {/* <Button
+              <Button
                 href="/login"
                 variant="contained"
                 sx={{
@@ -98,7 +98,7 @@ function Hero() {
                 }}
               >
                 Get Started
-              </Button> */}
+              </Button>
             </Box>
           </Grid>
         </GridContainer>

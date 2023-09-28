@@ -2,8 +2,6 @@ import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { loadUser } from "@/util/api/middleware/loadUser";
 import { queryOpenAi } from "@/util/api/queryOpenAi";
 import { NextResponse } from "next/server";
-import { getDocumentText } from "@/util/api/getDocuments";
-import { generatePromptFromDocuments } from "@/util/api/generatePromptFromDocuments";
 
 export async function POST(req: Request) {
     const { earlyResponse, decodedToken } = await authenticateApiUser();
@@ -18,7 +16,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const { fullConversation, includedDocuments } = await req.json();
+  const { fullConversation } = await req.json();
   if (fullConversation.length === 0) {
     return NextResponse.json(
       { error: "fullConversation is empty" },
@@ -27,8 +25,6 @@ export async function POST(req: Request) {
   }
 
   const { user, userRef } = await loadUser(decodedToken);
-  const documents = await getDocumentText(includedDocuments);
-  const documentPrompt = generatePromptFromDocuments(documents);
 
   if (user && user.prompts_left > 0) {
     await userRef.update({ prompts_left: user.prompts_left - 1 });
@@ -37,8 +33,8 @@ export async function POST(req: Request) {
       messages: [
         {
           role: "system",
-          // content: "Answer in 500 words or less. Short answers are better." 
-          content: "If the question does not encompass different scenarios, ignore the rest of the prompt. Else if your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses." + documentPrompt,
+        //   content: "Reply like Snoop Dog"
+          content: "If your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses. If your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses.",
         },
         ...fullConversation,
       ],
