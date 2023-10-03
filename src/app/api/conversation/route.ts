@@ -49,64 +49,73 @@ export async function POST(req: Request) {
     const firstReplyContent = firstReplyRes.choices[0].message.content;
     console.log("Logging response from OpenAi", firstReplyRes);
 
-    const summarizeRes = await queryOpenAi({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a searching the internet to find information related to this message. Pick two words to search. Output these words in lower case, no punctuation.",
-        },
-        {
-          role: "user",
-          content: firstReplyContent,
-        },
-      ],
-    });
-
-    // Can run a search by calling
-    const searchResults = await runSearch(
-      summarizeRes.choices[0].message.content
-    );
-
-    console.log("Search Results", searchResults);
-
-    if (Array.isArray(searchResults) && searchResults.length > 0) {
-      // const searchPrompt = searchResults
-      //   .map(
-      //     (result: SearchResult) =>
-      //       "Document title: " +
-      //       result.title +
-      //       "\n\nAbstract: " +
-      //       result.abstract
-      //   )
-      //   .join("\n\n");
-
-      // The chat context is too short when we include all the results. Revisit this when using a larger model.
-      // Can use tokenLength() to estimate the tokens used so far.
-      const searchPrompt = searchResults[0].abstract;
-
-      const secondReplyRes = await queryOpenAi({
+    try {
+      const summarizeRes = await queryOpenAi({
         model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
             content:
-              "Answer in 500 words or less. Short answers are better.\n\n" +
-              documentPrompt +
-              "\n\n" +
-              searchPrompt,
+              "You are a searching the internet to find information related to this message. Pick two words to search. Output these words in lower case, no punctuation.",
           },
-          ...fullConversation,
+          {
+            role: "user",
+            content: firstReplyContent,
+          },
         ],
       });
 
-      console.log("Logging second response from OpenAi", secondReplyRes);
+      const searchResults = await runSearch(
+        summarizeRes.choices[0].message.content
+      );
 
-      return NextResponse.json({
-        latestBotResponse: secondReplyRes.choices[0].message.content,
-      });
-    } else {
+      console.log("Search Results", searchResults);
+
+      if (Array.isArray(searchResults) && searchResults.length > 0) {
+        // const searchPrompt = searchResults
+        //   .map(
+        //     (result: SearchResult) =>
+        //       "Document title: " +
+        //       result.title +
+        //       "\n\nAbstract: " +
+        //       result.abstract
+        //   )
+        //   .join("\n\n");
+
+        // The chat context is too short when we include all the results. Revisit this when using a larger model.
+        // Can use tokenLength() to estimate the tokens used so far.
+        const searchPrompt = searchResults[0].abstract;
+
+        const secondReplyRes = await queryOpenAi({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content:
+                "Answer in 500 words or less. Short answers are better.\n\n" +
+                documentPrompt +
+                "\n\n" +
+                searchPrompt,
+            },
+            ...fullConversation,
+          ],
+        });
+
+        console.log("Logging second response from OpenAi", secondReplyRes);
+
+        return NextResponse.json({
+          latestBotResponse: secondReplyRes.choices[0].message.content,
+        });
+      } else {
+        return NextResponse.json({
+          latestBotResponse: firstReplyContent,
+        });
+      }
+    } catch (e) {
+      console.log(
+        "Encountered error when running search. Returning first reply.",
+        e
+      );
       return NextResponse.json({
         latestBotResponse: firstReplyContent,
       });

@@ -4,7 +4,7 @@ import { queryOpenAi } from "@/util/api/queryOpenAi";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-    const { earlyResponse, decodedToken } = await authenticateApiUser();
+  const { earlyResponse, decodedToken } = await authenticateApiUser();
   if (earlyResponse) {
     return earlyResponse;
   }
@@ -33,8 +33,8 @@ export async function POST(req: Request) {
       messages: [
         {
           role: "system",
-        //   content: "Reply like Snoop Dog"
-          content: "If your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses. If your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses.",
+          content:
+            "If your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses. If your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses.",
         },
         ...fullConversation,
       ],
@@ -43,31 +43,34 @@ export async function POST(req: Request) {
     const firstReplyContent = firstReplyRes.choices[0].message.content;
     console.log("Logging response from OpenAi", firstReplyRes);
 
-    const summarizeRes = await queryOpenAi({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a searching the internet to find information related to this message. Pick two words to search. Output these words in lower case, no punctuation.",
-        },
-        {
-          role: "user",
-          content: firstReplyContent,
-        },
-      ],
-    });
+    // See api/conversation/route.ts for how to run a search with runSearch()
+    try {
+      const summarizeRes = await queryOpenAi({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a searching the internet to find information related to this message. Pick two words to search. Output these words in lower case, no punctuation.",
+          },
+          {
+            role: "user",
+            content: firstReplyContent,
+          },
+        ],
+      });
 
-    // When we actually run searches, we will need to add another prompt to incorporate the information.
-    // We will also need to abstract the search logic out of /api/search so we can call it here as a function.
-    console.log(
-      "Search keywords (TO DO: Actually run a search)",
-      summarizeRes.choices[0].message.content
-    );
+      console.log(
+        "Search keywords (TO DO: Actually run a search)",
+        summarizeRes.choices[0].message.content
+      );
+    } catch (e) {
+      console.log(e);
+    }
 
     return NextResponse.json({
       latestBotResponse: firstReplyContent,
-    //   latestBotResponse: firstReplyContent.replace(/(\d+\.\s+)/g, "$1\n"),
+      //   latestBotResponse: firstReplyContent.replace(/(\d+\.\s+)/g, "$1\n"),
     });
   }
 
