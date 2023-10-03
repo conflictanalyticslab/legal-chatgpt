@@ -71,6 +71,19 @@ export async function POST(req: Request) {
 
   const rawFile = await file.arrayBuffer();
   const docText = await ocr(rawFile);
+
+  if (docText.length > 3000) {
+    return NextResponse.json(
+      {
+        error:
+          "File is too long. We limit files to 3000 characters including spaces. Yours is " +
+          docText.length +
+          " characters.",
+      },
+      { status: 400 }
+    );
+  }
+
   const newDoc = await newDocument(docText, file.name, decodedToken.user_id);
 
   return NextResponse.json(newDoc, { status: 200 });
