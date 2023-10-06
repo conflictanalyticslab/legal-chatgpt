@@ -52,8 +52,8 @@ function Hero() {
             >
               {/* \u00A0 is a non breaking space so text is all on one line but if we need to
                   we will split the text between the word AI and Designed */}
-              {/* {"Generative\u00A0AI Designed\u00A0for\u00A0Law"} */}
-              {"is\u00A0currently\u00A0down! We\u00A0are\u00A0implementing\u00A0new\u00A0features"}
+              {"Generative\u00A0AI Designed\u00A0for\u00A0Law"}
+              {/* {"is\u00A0currently\u00A0down! We\u00A0are\u00A0implementing\u00A0new\u00A0features"} */}
             </Typography>
             <Typography
               variant="body1"
