@@ -14,7 +14,6 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import Link from "@mui/material";
 
 import { auth } from "@/firebase";
 
@@ -22,7 +21,7 @@ import { getDatabase, ref, child, get } from "firebase/database";
 import { AppBackground, GridContainer, HeroBox } from "@/styles/styles";
 import { validEmailRegex } from "@/util/signup/validEmailRegex";
 
-export default function Login() {
+export default function Signup() {
   const Joi = require("joi");
   const router = useRouter();
 
@@ -192,7 +191,10 @@ export default function Login() {
         >
           <div style={{ marginTop: "18vh", marginBottom: "24px" }}>
             <Typography variant="h3" fontWeight={700} textAlign="center">
-              Welcome back
+                Create an account
+            </Typography>
+            <Typography variant="h5" fontWeight={700} textAlign="center" color="#11335D">
+                with a registered email
             </Typography>
           </div>
 
@@ -245,14 +247,13 @@ export default function Login() {
                     error={passwordError}
                     onChange={(e) => setPassword(e.target.value)}
                   />
-                  {/* <PasswordStrengthBar password={password} /> */}
                   <FormHelperText error={passwordError}>
                     {passHelper}
                   </FormHelperText>
                 </FormControl>
                 <Button
                   type="submit"
-                  onClick={handleSignin}
+                  onClick={handleSignup}
                   variant="contained"
                   sx={{
                     alignItems: "center",
@@ -266,36 +267,18 @@ export default function Login() {
                     mr: "2px",
                   }}
                 >
-                  Continue
+                  Sign up
                 </Button>
                 <div style={{ marginTop: "8px", marginBottom: "8px" }}>
-                  {"Don't have an account?"}&nbsp;
+                  {"Register your email with our"}&nbsp;
                   <a
                     // onClick={handleSignup}
                     href="/signup"
                     style={{ textDecoration: "underline", fontWeight: "bold" }}
                   >
-                    Sign up
+                    waitlist
                   </a>
                 </div>
-
-                {/* <div style={{ margin: 'auto', width: '350px', height: '15px', borderBottom: '2px solid #11335D', textAlign: 'center', alignItems: 'center'}}>
-                  <span style={{fontSize: '20px', backgroundColor: '#F3F5F6', padding: '0 10px', fontWeight: 'bold'}}>OR</span>
-              </div>
-
-              <Button
-              sx={{ width: '300px', height: '50px', fontSize: '16px', marginTop: '30px', backgroundColor: '#FFFFFF', color: 'black',  textTransform: 'none', mr: '2px', alignItems: 'center'}}
-              >
-                <img src={google_logo} style={{width: '14px', height: '14px', marginRight: '6px'}}/>
-                Continue with Google
-              </Button>
-              <Button
-                sx={{ alignItems: 'center', width: '300px', height: '50px', fontSize: '16px', marginTop: '30px', backgroundColor: '#FFFFFF', color: 'black',  textTransform: 'none', mr: '2px', alignItems: 'center'}}             
-              >
-                <img src={microsoft_logo} style={{width: '14px', height: '14px', marginRight: '6px'}}/>
-                Continue with Microsoft
-              </Button> */}
-
                 <FormHelperText error={Boolean(generalError)}>
                   {generalHelper}
                 </FormHelperText>
