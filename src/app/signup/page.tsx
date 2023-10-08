@@ -273,7 +273,7 @@ export default function Signup() {
                   {"Register your email with our"}&nbsp;
                   <a
                     // onClick={handleSignup}
-                    href="/signup"
+                    href="/waitlist"
                     style={{ textDecoration: "underline", fontWeight: "bold" }}
                   >
                     waitlist
