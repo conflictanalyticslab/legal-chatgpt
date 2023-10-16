@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { auth } from "@/firebase";
+import { useCallback, useState } from "react";
+import { getAuth, signOut } from "firebase/auth";
 import Link from "next/link";
 import styles from "@/styles/SideBar.module.css";
 
@@ -9,16 +9,13 @@ import ArticleIcon from "@mui/icons-material/Article";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { redirect } from "next/dist/server/api-utils";
+import { auth } from "@/firebase";
 
 export default function SideBar() {
-  const onLogout = () => {
-    try {
-      auth.signOut();
-      console.log("handle logout");
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const onLogout = useCallback(() => {
+    void auth.signOut();
+  }, [auth]);
 
   const navDataLink = [
     {
@@ -101,14 +98,16 @@ export default function SideBar() {
           <ArticleIcon />
           <span className={styles.linkText}>Documents</span>
         </Link>
-        <button
+        <Link
+          // style={{width:"100%"}}
+          href="/"
           key="logout-button"
           className={styles.sideitemConvo}
           onClick={onLogout}
         >
           <LogoutIcon />
           <span className={styles.linkText}>Logout</span>
-        </button>
+        </Link>
       </div>
     </div>
   );
