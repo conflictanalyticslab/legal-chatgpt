@@ -30,7 +30,7 @@ export default function Signup() {
       .email({ tlds: false })
       .pattern(validEmailRegex)
       .messages({
-        "string.pattern.base": "Email must be from an approved domain.",
+        "string.pattern.base": "Your email is not approved for access. See the link above for a list of approved institutional emails",
       }),
 
     password: Joi.string().messages({
@@ -81,6 +81,7 @@ export default function Signup() {
     setEmailError(false);
     setEmailHelper(
       "Please use an institutional email. For access, please contact us for assistance."
+      // "Your email is not approved for access. See here for a list of approved institutional emails"
     );
     setPasswordError(false);
     setPassHelper("");
@@ -193,8 +194,8 @@ export default function Signup() {
             <Typography variant="h3" fontWeight={700} textAlign="center">
                 Create an account
             </Typography>
-            <Typography variant="h5" fontWeight={700} textAlign="center" color="#11335D">
-                with a registered email
+            <Typography variant="h6" fontWeight={700} textAlign="center" color="#11335D">
+                with an email from <a href="/institutionsList">approved institutions</a>
             </Typography>
           </div>
 

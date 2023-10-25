@@ -474,7 +474,7 @@ export function Chat({
                             marginRight: 10,
                           }}
                         >
-                          Bot:
+                          OpenJustice:
                         </strong>
                         {/* {(responses[i].response).replace(/(\d+\.\s+)/g, "$1\n")} */}
                         <TextFormatter text= {responses[i].response} /> 
