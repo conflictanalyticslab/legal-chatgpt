@@ -428,7 +428,7 @@ export function Chat({
 
         <div
           style={{
-            height: "calc(100vh - 280px)",
+            height: "calc(100vh - 350px)",
             overflowY: "auto",
             width: "100%",
             paddingBlockStart: 20,
