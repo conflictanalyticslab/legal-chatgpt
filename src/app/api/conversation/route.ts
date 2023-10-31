@@ -29,8 +29,7 @@ export async function POST(req: Request) {
 
   const { user, userRef } = await loadUser(decodedToken);
   const documents = await getDocumentText(includedDocuments);
-  const documentPrompt = generatePromptFromDocuments(documents);
-
+  const documentPrompt = generatePromptFromDocuments(documents)
   if (user && user.prompts_left > 0) {
     await userRef.update({ prompts_left: user.prompts_left - 1 });
     const firstReplyRes = await queryOpenAi({
