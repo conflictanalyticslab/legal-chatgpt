@@ -33,7 +33,7 @@ function Hero() {
           alignItems="center"
           height="100%"
         >
-          <Grid item xs={12} md={7} maxWidth={"468"}>
+          <Grid item xs={12} md={7}>
             <Image
               src={mid_logo}
               alt="OpenJustice logo"
@@ -57,31 +57,9 @@ function Hero() {
             </Typography>
             <Typography
               variant="body1"
-              sx={{ marginTop: "30px", fontSize: "18px", textAlign: "left" }}
+              sx={{ marginTop: "30px", fontSize: "20px", textAlign: "left" }}
             >
-              Our mission is to make Legal AI Dependable and Accessible.
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{ marginTop: "30px", fontSize: "18px", textAlign: "left" }}
-            >
-              OpenJustice is an open-access AI technology designed to
-              efficiently address legal queries and provide comprehensive
-              answers by drawing upon diverse legal sources and narratives.
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{ marginTop: "20px", fontSize: "18px", textAlign: "left" }}
-            >
-              This is a research prototype designed to help law students and
-              lawyers to improve their legal skills.
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{ marginTop: "15px", fontSize: "18px", textAlign: "left" }}
-            >
-              OpenJustice is continuously learning and evolving. Please let us
-              know if the answers it produces are not what you expect.
+               Our mission is to make legal AI technology accessible and dependable. Built on state-of-the-art language models fine-tuned for law, OpenJustice can address complex legal queries and process and analyze legal documents. Drawing upon vast legal sources and narratives, OpenJustice aims to provide exhaustive and accurate responses and equip law students and lawyers with innovative research tools. As a continuously learning and evolving research prototype, we actively seek your input to improve the quality of our responses and ensure the dependability of OpenJustice
             </Typography>
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               <Button
@@ -100,6 +78,12 @@ function Hero() {
                 Get Started
               </Button>
             </Box>
+          </Grid>
+          <Grid style={{display: 'flex', gap: '3rem', paddingTop: '1rem'}}>
+          <Typography variant="h4"> Expert-led </Typography>
+          <Typography variant="h4"> Non-Profit </Typography>
+          <Typography variant="h4"> Open-source</Typography>
+          <Typography variant="h4"> Independent </Typography>
           </Grid>
         </GridContainer>
       </HeroBox>
