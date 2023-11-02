@@ -1,19 +1,14 @@
 import {
   getFirestore,
 } from "firebase-admin/firestore";
-import {
-  arrayUnion,
-  updateDoc,
-  doc
-} from "firebase/firestore";
-import { db } from "@/firebase";
+
+import { UserI } from "@/util/User";
 
 import { NextResponse } from "next/server";
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 
 import { initBackendFirebaseApp } from "@/util/api/middleware/initBackendFirebaseApp";
 import { userConverter } from "@/util/User";
-import { firestore } from "firebase-admin";
 
 // Get all documents owned by the user in the authentication header
 export async function GET(_: Request) {
@@ -75,10 +70,14 @@ export async function POST(req: Request) {
     console.log(docRef.id);
     const userDocRef = getFirestore().collection("users").doc(decodedToken.user_id).withConverter(userConverter);
     
-    const data = await userDocRef.get()
-    const to_update = ((data == null) ? [] : data.data().conversations).concat([docRef.id]);
-    console.log(to_update);
-    await userDocRef.update({conversations: to_update});
+    const data: UserI | undefined = (await userDocRef.get()).data();
+    if (typeof data != "undefined") {
+      const to_update = ((data == null) ? [] : data.conversations).concat([docRef.id]);
+
+    
+      console.log(to_update);
+      await userDocRef.update({conversations: to_update});
+    }
     return NextResponse.json(
       {
         docRef

@@ -4,6 +4,7 @@ import { queryOpenAi } from "@/util/api/queryOpenAi";
 import { NextResponse } from "next/server";
 import { getDocumentText } from "@/util/api/getDocuments";
 import { generatePromptFromDocuments } from "@/util/api/generatePromptFromDocuments";
+import { searchAndSummarize } from "@/util/api/searchAndSummarize";
 
 export async function POST(req: Request) {
   const { earlyResponse, decodedToken } = await authenticateApiUser();
@@ -47,35 +48,52 @@ export async function POST(req: Request) {
     const firstReplyContent = firstReplyRes.choices[0].message.content;
     console.log("Logging response from OpenAi", firstReplyRes);
 
+    
+    const {searchResults, toSearch} = await searchAndSummarize(firstReplyContent);
+
     // See api/conversation/route.ts for how to run a search with runSearch()
-    try {
-      const summarizeRes = await queryOpenAi({
+    if (Array.isArray(searchResults) && searchResults.length > 0) {
+      // const searchPrompt = searchResults
+      //   .map(
+      //     (result: SearchResult) =>
+      //       "Document title: " +
+      //       result.title +
+      //       "\n\nAbstract: " +
+      //       result.abstract
+      //   )
+      //   .join("\n\n");
+
+      // The chat context is too short when we include all the results. Revisit this when using a larger model.
+      // Can use tokenLength() to estimate the tokens used so far.
+      const searchPrompt = searchResults[0].abstract;
+
+      const secondReplyRes = await queryOpenAi({
         model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
             content:
-              "You are a searching the internet to find information related to this message. Pick two words to search. Output these words in lower case, no punctuation.",
+              "Answer in 500 words or less. Short answers are better.\n\n" +
+              documentPrompt +
+              "\n\n" +
+              searchPrompt,
           },
-          {
-            role: "user",
-            content: firstReplyContent,
-          },
+          ...fullConversation,
         ],
       });
 
-      console.log(
-        "Search keywords (TO DO: Actually run a search)",
-        summarizeRes.choices[0].message.content
-      );
-    } catch (e) {
-      console.log(e);
-    }
+      console.log("Logging second response from OpenAi", secondReplyRes);
 
-    return NextResponse.json({
-      latestBotResponse: firstReplyContent,
-      //   latestBotResponse: firstReplyContent.replace(/(\d+\.\s+)/g, "$1\n"),
-    });
+      return NextResponse.json({
+        latestBotResponse: secondReplyRes.choices[0].message.content,
+        toSearch: toSearch
+      });
+    } else {
+      return NextResponse.json({
+        latestBotResponse: firstReplyContent,
+        toSearch: toSearch
+      });
+    }
   }
 
   return NextResponse.json({ error: "No prompts left" }, { status: 403 });

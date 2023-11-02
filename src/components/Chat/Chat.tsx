@@ -116,6 +116,7 @@ export function Chat({
     isSatisfactory: null,
     message: null,
   });
+
   const [feedbackSelect, setFeedbackSelect] = useState<FeedbackReasonsI>({
     "Superficial Response": false,
     "Lacks Reasoning": false,
@@ -185,15 +186,16 @@ export function Chat({
         );
       };
       
-
       if (!response.ok) {
         const errorData = await response.json();
         setAlert(errorData.error);
         setLoading(false);
         return;
       }
+      
 
-      let { latestBotResponse } = await response.json();
+      let { latestBotResponse, toSearch } = await response.json();
+      
 
       setResponses([
         ...responses,
@@ -215,11 +217,16 @@ export function Chat({
       setConversation(
         conversation.concat([{ role: "assistant", content: latestBotResponse }])
       );
+
+      
+      setSearchTerm(toSearch);
     } catch (error) {
       console.error(error);
       setAlert("An unexpected error occured");
     } finally {
       setLoading(false);
+
+      
     }
   };
 
@@ -356,6 +363,7 @@ export function Chat({
       }}
     >
       <div
+        id="search-modal"
         style={{
           display: "flex",
         }}
