@@ -54,8 +54,11 @@ export const userConverter = {
       verified: user.verified,
     };
   },
-  fromFirestore: (snapshot: any, options: any) => {
-    const data = snapshot.data(options);
+  fromFirestore(
+    snapshot: FirebaseFirestore.QueryDocumentSnapshot
+  ): User {
+
+    const data = snapshot.data();
     return new User(
       data.email,
       data.conversations,
