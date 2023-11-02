@@ -8,7 +8,7 @@ export const searchAndSummarize = async (firstReplyContent: string) => {
           {
             role: "system",
             content:
-              "You are a searching the internet to find information related to this message. Please give two words to search in lower case, no punctuation.",
+              "You are a searching the internet to find information related to this message. Please give two words (and only those words) to search in lower case, no punctuation.",
           },
           {
             role: "user",
@@ -17,17 +17,26 @@ export const searchAndSummarize = async (firstReplyContent: string) => {
         ],
       });
   
-      let toSearch = summarizeRes.choices[0].message.content;
-  
-      toSearch = toSearch.split(':');
-      toSearch = toSearch[toSearch.length - 1].split(',');
-  
-      let results: any[] = [];
-      for (const s of toSearch) {
-        console.log(s)
-        results = results.concat(await callSearchAPI(s));
-        
-      }
+    let toSearch = summarizeRes.choices[0].message.content;
 
+    toSearch = toSearch.split(':');
+    toSearch = toSearch[toSearch.length - 1].split(',');
+
+    let results: any[] = [];
+    for (const s of toSearch) {
+      console.log(s)
+      results = results.concat(await callSearchAPI(s));
+      
+    }
+    
+    const elasticUrl = process.env.NEXT_PUBLIC_ELASTICSEARCH_URL || "";
+    const elasticResults = await fetch(elasticUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_PRIVATE_SEARCH_KEY}`,
+      },
+      body: JSON.stringify(results), // Assuming 'results' is the data you want to send
+    });
     return {searchResults: results, toSearch: summarizeRes.choices[0].message.content}
 }
