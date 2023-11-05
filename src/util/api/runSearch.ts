@@ -5,19 +5,17 @@ export type SearchResult = {
   abstract: string;
 };
 
-export const runSearch = async (
-  searchTerm: string
-): Promise<SearchResult[]> => {
+export const callSearchAPI = async (searchTerm: string) => {
   // Scholars Portal
   // reference: https://github.com/scholarsportal/text-mining/blob/main/corpus-builder.py
   const page = 1;
   const pageLength = 20;
   const dataType = "full";
-  // const urlScholarsPortal = `https://journals.scholarsportal.info/search?q=((${searchTerm}))&page=${page}&page_length=${pageLength}&data=${dataType}&format=json`;
+  // const urlScholarsPortal = `/scholarsportal/search?q=((${searchTerm}))&page=${page}&page_length=${pageLength}&data=${dataType}&format=json`;
 
   // SerpAPI (Google Search)
   // reference: https://serpapi.com/search-api
-  // const urlSerpAPI = `https://serpapi.com/search?engine=google&q="${searchTerm} site:www.canlii.org"&api_key=${process.env.NEXT_PUBLIC_SERPAPI_KEY}`;
+  // const urlSerpAPI = `/serpapi/search?engine=google&q="${searchTerm} site:www.canlii.org"&api_key=${process.env.NEXT_PUBLIC_SERPAPI_KEY}`;
 
   // Google Search API
   // reference: https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list
@@ -27,13 +25,13 @@ export const runSearch = async (
   // reference: https://www.courtlistener.com/help/api/rest/#search-endpoint
   const urlCourtListener = `https://www.courtlistener.com/api/rest/v3/search/?q=${searchTerm}`;
 
-  try {
-    const [resGoogleSearch, resCourtListener] = await Promise.all([
-      // fetch(urlScholarsPortal),
-      fetch(urlGoogleSearch),
-      fetch(urlCourtListener),
-    ]);
-    const results = [];
+  var results = [];
+
+  const [resGoogleSearch, resCourtListener] = await Promise.all([
+    // fetch(urlScholarsPortal),
+    fetch(urlGoogleSearch),
+    fetch(urlCourtListener),
+  ]);
     // const scholarsPortalJson = await resScholarsPortal.json();
     // for (const res of scholarsPortalJson.response.results
     //     .result) {
@@ -45,7 +43,9 @@ export const runSearch = async (
     //         source: "Journal Articles",
     //     });
     // }
+  try {
     const googleJson = await resGoogleSearch.json();
+    // console.log(googleJson)
     for (const res of googleJson.items) {
       results.push({
         url: res.link,
@@ -54,7 +54,10 @@ export const runSearch = async (
         source: "Canadian Case Law",
       });
     }
-
+  } catch (e) {
+    console.error(e);
+  }
+  try {
     const courtListenerJson = await resCourtListener.json();
     for (const res of courtListenerJson.results) {
       results.push({
@@ -65,20 +68,11 @@ export const runSearch = async (
       });
     }
 
-    // Upload results to ElasticCloud
-    // const elasticUrl = process.env.NEXT_PUBLIC_ELASTICSEARCH_URL || "";
-    // await fetch(elasticUrl, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: `Bearer ${process.env.NEXT_PUBLIC_PRIVATE_SEARCH_KEY}`,
-    //   },
-    //   body: JSON.stringify(results),
-    // });
+  // console.log(results)
 
-    return results;
+  // console.log(elasticResults);
   } catch (e) {
-    console.error(e);
-    return [];
+  console.error(e);
   }
+  return results;
 };

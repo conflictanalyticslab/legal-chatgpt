@@ -39,6 +39,8 @@ import Whatis from "@/images/Whatis.png";
 import Howto from "@/images/Howto.png";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { postConversation } from "@/util/requests/postConversation";
+
+import { postConversationSave } from "@/util/requests/postConversationSave";
 import { useIncludedDocuments } from "@/hooks/useIncludedDocuments";
 import { postConversationMult } from "@/util/requests/postConversationMult";
 
@@ -114,6 +116,7 @@ export function Chat({
     isSatisfactory: null,
     message: null,
   });
+
   const [feedbackSelect, setFeedbackSelect] = useState<FeedbackReasonsI>({
     "Superficial Response": false,
     "Lacks Reasoning": false,
@@ -183,15 +186,16 @@ export function Chat({
         );
       };
       
-
       if (!response.ok) {
         const errorData = await response.json();
         setAlert(errorData.error);
         setLoading(false);
         return;
       }
+      
 
-      let { latestBotResponse } = await response.json();
+      let { latestBotResponse, toSearch } = await response.json();
+      
 
       setResponses([
         ...responses,
@@ -213,11 +217,16 @@ export function Chat({
       setConversation(
         conversation.concat([{ role: "assistant", content: latestBotResponse }])
       );
+
+      
+      setSearchTerm(toSearch);
     } catch (error) {
       console.error(error);
       setAlert("An unexpected error occured");
     } finally {
       setLoading(false);
+
+      
     }
   };
 
@@ -259,7 +268,14 @@ export function Chat({
       // setAlert(
       //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
       // );
-      window.location.reload();
+      const response = (await postConversationSave(conversation, includedDocuments));
+      setAlert(
+        `Conversation successfully saved in Firebase.`
+      );
+      setTimeout(function() {
+          
+        window.location.reload();}, 
+        1000);
     } catch (e) {
       setAlert(`Error saving conversation: ${e}`);
     }
@@ -331,6 +347,7 @@ export function Chat({
       id: 4,
       icon: <SaveIcon />,
       title: "Save Conversation",
+      onClick: handleSave,
     },
   ] as {
     id: number;
@@ -346,6 +363,7 @@ export function Chat({
       }}
     >
       <div
+        id="search-modal"
         style={{
           display: "flex",
         }}
@@ -428,7 +446,7 @@ export function Chat({
 
         <div
           style={{
-            height: "calc(100vh - 280px)",
+            height: "calc(100vh - 350px)",
             overflowY: "auto",
             width: "100%",
             paddingBlockStart: 20,
