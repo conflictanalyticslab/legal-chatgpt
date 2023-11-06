@@ -54,6 +54,36 @@ export const userConverter = {
       verified: user.verified,
     };
   },
+
+
+  fromFirestore(
+    snapshot: FirebaseFirestore.QueryDocumentSnapshot
+  ): UserI {
+
+    const data = snapshot.data();
+    return new User(
+      data.email,
+      data.conversations,
+      data.role,
+      data.prompts_allowed,
+      data.prompts_left,
+      data.verified
+    );
+  },
+};
+
+
+export const userConverterOld = {
+  toFirestore: (user: UserI) => {
+    return {
+      email: user.email,
+      conversations: user.conversations,
+      role: user.role,
+      prompts_left: user.prompts_left,
+      prompts_allowed: user.prompts_allowed,
+      verified: user.verified,
+    };
+  },
   fromFirestore: (snapshot: any, options: any) => {
     const data = snapshot.data(options);
     return new User(
@@ -65,4 +95,4 @@ export const userConverter = {
       data.verified
     );
   },
-};
+}

@@ -1,8 +1,14 @@
-import { getFirestore } from "firebase-admin/firestore";
+import {
+  getFirestore,
+} from "firebase-admin/firestore";
+
+import { UserI } from "@/util/User";
+
 import { NextResponse } from "next/server";
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
-import { ocr } from "@/util/api/ocr";
-import { newDocument } from "@/util/api/newDocument";
+
+import { initBackendFirebaseApp } from "@/util/api/middleware/initBackendFirebaseApp";
+import { userConverter } from "@/util/User";
 
 // Get all documents owned by the user in the authentication header
 export async function GET(_: Request) {
@@ -19,7 +25,7 @@ export async function GET(_: Request) {
   }
 
   const queryResults = await getFirestore()
-    .collection("documents")
+    .collection("conversations")
     .where("userUid", "==", decodedToken.user_id)
     .get();
 
@@ -35,6 +41,7 @@ export async function GET(_: Request) {
 // This endpoint requires Node v20 or later
 // If this is failing locally, check your node version by running `node -v` in the terminal
 export async function POST(req: Request) {
+
   const { earlyResponse, decodedToken } = await authenticateApiUser();
   if (earlyResponse) {
     return earlyResponse;
@@ -47,44 +54,38 @@ export async function POST(req: Request) {
     );
   }
 
-  const data = await req.formData();
-  const file: File | null = data.get("file") as unknown as File;
+  const { fullConversation, includedDocuments } = await req.json();
 
-  if (!file) {
-    return NextResponse.json({ error: "File is missing" }, { status: 400 });
-  }
+  initBackendFirebaseApp();
+  
+  try {
 
-  // Set the maximum file size to 5 MB (5 * 1024 * 1024 bytes)
-  const maxSizeInBytes = 5 * 1024 * 1024;
+    const docRef = await getFirestore().collection("conversations").doc()
+    
+    await docRef.create({
+      conversation: fullConversation,
+      documents: includedDocuments,
+    });
 
-  if (file.size > maxSizeInBytes) {
+    console.log(docRef.id);
+    const userDocRef = getFirestore().collection("users").doc(decodedToken.user_id).withConverter(userConverter);
+    
+    const data: UserI | undefined = (await userDocRef.get()).data();
+    if (typeof data != "undefined") {
+      const to_update = ((data == null) ? [] : data.conversations).concat([docRef.id]);
+
+    
+      console.log(to_update);
+      await userDocRef.update({conversations: to_update});
+    }
     return NextResponse.json(
       {
-        error:
-          "File exceeds the maximum allowed size (20MB) Yours is " +
-          file.size / 1024 / 1024 +
-          " megabytes",
+        docRef
       },
-      { status: 400 }
+      { status: 201 }
     );
+  } catch (error: any) {
+    console.error(error.message);
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
-
-  const rawFile = await file.arrayBuffer();
-  const docText = await ocr(rawFile);
-
-  if (docText.length > 3000) {
-    return NextResponse.json(
-      {
-        error:
-          "File is too long. We limit files to 3000 characters including spaces. Yours is " +
-          docText.length +
-          " characters.",
-      },
-      { status: 400 }
-    );
-  }
-
-  const newDoc = await newDocument(docText, file.name, decodedToken.user_id);
-
-  return NextResponse.json(newDoc, { status: 200 });
 }

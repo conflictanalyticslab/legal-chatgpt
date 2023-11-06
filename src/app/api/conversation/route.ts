@@ -3,7 +3,8 @@ import { getDocumentText } from "@/util/api/getDocuments";
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { loadUser } from "@/util/api/middleware/loadUser";
 import { queryOpenAi } from "@/util/api/queryOpenAi";
-import { SearchResult, runSearch } from "@/util/api/runSearch";
+import { SearchResult, callSearchAPI } from "@/util/api/runSearch";
+import { searchAndSummarize } from "@/util/api/searchAndSummarize";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -48,27 +49,9 @@ export async function POST(req: Request) {
     const firstReplyContent = firstReplyRes.choices[0].message.content;
     console.log("Logging response from OpenAi", firstReplyRes);
 
-    const summarizeRes = await queryOpenAi({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a searching the internet to find information related to this message. Pick two words to search. Output these words in lower case, no punctuation.",
-        },
-        {
-          role: "user",
-          content: firstReplyContent,
-        },
-      ],
-    });
+    const {searchResults, toSearch} = await searchAndSummarize(firstReplyContent);
 
-    // Can run a search by calling
-    const searchResults = await runSearch(
-      summarizeRes.choices[0].message.content
-    );
-
-    console.log("Search Results", searchResults);
+    // console.log("Search Results", searchResults);
 
     if (Array.isArray(searchResults) && searchResults.length > 0) {
       // const searchPrompt = searchResults
@@ -104,10 +87,12 @@ export async function POST(req: Request) {
 
       return NextResponse.json({
         latestBotResponse: secondReplyRes.choices[0].message.content,
+        toSearch: toSearch
       });
     } else {
       return NextResponse.json({
         latestBotResponse: firstReplyContent,
+        toSearch: toSearch
       });
     }
   }

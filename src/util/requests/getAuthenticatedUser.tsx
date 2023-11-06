@@ -1,5 +1,5 @@
 import { auth, db } from "@/firebase";
-import { UserI, userConverter } from "@/util/User";
+import { UserI, userConverterOld } from "@/util/User";
 import { FirebaseError } from "firebase/app";
 import { getDoc, doc } from "firebase/firestore";
 
@@ -12,7 +12,7 @@ export async function getAuthenticatedUser(): Promise<UserI | null> {
       throw new FirebaseError("400", "User is not signed in");
     } else {
       const docRef = doc(db, "users", auth.currentUser.uid).withConverter(
-        userConverter
+        userConverterOld
       );
       const docSnap = await getDoc(docRef);
 
