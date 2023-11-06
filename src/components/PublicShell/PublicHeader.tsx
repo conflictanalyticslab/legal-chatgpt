@@ -35,8 +35,9 @@ export function PublicHeader() {
     { id: 2, route: "Publications", url: "https://conflictanalytics.queenslaw.ca/publications" },
     { id: 3, route: 'Blogs', url: "https://myopencourt.org/blog/"},
     { id: 4, route: "FAQs", url: "https://myopencourt.org/faqs/" },
-    { id: 5, route: "Sign In", url: "/login" },
-    { id: 6, route: "Waitlist", url: "/waitlist"}
+    { id: 5, route: 'Contributors', url: '/contributors'},
+    { id: 6, route: "Waitlist", url: "/waitlist"},
+    { id: 7, route: "Sign In", url: "/login" },
   ];
 
   const [state, setState] = React.useState({

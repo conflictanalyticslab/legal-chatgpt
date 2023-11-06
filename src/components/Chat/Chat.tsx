@@ -242,7 +242,6 @@ export function Chat({
       message: null,
     });
   };
-
   const handleSave = async () => {
     setSaving(true);
     try {
