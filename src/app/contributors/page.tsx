@@ -26,8 +26,8 @@ import ULeiden from "../../images/contributorsLogo/ULeiden.png";
 
 export default function Contributors() {
 
-    const images = require.context('../../images', true);
-    const imageList = images.keys().map(image => images(image));
+    // const images = require.context('../../images', true);
+    // const imageList = images.keys().map(image => images(image));
 
     return (
         <AppBackground>
@@ -55,31 +55,31 @@ export default function Contributors() {
             <div style={{ width: '100%', display: 'flex', justifyContent: 'center'}}>
                 <div style={{ width: '30%', paddingRight: '2rem'}}> 
                     <Typography variant="h4" fontWeight={700} textAlign='center'>US</Typography>
-                    <Image src={UCLALaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={NorthWesternLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={WisconsinLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={CornellLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={FSULaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={HarvardLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={IOWALaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={PennCareyLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi 'src={UCLALaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={NorthWesternLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={WisconsinLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={CornellLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={FSULaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={HarvardLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={IOWALaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={PennCareyLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
                 </div>
 
                 <div style={{ width: '30%', paddingRight: '2rem'}}> 
                     <Typography variant="h4" fontWeight={700} textAlign='center'>Canada</Typography>
-                    <Image src={QueensLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={UTorontoLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={McGillLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={UManitobaLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={UCalgaryLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={QueensLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={UTorontoLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={McGillLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={UManitobaLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={UCalgaryLaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
                 </div>
 
                 <div style={{ width: '30%'}}> 
                     <Typography variant="h4" fontWeight={700} textAlign='center'>Europe</Typography>
-                    <Image src={ULeiden} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={IELaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={ULille} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
-                    <Image src={Dauphine} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={ULeiden} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={IELaw} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={ULille} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
+                    <Image alt = 'hi' src={Dauphine} style={{paddingRight:'0.5rem', marginBottom: '0.5rem', maxHeight:'5rem', width: 'auto'}}></Image>
                 </div>
             </div>
 
