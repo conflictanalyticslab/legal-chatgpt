@@ -1,4 +1,4 @@
-import queryLlama2 from "./llama2"
+import queryLlama2 from "../api/queryLlama2"
 
 const data =  {
     "messages": [
