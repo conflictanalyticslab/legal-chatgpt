@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     // set a 1 second time out between llama2 requests for stability
     setTimeout(async () => {
       try {
-         res = await queryLlama2({
+        res = await queryLlama2({
           messages: [
             {
               role: "user",
