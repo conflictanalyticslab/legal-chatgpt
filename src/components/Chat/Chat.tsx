@@ -37,6 +37,7 @@ import { auth } from "@/firebase";
 import ChatPageOJ from "@/images/ChatPageOJ.png";
 import Whatis from "@/images/Whatis.png";
 import Howto from "@/images/Howto.png";
+import Paperclip from "@/images/paperclip.jpeg";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { postConversation } from "@/util/requests/postConversation";
 
@@ -626,32 +627,42 @@ export function Chat({
                             }}
                         /> */}
               <div style={{ height: 20 }}></div>
-              <OutlinedInput
-                // fullWidth
-                style={{ width: "95%", margin: "auto", display: "flex" }}
-                required
-                placeholder="Prompt"
-                value={currentInput}
-                onChange={(e) => setCurrentInput(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleSubmit();
-                    handleKeyDownImage();
-                  }
-                }}
-                multiline={true}
-                maxRows={4}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <LoadingButton
-                      onClick={textBoxSubmission}
-                      loading={loading}
-                    >
-                      <Send></Send>
-                    </LoadingButton>
-                  </InputAdornment>
-                }
-              ></OutlinedInput>
+              <div style={{ display: "flex", justifyContent: "space-between", width: "95%", margin: "auto" }}>
+                <button>
+                    <Image
+                        src={Paperclip}
+                        alt="Paperclip"
+                        onClick={handleButtonClickImage}
+                    />
+                </button>
+
+                <OutlinedInput
+                    // fullWidth
+                    style={{ width: "90%", display: "flex" }}
+                    required
+                    placeholder="Prompt"
+                    value={currentInput}
+                    onChange={(e) => setCurrentInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        handleSubmit();
+                        handleKeyDownImage();
+                      }
+                    }}
+                    multiline={true}
+                    maxRows={4}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <LoadingButton
+                          onClick={textBoxSubmission}
+                          loading={loading}
+                        >
+                          <Send></Send>
+                        </LoadingButton>
+                      </InputAdornment>
+                    }
+                  ></OutlinedInput>
+            </div>
               <div
                 style={{
                   display: "flex",

@@ -1,9 +1,9 @@
 import { queryOpenAi } from "./queryOpenAi";
-import {queryLlama2} from "./queryLlama2";
+import queryLlama2 from "./queryLlama2";
 import { callSearchAPI } from "./runSearch";
 
 export const searchAndSummarize = async (firstReplyContent: string) => {
-    const summarizeRes = await queryOpenAi({
+    let summarizeRes = await queryOpenAi({
       model: "gpt-3.5-turbo",
       messages: [
         {
@@ -25,7 +25,7 @@ export const searchAndSummarize = async (firstReplyContent: string) => {
       // set a 1 second time out between llama2 requests for stability
       setTimeout(async () => {
         try {
-          const summarizeRes = await queryLlama2({
+          summarizeRes = await queryLlama2({
             messages: [
               {
                 role: "system",

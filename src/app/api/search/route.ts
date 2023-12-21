@@ -1,6 +1,6 @@
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { queryOpenAi } from "@/util/api/queryOpenAi";
-import { queryLlama2 } from "@/util/api/queryLlama2";
+import queryLlama2 from "@/util/api/queryLlama2";
 import { callSearchAPI } from "@/util/api/runSearch";
 import { NextResponse } from "next/server";
 
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   }
 
   const { searchTerm } = await req.json();
-  const res = await queryOpenAi({
+  let res = await queryOpenAi({
     model: "gpt-3.5-turbo",
     messages: [
       {
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     // set a 1 second time out between llama2 requests for stability
     setTimeout(async () => {
       try {
-        const res = await queryLlama2({
+        res = await queryLlama2({
           messages: [
             {
               role: "user",
