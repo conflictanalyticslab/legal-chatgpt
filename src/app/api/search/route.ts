@@ -1,5 +1,6 @@
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { queryOpenAi } from "@/util/api/queryOpenAi";
+import queryLlama2 from "@/util/api/queryLlama2";
 import { callSearchAPI } from "@/util/api/runSearch";
 import { NextResponse } from "next/server";
 
@@ -12,7 +13,7 @@ export async function POST(req: Request) {
   }
 
   const { searchTerm } = await req.json();
-  const res = await queryOpenAi({
+  let res = await queryOpenAi({
     model: "gpt-3.5-turbo",
     messages: [
       {
@@ -21,6 +22,31 @@ export async function POST(req: Request) {
       },
     ],
   });
+
+  if (!res || !res.choices || res.choices.length === 0) {
+    console.error("Error from OpenAI: " + res);
+    console.log("switching to llama2");
+
+    // set a 1 second time out between llama2 requests for stability
+    setTimeout(async () => {
+      try {
+        res = await queryLlama2({
+          messages: [
+            {
+              role: "user",
+              content: `Search term: ${searchTerm}. Can you provide me with some synonyms for this search term, or fix any typo in this search term? Put the top 3 fixed results in a csv and just return that. For example, your response should just be: word1, word2, word3`,
+            },
+          ],
+        });
+        console.log("Logging response from llama2", res.choices[0].message.content);
+      } catch (error) {
+        console.error("queryLlama2 failed: " + error);
+      }
+    }, 1000);
+
+    
+
+  }
 
   console.log(res);
   let synonyms = [searchTerm].concat(

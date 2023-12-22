@@ -34,7 +34,7 @@
     "react-dom": "18.2.0",
     "sharp": "^0.32.5",
     "typescript": "^5.2.2",
-    "use-file-picker": "^2.0.0"
-  },
-  "devDependencies": {}
+    "use-file-picker": "^2.0.0",
+    "yarn": "^1.22.21"
+  }
 }

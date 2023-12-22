@@ -3,6 +3,7 @@ import { getDocumentText } from "@/util/api/getDocuments";
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { loadUser } from "@/util/api/middleware/loadUser";
 import { queryOpenAi } from "@/util/api/queryOpenAi";
+import queryLlama2 from "@/util/api/queryLlama2";
 import { SearchResult, callSearchAPI } from "@/util/api/runSearch";
 import { searchAndSummarize } from "@/util/api/searchAndSummarize";
 import { NextResponse } from "next/server";
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
 
   if (user && user.prompts_left > 0) {
     await userRef.update({ prompts_left: user.prompts_left - 1 });
-    const firstReplyRes = await queryOpenAi({
+    let firstReplyRes = await queryOpenAi({
       model: "gpt-3.5-turbo",
       messages: [
         {
@@ -47,9 +48,34 @@ export async function POST(req: Request) {
       ],
     });
 
+    if (!firstReplyRes || !firstReplyRes.choices || firstReplyRes.choices.length === 0) {
+        console.error("Error from OpenAI: " + firstReplyRes);
+        console.log("switching to llama2");
+
+        // set a 1 second time out between llama2 requests for stability
+        setTimeout(async () => {
+          try {
+            firstReplyRes = await queryLlama2({
+              "documents": [
+                {
+                  "role": "user",
+                  "content": documentPrompt
+                },
+                ...fullConversation
+              ]
+            });
+            console.log("Logging response from llama2", firstReplyRes.choices[0].message.content);
+          } catch (error) {
+            console.error("queryLlama2 failed: " + error);
+          }
+        }, 1000);
+
+        
+
+    }
+
     const firstReplyContent = firstReplyRes.choices[0].message.content;
     console.log("Logging response from OpenAi", firstReplyRes);
-
     const {searchResults, toSearch} = await searchAndSummarize(firstReplyContent);
 
     // console.log("Search Results", searchResults);
