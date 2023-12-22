@@ -24,6 +24,7 @@ import {
   Paper,
   Tooltip,
 } from "@mui/material";
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import RefreshIcon from "@mui/icons-material/Refresh";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
@@ -40,6 +41,9 @@ import Howto from "@/images/Howto.png";
 import Paperclip from "@/images/paperclip.jpeg";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { postConversation } from "@/util/requests/postConversation";
+// uncomment the following when working on pdf upload
+// import { uploadPdfDocument } from "@/util/requests/uploadPdfDocument";
+// import { useFilePicker } from "use-file-picker";
 
 import { postConversationSave } from "@/util/requests/postConversationSave";
 import { useIncludedDocuments } from "@/hooks/useIncludedDocuments";
@@ -628,17 +632,17 @@ export function Chat({
                         /> */}
               <div style={{ height: 20 }}></div>
               <div style={{ display: "flex", justifyContent: "space-between", width: "95%", margin: "auto" }}>
-                <button>
-                    <Image
-                        src={Paperclip}
-                        alt="Paperclip"
-                        onClick={handleButtonClickImage}
-                    />
-                </button>
+                <IconButton
+                  title="Attach a PDF File"
+                  key={5}
+                  // onClick={uploadPdfDocument}
+                >
+                  <AttachFileIcon />
+                </IconButton>
 
                 <OutlinedInput
                     // fullWidth
-                    style={{ width: "90%", display: "flex" }}
+                    style={{ width: "95%", display: "flex" }}
                     required
                     placeholder="Prompt"
                     value={currentInput}
