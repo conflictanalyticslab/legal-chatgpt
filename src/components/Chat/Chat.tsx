@@ -24,6 +24,7 @@ import {
   Paper,
   Tooltip,
 } from "@mui/material";
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import RefreshIcon from "@mui/icons-material/Refresh";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
@@ -40,6 +41,13 @@ import Howto from "@/images/Howto.png";
 import Paperclip from "@/images/paperclip.jpeg";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { postConversation } from "@/util/requests/postConversation";
+// uncomment the following when working on pdf upload
+import { uploadPdfDocument } from "@/util/requests/uploadPdfDocument";
+import { useFilePicker } from "use-file-picker";
+import {
+  FileAmountLimitValidator,
+  FileSizeValidator,
+} from "use-file-picker/validators";
 
 import { postConversationSave } from "@/util/requests/postConversationSave";
 import { useIncludedDocuments } from "@/hooks/useIncludedDocuments";
@@ -299,6 +307,27 @@ export function Chat({
       setShowStartupImage(false);
     }
   }, []);
+
+  const { openFilePicker } = useFilePicker({
+    accept: ".pdf",
+    // ArrayBuffer takes exactly as much space as the original file. DataURL, the default, would make it bigger.
+    readAs: "ArrayBuffer",
+    validators: [
+      new FileAmountLimitValidator({ max: 1 }),
+      new FileSizeValidator({ maxFileSize: 5 * 1024 * 1024 /* 5 megabytes */ }),
+    ],
+    onFilesRejected: ({ errors }) => {
+      console.log(errors);
+      setAlert("File is too big. We have a 5 Mb limit.");
+    },
+    onFilesSuccessfullySelected: async ({ plainFiles, filesContent }: any) => {
+      // this callback is called when there were no validation errors
+      console.log("onFilesSuccessfullySelected", plainFiles, filesContent);
+      const newDoc = await uploadPdfDocument(filesContent[0]);
+      // setDocuments([...documents, newDoc]);
+      // setIncludedDocuments([...includedDocuments, newDoc.uid]);
+    },
+  });
 
   const hideStartupImage = () => {
     // Set the flag in sessionStorage to hide the image on subsequent text submission
@@ -628,17 +657,17 @@ export function Chat({
                         /> */}
               <div style={{ height: 20 }}></div>
               <div style={{ display: "flex", justifyContent: "space-between", width: "95%", margin: "auto" }}>
-                <button>
-                    <Image
-                        src={Paperclip}
-                        alt="Paperclip"
-                        onClick={handleButtonClickImage}
-                    />
-                </button>
+                <IconButton
+                  title="Attach a PDF File"
+                  key={5}
+                  onClick={openFilePicker}
+                >
+                  <AttachFileIcon />
+                </IconButton>
 
                 <OutlinedInput
                     // fullWidth
-                    style={{ width: "90%", display: "flex" }}
+                    style={{ width: "95%", display: "flex" }}
                     required
                     placeholder="Prompt"
                     value={currentInput}
