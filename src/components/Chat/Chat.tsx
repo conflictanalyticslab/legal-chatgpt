@@ -52,6 +52,7 @@ import {
 import { postConversationSave } from "@/util/requests/postConversationSave";
 import { useIncludedDocuments } from "@/hooks/useIncludedDocuments";
 import { postConversationMult } from "@/util/requests/postConversationMult";
+import { postPDF } from "@/util/requests/postPDF";
 
 type FeedbackReasonsI = {
   "Superficial Response": boolean;
@@ -323,7 +324,16 @@ export function Chat({
     onFilesSuccessfullySelected: async ({ plainFiles, filesContent }: any) => {
       // this callback is called when there were no validation errors
       console.log("onFilesSuccessfullySelected", plainFiles, filesContent);
-      const newDoc = await uploadPdfDocument(filesContent[0]);
+
+      const pdfContent = await postPDF(plainFiles[0])
+    
+      // Log the string
+      setCurrentInput(pdfContent.content);
+
+      // console.log(pdfContent.content);
+
+      // console.log(filesContent[0]);
+      // const newDoc = await uploadPdfDocument(filesContent[0]);
       // setDocuments([...documents, newDoc]);
       // setIncludedDocuments([...includedDocuments, newDoc.uid]);
     },
