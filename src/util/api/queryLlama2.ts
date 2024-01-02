@@ -11,18 +11,21 @@ type QueueItem = {
   let llama2_processing = false;
   const url = 'https://Llama-2-70b-chat-openjustice-serverless.eastus2.inference.ai.azure.com/v1/chat/completions'
 //   const apiKey = process.env.LLAMA2_API_KEY;
-  const apiKey = "OgWjb3oPCHbqfyMuTQ4pA2WoAxqtWtZ3"
+  const apiKey = process.env.LLAMA2_API_KEY;
   
-  // if queue is not empty and not processing, pop a request out and send to the api, wait for 1 second, then call itself again
+  // helper function: if queue is not empty and not processing, pop a request out and send to the api, wait for 1 second, then call itself again
   const processQueue = async () => {
+    // check if queue is empty, if so, set processing to false (so we are not currently processing any api requests) and return
     if (llama2_queue.length === 0) {
       llama2_processing = false;
       return;
     }
-  
+    
+    // if queue is not empty, set processing to true and pop a request out of the queue as { data, resolve, reject }
     llama2_processing = true;
     const { data, resolve, reject } = llama2_queue.shift() as QueueItem;
   
+    // send request to api
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -32,19 +35,23 @@ type QueueItem = {
         },
         body: JSON.stringify(data)
       });
-  
+      
+      // check if response is ok, if not, throw error
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
   
     //   console.log("llama2 queue: " + llama2_queue);
-  
+
+      // resolve the promise with the content of pdf sent back from the api
       resolve(await response.json());
     } catch (error) {
+      // log the error if something went wrong and reject with the error
       console.error("queryLlama2 failed: " + error);
       reject(error);
     }
   
+    // wait for 1 second, then call itself again to process the next request in the queue
     setTimeout(processQueue, 1000);
   }
   
