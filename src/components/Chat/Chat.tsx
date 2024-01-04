@@ -3,7 +3,7 @@
 import React, { MouseEventHandler, useEffect, useState } from "react";
 import Image from "next/image";
 
-import SearchModal from "@/components/Chat/SearchModal";
+// import external components
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -33,8 +33,10 @@ import { Send, ThumbUp, ThumbDown } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import { Typography } from "@mui/material";
 
+// import external hooks
 import { auth } from "@/firebase";
 
+// import images
 import ChatPageOJ from "@/images/ChatPageOJ.png";
 import Whatis from "@/images/Whatis.png";
 import Howto from "@/images/Howto.png";
@@ -49,17 +51,26 @@ import {
   FileSizeValidator,
 } from "use-file-picker/validators";
 
+// import OJ hooks
 import { postConversationSave } from "@/util/requests/postConversationSave";
 import { useIncludedDocuments } from "@/hooks/useIncludedDocuments";
 import { postConversationMult } from "@/util/requests/postConversationMult";
 import { postPDF } from "@/util/requests/postPDF";
+const { includedDocuments, setIncludedDocuments } = useIncludedDocuments();
 
+// import OJ components
+import {
+  UserDocument,
+  getDocumentsOwnedByUser,
+} from "@/util/requests/getDocumentsOwnedByUser";
 type FeedbackReasonsI = {
   "Superficial Response": boolean;
   "Lacks Reasoning": boolean;
   "Lacks Relevant Facts": boolean;
   "Lacks Citation": boolean;
 };
+import SearchModal from "@/components/Chat/SearchModal";
+import PDFModal from "@/components/Chat/PDFModal";
 
 export function Chat({
   wasSearched,
@@ -108,7 +119,20 @@ export function Chat({
           handleAlertClose();
         }
       })
+      .then(() => {
+        // fetch documents from db and set state after authentication
+        const fetchData = async () => {
+          try {
+            setDocuments((await getDocumentsOwnedByUser()) as any);
+          } catch (e) {
+            console.log(e);
+            // router.push("/login");
+          }
+        };
+        fetchData();
+      })
       .catch((e) => {
+        console.error(e);
         router.push("/login");
       });
   }, []);
@@ -133,6 +157,45 @@ export function Chat({
     "Lacks Relevant Facts": false,
     "Lacks Citation": false,
   });
+
+  // const [documents, setDocuments] = useState<UserDocument[]>([{
+  //       uid: '1234',
+  //       name: "DOC1",
+  //       text: "a aaaaaaaaaa aaaaaaaaaa aaaaaaaaaa a aaaa",
+  //       userUid: "4321"
+  //     }, {
+  //       uid: '2234',
+  //       name: "DOC2",
+  //       text: "This is the text of the document",
+  //       userUid: "4321"}, {
+  //           uid: '3234',
+  //           name: "DOC3",
+  //           text: "This is the text of the document",
+  //           userUid: "4321"}, {
+  //               uid: '4234',
+  //               name: "DOC4",
+  //               text: "This is the text of the document",
+  //               userUid: "4321"}]);
+
+  const [documents, setDocuments] = useState<UserDocument[]>([]);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       setDocuments((await getDocumentsOwnedByUser()) as any);
+  //     } catch (e) {
+  //       console.log(e);
+  //       // router.push("/login");
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
+  // handle delete documents from PDFModal
+  const deleteDocument = (uid: string) => {
+    setDocuments(documents.filter((doc) => doc.uid !== uid));
+  }
 
   const findRefs = (
     texts: { name: string; text: string }[],
@@ -333,9 +396,9 @@ export function Chat({
       // console.log(pdfContent.content);
 
       // console.log(filesContent[0]);
-      // const newDoc = await uploadPdfDocument(filesContent[0]);
-      // setDocuments([...documents, newDoc]);
-      // setIncludedDocuments([...includedDocuments, newDoc.uid]);
+      const newDoc = await uploadPdfDocument(pdfContent.content);
+      setDocuments([...documents, newDoc]);
+      setIncludedDocuments([...includedDocuments, newDoc.uid]);
     },
   });
 
@@ -406,6 +469,9 @@ export function Chat({
         id="search-modal"
         style={{
           display: "flex",
+          justifyContent: "flex-end",
+          position: "absolute",
+          right: "40px"
         }}
       >
         {!showStartupImage && (
@@ -421,7 +487,12 @@ export function Chat({
             alt="Open Justice Powered by the Conflict Analytics Lab"
           />
         )}
-        <SearchModal wasSearched={wasSearched} setSearchTerm={setSearchTerm} />
+        <ul style={{textDecoration: "none", textIndent: 0}}>
+          <SearchModal wasSearched={wasSearched} setSearchTerm={setSearchTerm} />
+          <PDFModal documents={documents} deleteDocument={deleteDocument}/>
+        </ul>
+        
+        
       </div>
       <div
         style={{
