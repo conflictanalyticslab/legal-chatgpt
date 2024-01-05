@@ -56,7 +56,6 @@ import { postConversationSave } from "@/util/requests/postConversationSave";
 import { useIncludedDocuments } from "@/hooks/useIncludedDocuments";
 import { postConversationMult } from "@/util/requests/postConversationMult";
 import { postPDF } from "@/util/requests/postPDF";
-const { includedDocuments, setIncludedDocuments } = useIncludedDocuments();
 
 // import OJ components
 import {
@@ -119,18 +118,18 @@ export function Chat({
           handleAlertClose();
         }
       })
-      .then(() => {
-        // fetch documents from db and set state after authentication
-        const fetchData = async () => {
-          try {
-            setDocuments((await getDocumentsOwnedByUser()) as any);
-          } catch (e) {
-            console.log(e);
-            // router.push("/login");
-          }
-        };
-        fetchData();
-      })
+      // .then(() => {
+      //   // fetch documents from db and set state after authentication
+      //   const fetchData = async () => {
+      //     try {
+      //       setDocuments((await getDocumentsOwnedByUser()) as any);
+      //     } catch (e) {
+      //       console.log(e);
+      //       // router.push("/login");
+      //     }
+      //   };
+      //   fetchData();
+      // })
       .catch((e) => {
         console.error(e);
         router.push("/login");
@@ -158,26 +157,24 @@ export function Chat({
     "Lacks Citation": false,
   });
 
-  // const [documents, setDocuments] = useState<UserDocument[]>([{
-  //       uid: '1234',
-  //       name: "DOC1",
-  //       text: "a aaaaaaaaaa aaaaaaaaaa aaaaaaaaaa a aaaa",
-  //       userUid: "4321"
-  //     }, {
-  //       uid: '2234',
-  //       name: "DOC2",
-  //       text: "This is the text of the document",
-  //       userUid: "4321"}, {
-  //           uid: '3234',
-  //           name: "DOC3",
-  //           text: "This is the text of the document",
-  //           userUid: "4321"}, {
-  //               uid: '4234',
-  //               name: "DOC4",
-  //               text: "This is the text of the document",
-  //               userUid: "4321"}]);
-
-  const [documents, setDocuments] = useState<UserDocument[]>([]);
+  const [documents, setDocuments] = useState<UserDocument[]>([{
+        uid: '1234',
+        name: "DOC1",
+        text: "Sample 1",
+        userUid: "4321"
+      }, {
+        uid: '2234',
+        name: "DOC2",
+        text: "Sample 2",
+        userUid: "4321"}, {
+            uid: '3234',
+            name: "DOC3",
+            text: "Sample 3",
+            userUid: "4321"}, {
+                uid: '4234',
+                name: "DOC4",
+                text: "Sample 4",
+                userUid: "4321"}]);
 
   // useEffect(() => {
   //   const fetchData = async () => {
@@ -396,9 +393,9 @@ export function Chat({
       // console.log(pdfContent.content);
 
       // console.log(filesContent[0]);
-      const newDoc = await uploadPdfDocument(pdfContent.content);
-      setDocuments([...documents, newDoc]);
-      setIncludedDocuments([...includedDocuments, newDoc.uid]);
+      // const newDoc = await uploadPdfDocument(filesContent[0]);
+      // setDocuments([...documents, newDoc]);
+      // setIncludedDocuments([...includedDocuments, newDoc.uid]);
     },
   });
 
