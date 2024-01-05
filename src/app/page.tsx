@@ -1,10 +1,11 @@
 import React from "react";
 import Image from "next/image";
-import { Grid, Typography, Button, Box } from "@mui/material";
+import { Grid, Typography, Button, Box, Container } from "@mui/material";
 import mid_logo from "@/images/OpenMiddleLogo.png";
 import leftRight from "@/images/LandingBackground.png";
 import { PublicShell } from "@/components/PublicShell/PublicShell";
 import { AppBackground, GridContainer, HeroBox } from "@/styles/styles";
+// import MainpageVid from "@/images/MainPageVid.mp4";
 
 export default function Home() {
   return (
@@ -85,6 +86,9 @@ function Hero() {
           <Typography variant="h4"> Open-source</Typography>
           <Typography variant="h4"> Independent </Typography>
           </Grid>
+          <div style={{marginTop: "50px", marginBottom: "50px"}}>
+          <iframe src="https://queensuca-my.sharepoint.com/personal/hcl2_queensu_ca/_layouts/15/embed.aspx?UniqueId=f66f019c-9c88-46ec-a076-e706241fab51&embed=%7B%22ust%22%3Atrue%2C%22hv%22%3A%22CopyEmbedCode%22%7D&referrer=StreamWebApp&referrerScenario=EmbedDialog.Create" width="640" height="360" scrolling="no" title="Conflict Analytics OpenJustice Demo FINAL.mp4"></iframe>
+          </div>
         </GridContainer>
       </HeroBox>
     </AppBackground>
