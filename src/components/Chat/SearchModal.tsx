@@ -38,8 +38,8 @@ const SearchModal = ({
     <div
       style={{
         width: "20%",
-        marginLeft: "auto",
         paddingTop: "25px",
+        marginRight: "3rem"
       }}
     >
       <Button

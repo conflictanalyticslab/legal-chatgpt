@@ -30,7 +30,7 @@ export const searchAndSummarize = async (firstReplyContent: string) => {
               {
                 role: "system",
                 content:
-                  "You are a searching the internet to find information related to this message. Please give two words (and only those words) to search in lower case, no punctuation.",
+                  "Please give two words (and only those words) to search the internet in lowercase without punctuation.",
               },
               {
                 role: "user",
