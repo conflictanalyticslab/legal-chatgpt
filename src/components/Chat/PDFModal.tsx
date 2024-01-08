@@ -26,6 +26,8 @@ import CheckBoxOutlineIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 type Props = {
     documents: UserDocument[];
     deleteDocument: (uid: string) => void;
+    currentInput: string;
+    setCurrentInput: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const style = {
@@ -43,7 +45,7 @@ const style = {
     overflowY: "auto",
 };
 
-export default function PDFModal({ documents, deleteDocument }: Props) {
+export default function PDFModal({ documents, deleteDocument, currentInput, setCurrentInput }: Props) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -102,12 +104,14 @@ export default function PDFModal({ documents, deleteDocument }: Props) {
                         key="include-document"
                         onClick={() => {
                         if (includedDocuments.includes(document.uid)) {
+                            setCurrentInput(currentInput + " " + document.text);
                             setIncludedDocuments(
                             includedDocuments.filter(
                                 (docUid: string) => docUid != document.uid
                             )
                             );
                         } else {
+                            setCurrentInput(currentInput.replace(document.text, ""))
                             setIncludedDocuments([
                             ...includedDocuments,
                             document.uid,

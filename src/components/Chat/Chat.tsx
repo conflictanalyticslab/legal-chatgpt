@@ -371,7 +371,7 @@ export function Chat({
       const pdfContent = await postPDF(plainFiles[0])
     
       // Log the string
-      setCurrentInput(pdfContent.content);
+      setCurrentInput(currentInput + " " +pdfContent.content);
 
       // console.log(pdfContent.content);
 
@@ -470,7 +470,7 @@ export function Chat({
         )}
         <ul style={{textDecoration: "none", textIndent: 0}}>
           <SearchModal wasSearched={wasSearched} setSearchTerm={setSearchTerm} />
-          <PDFModal documents={documents} deleteDocument={deleteDocument}/>
+          <PDFModal documents={documents} deleteDocument={deleteDocument} currentInput={currentInput} setCurrentInput={setCurrentInput}/>
         </ul>
         
         
