@@ -47,25 +47,6 @@ export default function PDFModal({ documents, deleteDocument }: Props) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
-//   const [documents, setDocuments] = useState<UserDocument[]>([{
-//     uid: '1234',
-//     name: "DOC1",
-//     text: "a aaaaaaaaaa aaaaaaaaaa aaaaaaaaaa a aaaa",
-//     userUid: "4321"
-//   }, {
-//     uid: '2234',
-//     name: "DOC2",
-//     text: "This is the text of the document",
-//     userUid: "4321"}, {
-//         uid: '3234',
-//         name: "DOC3",
-//         text: "This is the text of the document",
-//         userUid: "4321"}, {
-//             uid: '4234',
-//             name: "DOC4",
-//             text: "This is the text of the document",
-//             userUid: "4321"}]);
   const { includedDocuments, setIncludedDocuments } = useIncludedDocuments();
 
 //   useEffect(() => {
