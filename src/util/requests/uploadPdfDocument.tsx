@@ -1,7 +1,8 @@
 import { auth } from "@/firebase";
 
 export async function uploadPdfDocument(file: {
-  content: ArrayBuffer;
+  // content: ArrayBuffer;
+  content: string;
   name: string;
 }) {
   const formData = new FormData();
@@ -15,6 +16,14 @@ export async function uploadPdfDocument(file: {
     },
     body: formData,
   });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    if (res.status === 413) {
+      throw new Error("PDF File uploaded too large");
+    }
+    console.error(`Error! status: ${res.status} ${errorData.error}`);
+  }
 
   return res.json();
 }

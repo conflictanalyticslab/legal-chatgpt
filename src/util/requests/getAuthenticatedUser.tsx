@@ -15,6 +15,7 @@ export async function getAuthenticatedUser(): Promise<UserI | null> {
         userConverterOld
       );
       const docSnap = await getDoc(docRef);
+      console.log("getDoc passed, " + docSnap.data())
 
       if (docSnap.exists()) {
         if (docSnap.data().verified) {

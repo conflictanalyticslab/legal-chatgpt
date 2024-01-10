@@ -8,7 +8,9 @@ export async function newDocument(text: string, name: string, userUid: string) {
       text,
       name,
     };
+    // console.log("newDoc: ", name, userUid, text);
     await docRef.set(newDoc);
+    // console.log("newDoc set")
     return {
       uid: docRef.id,
       ...newDoc,

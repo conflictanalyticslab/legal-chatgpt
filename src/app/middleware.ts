@@ -4,6 +4,8 @@ import { NextApiRequest } from "next";
 import { NextResponse } from "next/server";
 
 export const middleware = async (req: NextApiRequest) => {
+
+    // change the following to process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT when deploying to production
   if (!process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT) {
     return NextResponse.json(
       { error: "Missing environment variables" },
@@ -31,6 +33,7 @@ export const middleware = async (req: NextApiRequest) => {
     );
   }
 
+  // change the following to process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT when deploying to production
   admin.initializeApp({
     credential: admin.credential.cert(
       JSON.parse(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT)
