@@ -53,7 +53,7 @@ import {
 
 // import OJ hooks
 import { postConversationSave } from "@/util/requests/postConversationSave";
-import { useIncludedDocuments } from "@/hooks/useIncludedDocuments";
+// import { IncludedDocumentsProvider, useIncludedDocuments } from "@/hooks/useIncludedDocuments"; // passing props instead
 import { postConversationMult } from "@/util/requests/postConversationMult";
 import { postPDF } from "@/util/requests/postPDF";
 
@@ -70,6 +70,7 @@ type FeedbackReasonsI = {
 };
 import SearchModal from "@/components/Chat/SearchModal";
 import PDFModal from "@/components/Chat/PDFModal";
+import {deleteDocument} from "@/util/api/deleteDocument";
 
 export function Chat({
   wasSearched,
@@ -79,7 +80,6 @@ export function Chat({
   setSearchTerm: (searchTerm: string) => void;
 }) {
   const router = useRouter();
-  const { includedDocuments } = useIncludedDocuments();
   const [userInputs, setUserInputs] = useState<string[]>([]);
   const [conversation, setConversation] = useState<
     {
@@ -108,6 +108,7 @@ export function Chat({
   const [endSession, setEndSession] = useState(false);
   const [num, setNum] = useState(-1);
   const [totalQuota, setTotalQuota] = useState(0);
+  const [includedDocuments, setIncludedDocuments] = useState<string[]>([]);
 
   useEffect(() => {
     setAlert("Authenticating user...");
@@ -118,18 +119,18 @@ export function Chat({
           handleAlertClose();
         }
       })
-      // .then(() => {
-      //   // fetch documents from db and set state after authentication
-      //   const fetchData = async () => {
-      //     try {
-      //       setDocuments((await getDocumentsOwnedByUser()) as any);
-      //     } catch (e) {
-      //       console.log(e);
-      //       // router.push("/login");
-      //     }
-      //   };
-      //   fetchData();
-      // })
+      .then(() => {
+        // fetch documents from db and set state after authentication
+        const fetchData = async () => {
+          try {
+            setDocuments((await getDocumentsOwnedByUser()) as any);
+          } catch (e) {
+            console.log(e);
+            // router.push("/login");
+          }
+        };
+        fetchData();
+      })
       .catch((e) => {
         console.error(e);
         router.push("/login");
@@ -157,24 +158,7 @@ export function Chat({
     "Lacks Citation": false,
   });
 
-  const [documents, setDocuments] = useState<UserDocument[]>([{
-        uid: '1234',
-        name: "DOC1",
-        text: "Sample 1",
-        userUid: "4321"
-      }, {
-        uid: '2234',
-        name: "DOC2",
-        text: "Sample 2",
-        userUid: "4321"}, {
-            uid: '3234',
-            name: "DOC3",
-            text: "Sample 3",
-            userUid: "4321"}, {
-                uid: '4234',
-                name: "DOC4",
-                text: "Sample 4",
-                userUid: "4321"}]);
+  const [documents, setDocuments] = useState<UserDocument[]>([]);
 
   // useEffect(() => {
   //   const fetchData = async () => {
@@ -190,8 +174,8 @@ export function Chat({
   // }, []);
 
   // handle delete documents from PDFModal
-  const deleteDocument = (uid: string) => {
-    setDocuments(documents.filter((doc) => doc.uid !== uid));
+  const deleteDocumentChat = (uid: string) => {
+    deleteDocument(uid).then(() => setDocuments(documents.filter((doc) => doc.uid !== uid))).then(() => {console.log("PDF deleted successfully")}).catch((err) => {console.log("Error when deleting PDF, " + err)});
   }
 
   const findRefs = (
@@ -385,17 +369,52 @@ export function Chat({
       // this callback is called when there were no validation errors
       console.log("onFilesSuccessfullySelected", plainFiles, filesContent);
 
+    try {
       const pdfContent = await postPDF(plainFiles[0])
+
+      if (pdfContent.content.length > 3000) {
+        throw new Error("PDF File uploaded too large");
+      }
     
       // Log the string
-      setCurrentInput(pdfContent.content);
+      setCurrentInput(currentInput + " " +pdfContent.content);
+
+      setIncludedDocuments([...includedDocuments, pdfContent.uid]);
 
       // console.log(pdfContent.content);
 
       // console.log(filesContent[0]);
-      // const newDoc = await uploadPdfDocument(filesContent[0]);
-      // setDocuments([...documents, newDoc]);
-      // setIncludedDocuments([...includedDocuments, newDoc.uid]);
+      
+      const newDoc = await uploadPdfDocument({"content": pdfContent.content, "name": plainFiles[0].name});
+      setDocuments([...documents, newDoc]);
+      setIncludedDocuments([...includedDocuments, newDoc.uid]);
+    } catch (err: Error | any) {
+      if (err.message === 'PDF File uploaded too large') {
+        // Create a new div element for our alert
+        const alertDiv = document.createElement('div');
+        alertDiv.textContent = 'The PDF file uploaded exceeds limit, maximum of 3000 characters in each PDF uploaded';
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '40px';
+        alertDiv.style.left = '50%';
+        alertDiv.style.transform = 'translate(-50%, -50%)';
+        alertDiv.style.backgroundColor = 'red';
+        alertDiv.style.color = 'white';
+        alertDiv.style.padding = '1em';
+        alertDiv.style.zIndex = '1000';
+        alertDiv.style.opacity = '0.8';
+        alertDiv.style.borderRadius = '10px';
+  
+        // Append the alert to the body
+        document.body.appendChild(alertDiv);
+  
+        // Remove the alert after 5 seconds
+        window.setTimeout(() => {
+          document.body.removeChild(alertDiv);
+        }, 5000);
+      }
+    }
+      
+      
     },
   });
 
@@ -486,7 +505,7 @@ export function Chat({
         )}
         <ul style={{textDecoration: "none", textIndent: 0}}>
           <SearchModal wasSearched={wasSearched} setSearchTerm={setSearchTerm} />
-          <PDFModal documents={documents} deleteDocument={deleteDocument}/>
+          <PDFModal documents={documents} deleteDocument={deleteDocumentChat} currentInput={currentInput} setCurrentInput={setCurrentInput} includedDocuments={includedDocuments} setIncludedDocuments={setIncludedDocuments}/>
         </ul>
         
         

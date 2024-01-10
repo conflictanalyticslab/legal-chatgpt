@@ -17,15 +17,20 @@ import {
     UserDocument,
     getDocumentsOwnedByUser,
 } from "@/util/requests/getDocumentsOwnedByUser";
-import { useIncludedDocuments } from "@/hooks/useIncludedDocuments";
+// import { useIncludedDocuments } from "@/hooks/useIncludedDocuments"; // passing props instead
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import { stringify } from "querystring";
 
 type Props = {
     documents: UserDocument[];
     deleteDocument: (uid: string) => void;
+    currentInput: string;
+    setCurrentInput: React.Dispatch<React.SetStateAction<string>>;
+    includedDocuments: string[];
+    setIncludedDocuments: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
 const style = {
@@ -43,30 +48,11 @@ const style = {
     overflowY: "auto",
 };
 
-export default function PDFModal({ documents, deleteDocument }: Props) {
+export default function PDFModal({ documents, deleteDocument, currentInput, setCurrentInput, includedDocuments, setIncludedDocuments }: Props) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
-//   const [documents, setDocuments] = useState<UserDocument[]>([{
-//     uid: '1234',
-//     name: "DOC1",
-//     text: "a aaaaaaaaaa aaaaaaaaaa aaaaaaaaaa a aaaa",
-//     userUid: "4321"
-//   }, {
-//     uid: '2234',
-//     name: "DOC2",
-//     text: "This is the text of the document",
-//     userUid: "4321"}, {
-//         uid: '3234',
-//         name: "DOC3",
-//         text: "This is the text of the document",
-//         userUid: "4321"}, {
-//             uid: '4234',
-//             name: "DOC4",
-//             text: "This is the text of the document",
-//             userUid: "4321"}]);
-  const { includedDocuments, setIncludedDocuments } = useIncludedDocuments();
+  
 
 //   useEffect(() => {
 //     const fetchData = async () => {
@@ -121,12 +107,14 @@ export default function PDFModal({ documents, deleteDocument }: Props) {
                         key="include-document"
                         onClick={() => {
                         if (includedDocuments.includes(document.uid)) {
+                            setCurrentInput(currentInput.replace(document.text, ""))
                             setIncludedDocuments(
                             includedDocuments.filter(
                                 (docUid: string) => docUid != document.uid
                             )
                             );
                         } else {
+                            setCurrentInput(currentInput + " " + document.text);
                             setIncludedDocuments([
                             ...includedDocuments,
                             document.uid,
