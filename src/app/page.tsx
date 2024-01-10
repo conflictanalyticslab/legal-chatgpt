@@ -87,7 +87,7 @@ function Hero() {
           <Typography variant="h4"> Independent </Typography>
           </Grid>
           <div style={{marginTop: "50px", marginBottom: "50px"}}>
-          <iframe src="https://queensuca-my.sharepoint.com/personal/hcl2_queensu_ca/_layouts/15/embed.aspx?UniqueId=f66f019c-9c88-46ec-a076-e706241fab51&embed=%7B%22ust%22%3Atrue%2C%22hv%22%3A%22CopyEmbedCode%22%7D&referrer=StreamWebApp&referrerScenario=EmbedDialog.Create" width="640" height="360" scrolling="no" title="Conflict Analytics OpenJustice Demo FINAL.mp4"></iframe>
+          <iframe src="https://www.youtube.com/embed/pmF9FYCWT5A?rel=0" width="640" height="360" scrolling="no" title="Conflict Analytics OpenJustice Demo FINAL.mp4"></iframe>
           </div>
         </GridContainer>
       </HeroBox>
