@@ -1,0 +1,22 @@
+import { getFirestore, doc, getDoc, updateDoc} from "firebase/firestore";
+
+const db = getFirestore();
+
+export const editDocument = async (documentUid: string, newContent: string): Promise<void> => {
+    const docRef = doc(db, "documents/", documentUid);
+  
+    try {
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) {
+            console.log('No matching document.');
+            return;
+        }  
+
+        console.log(`Editing document with ID: ${documentUid}`);
+        await updateDoc(docRef, { text: newContent });
+        console.log('Document has been editted.');
+    } catch (error) {
+        console.error("Error deleting document:", error);
+        throw error;
+    }
+}

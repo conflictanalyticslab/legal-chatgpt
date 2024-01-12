@@ -70,10 +70,10 @@ function Hero() {
                   width: "160px",
                   fontSize: "16px",
                   marginTop: "30px",
-                  color: "black",
+                  color: "white",
                   textTransform: "none",
                   textDecoration: "none",
-                  fontWeight: "bold",
+                  fontWeight: "bold"
                 }}
               >
                 Get Started
