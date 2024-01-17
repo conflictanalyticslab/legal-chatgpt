@@ -40,7 +40,6 @@ import { auth } from "@/firebase";
 import ChatPageOJ from "@/images/ChatPageOJ.png";
 import Whatis from "@/images/Whatis.png";
 import Howto from "@/images/Howto.png";
-import Paperclip from "@/images/paperclip.jpeg";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { postConversation } from "@/util/requests/postConversation";
 // uncomment the following when working on pdf upload
@@ -55,6 +54,8 @@ import {
 import { postConversationSave } from "@/util/requests/postConversationSave";
 // import { IncludedDocumentsProvider, useIncludedDocuments } from "@/hooks/useIncludedDocuments"; // passing props instead
 import { postConversationMult } from "@/util/requests/postConversationMult";
+import { getConversation } from "@/util/requests/getConversation";
+import { putConversationSave } from "@/util/requests/putConversationSave";
 import { postPDF } from "@/util/requests/postPDF";
 
 // import OJ components
@@ -109,6 +110,7 @@ export function Chat({
   const [num, setNum] = useState(-1);
   const [totalQuota, setTotalQuota] = useState(0);
   const [includedDocuments, setIncludedDocuments] = useState<string[]>([]);
+  const [conversationUid, setConversationUid] = useState<string | null>("");
 
   useEffect(() => {
     setAlert("Authenticating user...");
@@ -231,14 +233,23 @@ export function Chat({
 
       let response;
       
-      if (conversation.length === 0) {
-        response = await postConversationMult(fullConversation);
+      // // TO DO: rework the logic below, setState hook doesn't execute immediately, so checking length of conversation is unstable
+      // if (conversation.length === 0) {
+      //   console.log(conversation)
+      //   response = await postConversationMult(fullConversation);
+      // } else {
+      //   response = await postConversation(
+      //     fullConversation,
+      //     includedDocuments
+      //   );
+      // };
+
+      if (includedDocuments.length === 0) {
+        response = await postConversation(fullConversation, includedDocuments);
       } else {
-        response = await postConversation(
-          fullConversation,
-          includedDocuments
-        );
-      };
+        response = await postConversationMult(fullConversation);
+      }
+      console.log("submit response:",response);
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -268,18 +279,26 @@ export function Chat({
         },
       ]);
 
-      setConversation(
-        conversation.concat([{ role: "assistant", content: latestBotResponse }])
-      );
+      // setConversation(
+      //   fullConversation.concat([{ role: "assistant", content: latestBotResponse }])
+      // );
+      fullConversation.push({ role: "assistant", content: latestBotResponse });
 
-      
+      // save conversation to db
+      // console.log(fullConversation.length);
+      if (conversationUid) {
+        await putConversationSave(conversationUid, fullConversation, includedDocuments);
+      } else {
+        (await postConversationSave(fullConversation, includedDocuments)).json().then((res) => {setConversationUid(res.uid)}).catch((err) => {console.log(err)});
+      }
+
       setSearchTerm(toSearch);
     } catch (error) {
       console.error(error);
       setAlert("An unexpected error occured");
     } finally {
       setLoading(false);
-
+      // console.log(fullConversation.length);
       
     }
   };
@@ -322,14 +341,15 @@ export function Chat({
       // setAlert(
       //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
       // );
-      const response = (await postConversationSave(conversation, includedDocuments));
+      (await postConversationSave(conversation, includedDocuments)).json().then((res) => {setConversationUid(res.uid)}).catch((err) => {console.log(err)});
+      console.log(conversation.length);
       setAlert(
         `Conversation successfully saved in Firebase.`
       );
-      setTimeout(function() {
+      // setTimeout(function() {
           
-        window.location.reload();}, 
-        1000);
+      //   window.location.reload();}, 
+      //   1000);
     } catch (e) {
       setAlert(`Error saving conversation: ${e}`);
     }
@@ -352,6 +372,11 @@ export function Chat({
       setShowStartupImage(false);
     }
   }, []);
+
+  // // debug function to get the conversation uid
+  // useEffect(() => {
+  //   console.log("conversationUid", conversationUid);
+  // }, [conversationUid]);
 
   const { openFilePicker } = useFilePicker({
     accept: ".pdf",

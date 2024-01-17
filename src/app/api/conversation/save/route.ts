@@ -37,6 +37,33 @@ export async function GET(_: Request) {
   return NextResponse.json({ documents: plainJsObjects }, { status: 200 });
 }
 
+export async function PUT(req: Request) {
+  const { earlyResponse, decodedToken } = await authenticateApiUser();
+  if (earlyResponse) {
+    return earlyResponse;
+  }
+
+  if (!decodedToken) {
+    return NextResponse.json(
+      { error: "decodedToken is missing but there was no earlyResponse" },
+      { status: 500 }
+    );
+  }
+
+  const { uid, fullConversation, includedDocuments } = await req.json();
+
+  initBackendFirebaseApp();
+
+  try {
+    const docRef = getFirestore().collection("conversations").doc(uid);
+    await docRef.update({ conversation: fullConversation, includedDocuments: includedDocuments });
+    return NextResponse.json({ uid }, { status: 200 });
+  } catch (error: any) {
+    console.error("conversation uid: ", uid, error.message);
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+}
+
 // Upload a document
 // This endpoint requires Node v20 or later
 // If this is failing locally, check your node version by running `node -v` in the terminal
@@ -80,7 +107,7 @@ export async function POST(req: Request) {
     }
     return NextResponse.json(
       {
-        docRef
+        uid: docRef.id,
       },
       { status: 201 }
     );
