@@ -35,43 +35,48 @@ export async function POST(req: Request) {
 
   if (user && user.prompts_left > 0) {
     await userRef.update({ prompts_left: user.prompts_left - 1 });
-    let firstReplyRes = await queryOpenAi({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Answer in 500 words or less. Short answers are better.\n\n" +
-            documentPrompt,
-        },
-        ...fullConversation,
-      ],
-    });
+    let firstReplyRes: any;
+    let gpt_flag = true;
+    try {
+      firstReplyRes = await queryOpenAi({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Answer in 500 words or less. Short answers are better.\n\n" +
+              documentPrompt,
+          },
+          ...fullConversation,
+        ],
+      });
+      if (!firstReplyRes || !firstReplyRes.choices || firstReplyRes.choices.length === 0) {
+        gpt_flag = false;
+      }
+    } catch (error) {
+      console.error("queryOpenAi failed: " + error);
+      gpt_flag = false;
+    }
 
-    if (!firstReplyRes || !firstReplyRes.choices || firstReplyRes.choices.length === 0) {
+    if (!gpt_flag) {
         console.error("Error from OpenAI: " + firstReplyRes);
         console.log("switching to llama2");
 
         // set a 1 second time out between llama2 requests for stability
-        setTimeout(async () => {
-          try {
-            firstReplyRes = await queryLlama2({
-              "documents": [
-                {
-                  "role": "user",
-                  "content": documentPrompt
-                },
-                ...fullConversation
-              ]
-            });
-            console.log("Logging response from llama2", firstReplyRes.choices[0].message.content);
-          } catch (error) {
-            console.error("queryLlama2 failed: " + error);
-          }
-        }, 1000);
-
-        
-
+        try {
+          firstReplyRes = await queryLlama2({
+            "documents": [
+              {
+                "role": "user",
+                "content": documentPrompt
+              },
+              ...fullConversation
+            ]
+          });
+          console.log("Logging response from llama2", firstReplyRes.choices[0].message.content);
+        } catch (error) {
+          console.error("queryLlama2 failed: " + error);
+        };
     }
 
     const firstReplyContent = firstReplyRes.choices[0].message.content;
@@ -95,20 +100,48 @@ export async function POST(req: Request) {
       // Can use tokenLength() to estimate the tokens used so far.
       const searchPrompt = searchResults[0].abstract;
 
-      const secondReplyRes = await queryOpenAi({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content:
-              "Answer in 500 words or less. Short answers are better.\n\n" +
-              documentPrompt +
-              "\n\n" +
-              searchPrompt,
-          },
-          ...fullConversation,
-        ],
-      });
+      let secondReplyRes:any;
+        try {
+        secondReplyRes = await queryOpenAi({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content:
+                "Answer in 500 words or less. Short answers are better.\n\n" +
+                documentPrompt +
+                "\n\n" +
+                searchPrompt,
+            },
+            ...fullConversation,
+          ],
+        });
+        if (!secondReplyRes || !secondReplyRes.choices || secondReplyRes.choices.length === 0) {
+          gpt_flag = false;
+        }
+      } catch (error) {
+        console.error("queryOpenAi failed: " + error);
+        gpt_flag = false;
+      }
+
+      if (!gpt_flag) {
+        console.log("switching to llama2 for second response");
+
+        try {
+          secondReplyRes = await queryLlama2({
+            "documents": [
+              {
+                "role": "user",
+                "content": documentPrompt + "\n\n" + searchPrompt
+              },
+              ...fullConversation
+            ]
+          });
+          console.log("Logging second response from llama2", secondReplyRes.choices[0].message.content);
+        } catch (error) {
+          console.error("queryLlama2 failed: " + error);
+        }
+      }
 
       console.log("Logging second response from OpenAi", secondReplyRes);
 
