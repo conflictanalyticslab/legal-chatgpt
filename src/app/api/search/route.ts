@@ -13,39 +13,43 @@ export async function POST(req: Request) {
   }
 
   const { searchTerm } = await req.json();
-  let res = await queryOpenAi({
-    model: "gpt-3.5-turbo",
-    messages: [
-      {
-        role: "user",
-        content: `Search term: ${searchTerm}. Can you provide me with some synonyms for this search term, or fix any typo in this search term? Put the top 3 fixed results in a csv and just return that. For example, your response should just be: word1, word2, word3`,
-      },
-    ],
-  });
+  let res:any;
+  let gpt_flag = true;
+  
+  try {
+    res = await queryOpenAi({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "user",
+          content: `Search term: ${searchTerm}. Can you provide me with some synonyms for this search term, or fix any typo in this search term? Put the top 3 fixed results in a csv and just return that. For example, your response should just be: word1, word2, word3`,
+        },
+      ],
+    });
+    if (!res || !res.choices || res.choices.length === 0) {
+      gpt_flag = false;
+    }
+  } catch (error) {
+    console.error("queryOpenAi failed: " + error);
+    gpt_flag = false;
+  }
 
-  if (!res || !res.choices || res.choices.length === 0) {
+  if (!gpt_flag) {
     console.error("Error from OpenAI: " + res);
     console.log("switching to llama2");
-
-    // set a 1 second time out between llama2 requests for stability
-    setTimeout(async () => {
-      try {
-         res = await queryLlama2({
-          messages: [
-            {
-              role: "user",
-              content: `Search term: ${searchTerm}. Can you provide me with some synonyms for this search term, or fix any typo in this search term? Put the top 3 fixed results in a csv and just return that. For example, your response should just be: word1, word2, word3`,
-            },
-          ],
-        });
-        console.log("Logging response from llama2", res.choices[0].message.content);
-      } catch (error) {
-        console.error("queryLlama2 failed: " + error);
-      }
-    }, 1000);
-
-    
-
+    try {
+        res = await queryLlama2({
+        messages: [
+          {
+            role: "user",
+            content: `Search term: ${searchTerm}. Can you provide me with some synonyms for this search term, or fix any typo in this search term? Put the top 3 fixed results in a csv and just return that. For example, your response should just be: word1, word2, word3`,
+          },
+        ],
+      });
+      console.log("Logging response from llama2", res.choices[0].message.content);
+    } catch (error) {
+      console.error("queryLlama2 failed: " + error);
+    }
   }
 
   console.log(res);
@@ -71,7 +75,8 @@ export async function POST(req: Request) {
     
   }
 
-  
+  console.log("================\n" + JSON.stringify(results));
+
   const elasticUrl = process.env.NEXT_PUBLIC_ELASTICSEARCH_URL || "";
   const elasticResults = await fetch(elasticUrl, {
     method: "POST",
@@ -81,6 +86,7 @@ export async function POST(req: Request) {
     },
     body: JSON.stringify(results), // Assuming 'results' is the data you want to send
   });
+  console.log(elasticResults);
   // synonyms.map((s) => {
   //   callSearchAPI(s);
   // });
