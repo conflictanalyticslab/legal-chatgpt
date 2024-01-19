@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const connector = new AppSearchAPIConnector({
   searchKey: process.env.NEXT_PUBLIC_PUBLIC_SEARCH_KEY,
-  engineName: "open-justice-meta",
+  engineName: "openjustice-meta",
   endpointBase: process.env.NEXT_PUBLIC_ENDPOINT_URL || "",
 });
 
@@ -36,14 +36,20 @@ const elasticSearchConfig = {
           size: 500,
         },
       },
-      body: {
+      name: {
         snippet: {
           fallback: true,
         },
       },
+      publisher: {
+        snippet: {
+          fallback: true,
+        },
+      },
+      hyperlink: { raw: {} },
       url: { raw: {} },
     },
-    search_fields: { title: {} },
+    search_fields: { title: {}, name: {} },
     disjunctiveFacets: ["source"],
     facets: { source: { type: "value", size: 30 } },
   },
