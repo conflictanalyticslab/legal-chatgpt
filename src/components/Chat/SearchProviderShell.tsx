@@ -36,14 +36,20 @@ const elasticSearchConfig = {
           size: 500,
         },
       },
-      // body: {
-      //   snippet: {
-      //     fallback: true,
-      //   },
-      // },
+      name: {
+        snippet: {
+          fallback: true,
+        },
+      },
+      publisher: {
+        snippet: {
+          fallback: true,
+        },
+      },
+      hyperlink: { raw: {} },
       url: { raw: {} },
     },
-    search_fields: { title: {} },
+    search_fields: { title: {}, name: {} },
     disjunctiveFacets: ["source"],
     facets: { source: { type: "value", size: 30 } },
   },
