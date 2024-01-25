@@ -3,7 +3,10 @@ import queryLlama2 from "./queryLlama2";
 import { callSearchAPI } from "./runSearch";
 
 export const searchAndSummarize = async (firstReplyContent: string) => {
-    let summarizeRes = await queryOpenAi({
+    let summarizeRes: any;
+    let gpt_working = true;
+    try {
+      summarizeRes= await queryOpenAi({
       model: "gpt-3.5-turbo",
       messages: [
         {
@@ -17,13 +20,20 @@ export const searchAndSummarize = async (firstReplyContent: string) => {
         },
       ],
     });
-
     if (!summarizeRes || !summarizeRes.choices || summarizeRes.choices.length === 0) {
-      console.error("Error from OpenAI: " + summarizeRes);
+      gpt_working = false;
+    }
+    } catch (error) {
+      console.error("queryOpenAi failed: " + error);
+      gpt_working = false;
+    }
+
+    if (!gpt_working) {
+      // console.error("Error from OpenAI: " + summarizeRes);
       console.log("switching to llama2");
 
       // set a 1 second time out between llama2 requests for stability
-      setTimeout(async () => {
+      
         try {
           summarizeRes = await queryLlama2({
             messages: [
@@ -42,11 +52,7 @@ export const searchAndSummarize = async (firstReplyContent: string) => {
         } catch (error) {
           console.error("queryLlama2 failed: " + error);
         }
-      }, 1000);
-
-      
-
-  }
+    };
   
     let toSearch = summarizeRes.choices[0].message.content;
 

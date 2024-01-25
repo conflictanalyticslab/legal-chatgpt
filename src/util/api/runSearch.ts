@@ -45,7 +45,7 @@ export const callSearchAPI = async (searchTerm: string) => {
     // }
   try {
     const googleJson = await resGoogleSearch.json();
-    // console.log(googleJson)
+    // console.log(JSON.stringify(googleJson, null, 2));
     for (const res of googleJson.items) {
       results.push({
         url: res.link,
