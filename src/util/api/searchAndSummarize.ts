@@ -30,12 +30,27 @@ export const searchAndSummarize = async (firstReplyContent: string) => {
 
     if (!gpt_working) {
       // console.error("Error from OpenAI: " + summarizeRes);
-      console.log("switching to llama2");
+      console.log("switching to llama2 in searchAndSummarize.ts");
 
       // set a 1 second time out between llama2 requests for stability
       
         try {
           summarizeRes = await queryLlama2({
+            "messages": [
+              {
+                "role": "system",
+                "content":
+                  "Please give two words (and only those words) to search the internet in lowercase without punctuation.",
+              },
+              {
+                "role": "user",
+                "content": firstReplyContent.split('\n')[0],
+              },
+            ],
+          });
+          console.log("Logging response from llama2", summarizeRes.choices[0].message.content);
+        } catch (error) {
+          console.error("queryLlama2 failed in searchAndSummarize.ts: " + error + " " + JSON.stringify({
             messages: [
               {
                 role: "system",
@@ -47,10 +62,7 @@ export const searchAndSummarize = async (firstReplyContent: string) => {
                 content: firstReplyContent,
               },
             ],
-          });
-          console.log("Logging response from llama2", summarizeRes.choices[0].message.content);
-        } catch (error) {
-          console.error("queryLlama2 failed: " + error);
+          }));
         }
     };
   
