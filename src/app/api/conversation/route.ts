@@ -148,9 +148,7 @@ export async function POST(req: Request) {
                 "content": documentPrompt + "\n\n" + searchPrompt
               },
               ...fullConversation
-            ],
-            "temperature": 0.7,
-            "max_tokens": 256,  
+            ]
           });
           console.log("Logging second response from llama2", secondReplyRes.choices[0].message.content);
         } catch (error) {

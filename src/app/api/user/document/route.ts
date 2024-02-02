@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { ocr } from "@/util/api/ocr";
 import { newDocument } from "@/util/api/newDocument";
+import GPT4Tokenizer from 'gpt4-tokenizer';
 
 // Get all documents owned by the user in the authentication header
 export async function GET(_: Request) {
@@ -79,11 +80,14 @@ export async function POST(req: Request) {
   // console.log(docText);
   // const docText = await ocr(rawFile);
 
-  if (docText.length > 3000) {
+  const tokenizer = new GPT4Tokenizer({ type: 'gpt3' }); // or 'codex'
+  const estimatedTokenCount = tokenizer.estimateTokenCount(docText);
+
+  if (estimatedTokenCount > 2048) {
     return NextResponse.json(
       {
         error:
-          "File is too long. We limit files to 3000 characters including spaces. Yours is " +
+          "File is too long. We limit files to  including spaces. Yours is " +
           docText.length +
           " characters.",
       },
