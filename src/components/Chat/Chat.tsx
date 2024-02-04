@@ -304,7 +304,7 @@ export function Chat({
       setSearchTerm(toSearch);
     } catch (error) {
       console.error(error);
-      setAlert("An unexpected error occured");
+      setAlert("Chat length exceeds programming limitations. Please refresh the page to start a new session.");
     } finally {
       setLoading(false);
       // console.log(fullConversation.length);
