@@ -59,23 +59,23 @@ export async function POST(req: Request) {
 
     if (!gpt_flag)  {
       console.error("Error from OpenAI: " + firstReplyRes);
-      console.log("switching to llama2");
+      console.log("switching to llama2 in multiplicity/route.ts for first response");
 
       // set a 1 second time out between llama2 requests for stability
       try {
         firstReplyRes = await queryLlama2({
-          messages: [
+          "messages": [
             {
-              role: "system",
+              "role": "system",
               // content: "Answer in 500 words or less. Short answers are better." 
-              content: "If the question does not encompass different scenarios, ignore the rest of the prompt. Else if your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses." + documentPrompt,
+              "content": "If the question does not encompass different scenarios, ignore the rest of the prompt. Else if your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses." + documentPrompt,
             },
             ...fullConversation,
           ],
         });
         console.log("Logging response from llama2", firstReplyRes.choices[0].message.content);
       } catch (error) {
-        console.error("queryLlama2 failed: " + error);
+        console.error("queryLlama2 failed in multiplicity/route.ts for first response: " + error);
       }
     };
 
@@ -129,15 +129,15 @@ export async function POST(req: Request) {
       }
 
       if (!gpt_flag) {
-        console.log("switching to llama2 for second response");
+        console.log("switching to llama2 in multiplicity/route.ts for second response");
 
         try {
           secondReplyRes = await queryLlama2({
-            messages: [
+            "messages": [
               {
-                role: "system",
+                "role": "system",
                 // content: "Answer in 500 words or less. Short answers are better." 
-                content:
+                "content":
                 "If the question does not encompass different scenarios, ignore the rest of the prompt. Else if your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses.\n" +
                 documentPrompt +
                 "\n\n" +
@@ -148,7 +148,7 @@ export async function POST(req: Request) {
           });
           console.log("Logging second response from llama2", secondReplyRes.choices[0].message.content);
         } catch (error) {
-          console.error("second response queryLlama2 failed: " + error);
+          console.error("queryLlama2 failed in multiplicity/route.ts for second response: " + error);
         }
       }
 

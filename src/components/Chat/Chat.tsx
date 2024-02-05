@@ -32,6 +32,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import { Send, ThumbUp, ThumbDown } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import { Typography } from "@mui/material";
+import GPT4Tokenizer from 'gpt4-tokenizer';
 
 // import external hooks
 import { auth } from "@/firebase";
@@ -217,6 +218,14 @@ export function Chat({
       return;
     }
 
+    const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
+    const estimatedTokenCount = tokenizer.estimateTokenCount(currentInput);
+
+    if (estimatedTokenCount >= 4096) {
+      createAlert('The input exceeds the token limit, maximum of 4096 tokens in each input, current input contains ' + estimatedTokenCount + ' tokens');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -295,7 +304,7 @@ export function Chat({
       setSearchTerm(toSearch);
     } catch (error) {
       console.error(error);
-      setAlert("An unexpected error occured");
+      setAlert("Chat length exceeds programming limitations. Please refresh the page to start a new session.");
     } finally {
       setLoading(false);
       // console.log(fullConversation.length);
@@ -378,6 +387,30 @@ export function Chat({
   //   console.log("conversationUid", conversationUid);
   // }, [conversationUid]);
 
+  const createAlert = (message: string) => {
+      // Create a new div element for our alert
+      const alertDiv = document.createElement('div');
+      alertDiv.textContent = message;
+      alertDiv.style.position = 'fixed';
+      alertDiv.style.top = '40px';
+      alertDiv.style.left = '50%';
+      alertDiv.style.transform = 'translate(-50%, -50%)';
+      alertDiv.style.backgroundColor = 'red';
+      alertDiv.style.color = 'white';
+      alertDiv.style.padding = '1em';
+      alertDiv.style.zIndex = '1000';
+      alertDiv.style.opacity = '0.8';
+      alertDiv.style.borderRadius = '10px';
+
+      // Append the alert to the body
+      document.body.appendChild(alertDiv);
+
+      // Remove the alert after 5 seconds
+      window.setTimeout(() => {
+        document.body.removeChild(alertDiv);
+      }, 5000);
+  }
+
   const { openFilePicker } = useFilePicker({
     accept: ".pdf",
     // ArrayBuffer takes exactly as much space as the original file. DataURL, the default, would make it bigger.
@@ -394,12 +427,25 @@ export function Chat({
       // this callback is called when there were no validation errors
       console.log("onFilesSuccessfullySelected", plainFiles, filesContent);
 
+    let estimatedTokenCount = -1;
+    let pdfFileSize = -1;
+
     try {
       const pdfContent = await postPDF(plainFiles[0])
 
-      if (pdfContent.content.length > 3000) {
+      if (pdfContent.size > 5 * 1024 * 1024) {
+        pdfFileSize = pdfContent.size;
         throw new Error("PDF File uploaded too large");
       }
+
+      const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
+      estimatedTokenCount = tokenizer.estimateTokenCount(pdfContent.content);
+
+      if (estimatedTokenCount > 2048) {
+        throw new Error("PDF token limit exceeded");
+      }
+
+      console.log(estimatedTokenCount);
     
       // Log the string
       setCurrentInput(currentInput + " " +pdfContent.content);
@@ -415,27 +461,9 @@ export function Chat({
       setIncludedDocuments([...includedDocuments, newDoc.uid]);
     } catch (err: Error | any) {
       if (err.message === 'PDF File uploaded too large') {
-        // Create a new div element for our alert
-        const alertDiv = document.createElement('div');
-        alertDiv.textContent = 'The PDF file uploaded exceeds limit, maximum of 3000 characters in each PDF uploaded';
-        alertDiv.style.position = 'fixed';
-        alertDiv.style.top = '40px';
-        alertDiv.style.left = '50%';
-        alertDiv.style.transform = 'translate(-50%, -50%)';
-        alertDiv.style.backgroundColor = 'red';
-        alertDiv.style.color = 'white';
-        alertDiv.style.padding = '1em';
-        alertDiv.style.zIndex = '1000';
-        alertDiv.style.opacity = '0.8';
-        alertDiv.style.borderRadius = '10px';
-  
-        // Append the alert to the body
-        document.body.appendChild(alertDiv);
-  
-        // Remove the alert after 5 seconds
-        window.setTimeout(() => {
-          document.body.removeChild(alertDiv);
-        }, 5000);
+        createAlert('The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ' + pdfFileSize + ' bytes');
+      } else if (err.message === 'PDF token limit exceeded' && estimatedTokenCount !== -1) {
+        createAlert('The PDF file uploaded exceeds limit, maximum of 2048 token in each PDF uploaded, your pdf contains ' + estimatedTokenCount + ' tokens');
       }
     }
       

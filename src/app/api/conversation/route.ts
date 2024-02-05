@@ -60,12 +60,25 @@ export async function POST(req: Request) {
 
     if (!gpt_flag) {
         console.error("Error from OpenAI: " + firstReplyRes);
-        console.log("switching to llama2");
+        console.log("switching to llama2 in conversation/route.ts");
+
+        // console.log("========================================================");
+        // console.log({
+        //   "temperature": 0.7,
+        //   "max_tokens": 256,
+        //   "documents": [
+        //     {
+        //       "role": "user",
+        //       "content": documentPrompt
+        //     },
+        //     ...fullConversation
+        //   ]
+        // });
 
         // set a 1 second time out between llama2 requests for stability
         try {
           firstReplyRes = await queryLlama2({
-            "documents": [
+            "messages": [
               {
                 "role": "user",
                 "content": documentPrompt
@@ -75,7 +88,7 @@ export async function POST(req: Request) {
           });
           console.log("Logging response from llama2", firstReplyRes.choices[0].message.content);
         } catch (error) {
-          console.error("queryLlama2 failed: " + error);
+          console.error("queryLlama2 failed in conversation/route.ts: " + error);
         };
     }
 
@@ -125,11 +138,11 @@ export async function POST(req: Request) {
       }
 
       if (!gpt_flag) {
-        console.log("switching to llama2 for second response");
+        console.log("switching to llama2 in conversation/route.ts for second response");
 
         try {
           secondReplyRes = await queryLlama2({
-            "documents": [
+            "messages": [
               {
                 "role": "user",
                 "content": documentPrompt + "\n\n" + searchPrompt
@@ -139,7 +152,7 @@ export async function POST(req: Request) {
           });
           console.log("Logging second response from llama2", secondReplyRes.choices[0].message.content);
         } catch (error) {
-          console.error("queryLlama2 failed: " + error);
+          console.error("queryLlama2 failed in conversation/route.ts for second response: " + error);
         }
       }
 
