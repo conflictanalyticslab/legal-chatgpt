@@ -58,6 +58,7 @@ import { postConversationMult } from "@/util/requests/postConversationMult";
 import { getConversation } from "@/util/requests/getConversation";
 import { putConversationSave } from "@/util/requests/putConversationSave";
 import { postPDF } from "@/util/requests/postPDF";
+import { postWebUrl } from "@/util/requests/postWebUrl";
 
 // import OJ components
 import {
@@ -212,33 +213,98 @@ export function Chat({
     return allRefs;
   };
 
+  const getUrls = (text: string) => {
+    const urlRegex = /(https?:\/\/)?([A-Za-z_0-9.-]+[.][A-Za-z]{2,})(\/[A-Za-z0-9-._~:\/\?#\[\]@!$&'()*+,;=]*)?/g;
+    let match;
+    const urls = [];
+    while (match = urlRegex.exec(text)) {
+        urls.push(match[0]);
+    }
+    return urls;
+}
+
+  const isValidUrl = (string: string) => {
+    try {
+        new URL(string);
+    } catch (_) {
+        return false;  
+    }
+
+    return true;
+  }
+
   const handleSubmit = async () => {
     if (!auth.currentUser) {
       setAlert("Missing auth.currentUser");
       return;
     }
 
-    const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
-    const estimatedTokenCount = tokenizer.estimateTokenCount(currentInput);
+    setLoading(true);
 
-    if (estimatedTokenCount >= 4096) {
-      createAlert('The input exceeds the token limit, maximum of 4096 tokens in each input, current input contains ' + estimatedTokenCount + ' tokens');
-      return;
+    let urls = getUrls(currentInput);
+
+    for (let url of urls) {
+      if (!url.includes("http") || !url.includes("https")) {
+        url = "https://" + url;
+      }
+      if (!isValidUrl(url)) {
+        setAlert("Invalid URL: " + url);
+        setLoading(false);
+        return;
+      }
     }
 
-    setLoading(true);
+    let urlContent;
+    let urlContentUserInput = currentInput;
+
+    for (const url of urls) {
+      try {
+        urlContent = await postWebUrl(url);
+        // console.log(urlContent.text);
+        urlContentUserInput = urlContentUserInput.replace(url, urlContent.text);
+      } catch (error: any) {
+        console.error(error);
+        if (error.message.includes("400")) {
+          console.log(error.status);
+          createAlert("Error fetching content from URL: " + url + " doesn't allow web scraping!");
+        } else {
+          createAlert("Error fetching content from URL: " + url + ", Please check the URL spelling and try again");
+        }
+        
+        setLoading(false);
+        return;
+      }
+    }
+
+    setCurrentInput("");
+
+    console.log(currentInput);
 
     try {
       const fullConversation = conversation.concat([
         {
           role: "user",
-          content: currentInput,  
+          content: urlContentUserInput,  
         },
       ]);
       setConversation(fullConversation);
       setUserInputs(userInputs.concat([currentInput]));
       setCurrentInput("");
       setNum(num - 1);
+
+      let total_conv = "";
+      for (const conv of fullConversation) {
+        total_conv += conv.content + " ";
+      }
+
+      const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
+      const estimatedTokenCount = tokenizer.estimateTokenCount(total_conv);
+
+      if (estimatedTokenCount >= 4096) {
+        createAlert('The input exceeds the token limit, maximum of 4096 tokens in each input, current input contains ' + estimatedTokenCount + ' tokens');
+        setLoading(false);
+        return;
+      }
 
       let response;
       
