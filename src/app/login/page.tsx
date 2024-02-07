@@ -14,13 +14,14 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import Link from "@mui/material";
-
+import Link from "next/link";
 import { auth } from "@/firebase";
+import styles from "@/styles/ResetPassword.module.css";
 
 import { getDatabase, ref, child, get } from "firebase/database";
 import { AppBackground, GridContainer, HeroBox } from "@/styles/styles";
 import { validEmailRegex } from "@/util/signup/validEmailRegex";
+import { resetPassword } from "@/util/api/firebase/auth";
 
 export default function Login() {
   const Joi = require("joi");
@@ -221,6 +222,8 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   style={{ width: "300px" }}
                 />
+
+                {/* Password */}
                 <FormControl sx={{ m: 1, width: "300px" }} variant="outlined">
                   <InputLabel htmlFor="outlined-adornment-password">
                     Password
@@ -249,7 +252,21 @@ export default function Login() {
                   <FormHelperText error={passwordError}>
                     {passHelper}
                   </FormHelperText>
+                  {/* Forgot Password */}
+                  <Link
+                    href="/resetPassword"
+                    style={{
+                      alignSelf: "end",
+                      color: "rgba(0, 0, 0, 0.6)",
+                      padding: "5px 0 0 0",
+                      fontSize: "14px",
+                    }}
+                    className={styles.forgot_password}
+                  >
+                    Forgot Password
+                  </Link>
                 </FormControl>
+
                 <Button
                   type="submit"
                   onClick={handleSignin}
@@ -259,7 +276,7 @@ export default function Login() {
                     width: "300px",
                     height: "50px",
                     fontSize: "16px",
-                    marginTop: "30px",
+                    marginTop: "20px",
                     backgroundColor: "#11335D",
                     color: "white",
                     textTransform: "none",
@@ -268,6 +285,8 @@ export default function Login() {
                 >
                   Continue
                 </Button>
+
+                {/* Sign Up */}
                 <div style={{ marginTop: "8px", marginBottom: "8px" }}>
                   {"Don't have an account?"}&nbsp;
                   <a
