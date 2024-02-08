@@ -1,7 +1,7 @@
 export const postWebUrl = async (url: string): Promise<any> => {
 
     try {
-        const response = await fetch("http://74.235.198.154:5001/robots", {
+        const response = await fetch("https://webreader.openjustice.ai/robots", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
