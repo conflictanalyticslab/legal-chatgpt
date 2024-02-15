@@ -514,13 +514,7 @@ export function Chat({
       id: 3,
       icon: <CloseIcon />,
       title: "Clear Conversation",
-    },
-    {
-      id: 4,
-      icon: <SaveIcon />,
-      title: "Save Conversation",
-      onClick: handleSave,
-    },
+    }
   ] as {
     id: number;
     icon: any;
