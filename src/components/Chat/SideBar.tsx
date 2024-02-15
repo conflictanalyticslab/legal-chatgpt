@@ -87,7 +87,7 @@ export default function SideBar() {
           <ChatBubbleIcon />
           <span className={styles.linkText}>Chat</span>
         </Link>
-        <Link
+        {/* <Link
           href="/chat/documents"
           key="documents-page-link"
           className={styles.sideitemConvo}
@@ -97,7 +97,7 @@ export default function SideBar() {
         >
           <ArticleIcon />
           <span className={styles.linkText}>Documents</span>
-        </Link>
+        </Link> */}
         <Link
           // style={{width:"100%"}}
           href="/"
