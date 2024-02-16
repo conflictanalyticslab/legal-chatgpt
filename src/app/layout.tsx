@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className={roboto.className}>
         <IncludedDocumentsProvider>{children}</IncludedDocumentsProvider>
       </body>
-      <GoogleAnalytics gaId="G-LVX561RGDL" />
+      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_MEASUREMENT_ID || ""} />
     </html>
   );
 }
