@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Grid, Typography, Button, Box } from "@mui/material";
+import { Grid, Typography, Box } from "@mui/material";
 
 import TextField from "@mui/material/TextField";
 import { FormControl } from "@mui/material";
@@ -14,7 +14,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
 import { signInWithEmailAndPassword } from "firebase/auth";
-
+import { Button } from "@/components/ui/button";
 import { auth } from "@/firebase";
 
 import { getDatabase, ref, child, get } from "firebase/database";
@@ -30,7 +30,8 @@ export default function Signup() {
       .email({ tlds: false })
       .pattern(validEmailRegex)
       .messages({
-        "string.pattern.base": "Your email is not approved for access. See the link above for a list of approved institutional emails",
+        "string.pattern.base":
+          "Your email is not approved for access. See the link above for a list of approved institutional emails",
       }),
 
     password: Joi.string().messages({
@@ -192,10 +193,16 @@ export default function Signup() {
         >
           <div style={{ marginTop: "18vh", marginBottom: "24px" }}>
             <Typography variant="h3" fontWeight={700} textAlign="center">
-                Create an account
+              Create an account
             </Typography>
-            <Typography variant="h6" fontWeight={700} textAlign="center" color="#11335D">
-                with an email from <a href="/institutionsList">approved institutions</a>
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              textAlign="center"
+              color="#11335D"
+            >
+              with an email from{" "}
+              <a href="/institutionsList">approved institutions</a>
             </Typography>
           </div>
 
@@ -251,25 +258,14 @@ export default function Signup() {
                   <FormHelperText error={passwordError}>
                     {passHelper}
                   </FormHelperText>
+                  <Button
+                    type="submit"
+                    onClick={handleSignup}
+                    className="mt-[20px]"
+                  >
+                    Sign up
+                  </Button>
                 </FormControl>
-                <Button
-                  type="submit"
-                  onClick={handleSignup}
-                  variant="contained"
-                  sx={{
-                    alignItems: "center",
-                    width: "300px",
-                    height: "50px",
-                    fontSize: "16px",
-                    marginTop: "30px",
-                    backgroundColor: "#11335D",
-                    color: "white",
-                    textTransform: "none",
-                    mr: "2px",
-                  }}
-                >
-                  Sign up
-                </Button>
                 <div style={{ marginTop: "8px", marginBottom: "8px" }}>
                   {"Register your email with our"}&nbsp;
                   <a

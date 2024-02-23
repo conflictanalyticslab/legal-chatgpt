@@ -2,7 +2,6 @@
 import { AppBackground, GridContainer } from "@/styles/styles";
 import { resetPassword } from "@/util/api/firebase/auth";
 import {
-  Button,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -11,6 +10,7 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { validEmailRegex } from "@/util/signup/validEmailRegex";
+import { Button } from "@/components/ui/button";
 
 function page() {
   const [email, setEmail] = useState("");
@@ -111,24 +111,13 @@ function page() {
               <Button
                 type="submit"
                 onClick={handleResetPassword}
-                variant="contained"
                 disabled={loading}
-                sx={{
-                  alignItems: "center",
-                  width: "300px",
-                  height: "50px",
-                  fontSize: "16px",
-                  marginTop: "20px",
-                  backgroundColor: "#11335D",
-                  color: "white",
-                  textTransform: "none",
-                  mr: "2px",
-                }}
+                className="mt-[20px]"
               >
                 Reset Password
               </Button>
             ) : (
-                // Success Message
+              // Success Message
               <FormLabel
                 style={{
                   color: "#67A55A",

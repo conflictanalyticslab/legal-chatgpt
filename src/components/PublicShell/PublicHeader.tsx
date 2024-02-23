@@ -1,9 +1,8 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import {
   AppBar,
-  Link,
   Box,
   List,
   ListItem,
@@ -16,6 +15,10 @@ import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import logo from "../../images/RobotoLogo.png";
 import { BlackMenuIcon, MyToolbar } from "@/styles/styles";
+import Container from "../ui/Container";
+import { Button } from "../ui/button";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 function ElevationScroll({ children }: { children: React.ReactElement }) {
   const trigger = useScrollTrigger({
@@ -31,12 +34,20 @@ function ElevationScroll({ children }: { children: React.ReactElement }) {
 
 export function PublicHeader() {
   const links = [
-    { id: 1, route: "About Us", url: "https://conflictanalytics.queenslaw.ca/" },
-    { id: 2, route: "Publications", url: "https://conflictanalytics.queenslaw.ca/publications" },
-    { id: 3, route: 'Blogs', url: "https://myopencourt.org/blog/"},
+    {
+      id: 1,
+      route: "About Us",
+      url: "https://conflictanalytics.queenslaw.ca/",
+    },
+    {
+      id: 2,
+      route: "Publications",
+      url: "https://conflictanalytics.queenslaw.ca/publications",
+    },
+    { id: 3, route: "Blogs", url: "https://myopencourt.org/blog/" },
     { id: 4, route: "FAQs", url: "https://myopencourt.org/faqs/" },
-    { id: 5, route: "Sign In", url: "/login" },
-    { id: 6, route: "Waitlist", url: "/waitlist"}
+    { id: 5, route: "Waitlist", url: "/waitlist" },
+    { id: 6, route: "Login", url: "/login" },
   ];
 
   const [state, setState] = React.useState({
@@ -71,75 +82,69 @@ export function PublicHeader() {
     </Box>
   );
 
-  const theme = useTheme();
-  const matches = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const [navOpen, setNavOpen] = useState(false);
+  const isTablet = useMediaQuery("(max-width: 768px)");
   return (
-    <ElevationScroll>
-      <AppBar position="sticky">
-        <MyToolbar>
-          <Link href="/">
-            <Image
-              src={logo}
-              alt="My Team"
-              style={{
-                margin: "auto",
-                marginLeft: "50px",
-              }}
-              height={62}
-            />
-          </Link>
+    <nav className="fixed z-[2] top-0 left-0 right-0 bg-greyBg py-[15px] border-b-[2px] border-border">
+      <Container className="flex justify-between items-center">
+        <Link href="/">
+          <Image src={logo} width={200} height={40} alt="Logo" />
+        </Link>
 
-          {matches ? (
-            <Box>
-              <IconButton
-                size="large"
-                edge="end"
-                color="inherit"
-                aria-label="menu"
-                onClick={toggleDrawer("right", true)}
-              >
-                <BlackMenuIcon />
-              </IconButton>
+        <Button
+          variant={"outline"}
+          className={cn("bg-greyBg px-[5px] hidden", {
+            flex: isTablet,
+          })}
+          onClick={() => setNavOpen(!navOpen)}
+        >
+          <Image
+            src={
+              !navOpen
+                ? "/assets/landing_page/nav_menu.png"
+                : "/assets/landing_page/close.svg"
+            }
+            height={30}
+            width={30}
+            alt="menu"
+          />
+        </Button>
 
-              <Drawer
-                anchor="right"
-                open={state["right"]}
-                onClose={toggleDrawer("right", false)}
-              >
-                {list("right")}
-              </Drawer>
-            </Box>
-          ) : (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                flexGrow: "0.1",
-                marginRight: "60px",
-              }}
-            >
-              {links.map((link) => (
-                <Link
-                  href={link.url}
-                  style={{
-                    color: "#000",
-                    fontSize: "1.2rem",
-                    fontWeight: "bold",
-                    paddingRight: "12px",
-                  }}
-                  target="_blank"
-                  underline="none"
-                  key={link.url}
-                >
-                  {link.route}
-                </Link>
-              ))}
-            </Box>
+        <div
+          className={cn(
+            `flex gap-[20px] text-[1.2rem] items-center`,
+            {
+              hidden: !navOpen && isTablet,
+            },
+            {
+              "flex-col fixed top-[70px] pt-[30px] left-0 right-0 bottom-0 bg-greyBg":
+                navOpen && isTablet,
+            }
           )}
-        </MyToolbar>
-      </AppBar>
-    </ElevationScroll>
+        >
+          {links
+            .filter((item) => item.id != 6)
+            .map((link) => (
+              <Link
+                className="text-black no-underline hover:text-primaryOJ"
+                href={link.url}
+                target="_blank"
+                key={link.url}
+              >
+                {link.route}
+              </Link>
+            ))}
+          <Button
+            asChild
+            className="bg-primaryOJ px-[20px] hover:bg-primaryOJ/90"
+          >
+            <Link href={links[links.length - 1].url} className="no-underline">
+              {links[links.length - 1].route}
+            </Link>
+          </Button>
+        </div>
+      </Container>
+    </nav>
   );
 }
 

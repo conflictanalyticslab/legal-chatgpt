@@ -5,8 +5,8 @@ import { FooterContainer } from "@/styles/styles";
 
 const PublicFooter = () => {
   return (
-    <FooterContainer sx={{ flexGrow: 1 }}>
-      <Typography variant="body1">
+    <footer className="border-[2px] border-border py-[12px] flex items-center justify-center bg-white">
+      <Typography variant="body1" className="text-center">
         © {new Date().getFullYear()}{" "}
         <Link
           href="https://myopencourt.org/"
@@ -17,7 +17,7 @@ const PublicFooter = () => {
         </Link>
         . All rights reserved.
       </Typography>
-    </FooterContainer>
+    </footer>
   );
 };
 

@@ -1,10 +1,13 @@
 import React from "react";
 import Image from "next/image";
-import { Grid, Typography, Button, Box, Container } from "@mui/material";
+import { Grid, Typography, Box } from "@mui/material";
 import mid_logo from "@/images/OpenMiddleLogo.png";
 import leftRight from "@/images/LandingBackground.png";
 import { PublicShell } from "@/components/PublicShell/PublicShell";
 import { AppBackground, GridContainer, HeroBox } from "@/styles/styles";
+import Container from "@/components/ui/Container";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 // import MainpageVid from "@/images/MainPageVid.mp4";
 
 export default function Home() {
@@ -17,80 +20,71 @@ export default function Home() {
 
 function Hero() {
   return (
-    <AppBackground
-      style={{
-        backgroundImage: `url('${leftRight.src}')`,
-        backgroundSize: "cover",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center center",
-      }}
-    >
-      <HeroBox textAlign="center">
-        <GridContainer
-          container
-          spacing={0}
-          direction="column"
-          justifyContent="center"
-          alignItems="center"
-          height="100%"
-        >
-          <Grid item xs={12} md={7}>
-            <Image
-              src={mid_logo}
-              alt="OpenJustice logo"
-              style={{
-                marginTop: "120px",
-                alignItems: "center",
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} md={7} width="40%" sx={{ paddingBottom: "20px" }}>
-            <Typography
-              variant="h1"
-              fontWeight={700}
-              textAlign="center"
-              sx={{ paddingBottom: "5px", fontSize: "2.125rem" }}
-            >
-              {/* \u00A0 is a non breaking space so text is all on one line but if we need to
-                  we will split the text between the word AI and Designed */}
-              {"Generative\u00A0AI Designed\u00A0for\u00A0Law"}
-              {/* {"is\u00A0currently\u00A0down! We\u00A0are\u00A0implementing\u00A0new\u00A0features"} */}
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{ marginTop: "30px", fontSize: "20px", textAlign: "left" }}
-            >
-               Our mission is to make legal AI technology accessible and dependable. Built on state-of-the-art language models fine-tuned for law, OpenJustice can address complex legal queries and process and analyze legal documents. Drawing upon vast legal sources and narratives, OpenJustice aims to provide exhaustive and accurate responses and equip law students and lawyers with innovative research tools. As a continuously learning and evolving research prototype, we actively seek your input to improve the quality of our responses and ensure the dependability of OpenJustice
-            </Typography>
-            <Box sx={{ display: "flex", justifyContent: "center" }}>
+    <main className="  ">
+      <Container className="min-h-[100vh] py-[70px] flex flex-col justify-center ">
+        {/* Info */}
+        <div className="flex flex-col lg:flex-row items-center justify-between w-[100%] h-[100%] lg:gap-[60px] pt-[60px] lg:pt-[0]">
+          <div className="flex flex-col  items-center lg:items-start gap-[35px] lg:gap-[15px] w-[100%] md:w-[80%] lg:w-[65%] order-2 lg:order-1 ">
+            {/* Title Heading */}
+            <div className="flex flex-col gap-[5px]">
+              <h1 className="text-5xl font-bold text-center lg:text-left">
+                Generative AI <br className="block lg:hidden" /> Designed for
+                Law
+              </h1>
+              <div className="flex flex-wrap gap-x-[15px] justify-center lg:justify-start">
+                <p className="text-xl"> Expert-led </p>
+                <p className="text-xl"> Non-Profit </p>
+                <p className="text-xl"> Open-source</p>
+                <p className="text-xl"> Independent </p>
+              </div>
+            </div>
+            {/* Description */}
+            <div className="flex flex-col gap-[30px] items-center lg:items-start">
+              <p className="text-xl text-[#646464] text-center lg:text-left">
+                Our goal is to deliver accessible, reliable legal AI.
+                OpenJustice, built on advanced language models for law,
+                processes queries and documents, drawing from vast legal sources
+                to provide precise, comprehensive answers and innovative tools
+                for law students and lawyers. As a growing prototype, we value
+                your feedback to improve and ensure OpenJustice's dependability.
+              </p>
               <Button
-                href="/login"
-                variant="contained"
-                sx={{
-                  width: "160px",
-                  fontSize: "16px",
-                  marginTop: "30px",
-                  color: "white",
-                  textTransform: "none",
-                  textDecoration: "none",
-                  fontWeight: "bold"
-                }}
+                variant="default"
+                className="w-[150px] bg-primaryOJ hover:bg-primaryOJ/90 text-white"
               >
-                Get Started
+                <Link href="/login">Get Started</Link>
               </Button>
-            </Box>
-          </Grid>
-          <Grid style={{display: 'flex', gap: '3rem', paddingTop: '1rem'}}>
-          <Typography variant="h4"> Expert-led </Typography>
-          <Typography variant="h4"> Non-Profit </Typography>
-          <Typography variant="h4"> Open-source</Typography>
-          <Typography variant="h4"> Independent </Typography>
-          </Grid>
-          <div style={{marginTop: "50px", marginBottom: "50px"}}>
-          <iframe src="https://www.youtube.com/embed/pmF9FYCWT5A?rel=0" width="640" height="360" scrolling="no" title="Conflict Analytics OpenJustice Demo FINAL.mp4"></iframe>
+            </div>
           </div>
-        </GridContainer>
-      </HeroBox>
-    </AppBackground>
+
+          {/* LOGO */}
+          <div className="order-1 min-w-[150px] lg:min-w-[300px] min-h-[150px] lg:min-h-[300px] max-h-[150px] lg:max-h-[300px] max-w-[150px] lg:max-w-[300px] relative">
+            <Image
+              src={"/assets/landing_page/OJ_ICON.svg"}
+              fill
+              alt="ICON"
+              className="object-contain"
+            />
+          </div>
+        </div>
+      </Container>
+      <div className="bg-[white] w-[100%] pt-[50px] pb-[100px] flex flex-col gap-[30px] items-center ">
+        <Container className="text-center flex flex-col items-center gap-[15px]">
+          <h1 className="text-5xl font-bold">OpenJustice Demo</h1>
+          <p className="text-xl text-[#646464]">
+            {" "}
+            Watch our demo and learn more about OpenJustice.
+          </p>
+        </Container>
+        <div className=" video-shadow flex min-h-[400px] mx-auto">
+          <iframe
+            src="https://www.youtube.com/embed/pmF9FYCWT5A?rel=0"
+            className=" max-w-[1000px] w-[90vw] sm:w-[80vw] lg:w-[70vw] h-[100vh] max-h-[400px] md:max-h-[500px] lg:max-h-[600px]"
+            scrolling="no"
+            title="Conflict Analytics OpenJustice Demo FINAL.mp4"
+          ></iframe>
+        </div>
+      </div>
+    </main>
   );
 }

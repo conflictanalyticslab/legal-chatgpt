@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Grid, Typography, Button, Box } from "@mui/material";
-
+import { Grid, Typography, Box } from "@mui/material";
+import { Button } from "@/components/ui/button";
 import TextField from "@mui/material/TextField";
 import { FormControl } from "@mui/material";
 import OutlinedInput from "@mui/material/OutlinedInput";
@@ -265,26 +265,15 @@ export default function Login() {
                   >
                     Forgot Password
                   </Link>
-                </FormControl>
 
-                <Button
-                  type="submit"
-                  onClick={handleSignin}
-                  variant="contained"
-                  sx={{
-                    alignItems: "center",
-                    width: "300px",
-                    height: "50px",
-                    fontSize: "16px",
-                    marginTop: "20px",
-                    backgroundColor: "#11335D",
-                    color: "white",
-                    textTransform: "none",
-                    mr: "2px",
-                  }}
-                >
-                  Continue
-                </Button>
+                  <Button
+                    type="submit"
+                    onClick={handleSignin}
+                    className="mt-[20px]"
+                  >
+                    Continue
+                  </Button>
+                </FormControl>
 
                 {/* Sign Up */}
                 <div style={{ marginTop: "8px", marginBottom: "8px" }}>
