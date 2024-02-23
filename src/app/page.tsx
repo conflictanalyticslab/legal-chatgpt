@@ -50,7 +50,8 @@ function Hero() {
               </p>
               <Button
                 variant="default"
-                className="w-[150px] bg-primaryOJ hover:bg-primaryOJ/90 text-white"
+                className="w-[150px] bg-primaryOJ hover:bg-primaryOJ/90 text-white text-lg py-[1.4rem]"
+                asChild
               >
                 <Link href="/login">Get Started</Link>
               </Button>

@@ -136,7 +136,7 @@ export function PublicHeader() {
             ))}
           <Button
             asChild
-            className="bg-primaryOJ px-[20px] hover:bg-primaryOJ/90"
+            className="bg-primaryOJ px-[20px] border-primaryOJ border-[2px] text-md text-white"
           >
             <Link href={links[links.length - 1].url} className="no-underline">
               {links[links.length - 1].route}
