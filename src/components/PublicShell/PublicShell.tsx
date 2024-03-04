@@ -7,7 +7,7 @@ export function PublicShell({
   showFooter = true,
 }: {
   children: ReactNode;
-  showFooter: boolean;
+  showFooter?: boolean;
 }) {
   return (
     <>
