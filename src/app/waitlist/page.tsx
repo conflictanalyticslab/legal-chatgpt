@@ -106,6 +106,7 @@ export default function Signup() {
           justifyContent="center"
           alignItems="center"
           height="100%"
+          style={{minHeight:"100vh"}}
         >
           <div style={{ marginTop: "18vh", marginBottom: "24px" }}>
             <Typography variant="h3" fontWeight={700} textAlign="center">
