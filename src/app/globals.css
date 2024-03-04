@@ -31,8 +31,22 @@ body {
   padding: 32px 0 0 0 !important;
 }
 
-.video-shadow{
-  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+.video-shadow {
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px,
+    rgba(0, 0, 0, 0.22) 0px 15px 12px;
+}
+#landing-page {
+  scroll-snap-align: start;
+
+}
+#video-page {
+  scroll-snap-align: start;
+}
+#main-id {
+  scroll-snap-type: y mandatory;
+  overflow-y: auto; /* Make sure it's scrollable */
+  height: 100vh; /* Adjust based on your layout needs */
+  scroll-behavior: smooth;
 }
 
 @layer base {
