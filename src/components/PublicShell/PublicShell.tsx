@@ -2,12 +2,18 @@ import { ReactNode } from "react";
 import PublicFooter from "./PublicFooter";
 import PublicHeader from "./PublicHeader";
 
-export function PublicShell({ children }: { children: ReactNode }) {
+export function PublicShell({
+  children,
+  showFooter = true,
+}: {
+  children: ReactNode;
+  showFooter?: boolean;
+}) {
   return (
     <>
       <PublicHeader />
       {children}
-      <PublicFooter />
+      {showFooter && <PublicFooter />}
     </>
   );
 }

@@ -5,7 +5,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 
 export const AppBackground = styled("div")({
   backgroundColor: "#f5f5f7",
-  minHeight: "85vh",
+  minHeight: "100vh",
+  paddingTop: "71px",
 });
 
 export const MyToolbar = styled(Toolbar)({
