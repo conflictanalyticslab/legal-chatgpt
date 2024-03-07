@@ -126,7 +126,6 @@ export default function Signup() {
       console.log(err);
       setGeneralError(err);
     }
-    console.log({ emailError, passwordError });
 
     return emailError || passwordError;
   };
@@ -182,111 +181,101 @@ export default function Signup() {
 
   return (
     <AppBackground>
-      <HeroBox textAlign="center">
-        <GridContainer
-          container
-          spacing={7}
-          direction="column"
-          justifyContent="center"
-          alignItems="center"
-          height="100%"
-          style={{minHeight:"100vh"}}
+      <div className="min-w-[300px] min-h-[100%] pt-[40px] pb-[80px]">
+        <div style={{ marginBottom: "24px" }}>
+          <Typography variant="h3" fontWeight={700} textAlign="center">
+            Create an account
+          </Typography>
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            textAlign="center"
+            color="#11335D"
+            className="px-[20px]"
+>
+            with an email from{" "}
+            <a href="/institutionsList">approved institutions</a>
+          </Typography>
+        </div>
 
-        >
-          <div style={{ marginTop: "18vh", marginBottom: "24px" }}>
-            <Typography variant="h3" fontWeight={700} textAlign="center">
-              Create an account
-            </Typography>
-            <Typography
-              variant="h6"
-              fontWeight={700}
-              textAlign="center"
-              color="#11335D"
-            >
-              with an email from{" "}
-              <a href="/institutionsList">approved institutions</a>
-            </Typography>
-          </div>
-
-          <div style={{ width: "40%", alignItems: "center" }}>
-            <Box
-              component="form"
-              sx={{
-                "& .MuiTextField-root": { m: 1, width: "25ch" },
-                alignItems: "center",
+        <div style={{ alignItems: "center" }}>
+          <Box
+            component="form"
+            sx={{
+              "& .MuiTextField-root": { m: 1, width: "25ch" },
+              alignItems: "center",
+            }}
+            autoComplete="off"
+          >
+            <div
+              style={{
+                maxWidth: "500px",
+                textAlign: "center",
+                margin: "auto",
               }}
-              autoComplete="off"
             >
-              <div
-                style={{
-                  maxWidth: "500px",
-                  textAlign: "center",
-                  margin: "auto",
-                }}
-              >
-                <TextField
-                  id="email-input"
-                  label="Email"
-                  helperText={emailHelper}
-                  value={email}
-                  error={emailError}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={{ width: "300px" }}
+              <TextField
+                id="email-input"
+                label="Email"
+                helperText={emailHelper}
+                value={email}
+                error={emailError}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{ width: "300px" }}
+              />
+              <FormControl sx={{ m: 1, width: "300px" }} variant="outlined">
+                <InputLabel htmlFor="outlined-adornment-password">
+                  Password
+                </InputLabel>
+                <OutlinedInput
+                  id="outlined-adornment-password"
+                  type={showPassword ? "text" : "password"}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  label="Password"
+                  value={password}
+                  error={passwordError}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
-                <FormControl sx={{ m: 1, width: "300px" }} variant="outlined">
-                  <InputLabel htmlFor="outlined-adornment-password">
-                    Password
-                  </InputLabel>
-                  <OutlinedInput
-                    id="outlined-adornment-password"
-                    type={showPassword ? "text" : "password"}
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={handleClickShowPassword}
-                          onMouseDown={handleMouseDownPassword}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    }
-                    label="Password"
-                    value={password}
-                    error={passwordError}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <FormHelperText error={passwordError}>
-                    {passHelper}
-                  </FormHelperText>
-                  <Button
-                    type="submit"
-                    onClick={handleSignup}
-                    className="mt-[20px]"
-                  >
-                    Sign up
-                  </Button>
-                </FormControl>
-                <div style={{ marginTop: "8px", marginBottom: "8px" }}>
-                  {"Register your email with our"}&nbsp;
-                  <a
-                    // onClick={handleSignup}
-                    href="/waitlist"
-                    style={{ textDecoration: "underline", fontWeight: "bold" }}
-                  >
-                    waitlist
-                  </a>
-                </div>
-                <FormHelperText error={Boolean(generalError)}>
-                  {generalHelper}
+                <FormHelperText error={passwordError}>
+                  {passHelper}
                 </FormHelperText>
+                <Button
+                  type="submit"
+                  onClick={handleSignup}
+                  className="mt-[20px]"
+                >
+                  Sign up
+                </Button>
+              </FormControl>
+              <div style={{ marginTop: "8px", marginBottom: "8px" }}>
+                {"Register your email with our"}&nbsp;
+                <a
+                  // onClick={handleSignup}
+                  href="/waitlist"
+                  style={{ textDecoration: "underline", fontWeight: "bold" }}
+                >
+                  waitlist
+                </a>
               </div>
-            </Box>
-          </div>
-          <Grid item xs={12} md={7} margin="0px" width="90%"></Grid>
-        </GridContainer>
-      </HeroBox>
+              <FormHelperText error={Boolean(generalError)}>
+                {generalHelper}
+              </FormHelperText>
+            </div>
+          </Box>
+        </div>
+        <Grid item xs={12} md={7} margin="0px" width="90%"></Grid>
+      </div>
     </AppBackground>
   );
 }

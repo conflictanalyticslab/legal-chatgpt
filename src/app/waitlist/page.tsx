@@ -98,95 +98,85 @@ export default function Signup() {
 
   return (
     <AppBackground>
-      <HeroBox textAlign="center">
-        <GridContainer
-          container
-          spacing={7}
-          direction="column"
-          justifyContent="center"
-          alignItems="center"
-          height="100%"
-          style={{minHeight:"100vh"}}
-        >
-          <div style={{ marginTop: "18vh", marginBottom: "24px" }}>
-            <Typography variant="h3" fontWeight={700} textAlign="center">
-              Waitlist Registration
-            </Typography>
-          </div>
+      <div className="min-w-[300px] min-h-[100%] pt-[40px] pb-[80px]">
+        <div style={{ marginBottom: "24px" }}>
+          <Typography variant="h3" fontWeight={700} textAlign="center">
+            Waitlist Registration
+          </Typography>
+        </div>
 
-          <div>
-            <Box
-              component="form"
-              sx={{
-                "& .MuiTextField-root": { m: 1, width: "25ch" },
-                alignItems: "center",
+        <div className="max-w-fit mx-auto">
+          <Box
+            component="form"
+            sx={{
+              "& .MuiTextField-root": { m: 1, width: "25ch" },
+              alignItems: "center",
+            }}
+            autoComplete="off"
+          >
+            <div
+              style={{
+                textAlign: "center",
+                margin: "auto",
               }}
-              autoComplete="off"
+              className="flex flex-col items-center"
             >
-              <div
-                style={{
-                  textAlign: "center",
-                  margin: "auto",
-                }}
-                className="flex flex-col items-center"
+              <TextField
+                id="name-input"
+                label="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={{ width: "300px" }}
+                InputLabelProps={{ shrink: true }}
+                required
+              />
+              <TextField
+                id="email-input"
+                label="Email"
+                helperText={emailHelper}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{ width: "300px" }}
+                InputLabelProps={{ shrink: true }}
+                required
+              />
+              <TextField
+                id="university-input"
+                label="University"
+                value={university}
+                onChange={(e) => setUniversity(e.target.value)}
+                style={{ width: "300px" }}
+                InputLabelProps={{ shrink: true }}
+                required
+              />
+              <TextField
+                id="useCase-input"
+                label="How do you intend to use OpenJustice?"
+                value={useCase}
+                onChange={(e) => setUseCase(e.target.value)}
+                style={{ width: "300px" }}
+                multiline={true}
+                rows={3}
+                InputLabelProps={{ shrink: true }}
+                required
+              />
+              <Button
+                type="submit"
+                onClick={handleRegister}
+                className="mt-[20px] w-[100%]"
               >
-                <TextField
-                  id="name-input"
-                  label="Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  style={{ width: "300px" }}
-                  InputLabelProps={{ shrink: true }}
-                  required
-                />
-                <TextField
-                  id="email-input"
-                  label="Email"
-                  helperText={emailHelper}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={{ width: "300px" }}
-                  InputLabelProps={{ shrink: true }}
-                  required
-                />
-                <TextField
-                  id="university-input"
-                  label="University"
-                  value={university}
-                  onChange={(e) => setUniversity(e.target.value)}
-                  style={{ width: "300px" }}
-                  InputLabelProps={{ shrink: true }}
-                  required
-                />
-                <TextField
-                  id="useCase-input"
-                  label="How do you intend to use OpenJustice?"
-                  value={useCase}
-                  onChange={(e) => setUseCase(e.target.value)}
-                  style={{ width: "300px" }}
-                  multiline={true}
-                  rows={3}
-                  InputLabelProps={{ shrink: true }}
-                  required
-                />
-                <Button
-                  type="submit"
-                  onClick={handleRegister}
-                  className="mt-[20px] w-[100%]"
-                >
-                  Register to waitlist
-                </Button>
-                <FormHelperText
-                  error={Boolean(successError)}
-                  sx={{ textAlign: "center" }}
-                >
-                  {successMessage}
-                </FormHelperText>
-              </div>
-            </Box>
-          </div>
-        </GridContainer>
-      </HeroBox>
+                Register to waitlist
+              </Button>
+              <FormHelperText
+                error={Boolean(successError)}
+                sx={{ textAlign: "center" }}
+              >
+                {successMessage}
+              </FormHelperText>
+            </div>
+          </Box>
+        </div>
+      </div>
     </AppBackground>
   );
 }

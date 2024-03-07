@@ -62,29 +62,13 @@ function page() {
 
   return (
     <AppBackground>
-      <GridContainer
-        container
-        spacing={7}
-        direction="column"
-        justifyContent="center"
-        alignItems="center"
-        height="100%"
-      >
-        <div
-          style={{
-            position: "relative",
-            bottom: "100px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "30px",
-          }}
-        >
+      <div className="h-full items-center justify-center flex-col flex pt-[40px] pb-[80px] min-w-[300px]">
+        <div className="relative flex flex-col items-center gap-[30px]">
           <div>
             <Typography variant="h3" fontWeight={700} textAlign="center">
               Reset Password
             </Typography>
-            <p style={{ color: "rgba(0, 0, 0, 0.6)" }}>
+            <p style={{ color: "rgba(0, 0, 0, 0.6)" }} className="text-center">
               Enter your email and we'll send you a link to reset your password.
             </p>
           </div>
@@ -130,7 +114,7 @@ function page() {
             )}
           </FormControl>
         </div>
-      </GridContainer>
+      </div>
     </AppBackground>
   );
 }

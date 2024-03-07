@@ -182,138 +182,108 @@ export default function Login() {
 
   return (
     <AppBackground>
-      <HeroBox textAlign="center">
-        <GridContainer
-          container
-          spacing={7}
-          direction="column"
-          justifyContent="center"
-          alignItems="center"
-          height="100%"
-          style={{ minHeight: "100vh" }}
-        >
-          <div style={{ marginTop: "18vh", marginBottom: "24px" }}>
-            <Typography variant="h3" fontWeight={700} textAlign="center">
-              Welcome back
-            </Typography>
-          </div>
-
-          <div style={{ width: "40%", alignItems: "center" }}>
-            <Box
-              component="form"
-              sx={{
-                "& .MuiTextField-root": { m: 1, width: "25ch" },
-                alignItems: "center",
+      <div className="min-w-[300px] min-h-[100%] pt-[40px]">
+        <div style={{ marginBottom: "24px" }}>
+          <Typography variant="h3" fontWeight={700} textAlign="center">
+            Welcome back
+          </Typography>
+        </div>
+        <div>
+          <Box
+            component="form"
+            sx={{
+              "& .MuiTextField-root": { m: 1, width: "25ch" },
+              alignItems: "center",
+            }}
+            autoComplete="off"
+          >
+            <div
+              style={{
+                maxWidth: "500px",
+                textAlign: "center",
+                margin: "auto",
               }}
-              autoComplete="off"
             >
-              <div
-                style={{
-                  maxWidth: "500px",
-                  textAlign: "center",
-                  margin: "auto",
-                }}
-              >
-                <TextField
-                  id="email-input"
-                  label="Email"
-                  helperText={emailHelper}
-                  value={email}
-                  error={emailError}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={{ width: "300px" }}
+              <TextField
+                id="email-input"
+                label="Email"
+                helperText={emailHelper}
+                value={email}
+                error={emailError}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{ width: "300px" }}
+              />
+
+              {/* Password */}
+              <FormControl sx={{ m: 1, width: "300px" }} variant="outlined">
+                <InputLabel htmlFor="outlined-adornment-password">
+                  Password
+                </InputLabel>
+                <OutlinedInput
+                  id="outlined-adornment-password"
+                  type={showPassword ? "text" : "password"}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  label="Password"
+                  value={password}
+                  error={passwordError}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
-
-                {/* Password */}
-                <FormControl sx={{ m: 1, width: "300px" }} variant="outlined">
-                  <InputLabel htmlFor="outlined-adornment-password">
-                    Password
-                  </InputLabel>
-                  <OutlinedInput
-                    id="outlined-adornment-password"
-                    type={showPassword ? "text" : "password"}
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={handleClickShowPassword}
-                          onMouseDown={handleMouseDownPassword}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    }
-                    label="Password"
-                    value={password}
-                    error={passwordError}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  {/* <PasswordStrengthBar password={password} /> */}
-                  <FormHelperText error={passwordError}>
-                    {passHelper}
-                  </FormHelperText>
-                  {/* Forgot Password */}
-                  <Link
-                    href="/resetPassword"
-                    style={{
-                      alignSelf: "end",
-                      color: "rgba(0, 0, 0, 0.6)",
-                      padding: "5px 0 0 0",
-                      fontSize: "14px",
-                    }}
-                    className={styles.forgot_password}
-                  >
-                    Forgot Password
-                  </Link>
-
-                  <Button
-                    type="submit"
-                    onClick={handleSignin}
-                    className="mt-[20px]"
-                  >
-                    Continue
-                  </Button>
-                </FormControl>
-
-                {/* Sign Up */}
-                <div style={{ marginTop: "8px", marginBottom: "8px" }}>
-                  {"Don't have an account?"}&nbsp;
-                  <a
-                    // onClick={handleSignup}
-                    href="/signup"
-                    style={{ textDecoration: "underline", fontWeight: "bold" }}
-                  >
-                    Sign up
-                  </a>
-                </div>
-
-                {/* <div style={{ margin: 'auto', width: '350px', height: '15px', borderBottom: '2px solid #11335D', textAlign: 'center', alignItems: 'center'}}>
-                  <span style={{fontSize: '20px', backgroundColor: '#F3F5F6', padding: '0 10px', fontWeight: 'bold'}}>OR</span>
-              </div>
-
-              <Button
-              sx={{ width: '300px', height: '50px', fontSize: '16px', marginTop: '30px', backgroundColor: '#FFFFFF', color: 'black',  textTransform: 'none', mr: '2px', alignItems: 'center'}}
-              >
-                <img src={google_logo} style={{width: '14px', height: '14px', marginRight: '6px'}}/>
-                Continue with Google
-              </Button>
-              <Button
-                sx={{ alignItems: 'center', width: '300px', height: '50px', fontSize: '16px', marginTop: '30px', backgroundColor: '#FFFFFF', color: 'black',  textTransform: 'none', mr: '2px', alignItems: 'center'}}             
-              >
-                <img src={microsoft_logo} style={{width: '14px', height: '14px', marginRight: '6px'}}/>
-                Continue with Microsoft
-              </Button> */}
-
-                <FormHelperText error={Boolean(generalError)}>
-                  {generalHelper}
+                {/* <PasswordStrengthBar password={password} /> */}
+                <FormHelperText error={passwordError}>
+                  {passHelper}
                 </FormHelperText>
+                {/* Forgot Password */}
+                <Link
+                  href="/resetPassword"
+                  style={{
+                    alignSelf: "end",
+                    color: "rgba(0, 0, 0, 0.6)",
+                    padding: "5px 0 0 0",
+                    fontSize: "14px",
+                  }}
+                  className={styles.forgot_password}
+                >
+                  Forgot Password
+                </Link>
+
+                <Button
+                  type="submit"
+                  onClick={handleSignin}
+                  className="mt-[20px]"
+                >
+                  Continue
+                </Button>
+              </FormControl>
+
+              {/* Sign Up */}
+              <div style={{ marginTop: "8px", marginBottom: "8px" }}>
+                {"Don't have an account?"}&nbsp;
+                <a
+                  // onClick={handleSignup}
+                  href="/signup"
+                  style={{ textDecoration: "underline", fontWeight: "bold" }}
+                >
+                  Sign up
+                </a>
               </div>
-            </Box>
-          </div>
-          <Grid item xs={12} md={7} margin="0px" width="90%"></Grid>
-        </GridContainer>
-      </HeroBox>
+              <FormHelperText error={Boolean(generalError)}>
+                {generalHelper}
+              </FormHelperText>
+            </div>
+          </Box>
+        </div>
+      </div>
     </AppBackground>
   );
 }
