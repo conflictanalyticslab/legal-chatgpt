@@ -85,15 +85,21 @@ export function PublicHeader() {
   const [navOpen, setNavOpen] = useState(false);
   const isTablet = useMediaQuery("(max-width: 768px)");
   return (
-    <nav className="fixed z-[2] top-0 left-0 right-0 bg-greyBg py-[15px] border-b-[2px] border-border">
+    <nav className="fixed z-[2] top-0 left-0 right-0 bg-greyBg py-[10px] sm:py-[15px] border-b-[2px] border-border">
       <Container className="flex justify-between items-center">
         <Link href="/">
-          <Image src={logo} width={200} height={40} alt="Logo" />
+          <Image
+            src={logo}
+            width={200}
+            height={40}
+            alt="Logo"
+            className="w-[120px] sm:w-auto"
+          />
         </Link>
 
         <Button
           variant={"outline"}
-          className={cn("bg-greyBg px-[5px] hidden", {
+          className={cn("bg-greyBg h-auto px-[5px] hidden", {
             flex: isTablet,
           })}
           onClick={() => setNavOpen(!navOpen)}
@@ -106,6 +112,7 @@ export function PublicHeader() {
             }
             height={30}
             width={30}
+            className="w-[20px] sm:w-auto h-[20px] sm:h-auto"
             alt="menu"
           />
         </Button>

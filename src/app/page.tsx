@@ -25,27 +25,27 @@ function Hero() {
       <main id="main-id">
         <Container
           id="landing-page"
-          className="landing-page min-h-[100vh] h-[100vh] py-[70px] flex flex-col justify-center "
+          className="landing-page min-h-[100vh] sm:min-h-[100dvh] py-[70px] flex flex-col justify-start sm:justify-center "
         >
           {/* Info */}
-          <div className="flex flex-col lg:flex-row items-center justify-between w-[100%] h-[100%] lg:gap-[60px] pt-[60px] lg:pt-[0]">
-            <div className="flex flex-col  items-center lg:items-start gap-[35px] lg:gap-[15px] w-[100%] md:w-[80%] lg:w-[65%] order-2 lg:order-1 ">
+          <div className="flex flex-col lg:flex-row items-center justify-between w-[100%] h-[100%] lg:gap-[60px] pt-[10px] lg:pt-[0]">
+            <div className="flex flex-col  items-center lg:items-start gap-[5px] sm:gap-[35px] lg:gap-[15px] w-[100%] md:w-[80%] lg:w-[65%] order-2 lg:order-1 ">
               {/* Title Heading */}
               <div className="flex flex-col gap-[5px]">
-                <h1 className="text-5xl font-bold text-center lg:text-left">
+                <h1 className="text-3xl md:text-5xl font-bold text-center lg:text-left">
                   Generative AI <br className="block lg:hidden" /> Designed for
                   Law
                 </h1>
                 <div className="flex flex-wrap gap-x-[15px] justify-center lg:justify-start">
-                  <p className="text-xl"> Expert-led </p>
-                  <p className="text-xl"> Non-Profit </p>
-                  <p className="text-xl"> Open-source</p>
-                  <p className="text-xl"> Independent </p>
+                  <p className="text-sm sm:text-xl"> Expert-led </p>
+                  <p className="text-sm sm:text-xl"> Non-Profit </p>
+                  <p className="text-sm sm:text-xl"> Open-source</p>
+                  <p className="text-sm sm:text-xl"> Independent </p>
                 </div>
               </div>
               {/* Description */}
               <div className="flex flex-col gap-[30px] items-center lg:items-start">
-                <p className="text-xl text-[#646464] text-center lg:text-left">
+                <p className=" text-xs sm:text-xl text-[#646464] text-center lg:text-left">
                   Our goal is to deliver accessible, reliable legal AI.
                   OpenJustice, built on advanced language models for law,
                   processes queries and documents, drawing from vast legal
@@ -65,7 +65,7 @@ function Hero() {
             </div>
 
             {/* LOGO */}
-            <div className="order-1 min-w-[150px] lg:min-w-[300px] min-h-[150px] lg:min-h-[300px] max-h-[150px] lg:max-h-[300px] max-w-[150px] lg:max-w-[300px] relative">
+            <div className="order-1 min-w-[80px] lg:min-w-[300px] min-h-[100px] lg:min-h-[300px] max-h-[150px] lg:max-h-[300px] max-w-[150px] lg:max-w-[300px] relative">
               <Image
                 src={"/assets/landing_page/OJ_ICON.svg"}
                 fill
@@ -77,7 +77,7 @@ function Hero() {
         </Container>
         <div
           id="video-page"
-          className="bg-[white] w-[100%] min-h-[100vh] flex flex-col gap-[30px] items-center justify-center relative "
+          className="bg-[white] w-[100%] min-h-[100dvh] flex flex-col gap-[30px] items-center justify-center relative "
         >
           <Container className="text-center flex flex-col items-center gap-[15px] pt-[100px] my-0">
             <h1 className="text-5xl font-bold">OpenJustice Demo</h1>
@@ -86,10 +86,10 @@ function Hero() {
               Watch our demo and learn more about OpenJustice.
             </p>
           </Container>
-          <div className=" video-shadow flex min-h-[400px] mx-auto mb-[150px]">
+          <div className=" video-shadow flex min-h-[200px] mx-auto mb-[150px]">
             <iframe
               src="https://www.youtube.com/embed/pmF9FYCWT5A?rel=0"
-              className=" max-w-[1000px] w-[90vw] sm:w-[80vw] lg:w-[70vw] h-[100vh] max-h-[400px] md:max-h-[500px] lg:max-h-[600px]"
+              className=" max-w-[1000px] w-[90vw] sm:w-[80vw] lg:w-[70vw] max-h-[200px] md:max-h-[500px] lg:max-h-[600px]"
               scrolling="no"
               title="Conflict Analytics OpenJustice Demo FINAL.mp4"
             ></iframe>
