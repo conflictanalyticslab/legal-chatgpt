@@ -300,8 +300,8 @@ export function Chat({
       const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
       const estimatedTokenCount = tokenizer.estimateTokenCount(total_conv);
 
-      if (estimatedTokenCount >= 4096) {
-        createAlert('The input exceeds the token limit, maximum of 4096 tokens in each input, current input contains ' + estimatedTokenCount + ' tokens');
+      if (estimatedTokenCount >= 8192) {
+        createAlert('The input exceeds the token limit, maximum of 8192 tokens in each input, current input contains ' + estimatedTokenCount + ' tokens');
         setLoading(false);
         return;
       }
@@ -507,7 +507,7 @@ export function Chat({
       const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
       estimatedTokenCount = tokenizer.estimateTokenCount(pdfContent.content);
 
-      if (estimatedTokenCount > 2048) {
+      if (estimatedTokenCount > 8192) {
         throw new Error("PDF token limit exceeded");
       }
 
@@ -529,7 +529,7 @@ export function Chat({
       if (err.message === 'PDF File uploaded too large') {
         createAlert('The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ' + pdfFileSize + ' bytes');
       } else if (err.message === 'PDF token limit exceeded' && estimatedTokenCount !== -1) {
-        createAlert('The PDF file uploaded exceeds limit, maximum of 2048 token in each PDF uploaded, your pdf contains ' + estimatedTokenCount + ' tokens');
+        createAlert('The PDF file uploaded exceeds limit, maximum of 8192 token in each PDF uploaded, your pdf contains ' + estimatedTokenCount + ' tokens');
       }
     }
       

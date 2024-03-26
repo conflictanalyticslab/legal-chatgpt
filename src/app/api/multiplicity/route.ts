@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     let gpt_flag = true;
     try {
     firstReplyRes = await queryOpenAi({
-      model: "gpt-3.5-turbo",
+      model: "gpt-3.5-turbo-0125",
       messages: [
         {
           role: "system",
@@ -107,12 +107,12 @@ export async function POST(req: Request) {
 
       try {
         secondReplyRes = await queryOpenAi({
-          model: "gpt-3.5-turbo",
+          model: "gpt-3.5-turbo-0125",
           messages: [
             {
               role: "system",
               content:
-                "If the question does not encompass different scenarios, ignore the rest of the prompt. Else if your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses.\n" +
+                "If the question does not encompass different scenarios, ignore the rest of the prompt. Else if your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses. Use bolded fonts to highlight keywords and scenario headings.\n" +
                 documentPrompt +
                 "\n\n" +
                 searchPrompt,

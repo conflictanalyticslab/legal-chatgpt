@@ -19,12 +19,14 @@ export async function POST(req: Request) {
       password,
     });
 
+    // console.log("Successfully created new user:", user.uid);
+
     await getFirestore().collection("users").doc(user.uid).set({
       email,
       conversations: [],
-      role: "default",
-      prompts_allowed: 10,
-      prompts_left: 10,
+      role: "partner",
+      prompts_allowed: 100,
+      prompts_left: 100,
       verified: true,
     });
 
