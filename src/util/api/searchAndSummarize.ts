@@ -7,7 +7,7 @@ export const searchAndSummarize = async (firstReplyContent: string) => {
     let gpt_working = true;
     try {
       summarizeRes= await queryOpenAi({
-      model: "gpt-3.5-turbo",
+      model: "gpt-3.5-turbo-0125",
       messages: [
         {
           role: "system",

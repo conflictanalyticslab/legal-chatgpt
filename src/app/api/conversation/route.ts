@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     let gpt_flag = true;
     try {
       firstReplyRes = await queryOpenAi({
-        model: "gpt-3.5-turbo",
+        model: "gpt-3.5-turbo-0125",
         messages: [
           {
             role: "system",
@@ -116,7 +116,7 @@ export async function POST(req: Request) {
       let secondReplyRes:any;
         try {
         secondReplyRes = await queryOpenAi({
-          model: "gpt-3.5-turbo",
+          model: "gpt-3.5-turbo-0125",
           messages: [
             {
               role: "system",
