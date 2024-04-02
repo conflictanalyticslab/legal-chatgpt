@@ -102,58 +102,52 @@ export async function POST(req: Request) {
       // Can use tokenLength() to estimate the tokens used so far.
       const searchPrompt = searchResults[0].abstract;
 
-      let secondReplyRes: any;
-      gpt_flag = true;
-
-      try {
+      let secondReplyRes:any;
+        try {
         secondReplyRes = await queryOpenAi({
           model: "gpt-3.5-turbo-0125",
           messages: [
             {
               role: "system",
               content:
-                "If the question does not encompass different scenarios, ignore the rest of the prompt. Else if your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses. Use bolded fonts to highlight keywords and scenario headings.\n" +
+                "Answer in 500 words or less. Short answers are better.\n\n" +
                 documentPrompt +
                 "\n\n" +
                 searchPrompt,
             },
             ...fullConversation,
           ],
-        });
-        if (!secondReplyRes || !secondReplyRes.choices || secondReplyRes.choices.length === 0) {
+        }, true);
+        if (!secondReplyRes) {
           gpt_flag = false;
         }
+        return secondReplyRes;
       } catch (error) {
-        console.error("second response queryOpenAi failed: " + error);
+        console.error("queryOpenAi failed: " + error);
         gpt_flag = false;
       }
 
       if (!gpt_flag) {
-        console.log("switching to llama2 in multiplicity/route.ts for second response");
+        console.log("switching to llama2 in conversation/route.ts for second response");
 
         try {
           secondReplyRes = await queryLlama2({
             "messages": [
               {
-                "role": "system",
-                // content: "Answer in 500 words or less. Short answers are better." 
-                "content":
-                "If the question does not encompass different scenarios, ignore the rest of the prompt. Else if your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses.\n" +
-                documentPrompt +
-                "\n\n" +
-                searchPrompt,
+                "role": "user",
+                "content": documentPrompt + "\n\n" + searchPrompt
               },
-              ...fullConversation,
-            ],
+              ...fullConversation
+            ]
           });
           console.log("Logging second response from llama2", secondReplyRes.choices[0].message.content);
         } catch (error) {
-          console.error("queryLlama2 failed in multiplicity/route.ts for second response: " + error);
+          console.error("queryLlama2 failed in conversation/route.ts for second response: " + error);
         }
       }
 
-
-      console.log("Logging second response", secondReplyRes);
+      
+      // console.log("Logging second response from OpenAi", secondReplyRes.body.getReader().read().value);
 
       return NextResponse.json({
         latestBotResponse: secondReplyRes.choices[0].message.content,

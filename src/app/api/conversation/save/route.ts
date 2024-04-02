@@ -94,7 +94,7 @@ export async function POST(req: Request) {
       documents: includedDocuments,
     });
 
-    console.log(docRef.id);
+    // console.log(docRef.id);
     const userDocRef = getFirestore().collection("users").doc(decodedToken.user_id).withConverter(userConverter);
     
     const data: UserI | undefined = (await userDocRef.get()).data();
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
       const to_update = ((data == null) ? [] : data.conversations).concat([docRef.id]);
 
     
-      console.log(to_update);
+      // console.log(to_update);
       await userDocRef.update({conversations: to_update});
     }
     return NextResponse.json(

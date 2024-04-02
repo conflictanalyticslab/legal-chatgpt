@@ -28,7 +28,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import RefreshIcon from "@mui/icons-material/Refresh";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
-import SaveIcon from "@mui/icons-material/Save";
+// import SaveIcon from "@mui/icons-material/Save";
 import { Send, ThumbUp, ThumbDown } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import { Typography } from "@mui/material";
@@ -43,6 +43,7 @@ import Whatis from "@/images/Whatis.png";
 import Howto from "@/images/Howto.png";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { postConversation } from "@/util/requests/postConversation";
+import { postSearchTerms} from "@/util/requests/postSearchTerms";
 // uncomment the following when working on pdf upload
 import { uploadPdfDocument } from "@/util/requests/uploadPdfDocument";
 import { useFilePicker } from "use-file-picker";
@@ -54,8 +55,8 @@ import {
 // import OJ hooks
 import { postConversationSave } from "@/util/requests/postConversationSave";
 // import { IncludedDocumentsProvider, useIncludedDocuments } from "@/hooks/useIncludedDocuments"; // passing props instead
-import { postConversationMult } from "@/util/requests/postConversationMult";
-import { getConversation } from "@/util/requests/getConversation";
+// import { postConversationMult } from "@/util/requests/postConversationMult";
+// import { getConversation } from "@/util/requests/getConversation";
 import { putConversationSave } from "@/util/requests/putConversationSave";
 import { postPDF } from "@/util/requests/postPDF";
 import { postWebUrl } from "@/util/requests/postWebUrl";
@@ -74,6 +75,8 @@ type FeedbackReasonsI = {
 import SearchModal from "@/components/Chat/SearchModal";
 import PDFModal from "@/components/Chat/PDFModal";
 import {deleteDocument} from "@/util/api/deleteDocument";
+import { stringify } from "querystring";
+// import { set } from "firebase/database";
 
 export function Chat({
   wasSearched,
@@ -100,6 +103,7 @@ export function Chat({
       };
     }[]
   >([]);
+  const [latestResponse, setLatestResponse] = useState("");
   const [currentInput, setCurrentInput] = useState("");
   const [keyword, setKeyword] = useState("");
   const [kwRefs, setKwRefs] = useState<{
@@ -110,7 +114,7 @@ export function Chat({
   const [saving, setSaving] = useState(false);
   const [endSession, setEndSession] = useState(false);
   const [num, setNum] = useState(-1);
-  const [totalQuota, setTotalQuota] = useState(0);
+  // const [totalQuota, setTotalQuota] = useState(0);
   const [includedDocuments, setIncludedDocuments] = useState<string[]>([]);
   const [conversationUid, setConversationUid] = useState<string | null>("");
 
@@ -140,6 +144,37 @@ export function Chat({
         router.push("/login");
       });
   }, []);
+
+  useEffect(() => {
+    if (responses.length > 0 && latestResponse.length > responses[responses.length-1].response.length) {
+      setResponses([...responses.slice(0,responses.length-1), {
+        response: latestResponse,
+        is_satisfactory: "N/A",
+        feedback: {
+          message: "",
+          reasons: {
+            "Superficial Response": false,
+            "Lacks Citation": false,
+            "Lacks Reasoning": false,
+            "Lacks Relevant Facts": false,
+          },
+        },
+      }])
+    }
+    else {setResponses([...responses, {
+      response: latestResponse,
+      is_satisfactory: "N/A",
+      feedback: {
+        message: "",
+        reasons: {
+          "Superficial Response": false,
+          "Lacks Citation": false,
+          "Lacks Reasoning": false,
+          "Lacks Relevant Facts": false,
+        },
+      },
+    }])}
+    console.log(responses)}, [latestResponse]);
 
   const [alert, setAlert] = useState("");
 
@@ -307,6 +342,7 @@ export function Chat({
       }
 
       let response;
+      let search_terms_res;
       
       // // TO DO: rework the logic below, setState hook doesn't execute immediately, so checking length of conversation is unstable
       // if (conversation.length === 0) {
@@ -320,44 +356,97 @@ export function Chat({
       // };
 
       if (includedDocuments.length === 0) {
-        response = await postConversation(fullConversation, includedDocuments);
+        // uses conversation prompt to generate search terms
+        search_terms_res = await postSearchTerms(fullConversation, includedDocuments, false);
       } else {
-        response = await postConversationMult(fullConversation);
+        // uses conversationMult prompt to generate search terms
+        search_terms_res = await postSearchTerms(fullConversation, includedDocuments, true);
       }
-      console.log("submit response:",response);
+      console.log("submit response:",search_terms_res);
       
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (!search_terms_res.ok) {
+        const errorData = await search_terms_res.json();
         setAlert(errorData.error);
         setLoading(false);
         return;
       }
+
+      console.log("search_terms_res ok!");
+
+      const { toSearch, searchPrompt, documentPrompt } = await search_terms_res.json();
+      console.log("searchPrompt", searchPrompt);
+      console.log("documentPrompt", documentPrompt);
+      console.log("toSearch", toSearch);
+      response = await postConversation(searchPrompt, documentPrompt, fullConversation);
+
+      console.log("response.status: " + response.status);
+      console.log("response.body: " + response.body);
+      console.log("response.body.constructor: " + response.body?.constructor);
       
+      if (response.status === 200 && response.body != null && response.body.constructor === ReadableStream) {
+            console.log("stream");
+            let buffer = "";
+            const reader = response.body.getReader();
+            const encode = new TextDecoder("utf-8");
+                
+                // read the response content by iteration
+                while (true) {
+                  
+                  const currentResponse = await reader.read();
+                  
+                  if (currentResponse.done) {
+                    break;
+                  }
+  
+                  // decode content
+                  const valueOfCurrentResponse = "" + encode.decode(currentResponse.value);
+                  const objectsInCurrentResponse = valueOfCurrentResponse.split("\n").filter(str => str !== "");;
+                              
+                  for (let i = 0; i < objectsInCurrentResponse.length; i++) {
+                    
+                    try {
+                      let object = JSON.parse( objectsInCurrentResponse[i].substring(5) );											
+                                  
+                      if (object.hasOwnProperty('choices')) {
+                        
+                        let content = object.choices.at(-1).delta.content;
+                        
+                        if (content == undefined || content == null) {
+                          continue;
+                        }
+                        
+                        buffer += content;
+                        setLatestResponse(buffer);
+                        // console.log(buffer);
+                        // const newResponses = [...responses];
+                        // newResponses[responses.length-1].response += content;
+                        // setResponses(newResponses);
+                        // // responses[responses.length-1].response += content;
+                        // buffer += content;
+                        // console.log(buffer);
+                        // setConversation(
+                        //   fullConversation.concat([{ role: "assistant", content: buffer }])
+                        // );
 
-      let { latestBotResponse, toSearch } = await response.json();
+                        // buffer += content;
+                      }
+                    }
+                    catch (e) {
+                      continue;
+                    }
+                  }
+                }
+              }
+      else if (response.status === 200 && response.body != null) {
+        console.log("non-stream")
+        setLatestResponse(await response.json());
+      }
+
+      setConversation(
+        fullConversation.concat([{ role: "assistant", content: latestResponse }])
+      );
       
-
-      setResponses([
-        ...responses,
-        {
-          response: latestBotResponse,
-          is_satisfactory: "N/A",
-          feedback: {
-            message: "",
-            reasons: {
-              "Superficial Response": false,
-              "Lacks Citation": false,
-              "Lacks Reasoning": false,
-              "Lacks Relevant Facts": false,
-            },
-          },
-        },
-      ]);
-
-      // setConversation(
-      //   fullConversation.concat([{ role: "assistant", content: latestBotResponse }])
-      // );
-      fullConversation.push({ role: "assistant", content: latestBotResponse });
+      
 
       // save conversation to db
       // console.log(fullConversation.length);
