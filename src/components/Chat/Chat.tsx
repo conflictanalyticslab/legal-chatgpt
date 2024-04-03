@@ -417,18 +417,6 @@ export function Chat({
                         
                         buffer += content;
                         setLatestResponse(buffer);
-                        // console.log(buffer);
-                        // const newResponses = [...responses];
-                        // newResponses[responses.length-1].response += content;
-                        // setResponses(newResponses);
-                        // // responses[responses.length-1].response += content;
-                        // buffer += content;
-                        // console.log(buffer);
-                        // setConversation(
-                        //   fullConversation.concat([{ role: "assistant", content: buffer }])
-                        // );
-
-                        // buffer += content;
                       }
                     }
                     catch (e) {
@@ -824,6 +812,7 @@ export function Chat({
                           OpenJustice:
                         </strong>
                         {/* {(responses[i].response).replace(/(\d+\.\s+)/g, "$1\n")} */}
+                        {/* set the latest response to the response stream, and all other responses as string from responses array state */}
                         <TextFormatter text= {i === responses.length - 1 ? latestResponse : responses[i].response} />  
                       </div>
 
