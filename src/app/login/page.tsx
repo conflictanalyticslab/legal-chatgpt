@@ -50,7 +50,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
 
   const [emailHelper, setEmailHelper] = useState(
-    "Please use an approved email. For access, please contact us for assistance."
+    "Please use an institutional email. For access, please contact us for assistance."
   );
 
   const [passHelper, setPassHelper] = useState("");
