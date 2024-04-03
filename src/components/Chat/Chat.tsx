@@ -416,6 +416,7 @@ export function Chat({
                         }
                         
                         buffer += content;
+                        console.log(buffer);
                         setLatestResponse(buffer);
                       }
                     }
