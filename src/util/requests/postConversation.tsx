@@ -1,8 +1,9 @@
 import { auth } from "@/firebase";
 
 export async function postConversation(
-  fullConversation: object[],
-  includedDocuments: string[]
+  searchPrompt: string,
+  documentPrompt: string,
+  fullConversation: object[]
 ) {
   return await fetch("/api/conversation", {
     method: "POST",
@@ -10,6 +11,6 @@ export async function postConversation(
       "Content-Type": "application/json",
       Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
     },
-    body: JSON.stringify({ fullConversation, includedDocuments }),
+    body: JSON.stringify({ searchPrompt, documentPrompt, fullConversation}),
   });
 }

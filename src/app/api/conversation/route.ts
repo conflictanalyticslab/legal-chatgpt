@@ -1,11 +1,8 @@
-import { generatePromptFromDocuments } from "@/util/api/generatePromptFromDocuments";
-import { getDocumentText } from "@/util/api/getDocuments";
+
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { loadUser } from "@/util/api/middleware/loadUser";
 import { queryOpenAi } from "@/util/api/queryOpenAi";
 import queryLlama2 from "@/util/api/queryLlama2";
-import { SearchResult, callSearchAPI } from "@/util/api/runSearch";
-import { searchAndSummarize } from "@/util/api/searchAndSummarize";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -21,97 +18,17 @@ export async function POST(req: Request) {
     );
   }
 
-  const { fullConversation, includedDocuments } = await req.json();
+  const { user, userRef } = await loadUser(decodedToken);
+
+  if (user && user.prompts_left > 0) {
+  const {searchPrompt, documentPrompt, fullConversation} = await req.json()
   if (fullConversation.length === 0) {
     return NextResponse.json(
       { error: "fullConversation is empty" },
       { status: 400 }
     );
   }
-
-  const { user, userRef } = await loadUser(decodedToken);
-  const documents = await getDocumentText(includedDocuments);
-  const documentPrompt = generatePromptFromDocuments(documents);
-
-  if (user && user.prompts_left > 0) {
-    await userRef.update({ prompts_left: user.prompts_left - 1 });
-    let firstReplyRes: any;
-    let gpt_flag = true;
-    try {
-      firstReplyRes = await queryOpenAi({
-        model: "gpt-3.5-turbo-0125",
-        messages: [
-          {
-            role: "system",
-            content:
-              "Answer in 500 words or less. Short answers are better.\n\n" +
-              documentPrompt,
-          },
-          ...fullConversation,
-        ],
-      });
-      if (!firstReplyRes || !firstReplyRes.choices || firstReplyRes.choices.length === 0) {
-        gpt_flag = false;
-      }
-    } catch (error) {
-      console.error("queryOpenAi failed: " + error);
-      gpt_flag = false;
-    }
-
-    if (!gpt_flag) {
-        console.error("Error from OpenAI: " + firstReplyRes);
-        console.log("switching to llama2 in conversation/route.ts");
-
-        // console.log("========================================================");
-        // console.log({
-        //   "temperature": 0.7,
-        //   "max_tokens": 256,
-        //   "documents": [
-        //     {
-        //       "role": "user",
-        //       "content": documentPrompt
-        //     },
-        //     ...fullConversation
-        //   ]
-        // });
-
-        // set a 1 second time out between llama2 requests for stability
-        try {
-          firstReplyRes = await queryLlama2({
-            "messages": [
-              {
-                "role": "user",
-                "content": documentPrompt
-              },
-              ...fullConversation
-            ]
-          });
-          console.log("Logging response from llama2", firstReplyRes.choices[0].message.content);
-        } catch (error) {
-          console.error("queryLlama2 failed in conversation/route.ts: " + error);
-        };
-    }
-
-    const firstReplyContent = firstReplyRes.choices[0].message.content;
-    console.log("Logging response from OpenAi", firstReplyRes);
-    const {searchResults, toSearch} = await searchAndSummarize(firstReplyContent);
-
-    // console.log("Search Results", searchResults);
-
-    if (Array.isArray(searchResults) && searchResults.length > 0) {
-      // const searchPrompt = searchResults
-      //   .map(
-      //     (result: SearchResult) =>
-      //       "Document title: " +
-      //       result.title +
-      //       "\n\nAbstract: " +
-      //       result.abstract
-      //   )
-      //   .join("\n\n");
-
-      // The chat context is too short when we include all the results. Revisit this when using a larger model.
-      // Can use tokenLength() to estimate the tokens used so far.
-      const searchPrompt = searchResults[0].abstract;
+  let gpt_flag = true;
 
       let secondReplyRes:any;
         try {
@@ -128,10 +45,11 @@ export async function POST(req: Request) {
             },
             ...fullConversation,
           ],
-        });
-        if (!secondReplyRes || !secondReplyRes.choices || secondReplyRes.choices.length === 0) {
+        }, true);
+        if (!secondReplyRes) {
           gpt_flag = false;
         }
+        return secondReplyRes;
       } catch (error) {
         console.error("queryOpenAi failed: " + error);
         gpt_flag = false;
@@ -156,16 +74,15 @@ export async function POST(req: Request) {
         }
       }
 
-      console.log("Logging second response from OpenAi", secondReplyRes);
-
+      
+      // console.log("Logging second response from OpenAi", secondReplyRes.body.getReader().read().value);
+      if (secondReplyRes.choices[0].message.content) {
       return NextResponse.json({
-        latestBotResponse: secondReplyRes.choices[0].message.content,
-        toSearch: toSearch
+        latestBotResponse: secondReplyRes.choices[0].message.content
       });
     } else {
       return NextResponse.json({
-        latestBotResponse: firstReplyContent,
-        toSearch: toSearch
+        latestBotResponse: ""
       });
     }
   }
