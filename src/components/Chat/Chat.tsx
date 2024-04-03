@@ -673,6 +673,41 @@ export function Chat({
       }}
     >
       <div
+        style={{
+          width: '100%',
+          display: "flex",
+          justifyContent: "space-between"
+        }}
+      >
+        {!showStartupImage && (
+          <Image
+            src={ChatPageOJ}
+            style={{
+              width: "20%",
+              marginLeft: "3rem",
+              marginTop: "1rem",
+              maxHeight: "auto",
+              objectFit: "contain",
+            }}
+            alt="Open Justice Powered by the Conflict Analytics Lab"
+          />
+        )}
+        <div
+          id="search-modal"
+          style={{
+            width: "50%",
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center"
+          }}
+        >
+          <ul style={{textDecoration: "none", textIndent: 0}}>
+            <SearchModal wasSearched={wasSearched} setSearchTerm={setSearchTerm} />
+            <PDFModal documents={documents} deleteDocument={deleteDocumentChat} currentInput={currentInput} setCurrentInput={setCurrentInput} includedDocuments={includedDocuments} setIncludedDocuments={setIncludedDocuments}/>
+          </ul>
+        </div>
+      </div>
+      {/* <div
         id="search-modal"
         style={{
           display: "flex",
@@ -700,7 +735,7 @@ export function Chat({
         </ul>
         
         
-      </div>
+      </div> */}
       <div
         style={{
           paddingBlock: 32,
