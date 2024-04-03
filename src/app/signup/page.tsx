@@ -20,6 +20,7 @@ import { auth } from "@/firebase";
 import { getDatabase, ref, child, get } from "firebase/database";
 import { AppBackground, GridContainer, HeroBox } from "@/styles/styles";
 import { validEmailRegex } from "@/util/signup/validEmailRegex";
+import { publicEmailRegex } from "../../util/signup/publicEmailRegex";
 
 export default function Signup() {
   const Joi = require("joi");
@@ -29,6 +30,7 @@ export default function Signup() {
     email: Joi.string()
       .email({ tlds: false })
       .pattern(validEmailRegex)
+      .pattern(publicEmailRegex)
       .messages({
         "string.pattern.base":
           "Your email is not approved for access. See the link above for a list of approved institutional emails",
