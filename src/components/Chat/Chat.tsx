@@ -25,9 +25,9 @@ import {
   Tooltip,
 } from "@mui/material";
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import RefreshIcon from "@mui/icons-material/Refresh";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
+// import RefreshIcon from "@mui/icons-material/Refresh";
+// import AddIcon from "@mui/icons-material/Add";
+// import CloseIcon from "@mui/icons-material/Close";
 // import SaveIcon from "@mui/icons-material/Save";
 import { Send, ThumbUp, ThumbDown } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
@@ -76,6 +76,7 @@ import SearchModal from "@/components/Chat/SearchModal";
 import PDFModal from "@/components/Chat/PDFModal";
 import {deleteDocument} from "@/util/api/deleteDocument";
 import { stringify } from "querystring";
+import { doc } from "firebase/firestore";
 // import { set } from "firebase/database";
 
 export function Chat({
@@ -105,7 +106,8 @@ export function Chat({
   >([]);
   const [latestResponse, setLatestResponse] = useState("");
   const [currentInput, setCurrentInput] = useState("");
-  const [keyword, setKeyword] = useState("");
+  const [documentContent, setDocumentContent] = useState("");
+  // const [keyword, setKeyword] = useState("");
   const [kwRefs, setKwRefs] = useState<{
     keyword: String;
     refs: { name: String; kwLen: number; excerpts: string[] }[];
@@ -316,10 +318,11 @@ export function Chat({
     console.log(currentInput);
 
     try {
+      const docContentQuery = documentContent.length > 0? "\n Here is a document for context: " + documentContent + " " : "";
       const fullConversation = conversation.concat([
         {
           role: "user",
-          content: urlContentUserInput,  
+          content: urlContentUserInput + docContentQuery,  
         },
       ]);
       setConversation(fullConversation);
@@ -643,28 +646,28 @@ export function Chat({
     );
   }
 
-  const chatActions = [
-    {
-      id: 1,
-      icon: <RefreshIcon />,
-      title: "Refresh Conversation",
-    },
-    {
-      id: 2,
-      icon: <AddIcon />,
-      title: "New Conversation",
-    },
-    {
-      id: 3,
-      icon: <CloseIcon />,
-      title: "Clear Conversation",
-    }
-  ] as {
-    id: number;
-    icon: any;
-    onClick?: MouseEventHandler<HTMLButtonElement>;
-    title: string;
-  }[];
+  // const chatActions = [
+  //   {
+  //     id: 1,
+  //     icon: <RefreshIcon />,
+  //     title: "Refresh Conversation",
+  //   },
+  //   {
+  //     id: 2,
+  //     icon: <AddIcon />,
+  //     title: "New Conversation",
+  //   },
+  //   {
+  //     id: 3,
+  //     icon: <CloseIcon />,
+  //     title: "Clear Conversation",
+  //   }
+  // ] as {
+  //   id: number;
+  //   icon: any;
+  //   onClick?: MouseEventHandler<HTMLButtonElement>;
+  //   title: string;
+  // }[];
 
   return (
     <div
@@ -703,7 +706,7 @@ export function Chat({
         >
           <ul style={{textDecoration: "none", textIndent: 0}}>
             <SearchModal wasSearched={wasSearched} setSearchTerm={setSearchTerm} />
-            <PDFModal documents={documents} deleteDocument={deleteDocumentChat} currentInput={currentInput} setCurrentInput={setCurrentInput} includedDocuments={includedDocuments} setIncludedDocuments={setIncludedDocuments}/>
+            <PDFModal documents={documents} deleteDocument={deleteDocumentChat} documentContent={documentContent} setDocumentContent={setDocumentContent} includedDocuments={includedDocuments} setIncludedDocuments={setIncludedDocuments}/>
           </ul>
         </div>
       </div>
@@ -1035,7 +1038,7 @@ export function Chat({
                     : `Prompts left: ${num}`}
                 </p>
 
-                <div>
+                {/* <div>
                   {chatActions.map((action) => (
                     <Tooltip title={action.title}>
                       <IconButton
@@ -1047,7 +1050,7 @@ export function Chat({
                       </IconButton>
                     </Tooltip>
                   ))}
-                </div>
+                </div> */}
               </div>
             </>
           ) : (

@@ -29,6 +29,8 @@ export async function POST(req: Request) {
     );
   }
   let gpt_flag = true;
+  
+      // console.log(fullConversation);
 
       let secondReplyRes:any;
         try {

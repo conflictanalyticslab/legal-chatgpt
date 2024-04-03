@@ -31,6 +31,7 @@ export async function POST(req: Request) {
   const { user, userRef } = await loadUser(decodedToken);
   const documents = await getDocumentText(includedDocuments);
   const documentPrompt = generatePromptFromDocuments(documents);
+  const queryDocument = includedDocuments.length > 0 ? "Here is a document for context: " : "";
   const queryContent = isMult ? "Answer in 500 words or less. Short answers are better." : "If the question does not encompass different scenarios, ignore the rest of the prompt. Else if your answer encompasses different scenarios, number the new scenario and go to a new line. Give an answer that covers a few scenarios that the question encompasses.";
 
   if (user && user.prompts_left > 0) {

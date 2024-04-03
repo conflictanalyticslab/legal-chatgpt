@@ -11,6 +11,7 @@ import {
   Paging,
 } from "@elastic/react-search-ui";
 import { Layout, SingleLinksFacet } from "@elastic/react-search-ui-views";
+import { Typography } from "@mui/material";
 import "@elastic/react-search-ui-views/lib/styles/styles.css";
 import { postSearch } from "@/util/requests/postSearch";
 

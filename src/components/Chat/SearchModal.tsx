@@ -58,7 +58,7 @@ const SearchModal = ({
           style={{ width: "14px", height: "14px", marginRight: "auto" }}
           alt={""}
         />
-        <Typography style={{ marginRight: "auto" }}>Search...</Typography>
+        <Typography style={{ marginRight: "auto" }}>Search [Experimental]</Typography>
       </Button>
       <Modal open={modalOpen} onClose={handleClose}>
         <Box sx={style}>
