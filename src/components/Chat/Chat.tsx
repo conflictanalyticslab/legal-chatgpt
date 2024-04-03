@@ -824,7 +824,7 @@ export function Chat({
                           OpenJustice:
                         </strong>
                         {/* {(responses[i].response).replace(/(\d+\.\s+)/g, "$1\n")} */}
-                        <TextFormatter text= {responses[i].response} /> 
+                        <TextFormatter text= {i === responses.length - 1 ? latestResponse : responses[i].response} />  
                       </div>
 
                       {responses[i].is_satisfactory === "N/A" ? (
