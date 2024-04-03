@@ -33,7 +33,7 @@ export default function Signup() {
       .pattern(publicEmailRegex)
       .messages({
         "string.pattern.base":
-          "Your email is not approved for access. See the link above for a list of approved institutional emails",
+          "Please use an institutional email.",
       }),
 
     password: Joi.string().messages({
@@ -51,7 +51,7 @@ export default function Signup() {
   const [email, setEmail] = useState("");
 
   const [emailHelper, setEmailHelper] = useState(
-    "Please use an approved email. For access, please contact us for assistance."
+    "Please use an institutional email."
   );
 
   const [passHelper, setPassHelper] = useState("");
@@ -83,8 +83,7 @@ export default function Signup() {
   const validateUser = async () => {
     setEmailError(false);
     setEmailHelper(
-      "Please use an institutional email. For access, please contact us for assistance."
-      // "Your email is not approved for access. See here for a list of approved institutional emails"
+      ""
     );
     setPasswordError(false);
     setPassHelper("");
@@ -109,10 +108,11 @@ export default function Signup() {
                 console.log("Email is in whitelist");
                 setEmailError(false);
                 setEmailHelper("");
-              } else {
-                setEmailHelper(msg.message);
-                setEmailError(true);
               }
+              // else {
+              //   setEmailHelper(msg.message);
+              //   // setEmailError(true);
+              // }
             });
 
             // setGeneralHelper("");
@@ -145,7 +145,7 @@ export default function Signup() {
       if (userSignupRes.status === 403) {
         setEmailError(true);
         setEmailHelper(
-          "Please use an institutional email. For access, please contact us for assistance."
+          "Please use an institutional email."
         );
       } else if (userSignupRes.status === 400) {
         const { error }: { error: string } = await userSignupRes.json();
@@ -188,7 +188,7 @@ export default function Signup() {
           <Typography variant="h3" fontWeight={700} textAlign="center">
             Create an account
           </Typography>
-          <Typography
+          {/* <Typography
             variant="h6"
             fontWeight={700}
             textAlign="center"
@@ -197,7 +197,7 @@ export default function Signup() {
 >
             with an email from{" "}
             <a href="/institutionsList">approved institutions</a>
-          </Typography>
+          </Typography> */}
         </div>
 
         <div style={{ alignItems: "center" }}>
