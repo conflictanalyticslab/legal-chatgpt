@@ -4,6 +4,7 @@ import { loadUser } from "@/util/api/middleware/loadUser";
 import { queryOpenAi } from "@/util/api/queryOpenAi";
 import queryLlama2 from "@/util/api/queryLlama2";
 import { NextResponse } from "next/server";
+import GPT4Tokenizer from 'gpt4-tokenizer';
 
 export async function POST(req: Request) {
   const { earlyResponse, decodedToken } = await authenticateApiUser();
@@ -29,6 +30,8 @@ export async function POST(req: Request) {
     );
   }
   let gpt_flag = true;
+  
+      // console.log(fullConversation);
 
       let secondReplyRes:any;
         try {
@@ -57,6 +60,19 @@ export async function POST(req: Request) {
 
       if (!gpt_flag) {
         console.log("switching to llama2 in conversation/route.ts for second response");
+
+        let token_count = 0;
+        const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
+
+        for (let i = 0; i < fullConversation.length; i++) {
+          token_count += tokenizer.estimateTokenCount(fullConversation[i].content);
+        }
+
+        token_count += tokenizer.estimateTokenCount(documentPrompt) + tokenizer.estimateTokenCount(searchPrompt) + 2;
+
+        if (token_count > 2048) {
+          return NextResponse.json({ latestBotResponse: "Token limit of 2048 exceeded, your prompt includes " + token_count + " tokens"});
+        }
 
         try {
           secondReplyRes = await queryLlama2({

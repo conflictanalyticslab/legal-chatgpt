@@ -25,9 +25,9 @@ import {
   Tooltip,
 } from "@mui/material";
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import RefreshIcon from "@mui/icons-material/Refresh";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
+// import RefreshIcon from "@mui/icons-material/Refresh";
+// import AddIcon from "@mui/icons-material/Add";
+// import CloseIcon from "@mui/icons-material/Close";
 // import SaveIcon from "@mui/icons-material/Save";
 import { Send, ThumbUp, ThumbDown } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
@@ -75,7 +75,9 @@ type FeedbackReasonsI = {
 import SearchModal from "@/components/Chat/SearchModal";
 import PDFModal from "@/components/Chat/PDFModal";
 import {deleteDocument} from "@/util/api/deleteDocument";
-import { stringify } from "querystring";
+import { create } from "domain";
+// import { stringify } from "querystring";
+// import { doc } from "firebase/firestore";
 // import { set } from "firebase/database";
 
 export function Chat({
@@ -105,7 +107,8 @@ export function Chat({
   >([]);
   const [latestResponse, setLatestResponse] = useState("");
   const [currentInput, setCurrentInput] = useState("");
-  const [keyword, setKeyword] = useState("");
+  const [documentContent, setDocumentContent] = useState("");
+  // const [keyword, setKeyword] = useState("");
   const [kwRefs, setKwRefs] = useState<{
     keyword: String;
     refs: { name: String; kwLen: number; excerpts: string[] }[];
@@ -316,10 +319,11 @@ export function Chat({
     console.log(currentInput);
 
     try {
+      const docContentQuery = documentContent.length > 0? "\n Here is a document for context: " + documentContent + " " : "";
       const fullConversation = conversation.concat([
         {
           role: "user",
-          content: urlContentUserInput,  
+          content: urlContentUserInput + docContentQuery,  
         },
       ]);
       setConversation(fullConversation);
@@ -531,7 +535,7 @@ export function Chat({
   //   console.log("conversationUid", conversationUid);
   // }, [conversationUid]);
 
-  const createAlert = (message: string) => {
+  const createAlert = (message: string, backgroundColor = "red") => {
       // Create a new div element for our alert
       const alertDiv = document.createElement('div');
       alertDiv.textContent = message;
@@ -539,7 +543,7 @@ export function Chat({
       alertDiv.style.top = '40px';
       alertDiv.style.left = '50%';
       alertDiv.style.transform = 'translate(-50%, -50%)';
-      alertDiv.style.backgroundColor = 'red';
+      alertDiv.style.backgroundColor = backgroundColor;
       alertDiv.style.color = 'white';
       alertDiv.style.padding = '1em';
       alertDiv.style.zIndex = '1000';
@@ -577,22 +581,23 @@ export function Chat({
     try {
       const pdfContent = await postPDF(plainFiles[0])
 
-      if (pdfContent.size > 5 * 1024 * 1024) {
-        pdfFileSize = pdfContent.size;
+      pdfFileSize = plainFiles[0].size;
+
+      if (pdfFileSize > 5 * 1024 * 1024) {
         throw new Error("PDF File uploaded too large");
       }
 
       const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
       estimatedTokenCount = tokenizer.estimateTokenCount(pdfContent.content);
 
-      if (estimatedTokenCount > 8192) {
+      if (estimatedTokenCount > 16384) {
         throw new Error("PDF token limit exceeded");
       }
 
       console.log(estimatedTokenCount);
     
       // Log the string
-      setCurrentInput(currentInput + " " +pdfContent.content);
+      setDocumentContent(pdfContent.content);
 
       setIncludedDocuments([...includedDocuments, pdfContent.uid]);
 
@@ -603,9 +608,10 @@ export function Chat({
       const newDoc = await uploadPdfDocument({"content": pdfContent.content, "name": plainFiles[0].name});
       setDocuments([...documents, newDoc]);
       setIncludedDocuments([...includedDocuments, newDoc.uid]);
+      createAlert("PDF uploaded successfully!", "green");
     } catch (err: Error | any) {
       if (err.message === 'PDF File uploaded too large') {
-        createAlert('The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ' + pdfFileSize + ' bytes');
+        createAlert('The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ' + pdfFileSize/(1024*1024) + ' bytes');
       } else if (err.message === 'PDF token limit exceeded' && estimatedTokenCount !== -1) {
         createAlert('The PDF file uploaded exceeds limit, maximum of 8192 token in each PDF uploaded, your pdf contains ' + estimatedTokenCount + ' tokens');
       }
@@ -643,28 +649,28 @@ export function Chat({
     );
   }
 
-  const chatActions = [
-    {
-      id: 1,
-      icon: <RefreshIcon />,
-      title: "Refresh Conversation",
-    },
-    {
-      id: 2,
-      icon: <AddIcon />,
-      title: "New Conversation",
-    },
-    {
-      id: 3,
-      icon: <CloseIcon />,
-      title: "Clear Conversation",
-    }
-  ] as {
-    id: number;
-    icon: any;
-    onClick?: MouseEventHandler<HTMLButtonElement>;
-    title: string;
-  }[];
+  // const chatActions = [
+  //   {
+  //     id: 1,
+  //     icon: <RefreshIcon />,
+  //     title: "Refresh Conversation",
+  //   },
+  //   {
+  //     id: 2,
+  //     icon: <AddIcon />,
+  //     title: "New Conversation",
+  //   },
+  //   {
+  //     id: 3,
+  //     icon: <CloseIcon />,
+  //     title: "Clear Conversation",
+  //   }
+  // ] as {
+  //   id: number;
+  //   icon: any;
+  //   onClick?: MouseEventHandler<HTMLButtonElement>;
+  //   title: string;
+  // }[];
 
   return (
     <div
@@ -679,7 +685,18 @@ export function Chat({
           justifyContent: "space-between"
         }}
       >
-        {!showStartupImage && (
+        <Image
+            src={ChatPageOJ}
+            style={{
+              width: "20%",
+              marginLeft: "3rem",
+              marginTop: "1rem",
+              maxHeight: "auto",
+              objectFit: "contain",
+            }}
+            alt="Open Justice Powered by the Conflict Analytics Lab"
+          />
+        {/* {!showStartupImage && (
           <Image
             src={ChatPageOJ}
             style={{
@@ -691,7 +708,7 @@ export function Chat({
             }}
             alt="Open Justice Powered by the Conflict Analytics Lab"
           />
-        )}
+        )} */}
         <div
           id="search-modal"
           style={{
@@ -703,7 +720,7 @@ export function Chat({
         >
           <ul style={{textDecoration: "none", textIndent: 0}}>
             <SearchModal wasSearched={wasSearched} setSearchTerm={setSearchTerm} />
-            <PDFModal documents={documents} deleteDocument={deleteDocumentChat} currentInput={currentInput} setCurrentInput={setCurrentInput} includedDocuments={includedDocuments} setIncludedDocuments={setIncludedDocuments}/>
+            <PDFModal documents={documents} deleteDocument={deleteDocumentChat} documentContent={documentContent} setDocumentContent={setDocumentContent} includedDocuments={includedDocuments} setIncludedDocuments={setIncludedDocuments}/>
           </ul>
         </div>
       </div>
@@ -1035,7 +1052,7 @@ export function Chat({
                     : `Prompts left: ${num}`}
                 </p>
 
-                <div>
+                {/* <div>
                   {chatActions.map((action) => (
                     <Tooltip title={action.title}>
                       <IconButton
@@ -1047,7 +1064,7 @@ export function Chat({
                       </IconButton>
                     </Tooltip>
                   ))}
-                </div>
+                </div> */}
               </div>
             </>
           ) : (

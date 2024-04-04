@@ -30,8 +30,8 @@ import { set } from "firebase/database";
 type Props = {
     documents: UserDocument[];
     deleteDocument: (uid: string) => void;
-    currentInput: string;
-    setCurrentInput: React.Dispatch<React.SetStateAction<string>>;
+    documentContent: string;
+    setDocumentContent: React.Dispatch<React.SetStateAction<string>>;
     includedDocuments: string[];
     setIncludedDocuments: React.Dispatch<React.SetStateAction<string[]>>;
 };
@@ -51,14 +51,14 @@ const style = {
     overflowY: "auto",
 };
 
-export default function PDFModal({ documents, deleteDocument, currentInput, setCurrentInput, includedDocuments, setIncludedDocuments }: Props) {
+export default function PDFModal({ documents, deleteDocument, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments }: Props) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const [editing, setEditing] = useState("");
   const textFieldRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState("");
-  const cardContentRef = useRef<HTMLDivElement>(null);
+  // const cardContentRef = useRef<HTMLDivElement>(null);
   
 
 //   useEffect(() => {
@@ -97,7 +97,7 @@ export default function PDFModal({ documents, deleteDocument, currentInput, setC
           style={{ width: "16px", height: "22px", marginRight: "auto" }}
           alt={""}
         />
-        <Typography style={{ marginRight: "auto" }}>PDFs</Typography>
+        <Typography style={{ marginRight: "auto" }}>PDFs [Experimental]</Typography>
       </Button>
       <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
@@ -115,14 +115,14 @@ export default function PDFModal({ documents, deleteDocument, currentInput, setC
                         key="include-document"
                         onClick={() => {
                         if (includedDocuments.includes(document.uid)) {
-                            setCurrentInput(currentInput.replace(document.text, ""))
+                            setDocumentContent(documentContent.replace(document.text, ""))
                             setIncludedDocuments(
                             includedDocuments.filter(
                                 (docUid: string) => docUid != document.uid
                             )
                             );
                         } else {
-                            setCurrentInput(currentInput + " " + document.text);
+                            setDocumentContent(documentContent + " " + document.text);
                             setIncludedDocuments([
                             ...includedDocuments,
                             document.uid,
@@ -185,14 +185,14 @@ export default function PDFModal({ documents, deleteDocument, currentInput, setC
                         key="include-document"
                         onClick={() => {
                         if (includedDocuments.includes(document.uid)) {
-                            setCurrentInput(currentInput.replace(document.text, ""))
+                            // setCurrentInput(currentInput.replace(document.text, ""))
                             setIncludedDocuments(
                             includedDocuments.filter(
                                 (docUid: string) => docUid != document.uid
                             )
                             );
                         } else {
-                            setCurrentInput(currentInput + " " + document.text);
+                            // setCurrentInput(currentInput + " " + document.text);
                             setIncludedDocuments([
                             ...includedDocuments,
                             document.uid,
