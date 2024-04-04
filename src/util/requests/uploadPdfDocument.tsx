@@ -20,7 +20,9 @@ export async function uploadPdfDocument(file: {
   if (!res.ok) {
     const errorData = await res.json();
     if (res.status === 413) {
-      throw new Error("PDF File uploaded too large");
+      throw new Error("PDF token limit exceeded");
+    } else if (res.status === 400) {
+      throw new Error("PDF file too large");
     }
     console.error(`Error! status: ${res.status} ${errorData.error}`);
   }

@@ -75,8 +75,9 @@ type FeedbackReasonsI = {
 import SearchModal from "@/components/Chat/SearchModal";
 import PDFModal from "@/components/Chat/PDFModal";
 import {deleteDocument} from "@/util/api/deleteDocument";
-import { stringify } from "querystring";
-import { doc } from "firebase/firestore";
+import { create } from "domain";
+// import { stringify } from "querystring";
+// import { doc } from "firebase/firestore";
 // import { set } from "firebase/database";
 
 export function Chat({
@@ -534,7 +535,7 @@ export function Chat({
   //   console.log("conversationUid", conversationUid);
   // }, [conversationUid]);
 
-  const createAlert = (message: string) => {
+  const createAlert = (message: string, backgroundColor = "red") => {
       // Create a new div element for our alert
       const alertDiv = document.createElement('div');
       alertDiv.textContent = message;
@@ -542,7 +543,7 @@ export function Chat({
       alertDiv.style.top = '40px';
       alertDiv.style.left = '50%';
       alertDiv.style.transform = 'translate(-50%, -50%)';
-      alertDiv.style.backgroundColor = 'red';
+      alertDiv.style.backgroundColor = backgroundColor;
       alertDiv.style.color = 'white';
       alertDiv.style.padding = '1em';
       alertDiv.style.zIndex = '1000';
@@ -580,22 +581,23 @@ export function Chat({
     try {
       const pdfContent = await postPDF(plainFiles[0])
 
-      if (pdfContent.size > 5 * 1024 * 1024) {
-        pdfFileSize = pdfContent.size;
+      pdfFileSize = plainFiles[0].size;
+
+      if (pdfFileSize > 5 * 1024 * 1024) {
         throw new Error("PDF File uploaded too large");
       }
 
       const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
       estimatedTokenCount = tokenizer.estimateTokenCount(pdfContent.content);
 
-      if (estimatedTokenCount > 8192) {
+      if (estimatedTokenCount > 16384) {
         throw new Error("PDF token limit exceeded");
       }
 
       console.log(estimatedTokenCount);
     
       // Log the string
-      setCurrentInput(currentInput + " " +pdfContent.content);
+      setDocumentContent(pdfContent.content);
 
       setIncludedDocuments([...includedDocuments, pdfContent.uid]);
 
@@ -606,9 +608,10 @@ export function Chat({
       const newDoc = await uploadPdfDocument({"content": pdfContent.content, "name": plainFiles[0].name});
       setDocuments([...documents, newDoc]);
       setIncludedDocuments([...includedDocuments, newDoc.uid]);
+      createAlert("PDF uploaded successfully!", "green");
     } catch (err: Error | any) {
       if (err.message === 'PDF File uploaded too large') {
-        createAlert('The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ' + pdfFileSize + ' bytes');
+        createAlert('The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ' + pdfFileSize/(1024*1024) + ' bytes');
       } else if (err.message === 'PDF token limit exceeded' && estimatedTokenCount !== -1) {
         createAlert('The PDF file uploaded exceeds limit, maximum of 8192 token in each PDF uploaded, your pdf contains ' + estimatedTokenCount + ' tokens');
       }
@@ -682,7 +685,18 @@ export function Chat({
           justifyContent: "space-between"
         }}
       >
-        {!showStartupImage && (
+        <Image
+            src={ChatPageOJ}
+            style={{
+              width: "20%",
+              marginLeft: "3rem",
+              marginTop: "1rem",
+              maxHeight: "auto",
+              objectFit: "contain",
+            }}
+            alt="Open Justice Powered by the Conflict Analytics Lab"
+          />
+        {/* {!showStartupImage && (
           <Image
             src={ChatPageOJ}
             style={{
@@ -694,7 +708,7 @@ export function Chat({
             }}
             alt="Open Justice Powered by the Conflict Analytics Lab"
           />
-        )}
+        )} */}
         <div
           id="search-modal"
           style={{

@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          "File exceeds the maximum allowed size (20MB) Yours is " +
+          "File exceeds the maximum allowed size (5MB) Yours is " +
           file.size / 1024 / 1024 +
           " megabytes",
       },
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
   const tokenizer = new GPT4Tokenizer({ type: 'gpt3' }); // or 'codex'
   const estimatedTokenCount = tokenizer.estimateTokenCount(docText);
 
-  if (estimatedTokenCount > 2048) {
+  if (estimatedTokenCount > 16384) {
     return NextResponse.json(
       {
         error:
