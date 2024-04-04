@@ -33,6 +33,7 @@ import { Send, ThumbUp, ThumbDown } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import { Typography } from "@mui/material";
 import GPT4Tokenizer from 'gpt4-tokenizer';
+import ReactMarkdown from 'react-markdown'
 
 // import external hooks
 import { auth } from "@/firebase";
@@ -177,7 +178,8 @@ export function Chat({
         },
       },
     }])}
-    console.log(responses)}, [latestResponse]);
+    // console.log(responses);
+    }, [latestResponse]);
 
   const [alert, setAlert] = useState("");
 
@@ -866,7 +868,10 @@ export function Chat({
                         </strong>
                         {/* {(responses[i].response).replace(/(\d+\.\s+)/g, "$1\n")} */}
                         {/* set the latest response to the response stream, and all other responses as string from responses array state */}
-                        <TextFormatter text= {i === responses.length - 1 ? latestResponse : responses[i].response} />  
+                        {/* <TextFormatter text= {i === responses.length - 1 ? latestResponse : responses[i].response} />   */}
+                        <ReactMarkdown>
+                          {i === responses.length - 1 ? latestResponse : responses[i].response}
+                        </ReactMarkdown>
                       </div>
 
                       {responses[i].is_satisfactory === "N/A" ? (

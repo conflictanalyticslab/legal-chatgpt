@@ -24,8 +24,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import { stringify } from "querystring";
-import { set } from "firebase/database";
+// import { stringify } from "querystring";
+// import { set } from "firebase/database";
 
 type Props = {
     documents: UserDocument[];
@@ -251,12 +251,12 @@ export default function PDFModal({ documents, deleteDocument, documentContent, s
             inputRef={textFieldRef}
         />
         <Button
-          variant="contained"
+          variant="outlined"
           sx={{
             width: "160px",
             fontSize: "16px",
             marginTop: "30px",
-            color: "white",
+            color: "primary",
             textTransform: "none",
             textDecoration: "none",
             fontWeight: "bold"
