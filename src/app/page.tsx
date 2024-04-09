@@ -86,10 +86,10 @@ function Hero() {
               Watch our demo and learn more about OpenJustice.
             </p>
           </Container>
-          <div className=" video-shadow flex min-h-[200px] mx-auto mb-[150px]">
+          <div className=" video-shadow flex min-h-[300px] sm:min-h-[500px] md:min-h-[600px] mx-auto mb-[150px]">
             <iframe
               src="https://www.youtube.com/embed/pmF9FYCWT5A?rel=0"
-              className=" max-w-[1000px] w-[90vw] sm:w-[80vw] lg:w-[70vw] max-h-[200px] md:max-h-[500px] lg:max-h-[600px]"
+              className=" max-w-[1000px] w-[90vw] sm:w-[80vw] lg:w-[70vw] "
               scrolling="no"
               title="Conflict Analytics OpenJustice Demo FINAL.mp4"
             ></iframe>
