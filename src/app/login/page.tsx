@@ -16,12 +16,13 @@ import IconButton from "@mui/material/IconButton";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import Link from "next/link";
 import { auth } from "@/firebase";
+import { PublicClientApplication } from "@azure/msal-browser";
 import styles from "@/styles/ResetPassword.module.css";
 
 import { getDatabase, ref, child, get } from "firebase/database";
 import { AppBackground, GridContainer, HeroBox } from "@/styles/styles";
 import { validEmailRegex } from "@/util/signup/validEmailRegex";
-import { resetPassword } from "@/util/api/firebase/auth";
+// import { resetPassword } from "@/util/api/firebase/auth";
 
 export default function Login() {
   const Joi = require("joi");
@@ -179,6 +180,46 @@ export default function Login() {
         });
     }
   };
+
+//   const handleSignin = async (event: any) => {
+//     event.preventDefault();
+
+//     const errors = await validateUser();
+//     console.log(errors);
+//     const msalConfig = {
+//       auth: {
+//           clientId: "626a4386-93c2-44b0-a721-e77daab857ea",
+//           authority: "https://login.microsoftonline.com/6c1d4152-39d0-44ca-88d9-b8d6ddca0708",
+//           redirectUri: "https://localhost:3000/chat",
+//       },
+//     };
+
+//     const msalInstance = new PublicClientApplication(msalConfig);
+//     await msalInstance.initialize();
+    
+//     if (!errors) {
+//       // Azure AD Signin
+//       signInWithEmailAndPassword(auth, email, password)
+//       .then(() => {
+//         msalInstance.loginPopup()
+//         .then(response => {
+//           console.log(response)
+//           router.push("/chat");
+//         })
+//         .catch(error => {
+//           console.log(error);
+//           setGeneralError("An error occurred during login.");
+//         });
+//       }
+//       )
+//       .catch((error: any) => {
+//         const errorMessage = error.message;
+//         console.log(error.code);
+//         setGeneralError(errorMessage);
+//       });
+      
+//     }
+// };
 
   return (
     <AppBackground>

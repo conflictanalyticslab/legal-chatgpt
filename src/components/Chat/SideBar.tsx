@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useContext, useEffect, use } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import Link from "next/link";
 import styles from "@/styles/SideBar.module.css";
@@ -11,11 +11,13 @@ import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { redirect } from "next/dist/server/api-utils";
 import { auth } from "@/firebase";
+// import ConversationContext from './ConversationContext'
 
 export default function SideBar() {
   const onLogout = useCallback(() => {
     void auth.signOut();
   }, [auth]);
+
 
   const navDataLink = [
     {
@@ -46,6 +48,7 @@ export default function SideBar() {
   ];
 
   const [open, setOpen] = useState(false);
+  const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
   const toggleOpen = () => {
     setOpen(!open);
   };
@@ -76,6 +79,7 @@ export default function SideBar() {
       </div>
 
       <div className={styles.convoBar}>
+      
         <Link
           href="/chat"
           key="chat-page-link"
