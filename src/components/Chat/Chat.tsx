@@ -854,6 +854,7 @@ export function Chat({
                     return;
                   }
                   setNewConv(false);
+                  setShowStartupImage(false);
                   setConversationTitle(e.target.value as string)
                 }}
                 autoWidth
@@ -1065,9 +1066,11 @@ export function Chat({
                           >
                             <ThumbDown />
                           </IconButton>
+                          {i === responses.length - 1 && generating &&
                           <Button onClick={() => {
                             setGenerating(false);
                           }}>Stop</Button>
+                          }
                         </ButtonGroup>
                       ) : (
                         <IconButton disabled>
