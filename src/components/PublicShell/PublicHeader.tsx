@@ -124,7 +124,7 @@ export function PublicHeader() {
               hidden: !navOpen && isTablet,
             },
             {
-              "flex-col fixed top-[60px] pt-[30px] left-0 right-0 bottom-0 bg-greyBg":
+              "flex-col fixed top-[70px] pt-[30px] left-0 right-0 bottom-0 bg-greyBg":
                 navOpen && isTablet,
             }
           )}
