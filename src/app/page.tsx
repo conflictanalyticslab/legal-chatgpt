@@ -36,24 +36,30 @@ function Hero() {
                   Generative AI <br className="block lg:hidden" /> Designed for
                   Law
                 </h1>
-                <div className="flex flex-wrap gap-x-[15px] justify-center lg:justify-start">
-                  <p className="text-sm sm:text-xl"> Expert-led </p>
-                  <p className="text-sm sm:text-xl"> Non-Profit </p>
-                  <p className="text-sm sm:text-xl"> Open-source</p>
-                  <p className="text-sm sm:text-xl"> Independent </p>
+                <div className="flex flex-wrap gap-x-[15px] justify-center lg:justify-start pl-1">
+                  <p className="text-sm sm:text-xl font-normal"> Expert-led </p>
+                  <p className="text-sm sm:text-xl font-normal"> Non-Profit </p>
+                  <p className="text-sm sm:text-xl font-normal"> Open-source</p>
+                  <p className="text-sm sm:text-xl font-normal"> Independent </p>
                 </div>
               </div>
               {/* Description */}
-              <div className="flex flex-col gap-[30px] items-center lg:items-start">
-                <p className=" text-xs sm:text-xl text-[#646464] text-center lg:text-left">
-                  Our goal is to deliver accessible, reliable legal AI.
-                  OpenJustice, built on advanced language models for law,
-                  processes queries and documents, drawing from vast legal
-                  sources to provide precise, comprehensive answers and
-                  innovative tools for law students and lawyers. As a growing
-                  prototype, we value your feedback to improve and ensure
-                  OpenJustice's dependability.
-                </p>
+              <div className="flex flex-col gap-[30px] items-center lg:items-start pl-1">
+                <div className=" text-xs sm:text-xl text-[#646464] text-center lg:text-left">
+                  <p>
+                    Our goal is to deliver accessible, reliable legal AI.
+                    OpenJustice, built on advanced language models for law,
+                    processes queries and documents, drawing from vast legal
+                    sources to provide precise, comprehensive answers and
+                    innovative tools for law students and lawyers. As a growing
+                    prototype, we value your feedback to improve and ensure
+                    OpenJustice's dependability.
+                  </p>
+                  <p className="font-normal text-primaryOJ mt-4">
+                    OpenJustice is open to all lawyers and legal professionals
+                    with an institutional email.
+                  </p>
+                </div>
                 <Button
                   variant="default"
                   className="w-[150px] bg-primaryOJ hover:bg-primaryOJ/90 text-white text-lg py-[1.4rem]"
