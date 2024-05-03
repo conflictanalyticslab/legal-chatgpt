@@ -23,18 +23,27 @@ function DragDropFiles() {
 
     const handleUpload = async () => {
         if (files) {
-            // createAlert('Upload successful', 'green');
+            // calculate total size of files in MB
+            let totalSize = 0;
+            for (let i = 0; i < files.length; i++) {
+                totalSize += files[i].size;
+            }
+    
+            // check if total size exceeds 50 MB
+            if (totalSize > 52428800) {
+                createAlert(`Total file size exceeds 50 MB, currently ${totalSize / 1048576} MB`);
+                return;
+            }
+            
             const formData = new FormData();
             for (let i = 0; i < files.length; i++) {
                 formData.append('files', files[i]);
             }
-
+    
             const email = getCookie('email')!;
             formData.append('email', email);
-
-            // console.log(email);
     
-            const response = await fetch("https://partner.openjustice.ai", {
+            const response = await fetch("https://data.openjustice.ai/upload", {
                 method: 'POST',
                 body: formData 
             });

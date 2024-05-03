@@ -168,44 +168,12 @@ export default function Login() {
     }
   };
 
-  // const handleSignin = async (event: any) => {
-  //   event.preventDefault();
-
-  //   const errors = await validateUser();
-  //   console.log(errors);
-  //   if (!errors) {
-  //     if (chatSignIn) {
-  //       signInWithEmailAndPassword(auth, email, password)
-  //         .then(() => {
-  //           setCookie('email', email)
-  //           router.push("/chat");
-  //         })
-  //         .catch((error: any) => {
-  //           const errorMessage = error.message;
-  //           console.log(error.code);
-  //           setGeneralError(errorMessage);
-  //         });
-  //     } else {
-  //       signInWithEmailAndPassword(auth, email, password)
-  //         .then(() => {
-  //           setCookie('email', email)
-  //           router.push("/upload");
-  //         })
-  //         .catch((error: any) => {
-  //           const errorMessage = error.message;
-  //           console.log(error.code);
-  //           setGeneralError(errorMessage);
-  //         });
-      
-  //     }
-  //   }
-  // };
-
   const handleSignin = async (event: any) => {
     event.preventDefault();
 
     const errors = await validateUser();
     console.log(errors);
+
     const msalConfig = {
       auth: {
           clientId: "30cfa80e-d646-4a45-b1d4-763ea5784cbd",
@@ -214,32 +182,79 @@ export default function Login() {
       },
     };
 
+
     const msalInstance = new PublicClientApplication(msalConfig);
     await msalInstance.initialize();
-    
+
     if (!errors) {
-      // Azure AD Signin
-      signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        msalInstance.loginPopup()
-        .then(response => {
-          console.log(response)
-          router.push("/chat");
-        })
-        .catch(error => {
-          console.log(error);
-          setGeneralError("An error occurred during login.");
-        });
-      }
-      )
-      .catch((error: any) => {
-        const errorMessage = error.message;
-        console.log(error.code);
-        setGeneralError(errorMessage);
-      });
+      if (chatSignIn) {
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            msalInstance.loginPopup()
+            setCookie('email', email)
+            router.push("/chat");
+          })
+          .catch((error: any) => {
+            const errorMessage = error.message;
+            console.log(error.code);
+            setGeneralError(errorMessage);
+          });
+      } else {
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            msalInstance.loginPopup()
+            setCookie('email', email)
+            router.push("/upload");
+          })
+          .catch((error: any) => {
+            const errorMessage = error.message;
+            console.log(error.code);
+            setGeneralError(errorMessage);
+          });
       
+      }
     }
-};
+  };
+
+//   const handleSignin = async (event: any) => {
+//     event.preventDefault();
+
+//     const errors = await validateUser();
+//     console.log(errors);
+//     const msalConfig = {
+//       auth: {
+//           clientId: "30cfa80e-d646-4a45-b1d4-763ea5784cbd",
+//           authority: "https://login.microsoftonline.com/ca6f42a4-ef50-412e-a8c3-f9f37ad5455c",
+//           redirectUri: "https://openjustice.ai/chat",
+//       },
+//     };
+
+//     const msalInstance = new PublicClientApplication(msalConfig);
+//     await msalInstance.initialize();
+    
+//     if (!errors) {
+//       // Azure AD Signin
+//       signInWithEmailAndPassword(auth, email, password)
+//       .then(() => {
+//         msalInstance.loginPopup()
+//         .then(response => {
+//           console.log(response)
+//           router.push("/chat");
+//         })
+//         .catch(error => {
+//           console.log(error);
+//           setGeneralError("An error occurred during login.");
+//         });
+//       }
+//       )
+//       .catch((error: any) => {
+//         const errorMessage = error.message;
+//         console.log(error.code);
+//         setGeneralError(errorMessage);
+//       });
+      
+//     }
+// };
 
   return (
     <AppBackground>
