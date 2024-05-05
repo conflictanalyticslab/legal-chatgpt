@@ -93,7 +93,7 @@ export function PublicHeader() {
             width={200}
             height={40}
             alt="Logo"
-            className="w-[120px] sm:w-auto"
+            className="w-[200px] sm:w-auto"
           />
         </Link>
 
