@@ -7,7 +7,7 @@ const { auth } = require('firebase-admin');
 const { initBackendFirebaseApp } = require("../../src/util/api/middleware/initBackendFirebaseApp");
 // const { userConverter } = require("@/util/User");
 
-exports.handler = async (event, context) => {
+exports.handler = async (event:any, context:any) => {
     const { conversation, documents, title, id_token } = JSON.parse(event.body);
   
     // Authenticate the user 
@@ -44,7 +44,7 @@ exports.handler = async (event, context) => {
         statusCode: 201,
         body: JSON.stringify({ uid: docRef.id }),
       };
-    } catch (error) {
+    } catch (error:any) {
       console.error(error.message);
       return {
         statusCode: 400,

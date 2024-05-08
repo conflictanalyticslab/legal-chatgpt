@@ -1,11 +1,6 @@
-const {
-    getFirestore,
-  } = require("firebase-admin/firestore");
-  
 //   const { authenticateApiUser } = require("@/util/api/middleware/authenticateApiUser");
-const { initBackendFirebaseApp } = require("../../src/util/api/middleware/initBackendFirebaseApp");
   
-  exports.handler = async (event, context) => {
+  exports.handler = async (event:any, context:any) => {
     const { uid, conversation, documents, title} = JSON.parse(event.body);
   
     // Authenticate the user 
@@ -30,7 +25,7 @@ const { initBackendFirebaseApp } = require("../../src/util/api/middleware/initBa
         statusCode: 200,
         body: JSON.stringify({ uid }),
       };
-    } catch (error) {
+    } catch (error:any) {
       console.error("conversation uid: ", uid, error.message);
       return {
         statusCode: 400,
