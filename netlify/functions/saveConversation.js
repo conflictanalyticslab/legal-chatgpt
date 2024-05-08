@@ -4,7 +4,7 @@ const {
   
 //   const { authenticateApiUser } = require("@/util/api/middleware/authenticateApiUser");
 const { auth } = require('firebase-admin');
-const { initBackendFirebaseApp } = require("@/util/api/middleware/initBackendFirebaseApp");
+const { initBackendFirebaseApp } = require("../../src/util/api/middleware/initBackendFirebaseApp");
 // const { userConverter } = require("@/util/User");
 
 exports.handler = async (event, context) => {

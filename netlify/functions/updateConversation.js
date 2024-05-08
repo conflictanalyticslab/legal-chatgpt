@@ -3,7 +3,7 @@ const {
   } = require("firebase-admin/firestore");
   
 //   const { authenticateApiUser } = require("@/util/api/middleware/authenticateApiUser");
-  const { initBackendFirebaseApp } = require("@/util/api/middleware/initBackendFirebaseApp");
+const { initBackendFirebaseApp } = require("../../src/util/api/middleware/initBackendFirebaseApp");
   
   exports.handler = async (event, context) => {
     const { uid, conversation, documents, title} = JSON.parse(event.body);
