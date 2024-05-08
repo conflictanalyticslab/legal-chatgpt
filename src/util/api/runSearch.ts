@@ -25,7 +25,7 @@ export const callSearchAPI = async (searchTerm: string) => {
   // reference: https://www.courtlistener.com/help/api/rest/#search-endpoint
   const urlCourtListener = `https://www.courtlistener.com/api/rest/v3/search/?q=${searchTerm}`;
 
-  var results = [];
+  const results:any[] = [];
 
   const [resGoogleSearch, resCourtListener] = await Promise.all([
     // fetch(urlScholarsPortal),
@@ -45,7 +45,12 @@ export const callSearchAPI = async (searchTerm: string) => {
     // }
   try {
     const googleJson = await resGoogleSearch.json();
-    // console.log(JSON.stringify(googleJson, null, 2));
+    // console.log(JSON.stringify(googleJson));
+    // console.log(JSON.stringify(googleJson.items));
+    if (!googleJson.items) {
+      console.error("Google Search API failed");
+      return results;
+    }
     for (const res of googleJson.items) {
       results.push({
         url: res.link,

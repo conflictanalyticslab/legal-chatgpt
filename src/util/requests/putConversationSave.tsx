@@ -6,7 +6,7 @@ export async function putConversationSave(
   includedDocuments: string[],
   title: string
 ) {
-  return await fetch("/api/conversation/save", {
+  return await fetch("https://openjustice.ai/.netlify/functions/updateConversation", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

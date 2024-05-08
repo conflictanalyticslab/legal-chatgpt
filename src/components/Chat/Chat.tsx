@@ -530,9 +530,9 @@ export function Chat({
         setLatestResponse(await response.json());
       }
 
-      setConversation(
-        fullConversation.concat([{ role: "assistant", content: buffer }])
-      );
+      const tempConv = fullConversation.concat([{ role: "assistant", content: buffer }]);
+
+      
 
       // save conversation to db
       // console.log(fullConversation.length);
@@ -549,11 +549,15 @@ export function Chat({
         const { title } = await titleResPromise.json();
         setConversationTitle(title);
         // save new conversation to db
-        (await postConversationSave(fullConversation, includedDocuments, title)).json().then((res) => {setConversationUid(res.uid)}).catch((err) => {console.log(err)});
+        (await postConversationSave(tempConv, includedDocuments, title)).json().then((res) => {setConversationUid(res.uid)}).catch((err) => {console.log(err)});
       }
       else if (conversationUid) {
-        await putConversationSave(conversationUid, fullConversation, includedDocuments, conversationTitle);
+        await putConversationSave(conversationUid, tempConv, includedDocuments, conversationTitle);
       }
+
+      setConversation(
+        tempConv
+      );
 
       setSearchTerm(toSearch);
     } catch (error) {

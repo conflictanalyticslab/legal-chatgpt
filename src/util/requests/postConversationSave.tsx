@@ -5,7 +5,7 @@ export async function postConversationSave(
   includedDocuments: string[],
   title: string
 ) {
-  return await fetch("/api/conversation/save", {
+  return await fetch("https://openjustice.ai/.netlify/functions/saveConversation", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
