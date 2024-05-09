@@ -14,12 +14,14 @@ import admin from "firebase-admin";
     // const { earlyResponse, decodedToken } = await authenticateApiUser();
     // if (earlyResponse) return earlyResponse;
 
-    admin.initializeApp({
-      credential: admin.credential.cert(
-        JSON.parse(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT!)
-      ),
-      databaseURL: "https://legal-gpt-default-rtdb.firebaseio.com",
-    });
+    if (admin.apps.length === 0) {
+      admin.initializeApp({
+        credential: admin.credential.cert(
+          JSON.parse(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT!)
+        ),
+        databaseURL: "https://legal-gpt-default-rtdb.firebaseio.com",
+      });
+    }
   
     initBackendFirebaseApp();
   
@@ -34,6 +36,12 @@ import admin from "firebase-admin";
       }
   
       await convoRef.update({conversation: fullConversation, documents: includedDocuments, title: title });
+
+      console.log("conversation: ", fullConversation);
+      console.log("documents: ", includedDocuments);
+      console.log("title: ", title);
+      console.log("uid: ", uid);
+      console.log("=================updateConversation===================")
   
       return {
         statusCode: 200,

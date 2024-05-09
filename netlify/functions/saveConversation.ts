@@ -11,13 +11,15 @@ import admin from "firebase-admin";
 exports.handler = async (event:any, context:any) => {
     const { fullConversation, includedDocuments, title} = JSON.parse(event.body);
 
-    admin.initializeApp({
-      credential: admin.credential.cert(
-        JSON.parse(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT!)
-      ),
-      databaseURL: "https://legal-gpt-default-rtdb.firebaseio.com",
-    });
-  
+    if (admin.apps.length === 0) {
+      admin.initializeApp({
+        credential: admin.credential.cert(
+          JSON.parse(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT!)
+        ),
+        databaseURL: "https://legal-gpt-default-rtdb.firebaseio.com",
+      });
+    }
+
     // Authenticate the user 
     // Since this is a serverless function, you won't be able to use cookies.
     // You'll need to pass the user's token in the request body and validate it here.
@@ -32,10 +34,11 @@ exports.handler = async (event:any, context:any) => {
     try {
       const docRef = await getFirestore().collection("conversations").doc();
 
-      // console.log("conversation: ", conversation);
-      // console.log("documents: ", documents);
-      // console.log("title: ", title);
-      // console.log("uid: ", uid);
+      console.log("conversation: ", fullConversation);
+      console.log("documents: ", includedDocuments);
+      console.log("title: ", title);
+      console.log("uid: ", uid);
+      console.log("=================saveConversation===================")
 
       await docRef.create({
         conversation: fullConversation,
