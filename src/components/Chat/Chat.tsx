@@ -169,41 +169,43 @@ export function Chat({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setConversationTitles((await getConversationTitles()) as any)
-        const conversationData = await getConversation(conversationTitle);
-        if (conversationData && !newConv) {
-          console.log(conversationData)
-          setConversation(conversationData.conversation);
-          setIncludedDocuments(conversationData.hasOwnProperty('includedDocuments') ? conversationData.documents : []);
-          setConversationUid(conversationData.conversationId);
-          const tempInputs: string[] = [];
-          const tempResponses: {
-            response: string;
-            is_satisfactory: boolean | "N/A";
-            feedback: {
-              message: string;
-              reasons: FeedbackReasonsI;
-            };
-          }[] = [];
-          // setUserInputs(tempInputs);
-          // setResponses(tempResponses);
-          console.log("conversationData: " + JSON.stringify(conversationData))
-          for (let i = 0; i < conversationData.conversation.length; i++) {
-            if (conversationData.conversation[i].role === "user") {
-              tempInputs.push(conversationData.conversation[i].content);
-            } else if (conversationData.conversation[i].role === "assistant") {
-              console.log(`conversationData.conversation[${i}].content: ` + conversationData.conversation[i].content)
-              tempResponses.push({"response": conversationData.conversation[i].content, "is_satisfactory": "N/A", "feedback": {"message": "", "reasons": {"Superficial Response": false, "Lacks Citation": false, "Lacks Reasoning": false, "Lacks Relevant Facts": false}}});
+        if (conversation.length >= 2) {
+          setConversationTitles((await getConversationTitles()) as any)
+          const conversationData = await getConversation(conversationTitle);
+          if (conversationData && !newConv) {
+            console.log(conversationData)
+            setConversation(conversationData.conversation);
+            setIncludedDocuments(conversationData.hasOwnProperty('includedDocuments') ? conversationData.documents : []);
+            setConversationUid(conversationData.conversationId);
+            const tempInputs: string[] = [];
+            const tempResponses: {
+              response: string;
+              is_satisfactory: boolean | "N/A";
+              feedback: {
+                message: string;
+                reasons: FeedbackReasonsI;
+              };
+            }[] = [];
+            // setUserInputs(tempInputs);
+            // setResponses(tempResponses);
+            console.log("conversationData: " + JSON.stringify(conversationData))
+            for (let i = 0; i < conversationData.conversation.length; i++) {
+              if (conversationData.conversation[i].role === "user") {
+                tempInputs.push(conversationData.conversation[i].content);
+              } else if (conversationData.conversation[i].role === "assistant") {
+                console.log(`conversationData.conversation[${i}].content: ` + conversationData.conversation[i].content)
+                tempResponses.push({"response": conversationData.conversation[i].content, "is_satisfactory": "N/A", "feedback": {"message": "", "reasons": {"Superficial Response": false, "Lacks Citation": false, "Lacks Reasoning": false, "Lacks Relevant Facts": false}}});
+              }
             }
+            if (conversationData.conversation[conversationData.conversation.length-1].role === "user") {
+              tempInputs.pop();
+            }
+            setUserInputs(tempInputs);
+            setResponses(tempResponses);
+            setLatestResponse(conversationData.conversation[conversationData.conversation.length-1].role === "assistant"? conversationData.conversation[conversationData.conversation.length-1].content : "");
+            console.log("tempInputs: " + tempInputs);
+            console.log("tempResponses: " + JSON.stringify(tempResponses));
           }
-          if (conversationData.conversation[conversationData.conversation.length-1].role === "user") {
-            tempInputs.pop();
-          }
-          setUserInputs(tempInputs);
-          setResponses(tempResponses);
-          setLatestResponse(conversationData.conversation[conversationData.conversation.length-1].role === "assistant"? conversationData.conversation[conversationData.conversation.length-1].content : "");
-          console.log("tempInputs: " + tempInputs);
-          console.log("tempResponses: " + JSON.stringify(tempResponses));
         }
       } catch (e){
           console.log(e);
@@ -357,6 +359,11 @@ export function Chat({
     return true;
   }
 
+  const handleBeforeUnload = (event: any) => {
+    event.preventDefault();
+    event.returnValue = "Are you sure you want to leave? The response will not be stored to your current chat's history if you exit right now.";
+  }
+
   const handleSubmit = async () => {
     if (!auth.currentUser) {
       setAlert("Missing auth.currentUser");
@@ -364,6 +371,8 @@ export function Chat({
     }
 
     setLoading(true);
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     let urls = getUrls(currentInput);
 
@@ -554,6 +563,8 @@ export function Chat({
       else if (conversationUid) {
         await putConversationSave(conversationUid, tempConv, includedDocuments, conversationTitle);
       }
+
+      window.removeEventListener('beforeunload', handleBeforeUnload);
 
       setConversation(
         tempConv
