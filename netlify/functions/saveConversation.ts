@@ -5,10 +5,18 @@ const {
 //   const { authenticateApiUser } = require("@/util/api/middleware/authenticateApiUser");
 const { auth } = require('firebase-admin');
 const { initBackendFirebaseApp } = require("../../src/util/api/middleware/initBackendFirebaseApp");
+import admin from "firebase-admin";
 // const { userConverter } = require("@/util/User");
 
 exports.handler = async (event:any, context:any) => {
     const { conversation, documents, title, id_token } = JSON.parse(event.body);
+
+    admin.initializeApp({
+      credential: admin.credential.cert(
+        JSON.parse(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT!)
+      ),
+      databaseURL: "https://legal-gpt-default-rtdb.firebaseio.com",
+    });
   
     // Authenticate the user 
     // Since this is a serverless function, you won't be able to use cookies.

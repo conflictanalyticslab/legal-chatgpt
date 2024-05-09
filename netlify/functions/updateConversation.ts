@@ -1,3 +1,10 @@
+const {
+    getFirestore,
+  } = require("firebase-admin/firestore");
+  const { initBackendFirebaseApp } = require("../../src/util/api/middleware/initBackendFirebaseApp");
+
+import admin from "firebase-admin";
+  
 //   const { authenticateApiUser } = require("@/util/api/middleware/authenticateApiUser");
   
   exports.handler = async (event:any, context:any) => {
@@ -6,6 +13,13 @@
     // Authenticate the user 
     // const { earlyResponse, decodedToken } = await authenticateApiUser();
     // if (earlyResponse) return earlyResponse;
+
+    admin.initializeApp({
+      credential: admin.credential.cert(
+        JSON.parse(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT!)
+      ),
+      databaseURL: "https://legal-gpt-default-rtdb.firebaseio.com",
+    });
   
     initBackendFirebaseApp();
   
