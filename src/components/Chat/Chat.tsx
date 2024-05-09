@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, use } from "react";
 import Image from "next/image";
 
 // import external components
@@ -201,9 +201,10 @@ export function Chat({
           }
           setUserInputs(tempInputs);
           setResponses(tempResponses);
-          setLatestResponse(conversationData.conversation[conversationData.conversation.length-1].role === "assistant"? conversationData.conversation[conversationData.conversation.length-1].content : "");
+          // setLatestResponse(conversationData.conversation[conversationData.conversation.length-1].role === "assistant"? conversationData.conversation[conversationData.conversation.length-1].content : "");
           console.log("tempInputs: " + tempInputs);
           console.log("tempResponses: " + JSON.stringify(tempResponses));
+          console.log("latestResponse: " + latestResponse);
         }
       } catch (e){
           console.log(e);
@@ -219,6 +220,12 @@ export function Chat({
   // }, [responses]);
 
   useEffect(() => {
+    console.log("responses: " + JSON.stringify(responses));
+  }, [responses]);
+
+
+  useEffect(() => {
+    console.log("latestResponse changed, newConv: " + newConv +  ", latestResponse: " + latestResponse + ", responses: " + responses);
     if (responses.length > 0 && latestResponse.length > responses[responses.length-1].response.length) {
       setResponses([...responses.slice(0,responses.length-1), {
         response: latestResponse,
@@ -234,7 +241,8 @@ export function Chat({
         },
       }])
     }
-    else {setResponses([...responses, {
+    else {
+      setResponses([...responses, {
       response: latestResponse,
       is_satisfactory: "N/A",
       feedback: {
@@ -409,7 +417,7 @@ export function Chat({
 
     setCurrentInput("");
 
-    console.log(currentInput);
+    console.log("responses logged from handleSubmit: " + JSON.stringify(responses));
 
     try {
       const docContentQuery = documentContent.length > 0? "\n Here is a document for context: " + documentContent + " " : "";
@@ -484,6 +492,7 @@ export function Chat({
 
       let buffer = "";
       setGenerating(true); // set generating to true to start the stream
+      setNewConv(true);
       
       if (response.status === 200 && response.body != null && response.body.constructor === ReadableStream) {
             console.log("stream");
@@ -498,7 +507,7 @@ export function Chat({
                   if (currentResponse.done || !generatingRef.current) {
                     break;
                   }
-                  console.log("generating: " + generating)
+                  // console.log("generating: " + generating)
   
                   // decode content
                   const valueOfCurrentResponse = "" + encode.decode(currentResponse.value);
@@ -1028,7 +1037,7 @@ export function Chat({
                         {/* set the latest response to the response stream, and all other responses as string from responses array state */}
                         {/* <TextFormatter text= {i === responses.length - 1 ? latestResponse : responses[i].response} />   */}
                         <ReactMarkdown>
-                          {i === responses.length - 1 && responses.length > 1 ? latestResponse : responses[i].response}
+                          {i === responses.length - 1 && responses.length > 1 && newConv ? latestResponse : responses[i].response}
                         </ReactMarkdown>
                       </div>
 
