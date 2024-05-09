@@ -5,6 +5,8 @@ export async function postConversationSave(
   includedDocuments: string[],
   title: string
 ) {
+  console.log("fullConversation: ", fullConversation);
+  console.log("includedDocuments: ", includedDocuments);
   return await fetch("https://deploy-preview-80--cute-sprite-f73207.netlify.app/.netlify/functions/saveConversation", {
     method: "POST",
     headers: {

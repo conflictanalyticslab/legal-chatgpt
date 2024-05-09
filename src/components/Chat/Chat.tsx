@@ -592,37 +592,37 @@ export function Chat({
     });
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      // TO DO: Move saving logic to an API route
-      //console.log(userInputs, responses);
-      // const docRef = await addDoc(collection(db, "conversations"), {
-      //   userInputs: userInputs,
-      //   responses: responses,
-      // });
-      // const userDocRef = await updateDoc(
-      //   doc(db, "users", auth.currentUser.uid),
-      //   { conversations: arrayUnion(docRef.id) }
-      // );
-      // setAlert(
-      //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
-      // );
-      // replace empty string in the following call with title of the conversation
-      (await postConversationSave(conversation, includedDocuments, "")).json().then((res) => {setConversationUid(res.uid)}).catch((err) => {console.log(err)});
-      console.log(conversation.length);
-      setAlert(
-        `Conversation successfully saved in Firebase.`
-      );
-      // setTimeout(function() {
+  // const handleSave = async () => {
+  //   setSaving(true);
+  //   try {
+  //     // TO DO: Move saving logic to an API route
+  //     //console.log(userInputs, responses);
+  //     // const docRef = await addDoc(collection(db, "conversations"), {
+  //     //   userInputs: userInputs,
+  //     //   responses: responses,
+  //     // });
+  //     // const userDocRef = await updateDoc(
+  //     //   doc(db, "users", auth.currentUser.uid),
+  //     //   { conversations: arrayUnion(docRef.id) }
+  //     // );
+  //     // setAlert(
+  //     //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
+  //     // );
+  //     // replace empty string in the following call with title of the conversation
+  //     (await postConversationSave(conversation, includedDocuments, "")).json().then((res) => {setConversationUid(res.uid)}).catch((err) => {console.log(err)});
+  //     console.log(conversation.length);
+  //     setAlert(
+  //       `Conversation successfully saved in Firebase.`
+  //     );
+  //     // setTimeout(function() {
           
-      //   window.location.reload();}, 
-      //   1000);
-    } catch (e) {
-      setAlert(`Error saving conversation: ${e}`);
-    }
-    setSaving(false);
-  };
+  //     //   window.location.reload();}, 
+  //     //   1000);
+  //   } catch (e) {
+  //     setAlert(`Error saving conversation: ${e}`);
+  //   }
+  //   setSaving(false);
+  // };
 
   const handleAlertClose = () => {
     setAlert("");
