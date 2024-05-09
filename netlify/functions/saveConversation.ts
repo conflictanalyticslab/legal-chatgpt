@@ -9,7 +9,7 @@ import admin from "firebase-admin";
 // const { userConverter } = require("@/util/User");
 
 exports.handler = async (event:any, context:any) => {
-    const { conversation, documents, title} = JSON.parse(event.body);
+    const { fullConversation, includedDocuments, title} = JSON.parse(event.body);
 
     admin.initializeApp({
       credential: admin.credential.cert(
@@ -32,14 +32,14 @@ exports.handler = async (event:any, context:any) => {
     try {
       const docRef = await getFirestore().collection("conversations").doc();
 
-      console.log("conversation: ", conversation);
-      console.log("documents: ", documents);
-      console.log("title: ", title);
-      console.log("uid: ", uid);
+      // console.log("conversation: ", conversation);
+      // console.log("documents: ", documents);
+      // console.log("title: ", title);
+      // console.log("uid: ", uid);
 
       await docRef.create({
-        conversation: conversation,
-        documents: documents,
+        conversation: fullConversation,
+        documents: includedDocuments,
         title: title,
         userUid: uid,
       });

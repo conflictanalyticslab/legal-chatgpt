@@ -8,7 +8,7 @@ import admin from "firebase-admin";
 //   const { authenticateApiUser } = require("@/util/api/middleware/authenticateApiUser");
   
   exports.handler = async (event:any, context:any) => {
-    const { uid, conversation, documents, title} = JSON.parse(event.body);
+    const { uid, fullConversation, includedDocuments, title} = JSON.parse(event.body);
   
     // Authenticate the user 
     // const { earlyResponse, decodedToken } = await authenticateApiUser();
@@ -33,7 +33,7 @@ import admin from "firebase-admin";
         };
       }
   
-      await convoRef.update({conversation: conversation, documents: documents, title: title });
+      await convoRef.update({conversation: fullConversation, documents: includedDocuments, title: title });
   
       return {
         statusCode: 200,
