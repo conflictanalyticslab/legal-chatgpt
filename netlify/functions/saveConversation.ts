@@ -32,6 +32,11 @@ exports.handler = async (event:any, context:any) => {
     try {
       const docRef = await getFirestore().collection("conversations").doc();
 
+      console.log("conversation: ", conversation);
+      console.log("documents: ", documents);
+      console.log("title: ", title);
+      console.log("uid: ", uid);
+
       await docRef.create({
         conversation: conversation,
         documents: documents,
