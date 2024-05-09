@@ -171,6 +171,7 @@ export function Chat({
       try {
         setConversationTitles((await getConversationTitles()) as any)
         const conversationData = await getConversation(conversationTitle);
+        console.log("conversationData: " + JSON.stringify(conversationData));
         if (conversationData && !newConv) {
           console.log(conversationData)
           setConversation(conversationData.conversation);
@@ -192,7 +193,7 @@ export function Chat({
             if (conversationData.conversation[i].role === "user") {
               tempInputs.push(conversationData.conversation[i].content);
             } else if (conversationData.conversation[i].role === "assistant") {
-              console.log(`conversationData.conversation[${i}].content: ` + conversationData.conversation[i].content)
+              // console.log(`conversationData.conversation[${i}].content: ` + conversationData.conversation[i].content)
               tempResponses.push({"response": conversationData.conversation[i].content, "is_satisfactory": "N/A", "feedback": {"message": "", "reasons": {"Superficial Response": false, "Lacks Citation": false, "Lacks Reasoning": false, "Lacks Relevant Facts": false}}});
             }
           }
@@ -202,9 +203,9 @@ export function Chat({
           setUserInputs(tempInputs);
           setResponses(tempResponses);
           // setLatestResponse(conversationData.conversation[conversationData.conversation.length-1].role === "assistant"? conversationData.conversation[conversationData.conversation.length-1].content : "");
-          console.log("tempInputs: " + tempInputs);
-          console.log("tempResponses: " + JSON.stringify(tempResponses));
-          console.log("latestResponse: " + latestResponse);
+          // console.log("tempInputs: " + tempInputs);
+          // console.log("tempResponses: " + JSON.stringify(tempResponses));
+          // console.log("latestResponse: " + latestResponse);
         }
       } catch (e){
           console.log(e);
@@ -219,13 +220,9 @@ export function Chat({
   //   console.log("responses: " + JSON.stringify(responses));
   // }, [responses]);
 
-  useEffect(() => {
-    console.log("responses: " + JSON.stringify(responses));
-  }, [responses]);
-
 
   useEffect(() => {
-    console.log("latestResponse changed, newConv: " + newConv +  ", latestResponse: " + latestResponse + ", responses: " + responses);
+    // console.log("latestResponse changed, newConv: " + newConv +  ", latestResponse: " + latestResponse + ", responses: " + responses);
     if (responses.length > 0 && latestResponse.length > responses[responses.length-1].response.length) {
       setResponses([...responses.slice(0,responses.length-1), {
         response: latestResponse,
@@ -272,6 +269,10 @@ export function Chat({
     useEffect(() => {
       generatingRef.current = generating;
     }, [generating]);
+
+  // useEffect(() => {
+  //   console.log("conversationUid: " + conversationUid);
+  // }, [conversationUid]);
 
   const [alert, setAlert] = useState("");
 

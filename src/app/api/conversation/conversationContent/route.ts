@@ -37,7 +37,7 @@ import {
   
     const doc = queryResults.docs[0];
     const data = doc.data();
-    data.userUid = doc.id;
+    data.conversationId = doc.id;
   
     return NextResponse.json(data, { status: 200 });
   }
