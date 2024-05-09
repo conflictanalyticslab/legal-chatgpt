@@ -9,7 +9,7 @@ import admin from "firebase-admin";
 // const { userConverter } = require("@/util/User");
 
 exports.handler = async (event:any, context:any) => {
-    const { conversation, documents, title, id_token } = JSON.parse(event.body);
+    const { conversation, documents, title} = JSON.parse(event.body);
 
     admin.initializeApp({
       credential: admin.credential.cert(
@@ -24,7 +24,7 @@ exports.handler = async (event:any, context:any) => {
     // const { earlyResponse, decodedToken } = await authenticateApiUser();
     // if (earlyResponse) return earlyResponse;
 
-    const decodedToken = await auth().verifyIdToken(id_token);
+    const decodedToken = await auth().verifyIdToken(event.headers.authorization.split('Bearer ')[1]);
     const uid = decodedToken.uid;
   
     initBackendFirebaseApp();
