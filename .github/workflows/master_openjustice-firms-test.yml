@@ -23,7 +23,8 @@ jobs:
           npm install -force
           npm run build --if-present
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: zip release.zip -r .next public package.json package-lock.json
+        # This includes only the .next directory, the public directory, and the package.json and package-lock.json files in the zip file.
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
