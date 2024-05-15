@@ -29,7 +29,7 @@ jobs:
           npm run build --if-present
           
       - name: Zip artifact for deployment
-        run: zip release.zip -r .next public package.json package-lock.json
+        run: zip release.zip -r .next public package.json package-lock.json ecosystem.config.js
         # This includes only the .next directory, the public directory, and the package.json and package-lock.json files in the zip file.
 
       - name: Upload artifact for deployment job
