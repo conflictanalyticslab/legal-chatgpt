@@ -23,14 +23,9 @@ jobs:
           yarn install --frozen-lockfile
           yarn build
 
-      - name: npm install, build, and test
-        run: |
-          npm install -force
-          npm run build --if-present
-          
       - name: Zip artifact for deployment
         run: zip release.zip -r .next public package.json package-lock.json ecosystem.config.js
-        # This includes only the .next directory, the public directory, and the package.json and package-lock.json files in the zip file.
+        # This includes the .next directory, the public directory, and the package.json and package-lock.json files in the zip file.
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -53,6 +48,10 @@ jobs:
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
+
+      - name: Install dependencies
+        run: |
+          yarn install
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
