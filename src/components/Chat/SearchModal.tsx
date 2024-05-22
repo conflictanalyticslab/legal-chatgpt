@@ -35,13 +35,7 @@ const SearchModal = ({
   };
 
   return (
-    <div
-      style={{
-        width: "20%",
-        paddingTop: "25px",
-        marginRight: "3rem"
-      }}
-    >
+    <div>
       <Button
         sx={{
           display: "flex",
@@ -58,7 +52,9 @@ const SearchModal = ({
           style={{ width: "14px", height: "14px", marginRight: "auto" }}
           alt={""}
         />
-        <Typography style={{ marginRight: "auto" }}>Search [Experimental]</Typography>
+        <Typography style={{ marginRight: "auto" }}>
+          Search [Experimental]
+        </Typography>
       </Button>
       <Modal open={modalOpen} onClose={handleClose}>
         <Box sx={style}>
