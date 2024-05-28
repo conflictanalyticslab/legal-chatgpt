@@ -1,6 +1,6 @@
 "use client";
 
-import React, { MouseEventHandler, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, use } from "react";
 import Image from "next/image";
 
 // import external components
@@ -24,6 +24,10 @@ import {
   Paper,
   Tooltip,
 } from "@mui/material";
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormHelperText from '@mui/material/FormHelperText';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 // import RefreshIcon from "@mui/icons-material/Refresh";
 // import AddIcon from "@mui/icons-material/Add";
@@ -57,10 +61,13 @@ import {
 import { postConversationSave } from "@/util/requests/postConversationSave";
 // import { IncludedDocumentsProvider, useIncludedDocuments } from "@/hooks/useIncludedDocuments"; // passing props instead
 // import { postConversationMult } from "@/util/requests/postConversationMult";
-// import { getConversation } from "@/util/requests/getConversation";
+import { getConversationTitles } from "@/util/requests/getConversationTitles";
+import { getConversation } from "@/util/requests/getConversation";
 import { putConversationSave } from "@/util/requests/putConversationSave";
+import { postConversationTitle } from "@/util/requests/postConversationTitle";
 import { postPDF } from "@/util/requests/postPDF";
 import { postWebUrl } from "@/util/requests/postWebUrl";
+// import ConversationContext from './ConversationContext';
 
 // import OJ components
 import {
@@ -76,7 +83,8 @@ type FeedbackReasonsI = {
 import SearchModal from "@/components/Chat/SearchModal";
 import PDFModal from "@/components/Chat/PDFModal";
 import {deleteDocument} from "@/util/api/deleteDocument";
-import { create } from "domain";
+import { set } from "firebase/database";
+// import { create } from "domain";
 // import { stringify } from "querystring";
 // import { doc } from "firebase/firestore";
 // import { set } from "firebase/database";
@@ -96,6 +104,7 @@ export function Chat({
       content: string;
     }[]
   >([]);
+  // const [convTitle, setConvTitle] = useState("");
   const [responses, setResponses] = useState<
     {
       response: string;
@@ -118,9 +127,15 @@ export function Chat({
   const [saving, setSaving] = useState(false);
   const [endSession, setEndSession] = useState(false);
   const [num, setNum] = useState(-1);
+  const [conversationTitles, setConversationTitles] = useState<{title: string, uid: string}[]>([]);
+  const [conversationTitle, setConversationTitle] = useState<string>("");
   // const [totalQuota, setTotalQuota] = useState(0);
   const [includedDocuments, setIncludedDocuments] = useState<string[]>([]);
   const [conversationUid, setConversationUid] = useState<string | null>("");
+  const [newConv, setNewConv] = useState(true);
+  const [generating, setGenerating] = useState(true);
+  
+  const generatingRef = useRef(generating);
 
   useEffect(() => {
     setAlert("Authenticating user...");
@@ -136,6 +151,7 @@ export function Chat({
         const fetchData = async () => {
           try {
             setDocuments((await getDocumentsOwnedByUser()) as any);
+            setConversationTitles((await getConversationTitles()) as any);
           } catch (e) {
             console.log(e);
             // router.push("/login");
@@ -147,9 +163,66 @@ export function Chat({
         console.error(e);
         router.push("/login");
       });
+    console.log("generatingRef.current: " + generatingRef.current)
   }, []);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setConversationTitles((await getConversationTitles()) as any)
+        const conversationData = await getConversation(conversationTitle);
+        console.log("conversationData: " + JSON.stringify(conversationData));
+        if (conversationData && !newConv) {
+          console.log(conversationData)
+          setConversation(conversationData.conversation);
+          setIncludedDocuments(conversationData.hasOwnProperty('includedDocuments') ? conversationData.documents : []);
+          setConversationUid(conversationData.conversationId);
+          const tempInputs: string[] = [];
+          const tempResponses: {
+            response: string;
+            is_satisfactory: boolean | "N/A";
+            feedback: {
+              message: string;
+              reasons: FeedbackReasonsI;
+            };
+          }[] = [];
+          // setUserInputs(tempInputs);
+          // setResponses(tempResponses);
+          console.log("conversationData: " + JSON.stringify(conversationData))
+          for (let i = 0; i < conversationData.conversation.length; i++) {
+            if (conversationData.conversation[i].role === "user") {
+              tempInputs.push(conversationData.conversation[i].content);
+            } else if (conversationData.conversation[i].role === "assistant") {
+              // console.log(`conversationData.conversation[${i}].content: ` + conversationData.conversation[i].content)
+              tempResponses.push({"response": conversationData.conversation[i].content, "is_satisfactory": "N/A", "feedback": {"message": "", "reasons": {"Superficial Response": false, "Lacks Citation": false, "Lacks Reasoning": false, "Lacks Relevant Facts": false}}});
+            }
+          }
+          if (conversationData.conversation[conversationData.conversation.length-1].role === "user") {
+            tempInputs.pop();
+          }
+          setUserInputs(tempInputs);
+          setResponses(tempResponses);
+          // setLatestResponse(conversationData.conversation[conversationData.conversation.length-1].role === "assistant"? conversationData.conversation[conversationData.conversation.length-1].content : "");
+          // console.log("tempInputs: " + tempInputs);
+          // console.log("tempResponses: " + JSON.stringify(tempResponses));
+          // console.log("latestResponse: " + latestResponse);
+        }
+      } catch (e){
+          console.log(e);
+        // router.push("/login");
+      }
+    };
+    fetchData();
+    
+  }, [conversationTitle]);
+
+  // useEffect(() => {
+  //   console.log("responses: " + JSON.stringify(responses));
+  // }, [responses]);
+
+
+  useEffect(() => {
+    // console.log("latestResponse changed, newConv: " + newConv +  ", latestResponse: " + latestResponse + ", responses: " + responses);
     if (responses.length > 0 && latestResponse.length > responses[responses.length-1].response.length) {
       setResponses([...responses.slice(0,responses.length-1), {
         response: latestResponse,
@@ -165,7 +238,8 @@ export function Chat({
         },
       }])
     }
-    else {setResponses([...responses, {
+    else {
+      setResponses([...responses, {
       response: latestResponse,
       is_satisfactory: "N/A",
       feedback: {
@@ -180,6 +254,25 @@ export function Chat({
     }])}
     // console.log(responses);
     }, [latestResponse]);
+
+    // updates conversation in db whenever conversation state is updated
+    // useEffect(() => {
+    //   if (conversationUid) {
+    //     try {
+    //       putConversationSave(conversationUid, conversation, includedDocuments, conversationTitle);
+    //     } catch (e) {
+    //       console.error(e);
+    //     }
+    //   }
+    // }, [conversation]);
+
+    useEffect(() => {
+      generatingRef.current = generating;
+    }, [generating]);
+
+  // useEffect(() => {
+  //   console.log("conversationUid: " + conversationUid);
+  // }, [conversationUid]);
 
   const [alert, setAlert] = useState("");
 
@@ -273,6 +366,11 @@ export function Chat({
     return true;
   }
 
+  const handleBeforeUnload = (event: any) => {
+    event.preventDefault();
+    event.returnValue = "Are you sure you want to leave? The response will not be stored to your current chat's history if you exit right now.";
+  }
+
   const handleSubmit = async () => {
     if (!auth.currentUser) {
       setAlert("Missing auth.currentUser");
@@ -280,6 +378,8 @@ export function Chat({
     }
 
     setLoading(true);
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     let urls = getUrls(currentInput);
 
@@ -318,7 +418,7 @@ export function Chat({
 
     setCurrentInput("");
 
-    console.log(currentInput);
+    console.log("responses logged from handleSubmit: " + JSON.stringify(responses));
 
     try {
       const docContentQuery = documentContent.length > 0? "\n Here is a document for context: " + documentContent + " " : "";
@@ -341,14 +441,16 @@ export function Chat({
       const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
       const estimatedTokenCount = tokenizer.estimateTokenCount(total_conv);
 
-      if (estimatedTokenCount >= 8192) {
-        createAlert('The input exceeds the token limit, maximum of 8192 tokens in each input, current input contains ' + estimatedTokenCount + ' tokens');
+      if (estimatedTokenCount >= 16384) {
+        createAlert('The input exceeds the token limit, maximum of 16384 tokens in each input, current input contains ' + estimatedTokenCount + ' tokens');
         setLoading(false);
         return;
       }
 
       let response;
       let search_terms_res;
+      
+      
       
       // // TO DO: rework the logic below, setState hook doesn't execute immediately, so checking length of conversation is unstable
       // if (conversation.length === 0) {
@@ -388,21 +490,25 @@ export function Chat({
       console.log("response.status: " + response.status);
       console.log("response.body: " + response.body);
       console.log("response.body.constructor: " + response.body?.constructor);
+
+      let buffer = "";
+      setGenerating(true); // set generating to true to start the stream
+      setNewConv(true);
       
       if (response.status === 200 && response.body != null && response.body.constructor === ReadableStream) {
             console.log("stream");
-            let buffer = "";
             const reader = response.body.getReader();
             const encode = new TextDecoder("utf-8");
                 
                 // read the response content by iteration
-                while (true) {
+                while (generatingRef.current) {
                   
                   const currentResponse = await reader.read();
                   
-                  if (currentResponse.done) {
+                  if (currentResponse.done || !generatingRef.current) {
                     break;
                   }
+                  // console.log("generating: " + generating)
   
                   // decode content
                   const valueOfCurrentResponse = "" + encode.decode(currentResponse.value);
@@ -431,25 +537,46 @@ export function Chat({
                     }
                   }
                 }
+                try {
+                  setGenerating(true);
+                  await reader.cancel();
+                } catch (e) {}
               }
       else if (response.status === 200 && response.body != null) {
         console.log("non-stream")
         setLatestResponse(await response.json());
       }
 
-      setConversation(
-        fullConversation.concat([{ role: "assistant", content: latestResponse }])
-      );
-      
+      const tempConv = fullConversation.concat([{ role: "assistant", content: buffer }]);
+
       
 
       // save conversation to db
       // console.log(fullConversation.length);
-      if (conversationUid) {
-        await putConversationSave(conversationUid, fullConversation, includedDocuments);
-      } else {
-        (await postConversationSave(fullConversation, includedDocuments)).json().then((res) => {setConversationUid(res.uid)}).catch((err) => {console.log(err)});
+      if (fullConversation.length < 2) {
+        const titleResPromise = await postConversationTitle(fullConversation, includedDocuments);
+      
+        if (!titleResPromise.ok) {
+          const errorData = await titleResPromise.json();
+          setAlert(errorData.error);
+          setLoading(false);
+          return;
+        }
+
+        const { title } = await titleResPromise.json();
+        setConversationTitle(title);
+        // save new conversation to db
+        (await postConversationSave(tempConv, includedDocuments, title)).json().then((res) => {setConversationUid(res.uid)}).catch((err) => {console.log(err)});
       }
+      else if (conversationUid) {
+        await putConversationSave(conversationUid, tempConv, includedDocuments, conversationTitle);
+      }
+
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+
+      setConversation(
+        tempConv
+      );
 
       setSearchTerm(toSearch);
     } catch (error) {
@@ -484,36 +611,37 @@ export function Chat({
     });
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      // TO DO: Move saving logic to an API route
-      //console.log(userInputs, responses);
-      // const docRef = await addDoc(collection(db, "conversations"), {
-      //   userInputs: userInputs,
-      //   responses: responses,
-      // });
-      // const userDocRef = await updateDoc(
-      //   doc(db, "users", auth.currentUser.uid),
-      //   { conversations: arrayUnion(docRef.id) }
-      // );
-      // setAlert(
-      //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
-      // );
-      (await postConversationSave(conversation, includedDocuments)).json().then((res) => {setConversationUid(res.uid)}).catch((err) => {console.log(err)});
-      console.log(conversation.length);
-      setAlert(
-        `Conversation successfully saved in Firebase.`
-      );
-      // setTimeout(function() {
+  // const handleSave = async () => {
+  //   setSaving(true);
+  //   try {
+  //     // TO DO: Move saving logic to an API route
+  //     //console.log(userInputs, responses);
+  //     // const docRef = await addDoc(collection(db, "conversations"), {
+  //     //   userInputs: userInputs,
+  //     //   responses: responses,
+  //     // });
+  //     // const userDocRef = await updateDoc(
+  //     //   doc(db, "users", auth.currentUser.uid),
+  //     //   { conversations: arrayUnion(docRef.id) }
+  //     // );
+  //     // setAlert(
+  //     //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
+  //     // );
+  //     // replace empty string in the following call with title of the conversation
+  //     (await postConversationSave(conversation, includedDocuments, "")).json().then((res) => {setConversationUid(res.uid)}).catch((err) => {console.log(err)});
+  //     console.log(conversation.length);
+  //     setAlert(
+  //       `Conversation successfully saved in Firebase.`
+  //     );
+  //     // setTimeout(function() {
           
-      //   window.location.reload();}, 
-      //   1000);
-    } catch (e) {
-      setAlert(`Error saving conversation: ${e}`);
-    }
-    setSaving(false);
-  };
+  //     //   window.location.reload();}, 
+  //     //   1000);
+  //   } catch (e) {
+  //     setAlert(`Error saving conversation: ${e}`);
+  //   }
+  //   setSaving(false);
+  // };
 
   const handleAlertClose = () => {
     setAlert("");
@@ -531,6 +659,20 @@ export function Chat({
       setShowStartupImage(false);
     }
   }, []);
+
+  // useEffect(() => {
+  //     setConversationTitles(['Initial Title']);
+    
+  //     setTimeout(() => {
+  //         setConversationTitles(['Updated Title']);
+  //         console.log("5 seconds update: " + conversationTitles)
+  //     }, 5000);
+  // }, []);
+
+  // useEffect(() => {
+  //   console.log("conversationTitles", conversationTitles);
+  // }, [conversationTitles]);
+
 
   // // debug function to get the conversation uid
   // useEffect(() => {
@@ -675,6 +817,7 @@ export function Chat({
   // }[];
 
   return (
+    // <ConversationContext.Provider value={{ conversationTitles, setConversationTitle }}>
     <div
       style={{
         width: '100%'
@@ -723,6 +866,31 @@ export function Chat({
           <ul style={{textDecoration: "none", textIndent: 0}}>
             <SearchModal wasSearched={wasSearched} setSearchTerm={setSearchTerm} />
             <PDFModal documents={documents} deleteDocument={deleteDocumentChat} documentContent={documentContent} setDocumentContent={setDocumentContent} includedDocuments={includedDocuments} setIncludedDocuments={setIncludedDocuments}/>
+            <FormControl sx={{ minWidth: 270, maxWidth:270, marginTop: 3 }}>
+              <InputLabel id="demo-simple-select-autowidth-label">Chat History [Experimental]</InputLabel>
+              <Select
+                labelId="demo-simple-select-autowidth-label"
+                id="demo-simple-select-autowidth"
+                value={conversationTitle}
+                onChange={(e: SelectChangeEvent) => {
+                  if (e.target.value === conversationTitle || e.target.value === "") {
+                    return;
+                  }
+                  setNewConv(false);
+                  setShowStartupImage(false);
+                  setConversationTitle(e.target.value as string)
+                }}
+                autoWidth
+                label="chatHistory"
+              >
+                <MenuItem value={conversationTitle}>
+                  <em>{conversationTitle}</em>
+                </MenuItem>
+                {conversationTitles.map((title) => (
+                  <MenuItem value={title.title}>{title.title}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </ul>
         </div>
       </div>
@@ -870,7 +1038,7 @@ export function Chat({
                         {/* set the latest response to the response stream, and all other responses as string from responses array state */}
                         {/* <TextFormatter text= {i === responses.length - 1 ? latestResponse : responses[i].response} />   */}
                         <ReactMarkdown>
-                          {i === responses.length - 1 ? latestResponse : responses[i].response}
+                          {i === responses.length - 1 && responses.length > 1 && newConv ? latestResponse : responses[i].response}
                         </ReactMarkdown>
                       </div>
 
@@ -921,6 +1089,11 @@ export function Chat({
                           >
                             <ThumbDown />
                           </IconButton>
+                          {i === responses.length - 1 && generating &&
+                          <Button onClick={() => {
+                            setGenerating(false);
+                          }}>Stop</Button>
+                          }
                         </ButtonGroup>
                       ) : (
                         <IconButton disabled>
@@ -1148,5 +1321,6 @@ export function Chat({
         </Dialog>
       </div>
     </div>
+    // </ConversationContext.Provider>
   );
 }

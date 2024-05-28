@@ -10,32 +10,42 @@ import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { initBackendFirebaseApp } from "@/util/api/middleware/initBackendFirebaseApp";
 import { userConverter } from "@/util/User";
 
-// Get all documents owned by the user in the authentication header
-export async function GET(_: Request) {
-  const { earlyResponse, decodedToken } = await authenticateApiUser();
-  if (earlyResponse) {
-    return earlyResponse;
-  }
+// // Deprecated!!! Get the conversation for the current user given the title of the conversation
+// export async function GET(req: Request) {
+//   const { earlyResponse, decodedToken } = await authenticateApiUser();
+//   if (earlyResponse) {
+//     return earlyResponse;
+//   }
 
-  if (!decodedToken) {
-    return NextResponse.json(
-      { error: "decodedToken is missing but there was no earlyResponse" },
-      { status: 500 }
-    );
-  }
+//   if (!decodedToken) {
+//     return NextResponse.json(
+//       { error: "decodedToken is missing but there was no earlyResponse" },
+//       { status: 500 }
+//     );
+//   }
 
-  const queryResults = await getFirestore()
-    .collection("conversations")
-    .where("userUid", "==", decodedToken.user_id)
-    .get();
+//   const url = new URL(req.url);
+//   const title = url.searchParams.get('title');
 
-  const plainJsObjects = queryResults.docs.map((doc) => {
-    const data = doc.data();
-    return { ...data, uid: doc.id };
-  });
+//   const queryResults = await getFirestore()
+//     .collection("conversations")
+//     .where("userUid", "==", decodedToken.user_id)
+//     .where("title", "==", title)
+//     .limit(1)
+//     .get();
 
-  return NextResponse.json({ documents: plainJsObjects }, { status: 200 });
-}
+//   if (queryResults.empty) {
+//     return NextResponse.json(
+//       { error: "No matching conversation found" },
+//       { status: 404 }
+//     );
+//   }
+
+//   const doc = queryResults.docs[0];
+//   const data = doc.data();
+
+//   return NextResponse.json({ conversation: { ...data, uid: doc.id }}, { status: 200 });
+// }
 
 export async function PUT(req: Request) {
   const { earlyResponse, decodedToken } = await authenticateApiUser();
@@ -50,13 +60,18 @@ export async function PUT(req: Request) {
     );
   }
 
-  const { uid, fullConversation, includedDocuments } = await req.json();
+  const { uid, fullConversation, includedDocuments, title } = await req.json();
 
   initBackendFirebaseApp();
 
   try {
-    const docRef = getFirestore().collection("conversations").doc(uid);
-    await docRef.update({ conversation: fullConversation, includedDocuments: includedDocuments });
+    const convoRef = getFirestore().collection("conversations").doc(uid);
+
+    if (!convoRef) {
+      return NextResponse.json({ error: "No matching conversation found" }, { status: 404 });
+    }
+
+    await convoRef.update({ conversation: fullConversation, includedDocuments: includedDocuments, title: title });
     return NextResponse.json({ uid }, { status: 200 });
   } catch (error: any) {
     console.error("conversation uid: ", uid, error.message);
@@ -81,7 +96,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const { fullConversation, includedDocuments } = await req.json();
+  const { fullConversation, includedDocuments, title } = await req.json();
 
   initBackendFirebaseApp();
   
@@ -92,9 +107,11 @@ export async function POST(req: Request) {
     await docRef.create({
       conversation: fullConversation,
       documents: includedDocuments,
+      title: title,
+      userUid: decodedToken.user_id,
     });
 
-    // console.log(docRef.id);
+    console.log(docRef.id);
     const userDocRef = getFirestore().collection("users").doc(decodedToken.user_id).withConverter(userConverter);
     
     const data: UserI | undefined = (await userDocRef.get()).data();

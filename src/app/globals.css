@@ -43,20 +43,22 @@ body {
   scroll-snap-align: start;
 }
 #main-id {
-  scroll-snap-type: y mandatory;
-  overflow-y: auto; /* Make sure it's scrollable */
-  height: 100vh; /* Adjust based on your layout needs */
-  scroll-behavior: smooth;
+  /* scroll-snap-type: y mandatory;
+  overflow-y: auto; 
+  height: 100vh; 
+  scroll-behavior: smooth; */
 }
 
 @layer base {
   :root {
+    --heading:6rem;
+    --subheading:2.5rem;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-
+    --grey: #646464;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
-
+    
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
@@ -149,4 +151,32 @@ body {
 .sui-layout-main {
   width: 90% !important;
   padding: 32px 0 0 0 !important;
+}
+
+.slide-left{
+  animation: "scroll-left" 80s linear infinite;
+}
+
+.slide-right{
+  animation: "scroll-right" 80s linear reverse infinite;
+}
+
+/* Keyframes for continuous scroll */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(-4.2%);
+  }
+  100% {
+    transform: translateX(-54.5%); /* Move by the total width of 3 cards */
+  }
+}
+
+/* Keyframes for continuous scroll */
+@keyframes scroll-right {
+  0% {
+    transform: translateX(-4.2%);
+  }
+  100% {
+    transform: translateX(-55.5%); /* Move by the total width of 3 cards */
+  }
 }

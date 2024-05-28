@@ -2,8 +2,10 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Grid, Typography, Box } from "@mui/material";
+import { Grid, Typography, Box, colors } from "@mui/material";
 import { Button } from "@/components/ui/button";
+import Mui_Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 import TextField from "@mui/material/TextField";
 import { FormControl } from "@mui/material";
 import OutlinedInput from "@mui/material/OutlinedInput";
@@ -16,12 +18,15 @@ import IconButton from "@mui/material/IconButton";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import Link from "next/link";
 import { auth } from "@/firebase";
+import { PublicClientApplication } from "@azure/msal-browser";
 import styles from "@/styles/ResetPassword.module.css";
+import { setCookie } from 'typescript-cookie'
 
 import { getDatabase, ref, child, get } from "firebase/database";
 import { AppBackground, GridContainer, HeroBox } from "@/styles/styles";
 import { validEmailRegex } from "@/util/signup/validEmailRegex";
-import { resetPassword } from "@/util/api/firebase/auth";
+import { LineWeight } from "@mui/icons-material";
+// import { resetPassword } from "@/util/api/firebase/auth";
 
 export default function Login() {
   const Joi = require("joi");
@@ -59,6 +64,7 @@ export default function Login() {
   const [passwordError, setPasswordError] = useState(false);
   const [generalError, setGeneralError] = useState("");
   const [generalHelper, setGeneralHelper] = useState("");
+  const [chatSignIn, setChatSignIn] = React.useState(true);
 
   const readWhitelistEmails = async () => {
     return new Promise((resolve) => {
@@ -167,27 +173,107 @@ export default function Login() {
 
     const errors = await validateUser();
     console.log(errors);
+
+    const msalConfig = {
+      auth: {
+          clientId: "30cfa80e-d646-4a45-b1d4-763ea5784cbd",
+          authority: "https://login.microsoftonline.com/ca6f42a4-ef50-412e-a8c3-f9f37ad5455c",
+          redirectUri: "https://openjustice.ai/chat",
+      },
+    };
+
+
+    const msalInstance = new PublicClientApplication(msalConfig);
+    await msalInstance.initialize();
+
     if (!errors) {
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          router.push("/chat");
-        })
-        .catch((error: any) => {
-          const errorMessage = error.message;
-          console.log(error.code);
-          setGeneralError(errorMessage);
-        });
+      if (chatSignIn) {
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            msalInstance.loginPopup()
+            setCookie('email', email)
+            router.push("/chat");
+          })
+          .catch((error: any) => {
+            const errorMessage = error.message;
+            console.log(error.code);
+            setGeneralError(errorMessage);
+          });
+      } else {
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            msalInstance.loginPopup()
+            setCookie('email', email)
+            router.push("/upload");
+          })
+          .catch((error: any) => {
+            const errorMessage = error.message;
+            console.log(error.code);
+            setGeneralError(errorMessage);
+          });
+      
+      }
     }
   };
+
+//   const handleSignin = async (event: any) => {
+//     event.preventDefault();
+
+//     const errors = await validateUser();
+//     console.log(errors);
+//     const msalConfig = {
+//       auth: {
+//           clientId: "30cfa80e-d646-4a45-b1d4-763ea5784cbd",
+//           authority: "https://login.microsoftonline.com/ca6f42a4-ef50-412e-a8c3-f9f37ad5455c",
+//           redirectUri: "https://openjustice.ai/chat",
+//       },
+//     };
+
+//     const msalInstance = new PublicClientApplication(msalConfig);
+//     await msalInstance.initialize();
+    
+//     if (!errors) {
+//       // Azure AD Signin
+//       signInWithEmailAndPassword(auth, email, password)
+//       .then(() => {
+//         msalInstance.loginPopup()
+//         .then(response => {
+//           console.log(response)
+//           router.push("/chat");
+//         })
+//         .catch(error => {
+//           console.log(error);
+//           setGeneralError("An error occurred during login.");
+//         });
+//       }
+//       )
+//       .catch((error: any) => {
+//         const errorMessage = error.message;
+//         console.log(error.code);
+//         setGeneralError(errorMessage);
+//       });
+      
+//     }
+// };
 
   return (
     <AppBackground>
       <div className="min-w-[300px] min-h-[100%] pt-[40px]">
-        <div style={{ marginBottom: "24px" }}>
-          <Typography variant="h3" fontWeight={700} textAlign="center">
-            Welcome back
-          </Typography>
-        </div>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            '& > *': {
+              m: 1,
+            },
+          }}
+        >
+          <ButtonGroup variant="text" aria-label="Basic button group">
+              <Mui_Button style={chatSignIn ? {color: "black", fontWeight: "bold", fontSize: "20px"} : {color: "lightgray", fontSize: "20px"}} onClick={() => setChatSignIn(true)}>ChatBot</Mui_Button>
+              <Mui_Button style={chatSignIn ? {color: "lightgray", fontSize: "20px"} : {color: "black", fontWeight: "bold", fontSize: "20px"}} onClick={() => setChatSignIn(false)}>Data Upload</Mui_Button>
+          </ButtonGroup>
+        </Box>
         <div>
           <Box
             component="form"

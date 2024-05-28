@@ -1,8 +1,10 @@
 export const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_MESSAGING_SENDER_ID,
-  messagingSenderId: process.env.NEXT_PUBLIC_APP_ID,
-  appId: process.env.NEXT_PUBLIC_APP_ID,
+  apiKey: "AIzaSyDCLoAAYg5jzGLoeKnMNnJAb_GJtWgznX0",
+  authDomain: "legal-gpt.firebaseapp.com",
+  databaseURL: "https://legal-gpt-default-rtdb.firebaseio.com",
+  projectId: "legal-gpt",
+  storageBucket: "legal-gpt.appspot.com",
+  messagingSenderId: "639715611576",
+  appId: "1:639715611576:web:a277a8378db8388cb6f54d",
+  measurementId: "G-QQM7F436R6"
 };
