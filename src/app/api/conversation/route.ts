@@ -78,7 +78,7 @@ export async function POST(req: Request) {
             {
               role: "system",
               content:
-                "Answer in 500 words or less. Short answers are better.\n\n" +
+                "Answer in 500 words or less. Short answers are better. Bold the important terms, and include spacing to ensure proper formatting. \n\n" +
                 documentPrompt +
                 "\n\n" +
                 searchPrompt,
