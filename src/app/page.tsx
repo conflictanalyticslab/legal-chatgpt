@@ -35,7 +35,7 @@ function Hero() {
               <div className="flex flex-wrap gap-x-[15px] justify-center lg:justify-start pl-1">
                 <p className="text-sm sm:text-xl font-normal"> Expert-led </p>
                 <p className="text-sm sm:text-xl font-normal"> Non-Profit </p>
-                <p className="text-sm sm:text-xl font-normal"> Open-source</p>
+                <p className="text-sm sm:text-xl font-normal"> Open-Access</p>
                 <p className="text-sm sm:text-xl font-normal"> Independent </p>
               </div>
             </div>
