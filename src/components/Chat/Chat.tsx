@@ -85,6 +85,8 @@ import { set } from "firebase/database";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import { Card, CardContent, CardTitle } from "../ui/card";
+import { similaritySearch } from "./actions/semantic-search";
+import { useChatContext } from "./store/ChatContext";
 // import { create } from "domain";
 // import { stringify } from "querystring";
 // import { doc } from "firebase/firestore";
@@ -187,14 +189,10 @@ export function Chat({
               reasons: FeedbackReasonsI;
             };
           }[] = [];
-          // setUserInputs(tempInputs);
-          // setResponses(tempResponses);
-          console.log("conversationData: " + JSON.stringify(conversationData))
           for (let i = 0; i < conversationData.conversation.length; i++) {
             if (conversationData.conversation[i].role === "user") {
               tempInputs.push(conversationData.conversation[i].content);
             } else if (conversationData.conversation[i].role === "assistant") {
-              // console.log(`conversationData.conversation[${i}].content: ` + conversationData.conversation[i].content)
               tempResponses.push({"response": conversationData.conversation[i].content, "is_satisfactory": "N/A", "feedback": {"message": "", "reasons": {"Superficial Response": false, "Lacks Citation": false, "Lacks Reasoning": false, "Lacks Relevant Facts": false}}});
             }
           }
@@ -203,10 +201,7 @@ export function Chat({
           }
           setUserInputs(tempInputs);
           setResponses(tempResponses);
-          // setLatestResponse(conversationData.conversation[conversationData.conversation.length-1].role === "assistant"? conversationData.conversation[conversationData.conversation.length-1].content : "");
-          // console.log("tempInputs: " + tempInputs);
-          // console.log("tempResponses: " + JSON.stringify(tempResponses));
-          // console.log("latestResponse: " + latestResponse);
+          setLatestResponse(conversationData.conversation[conversationData.conversation.length-1].role === "assistant"? conversationData.conversation[conversationData.conversation.length-1].content : "");
         }
       } catch (e){
           console.log(e);
@@ -217,9 +212,6 @@ export function Chat({
     
   }, [conversationTitle]);
 
-  // useEffect(() => {
-  //   console.log("responses: " + JSON.stringify(responses));
-  // }, [responses]);
 
 
   useEffect(() => {
@@ -253,19 +245,7 @@ export function Chat({
         },
       },
     }])}
-    // console.log(responses);
     }, [latestResponse]);
-
-    // updates conversation in db whenever conversation state is updated
-    // useEffect(() => {
-    //   if (conversationUid) {
-    //     try {
-    //       putConversationSave(conversationUid, conversation, includedDocuments, conversationTitle);
-    //     } catch (e) {
-    //       console.error(e);
-    //     }
-    //   }
-    // }, [conversation]);
 
     useEffect(() => {
       generatingRef.current = generating;
@@ -297,19 +277,6 @@ export function Chat({
   });
 
   const [documents, setDocuments] = useState<UserDocument[]>([]);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       setDocuments((await getDocumentsOwnedByUser()) as any);
-  //     } catch (e) {
-  //       console.log(e);
-  //       // router.push("/login");
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
 
   // handle delete documents from PDFModal
   const deleteDocumentChat = (uid: string) => {
@@ -377,6 +344,7 @@ export function Chat({
     event.returnValue = "Are you sure you want to leave? The response will not be stored to your current chat's history if you exit right now.";
   }
 
+  const { setLLMQuery, setRelevantPDFs } = useChatContext();
   /**
    * Submits the user's query
    * 
@@ -391,10 +359,10 @@ export function Chat({
     }
 
     setLoading(true);
+    const userQuery = currentInput;
+    setCurrentInput("");
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    let urls = getUrls(currentInput);
+    let urls = getUrls(userQuery);
 
     // Parses any urls in the string and validates them
     for (let url of urls) {
@@ -409,7 +377,7 @@ export function Chat({
     }
 
     let urlContent;
-    let urlContentUserInput = currentInput;
+    let urlContentUserInput = userQuery;
 
     // Fetching website content and replacing the url in the query with the website content.
     for (const url of urls) {
@@ -431,11 +399,6 @@ export function Chat({
     }
 
     window.addEventListener("beforeunload", handleBeforeUnload);
-
-    setCurrentInput("");
-
-    console.log("responses logged from handleSubmit: " + JSON.stringify(responses));
-
     try {
       // Retrieves uploaded document content from user
       const docContentQuery = documentContent.length > 0? "\n Here is a document for context: " + documentContent + " " : ""; 
@@ -449,7 +412,7 @@ export function Chat({
       ]);
 
       setConversation(fullConversation);
-      setUserInputs(userInputs.concat([currentInput]));
+      setUserInputs(userInputs.concat([userQuery]));
       setCurrentInput("");
       setNum(num - 1);
 
@@ -486,6 +449,12 @@ export function Chat({
         return;
       }
 
+      // ---------------------------------------------- SEMANTIC SEARCH ---------------------------------------------- //
+      setLLMQuery(userQuery);
+      const pdfs = await similaritySearch(userQuery)
+      setRelevantPDFs(pdfs.matches);
+
+      // ---------------------------------------------- LLM OUTPUT ---------------------------------------------- //
       const { toSearch, searchPrompt, documentPrompt } = await search_terms_res.json();
       response = await postConversation(searchPrompt, documentPrompt, fullConversation); //Gets the model's output
 
@@ -548,10 +517,7 @@ export function Chat({
 
       const tempConv = fullConversation.concat([{ role: "assistant", content: buffer }]);
 
-      
-
       // save conversation to db
-      // console.log(fullConversation.length);
       if (fullConversation.length < 2) {
         const titleResPromise = await postConversationTitle(fullConversation, includedDocuments);
       
@@ -585,8 +551,6 @@ export function Chat({
       setAlert("Chat length exceeds programming limitations. Please refresh the page to start a new session.");
     } finally {
       setLoading(false);
-      // console.log(fullConversation.length);
-      
     }
   };
 
@@ -674,12 +638,6 @@ export function Chat({
   //   console.log("conversationTitles", conversationTitles);
   // }, [conversationTitles]);
 
-
-  // // debug function to get the conversation uid
-  // useEffect(() => {
-  //   console.log("conversationUid", conversationUid);
-  // }, [conversationUid]);
-
   const createAlert = (message: string, backgroundColor = "red") => {
       // Create a new div element for our alert
       const alertDiv = document.createElement('div');
@@ -739,17 +697,12 @@ export function Chat({
         throw new Error("PDF token limit exceeded");
       }
 
-      console.log(estimatedTokenCount);
     
       // Log the string
       setDocumentContent(pdfContent.content);
 
       setIncludedDocuments([...includedDocuments, pdfContent.uid]);
 
-      // console.log(pdfContent.content);
-
-      // console.log(filesContent[0]);
-      
       const newDoc = await uploadPdfDocument({"content": pdfContent.content, "name": plainFiles[0].name});
       setDocuments([...documents, newDoc]);
       setIncludedDocuments([...includedDocuments, newDoc.uid]);
@@ -761,7 +714,6 @@ export function Chat({
         createAlert('The PDF file uploaded exceeds limit, maximum of 8192 token in each PDF uploaded, your pdf contains ' + estimatedTokenCount + ' tokens');
       }
     }
-      
       
     },
   });
@@ -795,24 +747,20 @@ export function Chat({
   }
 
   return (
-    <div
-      className="flex justify-center relative"
-      style={{
-        width: "100%",
-      }}
-    >
+    <div className="flex justify-between relative w-full">
       {/* Top Left Options */}
-
-      <Card className="max-w-[270px] border-0 shadow-none bg-[transparent] absolute left-[50px] top-[50px]">
-        <CardContent className="flex items-center justify-center gap-3 p-3">
-          <Label className="font-bold text-[20px]">Enable RAG</Label>
+      <Card className="max-w-[270px] border-0 shadow-none bg-[transparent] pt-[20px] pl-[20px]">
+        <CardContent className="flex flex-col items-center justify-center gap-3 p-3">
+          <Label className="font-bold text-[20px] whitespace-nowrap">
+            Enable RAG
+          </Label>
           <Switch checked={false} />
         </CardContent>
       </Card>
 
       {/* Top Right Options */}
       <div
-        className="absolute top-[50px] right-[50px]"
+        className="order-3 flex justify-between pt-[20px] pr-[20px]"
         style={{
           display: "flex",
           justifyContent: "space-between",
@@ -823,10 +771,7 @@ export function Chat({
             className="flex flex-col gap-6"
             style={{ textDecoration: "none", textIndent: 0 }}
           >
-            <SearchModal
-              wasSearched={wasSearched}
-              setSearchTerm={setSearchTerm}
-            />
+            <SearchModal />
             <PDFModal
               documents={documents}
               deleteDocument={deleteDocumentChat}
@@ -871,7 +816,7 @@ export function Chat({
 
       {/* Main Content */}
       <div
-        className="mt-[50px] w-[75%] relative"
+        className="mt-[50px] w-[55%] relative"
         style={{
           display: "flex",
           justifyContent: "center",
@@ -880,8 +825,8 @@ export function Chat({
       >
         {/* Open Justice Background Information */}
         {showStartupImage && (
-          <div>
-            <div className="flex flex-col gap-[20px] items-center max-w-[708px]">
+          <div className="relative bottom-[100px]">
+            <div className="flex flex-col gap-[20px] items-center max-w-[708px] mx-[auto]">
               <Image
                 src={ChatPageOJ}
                 alt="Open Justice Powered by the Conflict Analytics Lab"
@@ -919,7 +864,7 @@ export function Chat({
         )}
 
         {/* Conversation */}
-        <div className="">
+        <div className="mb-[160px] bg-[transparent]">
           {userInputs &&
             userInputs.map((input, i) => (
               <div key={input}>
@@ -948,6 +893,7 @@ export function Chat({
                   <>
                     <Divider></Divider>
                     <div
+                      className="relative flex-col gap-2"
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
@@ -979,7 +925,7 @@ export function Chat({
                       </div>
 
                       {responses[i].is_satisfactory === "N/A" ? (
-                        <ButtonGroup>
+                        <ButtonGroup className="translate-x-0 translate-y-0 self-end">
                           {/* Thumbs Up */}
                           <IconButton
                             onClick={() => {
@@ -1037,7 +983,7 @@ export function Chat({
                           )}
                         </ButtonGroup>
                       ) : (
-                        <IconButton disabled>
+                        <IconButton disabled className="translate-x-0 translate-y-0 self-end">
                           {responses[i].is_satisfactory ? (
                             <ThumbUp />
                           ) : (
@@ -1056,7 +1002,10 @@ export function Chat({
         </div>
 
         {/* Prompt Input Text Field */}
-        <Paper className="shadow-none absolute bottom-[70px] w-[100%] bg-[transparent]" elevation={1} >
+        <Paper
+          className="shadow-none absolute bottom-[70px] w-[100%] bg-[transparent]"
+          elevation={1}
+        >
           {!endSession && num >= 0 ? (
             <>
               <div
@@ -1064,7 +1013,7 @@ export function Chat({
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  }}
+                }}
               >
                 <ButtonCN
                   variant="ghost"
