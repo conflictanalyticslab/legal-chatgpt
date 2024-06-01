@@ -58,20 +58,6 @@ export default function PDFModal({ documents, deleteDocument, documentContent, s
   const [editing, setEditing] = useState("");
   const textFieldRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState("");
-  // const cardContentRef = useRef<HTMLDivElement>(null);
-  
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         setDocuments((await getDocumentsOwnedByUser()) as any);
-//       } catch (e) {
-//         console.log(e);
-//       }
-//     };
-
-//     fetchData();
-//   }, []);
 
   return (
     <div>
