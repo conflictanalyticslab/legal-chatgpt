@@ -87,6 +87,7 @@ import { Label } from "../ui/label";
 import { Card, CardContent, CardTitle } from "../ui/card";
 import { similaritySearch } from "./actions/semantic-search";
 import { useChatContext } from "./store/ChatContext";
+import { useRag } from "./actions/rag";
 // import { create } from "domain";
 // import { stringify } from "querystring";
 // import { doc } from "firebase/firestore";
@@ -344,7 +345,38 @@ export function Chat({
     event.returnValue = "Are you sure you want to leave? The response will not be stored to your current chat's history if you exit right now.";
   }
 
-  const { setLLMQuery, setRelevantPDFs } = useChatContext();
+  const { setLLMQuery, setRelevantPDFs, enableRag, setEnableRag, ragConversation, setRagConversation } = useChatContext();
+
+  const fetchWithRag = async (query:string) => {
+    setRagConversation([...ragConversation, {question: query, answer: ''}])
+
+    // ---------------------------------------------- RAG Conversation ---------------------------------------------- //
+    const res = await useRag(query);
+    setLoading(false);
+    setRagConversation(((latestConvo:[{question: string, answer: string}]) => {
+      const convoWithAnswer = latestConvo;
+      if(convoWithAnswer.length > 0)
+        convoWithAnswer[convoWithAnswer.length -1].answer = res;
+      return convoWithAnswer;
+    }))
+
+    // ---------------------------------------------- SEMANTIC SEARCH ---------------------------------------------- //
+    setLLMQuery(query);
+    const pdfs = await similaritySearch(query)
+    setRelevantPDFs(pdfs.matches);
+  }
+
+  const handleEnableRag = (value:boolean) => {
+    setEnableRag(value);
+    localStorage.setItem('enableRag', JSON.stringify(value));
+  }
+
+  useEffect(()=> {
+    const enableRagStatus = localStorage.getItem('enableRag');
+    if(enableRagStatus)
+      setEnableRag(JSON.parse(enableRagStatus))
+  }, [])
+
   /**
    * Submits the user's query
    * 
@@ -361,6 +393,14 @@ export function Chat({
     setLoading(true);
     const userQuery = currentInput;
     setCurrentInput("");
+
+    if(enableRag)
+      {
+        fetchWithRag(userQuery);
+        return;
+      }
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     let urls = getUrls(userQuery);
 
@@ -697,7 +737,6 @@ export function Chat({
         throw new Error("PDF token limit exceeded");
       }
 
-    
       // Log the string
       setDocumentContent(pdfContent.content);
 
@@ -754,7 +793,7 @@ export function Chat({
           <Label className="font-bold text-[20px] whitespace-nowrap">
             Enable RAG
           </Label>
-          <Switch checked={false} />
+          <Switch checked={enableRag} onCheckedChange={handleEnableRag} />
         </CardContent>
       </Card>
 
@@ -816,16 +855,16 @@ export function Chat({
 
       {/* Main Content */}
       <div
-        className="mt-[50px] w-[55%] relative"
+        className="px-[20px] mt-[50px] w-[55%] relative "
         style={{
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "start",
           flexDirection: "column",
         }}
       >
         {/* Open Justice Background Information */}
         {showStartupImage && (
-          <div className="relative bottom-[100px]">
+          <div className="relative">
             <div className="flex flex-col gap-[20px] items-center max-w-[708px] mx-[auto]">
               <Image
                 src={ChatPageOJ}
@@ -864,142 +903,174 @@ export function Chat({
         )}
 
         {/* Conversation */}
-        <div className="mb-[160px] bg-[transparent]">
-          {userInputs &&
-            userInputs.map((input, i) => (
-              <div key={input}>
-                {/* Conversation Seperator Line */}
-                {i !== 0 && <Divider></Divider>}
+        {!enableRag && (
+          <div className="mb-[160px] bg-[transparent] overflow-auto ">
+            {userInputs &&
+              userInputs.map((input, i) => (
+                <div key={input}>
+                  {/* Conversation Seperator Line */}
+                  {i !== 0 && <Divider></Divider>}
 
-                {/* User's Input */}
-                <div
-                  style={{
-                    marginBlock: 40,
-                    overflowWrap: "break-word",
-                  }}
-                >
-                  <strong
+                  {/* User's Input */}
+                  <div
                     style={{
-                      marginRight: 10,
+                      marginBlock: 40,
+                      overflowWrap: "break-word",
                     }}
                   >
-                    You:
-                  </strong>
-                  {input}
-                </div>
-
-                {/* Displays LLM Responses if there are any */}
-                {i < responses.length && (
-                  <>
-                    <Divider></Divider>
-                    <div
-                      className="relative flex-col gap-2"
+                    <strong
                       style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginBlock: 32,
-                        overflowWrap: "break-word",
+                        marginRight: 10,
                       }}
                     >
-                      <div>
-                        <strong
-                          style={{
-                            marginRight: 10,
-                          }}
-                        >
-                          OpenJustice:
-                        </strong>
-                        {/* {(responses[i].response).replace(/(\d+\.\s+)/g, "$1\n")} */}
-                        {/* set the latest response to the response stream, and all other responses as string from responses array state */}
-                        {/* <TextFormatter text= {i === responses.length - 1 ? latestResponse : responses[i].response} />   */}
+                      You:
+                    </strong>
+                    {input}
+                  </div>
 
-                        {/* LLM Model Response */}
-                        <ReactMarkdown>
-                          {i === responses.length - 1 &&
-                          responses.length > 1 &&
-                          newConv
-                            ? latestResponse
-                            : responses[i].response}
-                        </ReactMarkdown>
+                  {/* Displays LLM Responses if there are any */}
+                  {i < responses.length && (
+                    <>
+                      <Divider></Divider>
+                      <div
+                        className="relative flex-col gap-2"
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "start",
+                          marginBlock: 32,
+                          overflowWrap: "break-word",
+                        }}
+                      >
+                        <div>
+                          <strong
+                            style={{
+                              marginRight: 10,
+                            }}
+                          >
+                            OpenJustice:
+                          </strong>
+                          {/* {(responses[i].response).replace(/(\d+\.\s+)/g, "$1\n")} */}
+                          {/* set the latest response to the response stream, and all other responses as string from responses array state */}
+                          {/* <TextFormatter text= {i === responses.length - 1 ? latestResponse : responses[i].response} />   */}
+
+                          {/* LLM Model Response */}
+                          <ReactMarkdown>
+                            {i === responses.length - 1 &&
+                            responses.length > 1 &&
+                            newConv
+                              ? latestResponse
+                              : responses[i].response}
+                          </ReactMarkdown>
+                        </div>
+
+                        {responses[i].is_satisfactory === "N/A" ? (
+                          <ButtonGroup className="translate-x-0 translate-y-0 self-end">
+                            {/* Thumbs Up */}
+                            <IconButton
+                              onClick={() => {
+                                setResponses(
+                                  responses.map((res, idx) =>
+                                    idx !== i
+                                      ? res
+                                      : {
+                                          ...res,
+                                          is_satisfactory: true,
+                                        }
+                                  )
+                                );
+                                setFeedbackState({
+                                  index: i,
+                                  dialogOpen: true,
+                                  isSatisfactory: true,
+                                  message: null,
+                                });
+                                setKwRefs(null);
+                              }}
+                            >
+                              <ThumbUp />
+                            </IconButton>
+
+                            {/* Thumbs Down */}
+                            <IconButton
+                              onClick={() => {
+                                setResponses(
+                                  responses.map((res, idx) =>
+                                    idx !== i
+                                      ? res
+                                      : {
+                                          ...res,
+                                          is_satisfactory: false,
+                                        }
+                                  )
+                                );
+                                setFeedbackState({
+                                  index: i,
+                                  dialogOpen: true,
+                                  isSatisfactory: false,
+                                  message: null,
+                                });
+                              }}
+                            >
+                              <ThumbDown />
+                            </IconButton>
+
+                            {/* Stop Text Generation */}
+                            {i === responses.length - 1 && generating && (
+                              <Button onClick={() => setGenerating(false)}>
+                                Stop
+                              </Button>
+                            )}
+                          </ButtonGroup>
+                        ) : (
+                          <IconButton
+                            disabled
+                            className="translate-x-0 translate-y-0 self-end"
+                          >
+                            {responses[i].is_satisfactory ? (
+                              <ThumbUp />
+                            ) : (
+                              <ThumbDown />
+                            )}
+                          </IconButton>
+                        )}
                       </div>
+                    </>
+                  )}
+                </div>
+              ))}
 
-                      {responses[i].is_satisfactory === "N/A" ? (
-                        <ButtonGroup className="translate-x-0 translate-y-0 self-end">
-                          {/* Thumbs Up */}
-                          <IconButton
-                            onClick={() => {
-                              setResponses(
-                                responses.map((res, idx) =>
-                                  idx !== i
-                                    ? res
-                                    : {
-                                        ...res,
-                                        is_satisfactory: true,
-                                      }
-                                )
-                              );
-                              setFeedbackState({
-                                index: i,
-                                dialogOpen: true,
-                                isSatisfactory: true,
-                                message: null,
-                              });
-                              setKwRefs(null);
-                            }}
-                          >
-                            <ThumbUp />
-                          </IconButton>
+            {/* Loading Animation */}
+            {loading && <CircularProgress></CircularProgress>}
+          </div>
+        )}
 
-                          {/* Thumbs Down */}
-                          <IconButton
-                            onClick={() => {
-                              setResponses(
-                                responses.map((res, idx) =>
-                                  idx !== i
-                                    ? res
-                                    : {
-                                        ...res,
-                                        is_satisfactory: false,
-                                      }
-                                )
-                              );
-                              setFeedbackState({
-                                index: i,
-                                dialogOpen: true,
-                                isSatisfactory: false,
-                                message: null,
-                              });
-                            }}
-                          >
-                            <ThumbDown />
-                          </IconButton>
-
-                          {/* Stop Text Generation */}
-                          {i === responses.length - 1 && generating && (
-                            <Button onClick={() => setGenerating(false)}>
-                              Stop
-                            </Button>
-                          )}
-                        </ButtonGroup>
-                      ) : (
-                        <IconButton disabled className="translate-x-0 translate-y-0 self-end">
-                          {responses[i].is_satisfactory ? (
-                            <ThumbUp />
-                          ) : (
-                            <ThumbDown />
-                          )}
-                        </IconButton>
+        {/* Conversation with Rag */}
+        {enableRag && (
+          <>
+            <div className="mb-[160px] bg-[transparent] flex flex-col gap-5 overflow-auto h-full">
+              {ragConversation &&
+                ragConversation.length > 0 &&
+                ragConversation.map((conversation: any, i: number) => (
+                  <>
+                    {i !== 0 && <hr />}
+                    <div className="flex flex-col gap-2">
+                      <Label className="font-bold">You:</Label>
+                      <p>{conversation.question}</p>
+                    </div>
+                    <hr />
+                    <div className="flex flex-col gap-2">
+                      <Label className="font-bold">Open Justice:</Label>
+                      <p>{conversation.answer}</p>
+                      {loading && (
+                        <div className="w-[10px] h-[10px] bg-[black] rounded-[50%] animate-pulse "></div>
                       )}
                     </div>
                   </>
-                )}
-              </div>
-            ))}
-
-          {/* Loading Animation */}
-          {loading && <CircularProgress></CircularProgress>}
-        </div>
+                ))}
+            </div>
+          </>
+        )}
 
         {/* Prompt Input Text Field */}
         <Paper
@@ -1017,7 +1088,7 @@ export function Chat({
               >
                 <ButtonCN
                   variant="ghost"
-                  className="hover:bg-[#E2E8F0] bg-[transparent] h-[56px] absolute left-[-50px]"
+                  className="hover:bg-[#E2E8F0] bg-[transparent] h-[56px] absolute left-[-70px]"
                   type="button"
                   aria-label="Attach PDF"
                   onClick={openFilePicker}
@@ -1036,6 +1107,7 @@ export function Chat({
                       if (e.key === "Enter") {
                         handleSubmit();
                         handleKeyDownImage();
+                        e.preventDefault();
                       }
                     }}
                     multiline={true}
@@ -1137,6 +1209,5 @@ export function Chat({
         </Dialog>
       </div>
     </div>
-    // </ConversationContext.Provider>
   );
 }
