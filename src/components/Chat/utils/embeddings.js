@@ -9,7 +9,7 @@ class Embedder {
     // Initialize the pipeline
     async init() {
         this.pinecone = new OpenAI({
-            apiKey: "sk-proj-sU0M7gZzN5xXktAeCND1T3BlbkFJXuU0xCiQ3kBy0zlReUCK",
+            apiKey: process.env.PINECONE_API_KEY,
         });
     }
     // Embed a single string
@@ -24,8 +24,8 @@ class Embedder {
             id: uuidv4(),
             metadata: {
                 chunk: 1,
-                directory: "",
-                hyperlink: "",
+                fileName: '',
+                url: '',
                 text,
             },
             values: result["data"][0]["embedding"],

@@ -85,15 +85,15 @@ const SearchPage = () => {
 
         {(relevantPDFs && relevantPDFs.length > 0) ? (
           relevantPDFs.map((doc: any) => (
-            <a href={doc.metadata.hyperlink} target="_blank">
+            <a href={doc.metadata.url} target="_blank">
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-normal">{doc.metadata.directory}</CardTitle>
+                  <CardTitle className="font-normal">{doc.metadata.fileName}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
                   <div className="flex flex-col">
                     <Label className="font-bold">URL:</Label>
-                    <output>{doc.metadata.hyperlink}</output>
+                    <output>{doc.metadata.url}</output>
                   </div>
                   <div className="flex flex-col">
                     <Label className="font-bold">Abstract</Label>

@@ -1,7 +1,7 @@
 export type TextMetadata = {
     chunk: number;
-    directory: string;
-    hyperlink: string;
+    fileName: string;
+    url: string;
     text: string;
   };
   

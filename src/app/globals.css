@@ -42,12 +42,7 @@ body {
 #video-page {
   scroll-snap-align: start;
 }
-#main-id {
-  /* scroll-snap-type: y mandatory;
-  overflow-y: auto; 
-  height: 100vh; 
-  scroll-behavior: smooth; */
-}
+
 
 @layer base {
   :root {
