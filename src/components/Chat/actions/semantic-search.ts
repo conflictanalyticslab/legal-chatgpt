@@ -4,7 +4,7 @@ import {embedder} from "@/components/Chat/utils/embeddings"
 import { TextMetadata } from "@/types/chat";
 export async function similaritySearch (query:string, topK:number = 3) {
   const pinecone = new Pinecone({
-    apiKey: "144487ee-b95d-4f40-b510-a5b57974b90d",
+    apiKey: process.env.PINECONE_API_KEY || '',
   });
 
   const indexName = "legal-pdf-documents";
