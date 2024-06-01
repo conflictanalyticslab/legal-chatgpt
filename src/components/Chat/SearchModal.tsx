@@ -19,13 +19,7 @@ const style = {
   overflowY: "auto",
 };
 
-const SearchModal = ({
-  wasSearched,
-  setSearchTerm,
-}: {
-  wasSearched: boolean;
-  setSearchTerm: (searchTerm: string) => void;
-}) => {
+const SearchModal = () => {
   const [modalOpen, setmodalOpen] = React.useState(false);
   const handleOpen = () => {
     setmodalOpen(true);
@@ -58,10 +52,7 @@ const SearchModal = ({
       </Button>
       <Modal open={modalOpen} onClose={handleClose}>
         <Box sx={style}>
-          <SearchPage
-            wasSearched={wasSearched}
-            setSearchTerm={setSearchTerm}
-          ></SearchPage>
+          <SearchPage></SearchPage>
         </Box>
       </Modal>
     </div>
