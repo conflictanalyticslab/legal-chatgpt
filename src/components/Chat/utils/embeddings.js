@@ -9,7 +9,7 @@ class Embedder {
     // Initialize the pipeline
     async init() {
         this.pinecone = new OpenAI({
-            apiKey: process.env.PINECONE_API_KEY,
+            apiKey: process.env.OPENAI_API_KEY,
         });
     }
     // Embed a single string

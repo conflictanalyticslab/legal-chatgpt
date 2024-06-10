@@ -31,7 +31,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormHelperText from '@mui/material/FormHelperText';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { Send, ThumbUp, ThumbDown } from "@mui/icons-material";
+import { Send, ThumbUp, ThumbDown, ContactSupportOutlined } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import { Typography } from "@mui/material";
 import GPT4Tokenizer from 'gpt4-tokenizer';
@@ -177,7 +177,6 @@ export function Chat({
         const conversationData = await getConversation(conversationTitle);
         console.log("conversationData: " + JSON.stringify(conversationData));
         if (conversationData && !newConv) {
-          console.log(conversationData)
           setConversation(conversationData.conversation);
           setIncludedDocuments(conversationData.hasOwnProperty('includedDocuments') ? conversationData.documents : []);
           setConversationUid(conversationData.conversationId);
@@ -347,23 +346,98 @@ export function Chat({
 
   const { setLLMQuery, setRelevantPDFs, enableRag, setEnableRag, ragConversation, setRagConversation } = useChatContext();
 
+  /**
+   * Makes a query with OpenAi's LLM and implements RAG using Pinecone vector store
+   * @param query the query from the user
+   */
   const fetchWithRag = async (query:string) => {
-    setRagConversation([...ragConversation, {question: query, answer: ''}])
+    // Update the chat with the user's query first
+    let newConvo = [...ragConversation, {
+      role: "user",
+      content: query,  
+    }]
+    setRagConversation(newConvo)
 
-    // ---------------------------------------------- RAG Conversation ---------------------------------------------- //
-    const res = await useRag(query);
-    setLoading(false);
-    setRagConversation(((latestConvo:[{question: string, answer: string}]) => {
-      const convoWithAnswer = latestConvo;
-      if(convoWithAnswer.length > 0)
-        convoWithAnswer[convoWithAnswer.length -1].answer = res;
-      return convoWithAnswer;
-    }))
+    // ---------------------------------------------- Generate RAG RESPONSE ---------------------------------------------- //
+    // Update the conversation with RAG
+    try {
+      const res = await useRag(query);
+
+      // Updated conversation with RAG response
+      newConvo = [
+        ...newConvo,
+        {
+          role: "agent",
+          content: res,
+        },
+      ];
+
+      // Saving a new a new conversation
+      if (ragConversation.length < 2) {
+        try {
+          //Generates relevant conversation title
+          const titleResPromise = await postConversationTitle(
+            newConvo,
+            includedDocuments
+          );
+
+          if (!titleResPromise.ok) {
+            console.error(
+              "Failed to generate conversation title and save conversation."
+            );
+          } else {
+            const { title } = await titleResPromise.json();
+            setConversationTitle(title);
+
+            (await postConversationSave(newConvo, includedDocuments, title))
+              .json()
+              .then((res) => {
+                setConversationUid(res.uid);
+              })
+              .catch((err) => {
+                console.error("Failed to save conversation in postConversationSave: ", err);
+              });
+          }
+        } catch (e) {
+          console.error("In postConversationSave: ", e);
+        }
+      } else if (conversationUid) {
+        // Updating existing conversation
+        try {
+          // Save existing conversation to db
+          await putConversationSave(
+            conversationUid,
+            newConvo,
+            includedDocuments,
+            conversationTitle
+          );
+        } catch (e) {
+          console.error("In putConversationSave: ", e);
+        }
+      }
+
+      setRagConversation(newConvo);
+    } catch (e) {
+      console.error("Error in useRag: ", e);
+      setRagConversation([
+        ...newConvo,
+        {
+          role: "agent",
+          content: "Error: failed to generate response",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
 
     // ---------------------------------------------- SEMANTIC SEARCH ---------------------------------------------- //
     setLLMQuery(query);
-    const pdfs = await similaritySearch(query)
-    setRelevantPDFs(pdfs.matches);
+    try {
+      const pdfs = await similaritySearch(query)
+      setRelevantPDFs(pdfs.matches);
+    } catch(e) {
+      console.error("In similaritySearch", e);
+    }
   }
 
   const handleEnableRag = (value:boolean) => {
@@ -441,13 +515,16 @@ export function Chat({
     window.addEventListener("beforeunload", handleBeforeUnload);
     try {
       // Retrieves uploaded document content from user
-      const docContentQuery = documentContent.length > 0? "\n Here is a document for context: " + documentContent + " " : ""; 
-      
+      const docContentQuery =
+        documentContent.length > 0
+          ? "\n Here is a document for context: " + documentContent + " "
+          : "";
+
       // Formats the conversation with the attached pdf document text
       const fullConversation = conversation.concat([
         {
           role: "user",
-          content: urlContentUserInput + docContentQuery,  
+          content: urlContentUserInput + docContentQuery,
         },
       ]);
 
@@ -461,12 +538,16 @@ export function Chat({
         total_conv += conv.content + " ";
       }
 
-      const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
+      const tokenizer = new GPT4Tokenizer({ type: "gpt3" });
       const estimatedTokenCount = tokenizer.estimateTokenCount(total_conv);
 
       // Current limit for tokens we can input
       if (estimatedTokenCount >= 16384) {
-        createAlert('The input exceeds the token limit, maximum of 16384 tokens in each input, current input contains ' + estimatedTokenCount + ' tokens');
+        createAlert(
+          "The input exceeds the token limit, maximum of 16384 tokens in each input, current input contains " +
+            estimatedTokenCount +
+            " tokens"
+        );
         setLoading(false);
         return;
       }
@@ -476,12 +557,20 @@ export function Chat({
 
       if (includedDocuments.length === 0) {
         // uses conversation prompt to generate search terms
-        search_terms_res = await postSearchTerms(fullConversation, includedDocuments, false);
+        search_terms_res = await postSearchTerms(
+          fullConversation,
+          includedDocuments,
+          false
+        );
       } else {
         // uses conversationMult prompt to generate search terms
-        search_terms_res = await postSearchTerms(fullConversation, includedDocuments, true);
+        search_terms_res = await postSearchTerms(
+          fullConversation,
+          includedDocuments,
+          true
+        );
       }
-      
+
       if (!search_terms_res.ok) {
         const errorData = await search_terms_res.json();
         setAlert(errorData.error);
@@ -491,76 +580,86 @@ export function Chat({
 
       // ---------------------------------------------- SEMANTIC SEARCH ---------------------------------------------- //
       setLLMQuery(userQuery);
-      const pdfs = await similaritySearch(userQuery)
+      const pdfs = await similaritySearch(userQuery);
       setRelevantPDFs(pdfs.matches);
 
       // ---------------------------------------------- LLM OUTPUT ---------------------------------------------- //
       const { toSearch, searchPrompt, documentPrompt } = await search_terms_res.json();
-      response = await postConversation(searchPrompt, documentPrompt, fullConversation); //Gets the model's output
+
+      response = await postConversation(
+        searchPrompt,
+        documentPrompt,
+        fullConversation
+      ); //Gets the model's output
 
       let buffer = "";
       setGenerating(true); // set generating to true to start the stream
-      setNewConv(true);
-      
+
       // The output stream coming from the model
-      if (response.status === 200 && response.body != null && response.body.constructor === ReadableStream) {
-            console.log("stream");
-            const reader = response.body.getReader();
-            const encode = new TextDecoder("utf-8");
-                
-                // read the response content by iteration
-                while (generatingRef.current) {
-                  
-                  const currentResponse = await reader.read();
-                  
-                  if (currentResponse.done || !generatingRef.current) {
-                    break;
-                  }
-                  // console.log("generating: " + generating)
-  
-                  // decode content
-                  const valueOfCurrentResponse = "" + encode.decode(currentResponse.value);
-                  const objectsInCurrentResponse = valueOfCurrentResponse.split("\n").filter(str => str !== "");;
-                              
-                  for (let i = 0; i < objectsInCurrentResponse.length; i++) {
-                    
-                    try {
-                      let object = JSON.parse( objectsInCurrentResponse[i].substring(5) );											
-                                  
-                      if (object.hasOwnProperty('choices')) {
-                        
-                        let content = object.choices.at(-1).delta.content;
-                        
-                        if (content == undefined || content == null) {
-                          continue;
-                        }
-                        
-                        buffer += content;
-                        // console.log(buffer);
-                        setLatestResponse(buffer);
-                      }
-                    }
-                    catch (e) {
-                      continue;
-                    }
-                  }
+      if (
+        response.status === 200 &&
+        response.body != null &&
+        response.body.constructor === ReadableStream
+      ) {
+        const reader = response.body.getReader();
+        const encode = new TextDecoder("utf-8");
+
+        // read the response content by iteration
+        while (generatingRef.current) {
+          const currentResponse = await reader.read();
+
+          if (currentResponse.done || !generatingRef.current) {
+            break;
+          }
+
+          // decode content
+          const valueOfCurrentResponse =
+            "" + encode.decode(currentResponse.value);
+          const objectsInCurrentResponse = valueOfCurrentResponse
+            .split("\n")
+            .filter((str) => str !== "");
+
+          for (let i = 0; i < objectsInCurrentResponse.length; i++) {
+            try {
+              let object = JSON.parse(objectsInCurrentResponse[i].substring(5));
+
+              if (object.hasOwnProperty("choices")) {
+                let content = object.choices.at(-1).delta.content;
+
+                if (content == undefined || content == null) {
+                  continue;
                 }
-                try {
-                  setGenerating(true);
-                  await reader.cancel();
-                } catch (e) {}
+
+                buffer += content;
+                setLatestResponse(buffer);
               }
+            } catch (e) {
+              continue;
+            }
+          }
+        }
+        try {
+          setGenerating(true);
+          await reader.cancel();
+        } catch (e) {}
+      } 
+      // If the response is not a readable stream just jsonify it
       else if (response.status === 200 && response.body != null) {
-        console.log("non-stream")
         setLatestResponse(await response.json());
       }
 
-      const tempConv = fullConversation.concat([{ role: "assistant", content: buffer }]);
+      const tempConv = fullConversation.concat([
+        { role: "assistant", content: buffer },
+      ]);
 
-      // save conversation to db
+      // Checks to see if this is a new conversation to determine if we need to add a new title or update an existing one.
       if (fullConversation.length < 2) {
-        const titleResPromise = await postConversationTitle(fullConversation, includedDocuments);
-      
+        //Generates relevant conversation title
+        const titleResPromise = await postConversationTitle(
+          fullConversation,
+          includedDocuments
+        );
+
         if (!titleResPromise.ok) {
           const errorData = await titleResPromise.json();
           setAlert(errorData.error);
@@ -570,20 +669,28 @@ export function Chat({
 
         const { title } = await titleResPromise.json();
         setConversationTitle(title);
-
         window.removeEventListener("beforeunload", handleBeforeUnload);
+
         // save new conversation to db
-        (await postConversationSave(tempConv, includedDocuments, title)).json().then((res) => {setConversationUid(res.uid)}).catch((err) => {console.log(err)});
-      }
-      else if (conversationUid) {
-        await putConversationSave(conversationUid, tempConv, includedDocuments, conversationTitle);
+        (await postConversationSave(tempConv, includedDocuments, title))
+          .json()
+          .then((res) => {
+            setConversationUid(res.uid);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      } else if (conversationUid) {
+        // Save existing conversation to db
+        await putConversationSave(
+          conversationUid,
+          tempConv,
+          includedDocuments,
+          conversationTitle
+        );
       }
 
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-
-      setConversation(
-        tempConv
-      );
+      setConversation(tempConv);
 
       setSearchTerm(toSearch);
     } catch (error) {
@@ -1055,19 +1162,12 @@ export function Chat({
                   <>
                     {i !== 0 && <hr />}
                     <div className="flex flex-col gap-2">
-                      <Label className="font-bold">You:</Label>
-                      <p>{conversation.question}</p>
-                    </div>
-                    <hr />
-                    <div className="flex flex-col gap-2">
-                      <Label className="font-bold">Open Justice:</Label>
-                      <p>{conversation.answer}</p>
-                      {loading && (
-                        <div className="w-[10px] h-[10px] bg-[black] rounded-[50%] animate-pulse "></div>
-                      )}
+                      <Label className="font-bold">{conversation?.role?.toUpperCase()}</Label>
+                      <p>{conversation.content}</p>
                     </div>
                   </>
                 ))}
+              {loading && (<div className="w-[10px] h-[10px] bg-[black] rounded-[50%] animate-pulse "></div>)}
             </div>
           </>
         )}
