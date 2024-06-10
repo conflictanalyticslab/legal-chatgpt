@@ -11,7 +11,7 @@ export async function useRag(query:string){
     
     // ********************************* CREATING A VECTOR STORE ********************************* //
     const pinecone = new Pinecone({
-        apiKey: process.env.PINECONE_API_KEY || '',
+        apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY || '',
       });
     const pineconeIndex = pinecone.Index('legal-pdf-documents');
     
