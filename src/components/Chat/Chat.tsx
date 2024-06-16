@@ -29,7 +29,7 @@ import { Button as ButtonCN } from "../ui/button";
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormHelperText from '@mui/material/FormHelperText';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { SelectChangeEvent } from '@mui/material/Select';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { Send, ThumbUp, ThumbDown, ContactSupportOutlined } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
@@ -42,12 +42,9 @@ import { auth } from "@/firebase";
 
 // import images
 import ChatPageOJ from "@/images/ChatPageOJ.png";
-import Whatis from "@/images/Whatis.png";
-import Howto from "@/images/Howto.png";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { postConversation } from "@/util/requests/postConversation";
 import { postSearchTerms} from "@/util/requests/postSearchTerms";
-// uncomment the following when working on pdf upload
 import { uploadPdfDocument } from "@/util/requests/uploadPdfDocument";
 import { useFilePicker } from "use-file-picker";
 import {
@@ -78,8 +75,6 @@ type FeedbackReasonsI = {
   "Lacks Relevant Facts": boolean;
   "Lacks Citation": boolean;
 };
-import SearchModal from "@/components/Chat/SearchModal";
-import PDFModal from "@/components/Chat/PDFModal";
 import {deleteDocument} from "@/util/api/deleteDocument";
 import { set } from "firebase/database";
 import { Switch } from "../ui/switch";
@@ -88,10 +83,8 @@ import { Card, CardContent, CardTitle } from "../ui/card";
 import { similaritySearch } from "./actions/semantic-search";
 import { useChatContext } from "./store/ChatContext";
 import { useRag } from "./actions/rag";
-// import { create } from "domain";
-// import { stringify } from "querystring";
-// import { doc } from "firebase/firestore";
-// import { set } from "firebase/database";
+import { Input } from "../ui/input";
+import ChatOptions from "./ChatOptions"
 
 export function Chat({
   wasSearched,
@@ -128,12 +121,10 @@ export function Chat({
     refs: { name: String; kwLen: number; excerpts: string[] }[];
   } | null>(null);
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [endSession, setEndSession] = useState(false);
   const [num, setNum] = useState(-1);
   const [conversationTitles, setConversationTitles] = useState<{title: string, uid: string}[]>([]);
   const [conversationTitle, setConversationTitle] = useState<string>("");
-  // const [totalQuota, setTotalQuota] = useState(0);
   const [includedDocuments, setIncludedDocuments] = useState<string[]>([]);
   const [conversationUid, setConversationUid] = useState<string | null>("");
   const [newConv, setNewConv] = useState(true);
@@ -175,7 +166,6 @@ export function Chat({
       try {
         setConversationTitles((await getConversationTitles()) as any)
         const conversationData = await getConversation(conversationTitle);
-        console.log("conversationData: " + JSON.stringify(conversationData));
         if (conversationData && !newConv) {
           setConversation(conversationData.conversation);
           setIncludedDocuments(conversationData.hasOwnProperty('includedDocuments') ? conversationData.documents : []);
@@ -205,14 +195,11 @@ export function Chat({
         }
       } catch (e){
           console.log(e);
-        // router.push("/login");
       }
     };
     fetchData();
     
   }, [conversationTitle]);
-
-
 
   useEffect(() => {
     // console.log("latestResponse changed, newConv: " + newConv +  ", latestResponse: " + latestResponse + ", responses: " + responses);
@@ -250,10 +237,6 @@ export function Chat({
     useEffect(() => {
       generatingRef.current = generating;
     }, [generating]);
-
-  // useEffect(() => {
-  //   console.log("conversationUid: " + conversationUid);
-  // }, [conversationUid]);
 
   const [alert, setAlert] = useState("");
 
@@ -469,10 +452,10 @@ export function Chat({
     setCurrentInput("");
 
     if(enableRag)
-      {
-        fetchWithRag(userQuery);
-        return;
-      }
+    {
+      fetchWithRag(userQuery);
+      return;
+    }
   
     window.addEventListener('beforeunload', handleBeforeUnload);
 
@@ -893,82 +876,25 @@ export function Chat({
   }
 
   return (
-    <div className="flex justify-between relative w-full">
-      {/* Top Left Options */}
-      <Card className="max-w-[270px] border-0 shadow-none bg-[transparent] pt-[20px] pl-[20px]">
-        <CardContent className="flex flex-col items-center justify-center gap-3 p-3">
-          <Label className="font-bold text-[20px] whitespace-nowrap">
-            Enable RAG
-          </Label>
-          <Switch checked={enableRag} onCheckedChange={handleEnableRag} />
-        </CardContent>
-      </Card>
-
-      {/* Top Right Options */}
-      <div
-        className="order-3 flex justify-between pt-[20px] pr-[20px]"
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        <div>
-          <ul
-            className="flex flex-col gap-6"
-            style={{ textDecoration: "none", textIndent: 0 }}
-          >
-            <SearchModal />
-            <PDFModal
-              documents={documents}
-              deleteDocument={deleteDocumentChat}
-              documentContent={documentContent}
-              setDocumentContent={setDocumentContent}
-              includedDocuments={includedDocuments}
-              setIncludedDocuments={setIncludedDocuments}
-            />
-            <FormControl sx={{ minWidth: 270, maxWidth: 270 }}>
-              <InputLabel id="demo-simple-select-autowidth-label">
-                Chat History [Experimental]
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-autowidth-label"
-                id="demo-simple-select-autowidth"
-                value={conversationTitle}
-                onChange={(e: SelectChangeEvent) => {
-                  if (
-                    e.target.value === conversationTitle ||
-                    e.target.value === ""
-                  ) {
-                    return;
-                  }
-                  setNewConv(false);
-                  setShowStartupImage(false);
-                  setConversationTitle(e.target.value as string);
-                }}
-                autoWidth
-                label="chatHistory"
-              >
-                <MenuItem value={conversationTitle}>
-                  <em>{conversationTitle}</em>
-                </MenuItem>
-                {conversationTitles.map((title) => (
-                  <MenuItem value={title.title}>{title.title}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </ul>
-        </div>
-      </div>
+    <div className="flex justify-center relative w-full overflow-auto max-h-[100vh] min-h-[100vh] items-start">
+      <ChatOptions
+        documents={documents}
+        deleteDocumentChat={deleteDocumentChat}
+        documentContent={documentContent}
+        setDocumentContent={setDocumentContent}
+        includedDocuments={includedDocuments}
+        setIncludedDocuments={setIncludedDocuments}
+        enableRag={enableRag}
+        handleEnableRag={handleEnableRag}
+        conversationTitles={conversationTitles}
+        setShowStartupImage={setShowStartupImage}
+        setNewConv={setNewConv}
+        setConversationTitle={setConversationTitle}
+        conversationTitle={conversationTitle}
+      />
 
       {/* Main Content */}
-      <div
-        className="px-[20px] mt-[50px] w-[55%] relative "
-        style={{
-          display: "flex",
-          justifyContent: "start",
-          flexDirection: "column",
-        }}
-      >
+      <div className="w-[55%] max-w-[1400px] h-[100%] flex flex-col justify-between py-[60px] relative">
         {/* Open Justice Background Information */}
         {showStartupImage && (
           <div className="relative">
@@ -1009,232 +935,211 @@ export function Chat({
           </div>
         )}
 
-        {/* Conversation */}
-        {!enableRag && (
-          <div className="mb-[160px] bg-[transparent] overflow-auto ">
-            {userInputs &&
-              userInputs.map((input, i) => (
-                <div key={input}>
-                  {/* Conversation Seperator Line */}
-                  {i !== 0 && <Divider></Divider>}
+        {/* Normal Conversation */}
+        {!enableRag && userInputs && (
+          <div className="bg-[transparent] w-full pb-[100px]">
+            {userInputs.map((input, i) => (
+              <div key={input}>
+                {/* Conversation Seperator Line */}
+                {i !== 0 && <Divider></Divider>}
 
-                  {/* User's Input */}
-                  <div
+                {/* User's Input */}
+                <div
+                  style={{
+                    marginBlock: 40,
+                    overflowWrap: "break-word",
+                  }}
+                >
+                  <strong
                     style={{
-                      marginBlock: 40,
-                      overflowWrap: "break-word",
+                      marginRight: 10,
                     }}
                   >
-                    <strong
+                    You:
+                  </strong>
+                  {input}
+                </div>
+
+                {/* Displays LLM Responses if there are any */}
+                {i < responses.length && (
+                  <>
+                    <Divider></Divider>
+                    <div
+                      className="relative flex-col gap-2"
                       style={{
-                        marginRight: 10,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "start",
+                        marginBlock: 32,
+                        overflowWrap: "break-word",
                       }}
                     >
-                      You:
-                    </strong>
-                    {input}
-                  </div>
+                      <div>
+                        <strong
+                          style={{
+                            marginRight: 10,
+                          }}
+                        >
+                          OpenJustice:
+                        </strong>
 
-                  {/* Displays LLM Responses if there are any */}
-                  {i < responses.length && (
-                    <>
-                      <Divider></Divider>
-                      <div
-                        className="relative flex-col gap-2"
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "start",
-                          marginBlock: 32,
-                          overflowWrap: "break-word",
-                        }}
-                      >
-                        <div>
-                          <strong
-                            style={{
-                              marginRight: 10,
+                        {/* LLM Model Response */}
+                        <ReactMarkdown>
+                          {i === responses.length - 1 &&
+                          responses.length > 1 &&
+                          newConv
+                            ? latestResponse
+                            : responses[i].response}
+                        </ReactMarkdown>
+                      </div>
+
+                      {responses[i].is_satisfactory === "N/A" ? (
+                        <ButtonGroup className="translate-x-0 translate-y-0 self-end">
+                          {/* Thumbs Up */}
+                          <IconButton
+                            onClick={() => {
+                              setResponses(
+                                responses.map((res, idx) =>
+                                  idx !== i
+                                    ? res
+                                    : {
+                                        ...res,
+                                        is_satisfactory: true,
+                                      }
+                                )
+                              );
+                              setFeedbackState({
+                                index: i,
+                                dialogOpen: true,
+                                isSatisfactory: true,
+                                message: null,
+                              });
+                              setKwRefs(null);
                             }}
                           >
-                            OpenJustice:
-                          </strong>
-                          {/* {(responses[i].response).replace(/(\d+\.\s+)/g, "$1\n")} */}
-                          {/* set the latest response to the response stream, and all other responses as string from responses array state */}
-                          {/* <TextFormatter text= {i === responses.length - 1 ? latestResponse : responses[i].response} />   */}
-
-                          {/* LLM Model Response */}
-                          <ReactMarkdown>
-                            {i === responses.length - 1 &&
-                            responses.length > 1 &&
-                            newConv
-                              ? latestResponse
-                              : responses[i].response}
-                          </ReactMarkdown>
-                        </div>
-
-                        {responses[i].is_satisfactory === "N/A" ? (
-                          <ButtonGroup className="translate-x-0 translate-y-0 self-end">
-                            {/* Thumbs Up */}
-                            <IconButton
-                              onClick={() => {
-                                setResponses(
-                                  responses.map((res, idx) =>
-                                    idx !== i
-                                      ? res
-                                      : {
-                                          ...res,
-                                          is_satisfactory: true,
-                                        }
-                                  )
-                                );
-                                setFeedbackState({
-                                  index: i,
-                                  dialogOpen: true,
-                                  isSatisfactory: true,
-                                  message: null,
-                                });
-                                setKwRefs(null);
-                              }}
-                            >
-                              <ThumbUp />
-                            </IconButton>
-
-                            {/* Thumbs Down */}
-                            <IconButton
-                              onClick={() => {
-                                setResponses(
-                                  responses.map((res, idx) =>
-                                    idx !== i
-                                      ? res
-                                      : {
-                                          ...res,
-                                          is_satisfactory: false,
-                                        }
-                                  )
-                                );
-                                setFeedbackState({
-                                  index: i,
-                                  dialogOpen: true,
-                                  isSatisfactory: false,
-                                  message: null,
-                                });
-                              }}
-                            >
-                              <ThumbDown />
-                            </IconButton>
-
-                            {/* Stop Text Generation */}
-                            {i === responses.length - 1 && generating && (
-                              <Button onClick={() => setGenerating(false)}>
-                                Stop
-                              </Button>
-                            )}
-                          </ButtonGroup>
-                        ) : (
-                          <IconButton
-                            disabled
-                            className="translate-x-0 translate-y-0 self-end"
-                          >
-                            {responses[i].is_satisfactory ? (
-                              <ThumbUp />
-                            ) : (
-                              <ThumbDown />
-                            )}
+                            <ThumbUp />
                           </IconButton>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
+
+                          {/* Thumbs Down */}
+                          <IconButton
+                            onClick={() => {
+                              setResponses(
+                                responses.map((res, idx) =>
+                                  idx !== i
+                                    ? res
+                                    : {
+                                        ...res,
+                                        is_satisfactory: false,
+                                      }
+                                )
+                              );
+                              setFeedbackState({
+                                index: i,
+                                dialogOpen: true,
+                                isSatisfactory: false,
+                                message: null,
+                              });
+                            }}
+                          >
+                            <ThumbDown />
+                          </IconButton>
+
+                          {/* Stop Text Generation */}
+                          {i === responses.length - 1 && generating && (
+                            <Button onClick={() => setGenerating(false)}>
+                              Stop
+                            </Button>
+                          )}
+                        </ButtonGroup>
+                      ) : (
+                        <IconButton
+                          disabled
+                          className="translate-x-0 translate-y-0 self-end"
+                        >
+                          {responses[i].is_satisfactory ? (
+                            <ThumbUp />
+                          ) : (
+                            <ThumbDown />
+                          )}
+                        </IconButton>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
 
             {/* Loading Animation */}
             {loading && <CircularProgress></CircularProgress>}
           </div>
         )}
 
-        {/* Conversation with Rag */}
+        {/* RAG Conversation */}
         {enableRag && (
           <>
-            <div className="mb-[160px] bg-[transparent] flex flex-col gap-5 overflow-auto h-full">
+            <div className="mb-[160px] bg-[transparent] flex flex-col gap-5 h-full w-full">
               {ragConversation &&
                 ragConversation.length > 0 &&
                 ragConversation.map((conversation: any, i: number) => (
                   <>
                     {i !== 0 && <hr />}
                     <div className="flex flex-col gap-2">
-                      <Label className="font-bold">{conversation?.role?.toUpperCase()}</Label>
+                      <Label className="font-bold">
+                        {conversation?.role === "user"? "You" : "OpenJustice"}
+                      </Label>
                       <p>{conversation.content}</p>
                     </div>
                   </>
                 ))}
-              {loading && (<div className="w-[10px] h-[10px] bg-[black] rounded-[50%] animate-pulse "></div>)}
+              {loading && (
+                <div className="w-[10px] h-[10px] bg-[black] rounded-[50%] animate-pulse "></div>
+              )}
             </div>
           </>
         )}
 
         {/* Prompt Input Text Field */}
-        <Paper
-          className="shadow-none absolute bottom-[70px] w-[100%] bg-[transparent]"
-          elevation={1}
-        >
-          {!endSession && num >= 0 ? (
-            <>
-              <div
-                className="flex gap-[10px] items-stretch mx-[auto] relative"
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <ButtonCN
-                  variant="ghost"
-                  className="hover:bg-[#E2E8F0] bg-[transparent] h-[56px] absolute left-[-70px]"
-                  type="button"
-                  aria-label="Attach PDF"
-                  onClick={openFilePicker}
-                >
-                  <AttachFileIcon />
-                </ButtonCN>
+        <div className="shadow-none bg-[#f5f5f7] fixed w-full h-[100px] bottom-0">
+          <div className="relative w-[52.5%]">
+          <ButtonCN
+              variant="ghost"
+              className="hover:bg-[#E2E8F0] bg-[transparent] h-[56px] absolute left-[-70px]"
+              type="button"
+              aria-label="Attach PDF"
+              onClick={openFilePicker}
+            >
+              <AttachFileIcon />
+            </ButtonCN>
 
-                <div className="flex flex-col w-full ">
-                  <OutlinedInput
-                    className="w-full flex bg-[#f5f5f7]"
-                    required
-                    placeholder="Prompt"
-                    value={currentInput}
-                    onChange={(e) => setCurrentInput(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter") {
-                        handleSubmit();
-                        handleKeyDownImage();
-                        e.preventDefault();
-                      }
-                    }}
-                    multiline={true}
-                    maxRows={4}
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <LoadingButton
-                          onClick={textBoxSubmission}
-                          loading={loading}
-                        >
-                          <Send></Send>
-                        </LoadingButton>
-                      </InputAdornment>
-                    }
-                  ></OutlinedInput>
-                  <label className="mt-2 text-[grey] text-[1rem] absolute bottom-[-25px] italic">
-                    {num === 0
-                      ? "No more prompts allowed. Please enter your final feedback."
-                      : `Prompts left: ${num}`}
-                  </label>
-                </div>
-              </div>
-            </>
-          ) : (
-            <></>
-          )}
-        </Paper>
+          <Input
+            className="w-full flex bg-[#f5f5f7] min-h-[56px] pr-[95px]"
+            required
+            placeholder="Prompt"
+            value={currentInput}
+            onChange={(e) => setCurrentInput(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+                handleKeyDownImage();
+                e.preventDefault();
+              }
+            }}
+          />
+          <ButtonCN
+              className="absolute right-0 top-[50%] translate-y-[-50%]"
+              variant={"ghost"}
+            >
+              <LoadingButton onClick={textBoxSubmission} loading={loading}>
+                <Send></Send>
+              </LoadingButton>
+            </ButtonCN>
+            <label className="text-[grey] text-[1rem] absolute bottom-[-30px] italic">
+              {num === 0
+                ? "No more prompts allowed. Please enter your final feedback."
+                : `Prompts left: ${num}`}
+            </label>
+          </div>
+        </div>
 
         {/* Alert Modal */}
         <Dialog open={!!alert} onClose={handleAlertClose}>
