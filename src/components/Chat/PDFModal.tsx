@@ -1,31 +1,19 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Modal from '@mui/material/Modal';
 import Image from "next/image";
 import DocsImg from "../../images/doc_img.jpeg";
 import {
-    Box,
-    Button,
-    Card,
-    CardActions,
-    CardContent,
-    Grid,
-    IconButton,
-    TextField,
-    Tooltip,
-    Typography
-} from "@mui/material";
-import {
     UserDocument,
     getDocumentsOwnedByUser,
 } from "@/util/requests/getDocumentsOwnedByUser";
-// import { useIncludedDocuments } from "@/hooks/useIncludedDocuments"; // passing props instead
 import { editDocument } from "@/util/api/editDocument";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import CheckBoxOutlineIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-// import { stringify } from "querystring";
-// import { set } from "firebase/database";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { Textarea } from "../ui/textarea";
+import { Checkbox } from "../ui/checkbox";
 
 type Props = {
     documents: UserDocument[];
@@ -56,231 +44,174 @@ export default function PDFModal({ documents, deleteDocument, documentContent, s
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const [editing, setEditing] = useState("");
-  const textFieldRef = useRef<HTMLInputElement>(null);
+  const textFieldRef = useRef<any>(null);
   const [inputValue, setInputValue] = useState("");
 
   return (
-    <div>
-      <Button
-        sx={{
-          display: "flex",
-          borderRadius: "10px",
-          border: "2px solid rgb(218, 226, 237)",
-          cursor: "pointer",
-          width: "17rem",
-          height: "2.5rem",
-        }}
-        onClick={handleOpen}
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          variant={"ghost"}
+          className="flex w-full justify-start gap-5"
+          onClick={handleOpen}
+        >
+          <Image
+            src={"/assets/icons/file-text.svg"}
+            width={16}
+            height={22}
+            alt={"pdf file"}
+          />
+          <Label>Documents</Label>
+        </Button>
+      </DialogTrigger>
+      <DialogContent
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[60vw] flex flex-col gap-5 overflow-auto box-border"
       >
-        <Image
-          src={DocsImg}
-          style={{ width: "16px", height: "22px", marginRight: "auto" }}
-          alt={""}
-        />
-        <Typography style={{ marginRight: "auto" }}>
-          PDFs [Experimental]
-        </Typography>
-      </Button>
-      <Modal open={open} onClose={handleClose}>
-        <Box sx={style}>
-          <Typography
-            style={{ justifyContent: "center", marginBottom: "3rem" }}
-            variant="h6"
-            component="h2"
-          >
-            Uploaded PDFs
-          </Typography>
-          {editing == "" ? (
-            <Grid container spacing={4} columns={4}>
+        <div className="flex flex-col gap-4">
+          <Label className="font-bold">Uploaded PDFs</Label>
+          <>
+            <div className="grid grid-cols-1 gap-2">
               {documents.map((document) => (
-                <Grid item key={document.uid} style={{ width: "25%" }}>
-                  <Card>
-                    <CardContent>{document.name}</CardContent>
-                    <CardContent>
-                      {document.text.length > 180
-                        ? document.text.substring(0, 177) + "..."
-                        : document.text}
-                    </CardContent>
-                    <CardActions>
-                      <Tooltip title="Include in conversation">
-                        <IconButton
-                          key="include-document"
-                          onClick={() => {
-                            if (includedDocuments.includes(document.uid)) {
-                              setDocumentContent(
-                                documentContent.replace(document.text, "")
-                              );
-                              setIncludedDocuments(
-                                includedDocuments.filter(
-                                  (docUid: string) => docUid != document.uid
-                                )
-                              );
-                            } else {
-                              setDocumentContent(
-                                documentContent + " " + document.text
-                              );
-                              setIncludedDocuments([
-                                ...includedDocuments,
-                                document.uid,
-                              ]);
-                            }
-                          }}
-                          style={{ color: "#006400" }}
-                        >
-                          {includedDocuments.includes(document.uid) ? (
-                            <CheckBoxIcon />
-                          ) : (
-                            <CheckBoxOutlineIcon />
-                          )}
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Edit document text">
-                        <IconButton
-                          key="edit-document"
-                          onClick={() => {
-                            setEditing(document.uid);
-                            setInputValue(document.text);
-                            if (textFieldRef.current) {
-                              textFieldRef.current.focus();
-                            }
-                          }}
-                          style={{ color: "#000" }}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete document">
-                        <IconButton
-                          key="delete-document"
-                          onClick={() => {
-                            console.log("Delete" + document.name);
-                            deleteDocument(document.uid);
-                          }}
-                          style={{ marginRight: "8px", color: "#f33" }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </CardActions>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          ) : (
-            <Grid container spacing={4}>
-              <Grid item xs={3}>
-                <Grid container spacing={4} alignItems="flex-start">
-                  {documents.map((document) => (
-                    <Grid item key={document.uid} xs={12}>
-                      <Card>
-                        <CardContent>{document.name}</CardContent>
-                        <CardContent>
-                          {document.text.length > 180
-                            ? document.text.substring(0, 177) + "..."
-                            : document.text}
-                        </CardContent>
-                        <CardActions>
-                          <Tooltip title="Include in conversation">
-                            <IconButton
-                              key="include-document"
+                <>
+                  <Card key={document.uid} className="">
+                    <CardHeader className="flex justify-between flex-row items-center">
+                      <Label className="font-bold">{document.name}</Label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="!m-0" asChild>
+                            <Checkbox
+                              checked={includedDocuments.includes(document.uid)}
                               onClick={() => {
                                 if (includedDocuments.includes(document.uid)) {
-                                  // setCurrentInput(currentInput.replace(document.text, ""))
+                                  setDocumentContent(
+                                    documentContent.replace(document.text, "")
+                                  );
                                   setIncludedDocuments(
                                     includedDocuments.filter(
                                       (docUid: string) => docUid != document.uid
                                     )
                                   );
                                 } else {
-                                  // setCurrentInput(currentInput + " " + document.text);
+                                  setDocumentContent(
+                                    documentContent + " " + document.text
+                                  );
                                   setIncludedDocuments([
                                     ...includedDocuments,
                                     document.uid,
                                   ]);
                                 }
                               }}
-                              style={{ color: "#006400" }}
-                            >
-                              {includedDocuments.includes(document.uid) ? (
-                                <CheckBoxIcon />
-                              ) : (
-                                <CheckBoxOutlineIcon />
-                              )}
-                            </IconButton>
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent align="end" sideOffset={10}>
+                            Include in conversation
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-3">
+                      <p className="line-clamp-6">{document.text}</p>
+                      <div className="flex gap-3 justify-end">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Button
+                                variant={"outline"}
+                                key="edit-document"
+                                onClick={() => {
+                                  setEditing(document.uid);
+                                  setInputValue(document.text);
+                                  if (textFieldRef.current) {
+                                    textFieldRef.current.focus();
+                                  }
+                                }}
+                              >
+                                <Image
+                                  src={"/assets/icons/pencil.svg"}
+                                  alt="delete"
+                                  height={20}
+                                  width={20}
+                                />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent align="end">
+                              Edit document text
+                            </TooltipContent>
                           </Tooltip>
-                          <Tooltip title="Edit document text">
-                            <IconButton
-                              key="edit-document"
-                              onClick={() => {
-                                setEditing(document.uid);
-                                setInputValue(document.text);
-                                if (textFieldRef.current) {
-                                  textFieldRef.current.focus();
-                                }
-                              }}
-                              style={{ color: "#000" }}
-                            >
-                              <EditIcon />
-                            </IconButton>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Button
+                                variant={"outline"}
+                                key="delete-document"
+                                onClick={() => {
+                                  deleteDocument(document.uid);
+                                }}
+                              >
+                                <Image
+                                  src={"/assets/icons/trash.svg"}
+                                  alt="delete"
+                                  height={20}
+                                  width={20}
+                                />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent align="end">
+                              Delete document
+                            </TooltipContent>
                           </Tooltip>
-                          <Tooltip title="Delete document">
-                            <IconButton
-                              key="delete-document"
-                              onClick={() => {
-                                console.log("Delete" + document.name);
-                                deleteDocument(document.uid);
-                              }}
-                              style={{ marginRight: "8px", color: "#f33" }}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </CardActions>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Grid>
-              <Grid item xs={9}>
-                <TextField
-                  fullWidth
-                  multiline
-                  variant="outlined"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  inputRef={textFieldRef}
-                />
-                <Button
-                  variant="outlined"
-                  sx={{
-                    width: "160px",
-                    fontSize: "16px",
-                    marginTop: "30px",
-                    color: "primary",
-                    textTransform: "none",
-                    textDecoration: "none",
-                    fontWeight: "bold",
-                  }}
-                  onClick={() => {
-                    if (textFieldRef.current && textFieldRef.current.value) {
-                      try {
-                        editDocument(editing, textFieldRef.current?.value);
-                        documents.filter((doc) => doc.uid == editing)[0].text =
-                          textFieldRef.current?.value;
-                        setEditing("");
-                      } catch (e) {
-                        console.error("Error editing document: " + e);
-                      }
-                    }
-                  }}
-                >
-                  Done
-                </Button>
-              </Grid>
-            </Grid>
-          )}
-        </Box>
-      </Modal>
-    </div>
+                        </TooltipProvider>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Edit PDF */}
+                  {editing && (
+                    <div className="flex flex-col gap-2 mt-[10px]">
+                      <Label className="text-center">Editing {document.name}:</Label>
+                      <div className="flex flex-col justify-end">
+                        <Textarea
+                          value={inputValue}
+                          onChange={(e) => setInputValue(e.target.value)}
+                          ref={textFieldRef}
+                          rows={10}
+                        />
+                        <Button
+                          variant="default"
+                          className="mt-3 self-end"
+                          onClick={() => {
+                            if (
+                              textFieldRef.current &&
+                              textFieldRef.current.value
+                            ) {
+                              try {
+                                editDocument(
+                                  editing,
+                                  textFieldRef.current?.value
+                                );
+                                documents.filter(
+                                  (doc) => doc.uid == editing
+                                )[0].text = textFieldRef.current?.value;
+                                setEditing("");
+                              } catch (e) {
+                                console.error("Error editing document: " + e);
+                              }
+                            }
+                          }}
+                        >
+                          Save
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ))}
+            </div>
+          </>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
