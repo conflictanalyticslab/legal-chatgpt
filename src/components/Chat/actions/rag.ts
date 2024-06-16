@@ -7,8 +7,7 @@ import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { PineconeStore } from "@langchain/pinecone";
 
-export async function useRag(query:string){
-    
+export async function useRag(query:string, namespace:string=''){
     // ********************************* CREATING A VECTOR STORE ********************************* //
     const pinecone = new Pinecone({
         apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY || '',
@@ -16,10 +15,14 @@ export async function useRag(query:string){
     const pineconeIndex = pinecone.Index('legal-pdf-documents');
     
     const vectorStore = await PineconeStore.fromExistingIndex(
-        new OpenAIEmbeddings({apiKey: process.env.OPENAI_API_KEY}),
-        { pineconeIndex }
+      new OpenAIEmbeddings({ apiKey: process.env.OPENAI_API_KEY }),
+      {
+        pineconeIndex,
+      }
     );
-    
+
+    vectorStore.namespace = namespace;
+    console.log("\n\nTHE NAME SPACE IS \n\n", vectorStore.namespace)
     // ********************************* SEMANTIC SEARCH ********************************* //
     const retriever = vectorStore.asRetriever();
     
@@ -41,7 +44,7 @@ export async function useRag(query:string){
     const retrievedDocs = await retriever.getRelevantDocuments(
         query
     );
-    
+    console.log("\n\nHEEEEERE\n\n")
     // ********************************* INVOKING RAG ********************************* //
     const res = await ragChain.invoke({
         question: query,

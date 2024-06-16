@@ -115,7 +115,6 @@ export function Chat({
   const [latestResponse, setLatestResponse] = useState("");
   const [currentInput, setCurrentInput] = useState("");
   const [documentContent, setDocumentContent] = useState("");
-  // const [keyword, setKeyword] = useState("");
   const [kwRefs, setKwRefs] = useState<{
     keyword: String;
     refs: { name: String; kwLen: number; excerpts: string[] }[];
@@ -129,7 +128,6 @@ export function Chat({
   const [conversationUid, setConversationUid] = useState<string | null>("");
   const [newConv, setNewConv] = useState(true);
   const [generating, setGenerating] = useState(true);
-  
   const generatingRef = useRef(generating);
 
   useEffect(() => {
@@ -327,7 +325,7 @@ export function Chat({
     event.returnValue = "Are you sure you want to leave? The response will not be stored to your current chat's history if you exit right now.";
   }
 
-  const { setLLMQuery, setRelevantPDFs, enableRag, setEnableRag, ragConversation, setRagConversation } = useChatContext();
+  const { setLLMQuery, setRelevantPDFs, enableRag, setEnableRag, ragConversation, setRagConversation, namespace } = useChatContext();
 
   /**
    * Makes a query with OpenAi's LLM and implements RAG using Pinecone vector store
@@ -344,8 +342,8 @@ export function Chat({
     // ---------------------------------------------- Generate RAG RESPONSE ---------------------------------------------- //
     // Update the conversation with RAG
     try {
-      const res = await useRag(query);
-
+      console.log("THIS IS THE NAMESPACE", namespace)
+      const res = await useRag(query, namespace);
       // Updated conversation with RAG response
       newConvo = [
         ...newConvo,
@@ -910,7 +908,10 @@ export function Chat({
                 "AI, or Artificial Intelligence, refers to the simulation of human intelligence in machines that are programmed to perform tasks that normally require human intelligence, such as speech recognition, decision-making, and natural language processing.",
                 "OpenJustice can help you with a wide variety of tasks, including answering legal questions, providing information on your case, and more. To use OpenJustice, simply type your question or prompt in the chat box and it will generate a response for you.",
               ].map((text, i) => (
-                <Card className="bg-[transparent] rounded-[15px] text-[#686868]">
+                <Card
+                  key={i}
+                  className="bg-[transparent] rounded-[15px] text-[#686868]"
+                >
                   <CardHeader>
                     <CardTitle>What is AI?</CardTitle>
                   </CardHeader>
@@ -922,11 +923,7 @@ export function Chat({
                       alt="ai"
                     />
                     <p style={{ textAlign: "justify", marginTop: "0px" }}>
-                      AI, or Artificial Intelligence, refers to the simulation
-                      of human intelligence in machines that are programmed to
-                      perform tasks that normally require human intelligence,
-                      such as speech recognition, decision-making, and natural
-                      language processing.
+                      {text}
                     </p>
                   </CardContent>
                 </Card>
@@ -939,7 +936,7 @@ export function Chat({
         {!enableRag && userInputs && (
           <div className="bg-[transparent] w-full pb-[100px]">
             {userInputs.map((input, i) => (
-              <div key={input}>
+              <div key={i}>
                 {/* Conversation Seperator Line */}
                 {i !== 0 && <Divider></Divider>}
 
@@ -1081,15 +1078,15 @@ export function Chat({
               {ragConversation &&
                 ragConversation.length > 0 &&
                 ragConversation.map((conversation: any, i: number) => (
-                  <>
+                  <div key={i}>
                     {i !== 0 && <hr />}
                     <div className="flex flex-col gap-2">
                       <Label className="font-bold">
-                        {conversation?.role === "user"? "You" : "OpenJustice"}
+                        {conversation?.role === "user" ? "You" : "OpenJustice"}
                       </Label>
                       <p>{conversation.content}</p>
                     </div>
-                  </>
+                  </div>
                 ))}
               {loading && (
                 <div className="w-[10px] h-[10px] bg-[black] rounded-[50%] animate-pulse "></div>
@@ -1101,7 +1098,7 @@ export function Chat({
         {/* Prompt Input Text Field */}
         <div className="shadow-none bg-[#f5f5f7] fixed w-full h-[100px] bottom-0">
           <div className="relative w-[52.5%]">
-          <ButtonCN
+            <ButtonCN
               variant="ghost"
               className="hover:bg-[#E2E8F0] bg-[transparent] h-[56px] absolute left-[-70px]"
               type="button"
@@ -1111,27 +1108,27 @@ export function Chat({
               <AttachFileIcon />
             </ButtonCN>
 
-          <Input
-            className="w-full flex bg-[#f5f5f7] min-h-[56px] pr-[95px]"
-            required
-            placeholder="Prompt"
-            value={currentInput}
-            onChange={(e) => setCurrentInput(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                handleSubmit();
-                handleKeyDownImage();
-                e.preventDefault();
-              }
-            }}
-          />
-          <ButtonCN
+            <Input
+              className="w-full flex bg-[#f5f5f7] min-h-[56px] pr-[95px]"
+              required
+              placeholder="Prompt"
+              value={currentInput}
+              onChange={(e) => setCurrentInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  handleSubmit();
+                  handleKeyDownImage();
+                  e.preventDefault();
+                }
+              }}
+            />
+            <ButtonCN
               className="absolute right-0 top-[50%] translate-y-[-50%]"
               variant={"ghost"}
+              onClick={textBoxSubmission}
+              disabled={loading}
             >
-              <LoadingButton onClick={textBoxSubmission} loading={loading}>
-                <Send></Send>
-              </LoadingButton>
+              <Image src="/assets/icons/send-horizontal.svg" alt="send" width={20} height={20}/>
             </ButtonCN>
             <label className="text-[grey] text-[1rem] absolute bottom-[-30px] italic">
               {num === 0

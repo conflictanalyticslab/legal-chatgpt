@@ -99,7 +99,7 @@ const SearchModal = () => {
         >
           {relevantPDFs && relevantPDFs.length > 0 ? (
             relevantPDFs.map((doc: any) => (
-              <Card>
+              <Card key={doc.metadata.fileName}>
                 <a href={doc.metadata.url} target="_blank">
                   <CardHeader>
                     <CardTitle className="font-normal">

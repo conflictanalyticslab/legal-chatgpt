@@ -52,7 +52,7 @@ export default function PDFModal({ documents, deleteDocument, documentContent, s
       <DialogTrigger asChild>
         <Button
           variant={"ghost"}
-          className="flex w-full justify-start gap-5"
+          className="w-full flex gap-5 justify-start"
           onClick={handleOpen}
         >
           <Image
@@ -72,9 +72,9 @@ export default function PDFModal({ documents, deleteDocument, documentContent, s
           <Label className="font-bold">Uploaded PDFs</Label>
           <>
             <div className="grid grid-cols-1 gap-2">
-              {documents.map((document) => (
-                <>
-                  <Card key={document.uid} className="">
+              {documents.map((document, i) => (
+                <div key={i}>
+                  <Card className="">
                     <CardHeader className="flex justify-between flex-row items-center">
                       <Label className="font-bold">{document.name}</Label>
                       <TooltipProvider>
@@ -115,25 +115,21 @@ export default function PDFModal({ documents, deleteDocument, documentContent, s
                       <div className="flex gap-3 justify-end">
                         <TooltipProvider>
                           <Tooltip>
-                            <TooltipTrigger>
-                              <Button
-                                variant={"outline"}
-                                key="edit-document"
-                                onClick={() => {
-                                  setEditing(document.uid);
-                                  setInputValue(document.text);
-                                  if (textFieldRef.current) {
-                                    textFieldRef.current.focus();
-                                  }
-                                }}
-                              >
-                                <Image
-                                  src={"/assets/icons/pencil.svg"}
-                                  alt="delete"
-                                  height={20}
-                                  width={20}
-                                />
-                              </Button>
+                            <TooltipTrigger
+                              onClick={() => {
+                                setEditing(document.uid);
+                                setInputValue(document.text);
+                                if (textFieldRef.current) {
+                                  textFieldRef.current.focus();
+                                }
+                              }}
+                            >
+                              <Image
+                                src={"/assets/icons/pencil.svg"}
+                                alt="delete"
+                                height={20}
+                                width={20}
+                              />
                             </TooltipTrigger>
                             <TooltipContent align="end">
                               Edit document text
@@ -142,21 +138,17 @@ export default function PDFModal({ documents, deleteDocument, documentContent, s
                         </TooltipProvider>
                         <TooltipProvider>
                           <Tooltip>
-                            <TooltipTrigger>
-                              <Button
-                                variant={"outline"}
-                                key="delete-document"
-                                onClick={() => {
-                                  deleteDocument(document.uid);
-                                }}
-                              >
-                                <Image
-                                  src={"/assets/icons/trash.svg"}
-                                  alt="delete"
-                                  height={20}
-                                  width={20}
-                                />
-                              </Button>
+                            <TooltipTrigger
+                              onClick={() => {
+                                deleteDocument(document.uid);
+                              }}
+                            >
+                              <Image
+                                src={"/assets/icons/trash.svg"}
+                                alt="delete"
+                                height={20}
+                                width={20}
+                              />
                             </TooltipTrigger>
                             <TooltipContent align="end">
                               Delete document
@@ -170,7 +162,9 @@ export default function PDFModal({ documents, deleteDocument, documentContent, s
                   {/* Edit PDF */}
                   {editing && (
                     <div className="flex flex-col gap-2 mt-[10px]">
-                      <Label className="text-center">Editing {document.name}:</Label>
+                      <Label className="text-center">
+                        Editing {document.name}:
+                      </Label>
                       <div className="flex flex-col justify-end">
                         <Textarea
                           value={inputValue}
@@ -206,7 +200,7 @@ export default function PDFModal({ documents, deleteDocument, documentContent, s
                       </div>
                     </div>
                   )}
-                </>
+                </div>
               ))}
             </div>
           </>
