@@ -10,26 +10,24 @@ import Image from "next/image";
 import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Card } from "../ui/card";
+import { useChatContext } from "./store/ChatContext";
 
 function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments, enableRag, handleEnableRag, conversationTitles, setShowStartupImage, setNewConv, setConversationTitle, conversationTitle }) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
-
+    const { namespace, setNamespace } = useChatContext();
     return (
       <div className="absolute top-4 right-8">
         <Popover open={dropdownOpen}>
-          <PopoverTrigger>
-            <Button
-              variant={"ghost"}
-              className="bg-[none] p-0 h-[50px] w-[50px]"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
-              <Image
-                src="/assets/icons/ellipsis.svg"
-                width={30}
-                height={40}
-                alt="chat options"
-              />
-            </Button>
+          <PopoverTrigger
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="bg-[none] p-0 h-[50px] w-[50px]"
+          >
+            <Image
+              src="/assets/icons/ellipsis.svg"
+              width={30}
+              height={40}
+              alt="chat options"
+            />
           </PopoverTrigger>
           <PopoverContent
             align="end"
@@ -49,24 +47,27 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
             {/* Enable Rag */}
             <Button
               variant="ghost"
-              className="flex items-center justify-between px-4 rounded-sm py-1 w-full"
+              className="w-full"
               onClick={() => handleEnableRag(!enableRag)}
+              asChild
             >
-              <div className="flex gap-5 justify-start">
-                <Image
-                  src={"/assets/icons/database.svg"}
-                  width={16}
-                  height={22}
-                  alt={"pdf file"}
-                />
-                <Label className="whitespace-nowrap">Enable RAG</Label>
+              <div className="w-full flex justify-between">
+                <div className="flex gap-5 justify-start">
+                  <Image
+                    src={"/assets/icons/database.svg"}
+                    width={16}
+                    height={22}
+                    alt={"pdf file"}
+                  />
+                  <Label className="whitespace-nowrap">Enable RAG</Label>
+                </div>
+                <Switch checked={enableRag} className="scale-[0.7]" />
               </div>
-              <Switch checked={enableRag} className="scale-[0.7]" />
             </Button>
 
             <div className="flex flex-col gap-2 pt-2">
               {/* Jurisdiction */}
-              <Select value={""}>
+              <Select value={namespace} onValueChange={setNamespace}>
                 <SelectTrigger className="w-full outline-[none] focus:shadow-none focus:ring-offset-0 focus:ring-0 px-[1rem]">
                   <div className="flex gap-3">
                     <Image
@@ -76,14 +77,16 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                       alt="Jurisdiction"
                     />
                     <span className="whitespace-nowrap text-ellipsis overflow-hidden block flex gap-3">
-                      {"Jurisdiction"}
+                      {namespace || "Choose Jurisdiction"}
                     </span>
                   </div>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem>French Law</SelectItem>
-                    <SelectItem>Austrialian Law</SelectItem>
+                    <SelectItem value="french_law">French Law</SelectItem>
+                    <SelectItem value="austrialian_law">
+                      Austrialian Law
+                    </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -113,9 +116,9 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {conversationTitles.map((title) => (
+                    {conversationTitles.map((title, i) => (
                       <SelectItem
-                        key={title.title}
+                        key={i}
                         value={title.title}
                         className="text-left"
                       >

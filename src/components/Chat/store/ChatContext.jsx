@@ -8,10 +8,12 @@ export const ChatContextProvider = ({ children }) => {
   const [relevantPDFs, setRelevantPDFs] = useState([]);
   const [LLMQuery, setLLMQuery] = useState('')
   const [enableRag, setEnableRag] = useState(false);
-  const [ragConversation, setRagConversation] = useState([])
+  const [ragConversation, setRagConversation] = useState([]);
+  const [namespace, setNamespace] = useState('');
+
   return (
     <ChatContext.Provider
-      value={{ state, setState, relevantPDFs, setRelevantPDFs, LLMQuery, setLLMQuery, enableRag, setEnableRag, ragConversation, setRagConversation }}
+      value={{ state, setState, relevantPDFs, setRelevantPDFs, LLMQuery, setLLMQuery, enableRag, setEnableRag, ragConversation, setRagConversation, namespace, setNamespace }}
     >
       {children}
     </ChatContext.Provider>
