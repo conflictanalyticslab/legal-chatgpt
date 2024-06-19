@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Card } from "../ui/card";
 import { useChatContext } from "./store/ChatContext";
 
-function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments, enableRag, handleEnableRag, conversationTitles, setShowStartupImage, setNewConv, setConversationTitle, conversationTitle }) {
+function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments, enableRag, handleEnableRag, conversationTitles, setShowStartupImage, setConversationTitle, conversationTitle }) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const { namespace, setNamespace } = useChatContext();
     return (
@@ -36,6 +36,7 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
           >
             <SearchModal />
             <PDFModal
+              disabled={enableRag}
               documents={documents}
               deleteDocument={deleteDocumentChat}
               documentContent={documentContent}
@@ -67,7 +68,7 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
 
             <div className="flex flex-col gap-2 pt-2">
               {/* Jurisdiction */}
-              <Select value={namespace} onValueChange={setNamespace}>
+              <Select onValueChange={setNamespace}>
                 <SelectTrigger className="w-full outline-[none] focus:shadow-none focus:ring-offset-0 focus:ring-0 px-[1rem]">
                   <div className="flex gap-3">
                     <Image
@@ -76,9 +77,7 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                       width={18}
                       alt="Jurisdiction"
                     />
-                    <span className="whitespace-nowrap text-ellipsis overflow-hidden block flex gap-3">
-                      {namespace || "Choose Jurisdiction"}
-                    </span>
+                    <SelectValue placeholder="Choose a Jurisdiction"/>
                   </div>
                 </SelectTrigger>
                 <SelectContent>
@@ -95,7 +94,6 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
               <Select
                 onValueChange={(value) => {
                   if (value === conversationTitle || value === "") return;
-                  setNewConv(false);
                   setShowStartupImage(false);
                   setConversationTitle(value);
                 }}

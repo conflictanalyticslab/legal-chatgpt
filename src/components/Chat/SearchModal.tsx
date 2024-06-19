@@ -3,19 +3,19 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { cn } from "@/lib/utils";
-import { similaritySearch } from "./actions/semantic-search";
+import { similaritySearch } from "../../app/chat/actions/semantic-search";
 import { useForm } from "react-hook-form";
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useChatContext } from "./store/ChatContext";
 
 const SearchModal = () => {
-  const { relevantPDFs, setRelevantPDFs, LLMQuery } = useChatContext();
+  const { relevantPDFs, setRelevantPDFs, pdfQuery, setPdfQuery, namespace} = useChatContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const formSchema = z.object({
@@ -27,7 +27,7 @@ const SearchModal = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      pdfQuery: LLMQuery,
+      pdfQuery: pdfQuery,
     },
   });
 
@@ -37,11 +37,11 @@ const SearchModal = () => {
     
     setIsLoading(true);
 
-    const query = form?.pdfQuery
+    const query = form?.pdfQuery as string
 
     try
     {
-      const similarDocs = await similaritySearch(query || '', 3)
+      const similarDocs = await similaritySearch(query, 3, namespace )
       setRelevantPDFs(similarDocs.matches);
     }
     catch(e) 
@@ -66,6 +66,7 @@ const SearchModal = () => {
         </Button>
       </DialogTrigger>
       <DialogContent className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[60vw] flex flex-col gap-5 overflow-auto box-border">
+        <DialogTitle className="hidden"></DialogTitle>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onsubmit)} className="space-y-8">
             <FormField
@@ -78,6 +79,8 @@ const SearchModal = () => {
                   </FormLabel>
                   <FormControl>
                     <Input
+                      value={pdfQuery}
+                      onChange={(event) => setPdfQuery(event.target.value)}
                       placeholder="What is employment Law?"
                       {...field}
                       disabled={isLoading}
@@ -98,8 +101,8 @@ const SearchModal = () => {
           )}
         >
           {relevantPDFs && relevantPDFs.length > 0 ? (
-            relevantPDFs.map((doc: any) => (
-              <Card key={doc.metadata.fileName}>
+            relevantPDFs.map((doc: any, i:number) => (
+              <Card key={i}>
                 <a href={doc.metadata.url} target="_blank">
                   <CardHeader>
                     <CardTitle className="font-normal">

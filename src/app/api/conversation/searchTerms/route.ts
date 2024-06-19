@@ -83,18 +83,7 @@ export async function POST(req: Request) {
     console.log("Logging response from OpenAi", firstReplyRes.choices[0].message.content);
     const {searchResults, toSearch} = await searchAndSummarize(firstReplyContent);
 
-    // console.log("Search Results", searchResults);
-
     if (Array.isArray(searchResults) && searchResults.length > 0) {
-      // const searchPrompt = searchResults
-      //   .map(
-      //     (result: SearchResult) =>
-      //       "Document title: " +
-      //       result.title +
-      //       "\n\nAbstract: " +
-      //       result.abstract
-      //   )
-      //   .join("\n\n");
 
       // The chat context is too short when we include all the results. Revisit this when using a larger model.
       // Can use tokenLength() to estimate the tokens used so far.

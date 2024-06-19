@@ -1,39 +1,18 @@
 "use client";
 
-import React, { useRef, useEffect, useState, use } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 
 // import external components
 import { useRouter } from "next/navigation";
 import {
-  Button,
-  ButtonGroup,
   Dialog,
   DialogContent,
   DialogContentText,
-  Divider,
-  IconButton,
-  TextField,
-  InputAdornment,
-  OutlinedInput,
-  FormGroup,
-  FormControlLabel,
-  FormControl,
-  Checkbox,
-  CircularProgress,
-  Paper,
-  Tooltip,
   CardHeader,
 } from "@mui/material";
-import { Button as ButtonCN } from "../ui/button";
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormHelperText from '@mui/material/FormHelperText';
-import { SelectChangeEvent } from '@mui/material/Select';
+import { Button as Button } from "../ui/button";
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { Send, ThumbUp, ThumbDown, ContactSupportOutlined } from "@mui/icons-material";
-import { LoadingButton } from "@mui/lab";
-import { Typography } from "@mui/material";
 import GPT4Tokenizer from 'gpt4-tokenizer';
 import ReactMarkdown from 'react-markdown'
 
@@ -44,7 +23,6 @@ import { auth } from "@/firebase";
 import ChatPageOJ from "@/images/ChatPageOJ.png";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { postConversation } from "@/util/requests/postConversation";
-import { postSearchTerms} from "@/util/requests/postSearchTerms";
 import { uploadPdfDocument } from "@/util/requests/uploadPdfDocument";
 import { useFilePicker } from "use-file-picker";
 import {
@@ -53,38 +31,28 @@ import {
 } from "use-file-picker/validators";
 
 // import OJ hooks
-import { postConversationSave } from "@/util/requests/postConversationSave";
-// import { IncludedDocumentsProvider, useIncludedDocuments } from "@/hooks/useIncludedDocuments"; // passing props instead
-// import { postConversationMult } from "@/util/requests/postConversationMult";
 import { getConversationTitles } from "@/util/requests/getConversationTitles";
-import { getConversation } from "@/util/requests/getConversation";
-import { putConversationSave } from "@/util/requests/putConversationSave";
-import { postConversationTitle } from "@/util/requests/postConversationTitle";
 import { postPDF } from "@/util/requests/postPDF";
-import { postWebUrl } from "@/util/requests/postWebUrl";
-// import ConversationContext from './ConversationContext';
 
 // import OJ components
 import {
   UserDocument,
   getDocumentsOwnedByUser,
 } from "@/util/requests/getDocumentsOwnedByUser";
-type FeedbackReasonsI = {
-  "Superficial Response": boolean;
-  "Lacks Reasoning": boolean;
-  "Lacks Relevant Facts": boolean;
-  "Lacks Citation": boolean;
-};
 import {deleteDocument} from "@/util/api/deleteDocument";
-import { set } from "firebase/database";
-import { Switch } from "../ui/switch";
-import { Label } from "../ui/label";
 import { Card, CardContent, CardTitle } from "../ui/card";
-import { similaritySearch } from "./actions/semantic-search";
+import { similaritySearch } from "../../app/chat/actions/semantic-search";
 import { useChatContext } from "./store/ChatContext";
-import { useRag } from "./actions/rag";
+import { useRag } from "../../app/chat/actions/rag";
 import { Input } from "../ui/input";
 import ChatOptions from "./ChatOptions"
+import { toast } from "../ui/use-toast";
+import { Toaster } from "../ui/toaster";
+import {fetchWithRAG} from "@/components/Chat/utils/rag_utils"
+import { Conversation } from "./types/conversationTitles";
+import "./Chat.css"
+import { cn } from "@/lib/utils";
+import { fetchWithLLM } from "./utils/normal_LLM_utils";
 
 export function Chat({
   wasSearched,
@@ -94,41 +62,36 @@ export function Chat({
   setSearchTerm: (searchTerm: string) => void;
 }) {
   const router = useRouter();
-  const [userInputs, setUserInputs] = useState<string[]>([]);
-  const [conversation, setConversation] = useState<
-    {
-      role: string;
-      content: string;
-    }[]
-  >([]);
-  // const [convTitle, setConvTitle] = useState("");
-  const [responses, setResponses] = useState<
-    {
-      response: string;
-      is_satisfactory: boolean | "N/A";
-      feedback: {
-        message: string;
-        reasons: FeedbackReasonsI;
-      };
-    }[]
-  >([]);
-  const [latestResponse, setLatestResponse] = useState("");
-  const [currentInput, setCurrentInput] = useState("");
-  const [documentContent, setDocumentContent] = useState("");
-  const [kwRefs, setKwRefs] = useState<{
-    keyword: String;
-    refs: { name: String; kwLen: number; excerpts: string[] }[];
-  } | null>(null);
+  const [conversation, setConversation] = useState<Conversation[]>([]);
+  const [latestResponse, setLatestResponse] = useState('');
+  const [userQuery, setUserQuery] = useState('');
+  const [documentContent, setDocumentContent] = useState('');
   const [loading, setLoading] = useState(false);
-  const [endSession, setEndSession] = useState(false);
   const [num, setNum] = useState(-1);
-  const [conversationTitles, setConversationTitles] = useState<{title: string, uid: string}[]>([]);
-  const [conversationTitle, setConversationTitle] = useState<string>("");
+  const [conversationTitles, setConversationTitles] = useState<
+    { title: string; uid: string }[]
+  >([]);
+  const [conversationTitle, setConversationTitle] = useState<string>('');
   const [includedDocuments, setIncludedDocuments] = useState<string[]>([]);
-  const [conversationUid, setConversationUid] = useState<string | null>("");
-  const [newConv, setNewConv] = useState(true);
-  const [generating, setGenerating] = useState(true);
-  const generatingRef = useRef(generating);
+  const [conversationUid, setConversationUid] = useState<string | null>('');
+  const [showStartupImage, setShowStartupImage] = useState(true);
+  const [documents, setDocuments] = useState<UserDocument[]>([]);
+  const scrollIntoViewRef = useRef<HTMLSpanElement>(null);
+  const {
+    setPdfQuery,
+    setRelevantPDFs,
+    enableRag,
+    setEnableRag,
+    namespace,
+    generateFlagRef,
+  } = useChatContext();
+  const [alert, setAlert] = useState('');
+
+  useEffect(()=> {
+    if(scrollIntoViewRef?.current){
+      scrollIntoViewRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [latestResponse, conversation])
 
   useEffect(() => {
     setAlert("Authenticating user...");
@@ -156,288 +119,53 @@ export function Chat({
         console.error(e);
         router.push("/login");
       });
-    console.log("generatingRef.current: " + generatingRef.current)
   }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setConversationTitles((await getConversationTitles()) as any)
-        const conversationData = await getConversation(conversationTitle);
-        if (conversationData && !newConv) {
-          setConversation(conversationData.conversation);
-          setIncludedDocuments(conversationData.hasOwnProperty('includedDocuments') ? conversationData.documents : []);
-          setConversationUid(conversationData.conversationId);
-          const tempInputs: string[] = [];
-          const tempResponses: {
-            response: string;
-            is_satisfactory: boolean | "N/A";
-            feedback: {
-              message: string;
-              reasons: FeedbackReasonsI;
-            };
-          }[] = [];
-          for (let i = 0; i < conversationData.conversation.length; i++) {
-            if (conversationData.conversation[i].role === "user") {
-              tempInputs.push(conversationData.conversation[i].content);
-            } else if (conversationData.conversation[i].role === "assistant") {
-              tempResponses.push({"response": conversationData.conversation[i].content, "is_satisfactory": "N/A", "feedback": {"message": "", "reasons": {"Superficial Response": false, "Lacks Citation": false, "Lacks Reasoning": false, "Lacks Relevant Facts": false}}});
-            }
-          }
-          if (conversationData.conversation[conversationData.conversation.length-1].role === "user") {
-            tempInputs.pop();
-          }
-          setUserInputs(tempInputs);
-          setResponses(tempResponses);
-          setLatestResponse(conversationData.conversation[conversationData.conversation.length-1].role === "assistant"? conversationData.conversation[conversationData.conversation.length-1].content : "");
-        }
-      } catch (e){
-          console.log(e);
-      }
-    };
-    fetchData();
-    
-  }, [conversationTitle]);
-
-  useEffect(() => {
-    // console.log("latestResponse changed, newConv: " + newConv +  ", latestResponse: " + latestResponse + ", responses: " + responses);
-    if (responses.length > 0 && latestResponse.length > responses[responses.length-1].response.length) {
-      setResponses([...responses.slice(0,responses.length-1), {
-        response: latestResponse,
-        is_satisfactory: "N/A",
-        feedback: {
-          message: "",
-          reasons: {
-            "Superficial Response": false,
-            "Lacks Citation": false,
-            "Lacks Reasoning": false,
-            "Lacks Relevant Facts": false,
-          },
-        },
-      }])
-    }
-    else {
-      setResponses([...responses, {
-      response: latestResponse,
-      is_satisfactory: "N/A",
-      feedback: {
-        message: "",
-        reasons: {
-          "Superficial Response": false,
-          "Lacks Citation": false,
-          "Lacks Reasoning": false,
-          "Lacks Relevant Facts": false,
-        },
-      },
-    }])}
-    }, [latestResponse]);
-
-    useEffect(() => {
-      generatingRef.current = generating;
-    }, [generating]);
-
-  const [alert, setAlert] = useState("");
-
-  const [feedbackState, setFeedbackState] = useState<{
-    index: number | null;
-    dialogOpen: boolean;
-    isSatisfactory: boolean | null;
-    message: string | null;
-  }>({
-    index: null,
-    dialogOpen: false,
-    isSatisfactory: null,
-    message: null,
-  });
-
-  const [feedbackSelect, setFeedbackSelect] = useState<FeedbackReasonsI>({
-    "Superficial Response": false,
-    "Lacks Reasoning": false,
-    "Lacks Relevant Facts": false,
-    "Lacks Citation": false,
-  });
-
-  const [documents, setDocuments] = useState<UserDocument[]>([]);
 
   // handle delete documents from PDFModal
   const deleteDocumentChat = (uid: string) => {
-    deleteDocument(uid).then(() => setDocuments(documents.filter((doc) => doc.uid !== uid))).then(() => {console.log("PDF deleted successfully")}).catch((err) => {console.log("Error when deleting PDF, " + err)});
-  }
-
-  const findRefs = (
-    texts: { name: string; text: string }[],
-    keyword: string
-  ) => {
-    var allRefs = [];
-    for (const text of texts) {
-      var indexes = [];
-      var excerpts = [];
-      const textLower = text.text.toLowerCase();
-      var pos = textLower.indexOf(keyword);
-      const kwLen = keyword.length;
-      const prev = 300;
-      const after = 500;
-      while (pos !== -1) {
-        indexes.push(pos);
-        const start = pos - prev > -1 ? pos - prev : 0;
-        const end =
-          pos + after < text.text.length ? pos + after : text.text.length;
-        excerpts.push(text.text.substring(start, end));
-        pos = text.text.indexOf(keyword, pos + 1);
-      }
-      indexes.length > 0 &&
-        allRefs.push({
-          name: text.name,
-          kwLen: kwLen,
-          excerpts: excerpts,
-        });
-    }
-    return allRefs;
+    deleteDocument(uid)
+      .then(() => setDocuments(documents.filter((doc) => doc.uid !== uid)))
+      .then(() => {
+        console.log("PDF deleted successfully");
+      })
+      .catch((err) => {
+        console.log("Error when deleting PDF, " + err);
+      });
   };
 
+  const stopQuery = () =>{
+    generateFlagRef.current = false
+  }
+
   /**
-   * Extracts URLs from a given text
-   * @param text string
-   * @returns {string[]} list of url strings found in the query 
+   * Confirms with the user if they want to exit the tab
+   * 
+   * @param event the close tab event
    */
-  const getUrls = (text: string) => {
-    const urlRegex = /(https?:\/\/)?([A-Za-z_0-9.-]+[.][A-Za-z]{2,})(\/[A-Za-z0-9-._~:\/\?#\[\]@!$&'()*+,;=]*)?/g;
-    let match;
-    const urls = [];
-    while (match = urlRegex.exec(text)) {
-        urls.push(match[0]);
-    }
-    return urls;
-  }
-
-  const isValidUrl = (string: string) => {
-    try {
-        new URL(string);
-    } catch (_) {
-        return false;  
-    }
-
-    return true;
-  }
-
   const handleBeforeUnload = (event: any) => {
     event.preventDefault();
-    event.returnValue = "Are you sure you want to leave? The response will not be stored to your current chat's history if you exit right now.";
-  }
+    event.returnValue =
+      "Are you sure you want to leave? The response will not be stored to your current chat's history if you exit right now.";
+  };
 
-  const { setLLMQuery, setRelevantPDFs, enableRag, setEnableRag, ragConversation, setRagConversation, namespace } = useChatContext();
-
-  /**
-   * Makes a query with OpenAi's LLM and implements RAG using Pinecone vector store
-   * @param query the query from the user
-   */
-  const fetchWithRag = async (query:string) => {
-    // Update the chat with the user's query first
-    let newConvo = [...ragConversation, {
-      role: "user",
-      content: query,  
-    }]
-    setRagConversation(newConvo)
-
-    // ---------------------------------------------- Generate RAG RESPONSE ---------------------------------------------- //
-    // Update the conversation with RAG
-    try {
-      console.log("THIS IS THE NAMESPACE", namespace)
-      const res = await useRag(query, namespace);
-      // Updated conversation with RAG response
-      newConvo = [
-        ...newConvo,
-        {
-          role: "agent",
-          content: res,
-        },
-      ];
-
-      // Saving a new a new conversation
-      if (ragConversation.length < 2) {
-        try {
-          //Generates relevant conversation title
-          const titleResPromise = await postConversationTitle(
-            newConvo,
-            includedDocuments
-          );
-
-          if (!titleResPromise.ok) {
-            console.error(
-              "Failed to generate conversation title and save conversation."
-            );
-          } else {
-            const { title } = await titleResPromise.json();
-            setConversationTitle(title);
-
-            (await postConversationSave(newConvo, includedDocuments, title))
-              .json()
-              .then((res) => {
-                setConversationUid(res.uid);
-              })
-              .catch((err) => {
-                console.error("Failed to save conversation in postConversationSave: ", err);
-              });
-          }
-        } catch (e) {
-          console.error("In postConversationSave: ", e);
-        }
-      } else if (conversationUid) {
-        // Updating existing conversation
-        try {
-          // Save existing conversation to db
-          await putConversationSave(
-            conversationUid,
-            newConvo,
-            includedDocuments,
-            conversationTitle
-          );
-        } catch (e) {
-          console.error("In putConversationSave: ", e);
-        }
-      }
-
-      setRagConversation(newConvo);
-    } catch (e) {
-      console.error("Error in useRag: ", e);
-      setRagConversation([
-        ...newConvo,
-        {
-          role: "agent",
-          content: "Error: failed to generate response",
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-
-    // ---------------------------------------------- SEMANTIC SEARCH ---------------------------------------------- //
-    setLLMQuery(query);
-    try {
-      const pdfs = await similaritySearch(query)
-      setRelevantPDFs(pdfs.matches);
-    } catch(e) {
-      console.error("In similaritySearch", e);
-    }
-  }
-
-  const handleEnableRag = (value:boolean) => {
+  const handleEnableRag = (value: boolean) => {
     setEnableRag(value);
-    localStorage.setItem('enableRag', JSON.stringify(value));
-  }
+    localStorage.setItem("enableRag", JSON.stringify(value));
+  };
 
-  useEffect(()=> {
-    const enableRagStatus = localStorage.getItem('enableRag');
-    if(enableRagStatus)
-      setEnableRag(JSON.parse(enableRagStatus))
-  }, [])
+  useEffect(() => {
+    const enableRagStatus = localStorage.getItem("enableRag");
+    if (enableRagStatus) setEnableRag(JSON.parse(enableRagStatus));
+  }, []);
 
   /**
    * Submits the user's query
-   * 
-   * @returns 
+   * To Do: make it so that handle submit only calls the LLM output so we don't have to wait until all the other proccess are complete before generating output
+   *
+   * @returns {void}
    */
   const handleSubmit = async () => {
+    if (userQuery === "") return;
 
     // Check for authentication
     if (!auth.currentUser) {
@@ -445,353 +173,72 @@ export function Chat({
       return;
     }
 
+    setShowStartupImage(false);
     setLoading(true);
-    const userQuery = currentInput;
-    setCurrentInput("");
-
-    if(enableRag)
-    {
-      fetchWithRag(userQuery);
-      return;
-    }
-  
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    let urls = getUrls(userQuery);
-
-    // Parses any urls in the string and validates them
-    for (let url of urls) {
-      if (!url.includes("http") || !url.includes("https")) {
-        url = "https://" + url;
-      }
-      if (!isValidUrl(url)) {
-        setAlert("Invalid URL: " + url);
-        setLoading(false);
-        return;
-      }
-    }
-
-    let urlContent;
-    let urlContentUserInput = userQuery;
-
-    // Fetching website content and replacing the url in the query with the website content.
-    for (const url of urls) {
-      try {
-        urlContent = await postWebUrl(url);
-        urlContentUserInput = urlContentUserInput.replace(url, urlContent.text);
-      } catch (error: any) {
-        console.error(error);
-        if (error.message.includes("400")) {
-          console.log(error.status);
-          createAlert("Error fetching content from URL: " + url + " doesn't allow web scraping!");
-        } else {
-          createAlert("Error fetching content from URL: " + url + ", Please check the URL spelling and try again");
-        }
-        
-        setLoading(false);
-        return;
-      }
-    }
-
+    setUserQuery("");
     window.addEventListener("beforeunload", handleBeforeUnload);
-    try {
-      // Retrieves uploaded document content from user
-      const docContentQuery =
-        documentContent.length > 0
-          ? "\n Here is a document for context: " + documentContent + " "
-          : "";
 
-      // Formats the conversation with the attached pdf document text
-      const fullConversation = conversation.concat([
-        {
-          role: "user",
-          content: urlContentUserInput + docContentQuery,
-        },
-      ]);
-
-      setConversation(fullConversation);
-      setUserInputs(userInputs.concat([userQuery]));
-      setCurrentInput("");
-      setNum(num - 1);
-
-      let total_conv = "";
-      for (const conv of fullConversation) {
-        total_conv += conv.content + " ";
-      }
-
-      const tokenizer = new GPT4Tokenizer({ type: "gpt3" });
-      const estimatedTokenCount = tokenizer.estimateTokenCount(total_conv);
-
-      // Current limit for tokens we can input
-      if (estimatedTokenCount >= 16384) {
-        createAlert(
-          "The input exceeds the token limit, maximum of 16384 tokens in each input, current input contains " +
-            estimatedTokenCount +
-            " tokens"
-        );
-        setLoading(false);
-        return;
-      }
-
-      let response;
-      let search_terms_res;
-
-      if (includedDocuments.length === 0) {
-        // uses conversation prompt to generate search terms
-        search_terms_res = await postSearchTerms(
-          fullConversation,
+    // Call RAG
+    if (enableRag) {
+      fetchWithRAG(
+        userQuery,
+        conversation,
+        setConversation,
+        useRag,
+        namespace,
+        postConversation,
+        includedDocuments,
+        setConversationUid,
+        conversationUid,
+        setLoading,
+        conversationTitle,
+        setPdfQuery,
+        setRelevantPDFs,
+        similaritySearch,
+        setAlert,
+        handleBeforeUnload
+      );
+    } else {
+      try {
+        fetchWithLLM(
+          documentContent,
+          userQuery,
+          conversation,
+          setConversation,
+          setUserQuery,
+          num,
+          setNum,
+          setLoading,
           includedDocuments,
-          false
-        );
-      } else {
-        // uses conversationMult prompt to generate search terms
-        search_terms_res = await postSearchTerms(
-          fullConversation,
-          includedDocuments,
-          true
-        );
-      }
-
-      if (!search_terms_res.ok) {
-        const errorData = await search_terms_res.json();
-        setAlert(errorData.error);
-        setLoading(false);
-        return;
-      }
-
-      // ---------------------------------------------- SEMANTIC SEARCH ---------------------------------------------- //
-      setLLMQuery(userQuery);
-      const pdfs = await similaritySearch(userQuery);
-      setRelevantPDFs(pdfs.matches);
-
-      // ---------------------------------------------- LLM OUTPUT ---------------------------------------------- //
-      const { toSearch, searchPrompt, documentPrompt } = await search_terms_res.json();
-
-      response = await postConversation(
-        searchPrompt,
-        documentPrompt,
-        fullConversation
-      ); //Gets the model's output
-
-      let buffer = "";
-      setGenerating(true); // set generating to true to start the stream
-
-      // The output stream coming from the model
-      if (
-        response.status === 200 &&
-        response.body != null &&
-        response.body.constructor === ReadableStream
-      ) {
-        const reader = response.body.getReader();
-        const encode = new TextDecoder("utf-8");
-
-        // read the response content by iteration
-        while (generatingRef.current) {
-          const currentResponse = await reader.read();
-
-          if (currentResponse.done || !generatingRef.current) {
-            break;
-          }
-
-          // decode content
-          const valueOfCurrentResponse =
-            "" + encode.decode(currentResponse.value);
-          const objectsInCurrentResponse = valueOfCurrentResponse
-            .split("\n")
-            .filter((str) => str !== "");
-
-          for (let i = 0; i < objectsInCurrentResponse.length; i++) {
-            try {
-              let object = JSON.parse(objectsInCurrentResponse[i].substring(5));
-
-              if (object.hasOwnProperty("choices")) {
-                let content = object.choices.at(-1).delta.content;
-
-                if (content == undefined || content == null) {
-                  continue;
-                }
-
-                buffer += content;
-                setLatestResponse(buffer);
-              }
-            } catch (e) {
-              continue;
-            }
-          }
-        }
-        try {
-          setGenerating(true);
-          await reader.cancel();
-        } catch (e) {}
-      } 
-      // If the response is not a readable stream just jsonify it
-      else if (response.status === 200 && response.body != null) {
-        setLatestResponse(await response.json());
-      }
-
-      const tempConv = fullConversation.concat([
-        { role: "assistant", content: buffer },
-      ]);
-
-      // Checks to see if this is a new conversation to determine if we need to add a new title or update an existing one.
-      if (fullConversation.length < 2) {
-        //Generates relevant conversation title
-        const titleResPromise = await postConversationTitle(
-          fullConversation,
-          includedDocuments
-        );
-
-        if (!titleResPromise.ok) {
-          const errorData = await titleResPromise.json();
-          setAlert(errorData.error);
-          setLoading(false);
-          return;
-        }
-
-        const { title } = await titleResPromise.json();
-        setConversationTitle(title);
-        window.removeEventListener("beforeunload", handleBeforeUnload);
-
-        // save new conversation to db
-        (await postConversationSave(tempConv, includedDocuments, title))
-          .json()
-          .then((res) => {
-            setConversationUid(res.uid);
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      } else if (conversationUid) {
-        // Save existing conversation to db
-        await putConversationSave(
+          setAlert,
+          generateFlagRef,
+          setLatestResponse,
+          setPdfQuery,
+          setRelevantPDFs,
+          setSearchTerm,
+          namespace,
+          conversationTitle,
+          setConversationTitle,
           conversationUid,
-          tempConv,
-          includedDocuments,
-          conversationTitle
+          setConversationUid,
+          handleBeforeUnload
+        );
+      } catch (error) {
+        console.error(error);
+        setAlert(
+          "Chat length exceeds programming limitations. Please refresh the page to start a new session."
         );
       }
-
-      setConversation(tempConv);
-
-      setSearchTerm(toSearch);
-    } catch (error) {
-      console.error(error);
-      setAlert("Chat length exceeds programming limitations. Please refresh the page to start a new session.");
-    } finally {
-      setLoading(false);
     }
   };
-
-  const submitFeedback = () => {
-    setResponses(
-      responses.map((res, idx) =>
-        idx !== feedbackState.index
-          ? res
-          : {
-              ...res,
-              feedback: {
-                message: feedbackState.message ? feedbackState.message : "",
-                reasons: feedbackSelect,
-              },
-            }
-      )
-    );
-    setFeedbackState({
-      index: null,
-      dialogOpen: false,
-      isSatisfactory: true,
-      message: null,
-    });
-  };
-
-  // const handleSave = async () => {
-  //   setSaving(true);
-  //   try {
-  //     // TO DO: Move saving logic to an API route
-  //     //console.log(userInputs, responses);
-  //     // const docRef = await addDoc(collection(db, "conversations"), {
-  //     //   userInputs: userInputs,
-  //     //   responses: responses,
-  //     // });
-  //     // const userDocRef = await updateDoc(
-  //     //   doc(db, "users", auth.currentUser.uid),
-  //     //   { conversations: arrayUnion(docRef.id) }
-  //     // );
-  //     // setAlert(
-  //     //     `Conversation (ID: ${docRef.id}) successfully saved in Firebase.`
-  //     // );
-  //     // replace empty string in the following call with title of the conversation
-  //     (await postConversationSave(conversation, includedDocuments, "")).json().then((res) => {setConversationUid(res.uid)}).catch((err) => {console.log(err)});
-  //     console.log(conversation.length);
-  //     setAlert(
-  //       `Conversation successfully saved in Firebase.`
-  //     );
-  //     // setTimeout(function() {
-          
-  //     //   window.location.reload();}, 
-  //     //   1000);
-  //   } catch (e) {
-  //     setAlert(`Error saving conversation: ${e}`);
-  //   }
-  //   setSaving(false);
-  // };
 
   const handleAlertClose = () => {
     setAlert("");
   };
-  const handleFeedbackClose = () => {
-    setFeedbackState({ ...feedbackState, dialogOpen: false });
-  };
-
-  const [showStartupImage, setShowStartupImage] = useState(true);
-
-  useEffect(() => {
-    // Check if Startup image flag is already set in session Storage
-    const isStartupImageHidden = sessionStorage.getItem("isStartupImageHidden");
-    if (isStartupImageHidden === "true") {
-      setShowStartupImage(false);
-    }
-  }, []);
-
-  // useEffect(() => {
-  //     setConversationTitles(['Initial Title']);
-    
-  //     setTimeout(() => {
-  //         setConversationTitles(['Updated Title']);
-  //         console.log("5 seconds update: " + conversationTitles)
-  //     }, 5000);
-  // }, []);
-
-  // useEffect(() => {
-  //   console.log("conversationTitles", conversationTitles);
-  // }, [conversationTitles]);
-
-  const createAlert = (message: string, backgroundColor = "red") => {
-      // Create a new div element for our alert
-      const alertDiv = document.createElement('div');
-      alertDiv.textContent = message;
-      alertDiv.style.position = 'fixed';
-      alertDiv.style.top = '40px';
-      alertDiv.style.left = '50%';
-      alertDiv.style.transform = 'translate(-50%, -50%)';
-      alertDiv.style.backgroundColor = backgroundColor;
-      alertDiv.style.color = 'white';
-      alertDiv.style.padding = '1em';
-      alertDiv.style.zIndex = '1000';
-      alertDiv.style.opacity = '0.8';
-      alertDiv.style.borderRadius = '10px';
-
-      // Append the alert to the body
-      document.body.appendChild(alertDiv);
-
-      // Remove the alert after 5 seconds
-      window.setTimeout(() => {
-        document.body.removeChild(alertDiv);
-      }, 5000);
-  }
 
   const { openFilePicker } = useFilePicker({
     accept: ".pdf",
+
     // ArrayBuffer takes exactly as much space as the original file. DataURL, the default, would make it bigger.
     readAs: "ArrayBuffer",
     validators: [
@@ -802,79 +249,65 @@ export function Chat({
       console.log(errors);
       setAlert("File is too big. We have a 5 Mb limit.");
     },
-    onFilesSuccessfullySelected: async ({ plainFiles, filesContent }: any) => {
+    onFilesSuccessfullySelected: async ({ plainFiles }: any) => {
       // this callback is called when there were no validation errors
-      console.log("onFilesSuccessfullySelected", plainFiles, filesContent);
+      let estimatedTokenCount = -1;
+      let pdfFileSize = -1;
 
-    let estimatedTokenCount = -1;
-    let pdfFileSize = -1;
+      try {
+        const pdfContent = await postPDF(plainFiles[0]);
 
-    try {
-      const pdfContent = await postPDF(plainFiles[0])
+        pdfFileSize = plainFiles[0].size;
 
-      pdfFileSize = plainFiles[0].size;
+        if (pdfFileSize > 5 * 1024 * 1024) {
+          throw new Error("PDF File uploaded too large");
+        }
 
-      if (pdfFileSize > 5 * 1024 * 1024) {
-        throw new Error("PDF File uploaded too large");
+        const tokenizer = new GPT4Tokenizer({ type: "gpt3" });
+        estimatedTokenCount = tokenizer.estimateTokenCount(pdfContent.content);
+
+        if (estimatedTokenCount > 16384) {
+          throw new Error("PDF token limit exceeded");
+        }
+
+        // Log the string
+        setDocumentContent(pdfContent.content);
+        setIncludedDocuments([...includedDocuments, pdfContent.uid]);
+
+        const newDoc = await uploadPdfDocument({
+          content: pdfContent.content,
+          name: plainFiles[0].name,
+        });
+        setDocuments([...documents, newDoc]);
+        setIncludedDocuments([...includedDocuments, newDoc.uid]);
+
+        toast({
+          title: "PDF uploaded successfully!",
+        });
+      } catch (err: Error | any) {
+        if (err.message === "PDF File uploaded too large") {
+          toast({
+            title:
+              "The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ' + pdfFileSize/(1024*1024) + ' bytes!",
+            variant: "destructive",
+          });
+        } else if (
+          err.message === "PDF token limit exceeded" &&
+          estimatedTokenCount !== -1
+        ) {
+          toast({
+            title:
+              "The PDF file uploaded exceeds limit, maximum of 8192 token in each PDF uploaded, your pdf contains ' + estimatedTokenCount + ' tokens",
+            variant: "destructive",
+          });
+        }
       }
-
-      const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
-      estimatedTokenCount = tokenizer.estimateTokenCount(pdfContent.content);
-
-      if (estimatedTokenCount > 16384) {
-        throw new Error("PDF token limit exceeded");
-      }
-
-      // Log the string
-      setDocumentContent(pdfContent.content);
-
-      setIncludedDocuments([...includedDocuments, pdfContent.uid]);
-
-      const newDoc = await uploadPdfDocument({"content": pdfContent.content, "name": plainFiles[0].name});
-      setDocuments([...documents, newDoc]);
-      setIncludedDocuments([...includedDocuments, newDoc.uid]);
-      createAlert("PDF uploaded successfully!", "green");
-    } catch (err: Error | any) {
-      if (err.message === 'PDF File uploaded too large') {
-        createAlert('The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ' + pdfFileSize/(1024*1024) + ' bytes');
-      } else if (err.message === 'PDF token limit exceeded' && estimatedTokenCount !== -1) {
-        createAlert('The PDF file uploaded exceeds limit, maximum of 8192 token in each PDF uploaded, your pdf contains ' + estimatedTokenCount + ' tokens');
-      }
-    }
-      
     },
   });
 
-  const hideStartupImage = () => {
-    // Set the flag in sessionStorage to hide the image on subsequent text submission
-    sessionStorage.setItem("isStartupImageHidden", "true");
-    setShowStartupImage(false);
-  };
-
-  const handleKeyDownImage = () => {
-    hideStartupImage();
-  };
-
-  const handleButtonClickImage = () => {
-    if (showStartupImage) {
-      hideStartupImage();
-    }
-  };
-
-  const textBoxSubmission = () => {
-    handleSubmit();
-    handleButtonClickImage();
-  };
-
-  const TextFormatter: React.FC<{ text: string }> = ({ text }) => {
-    const formattedText = text.replace(/(\d+\.\s+)/g, "<br />$1");
-    return (
-      <div dangerouslySetInnerHTML={{ __html: formattedText }} />
-    );
-  }
-
   return (
     <div className="flex justify-center relative w-full overflow-auto max-h-[100vh] min-h-[100vh] items-start">
+      <Toaster />
       <ChatOptions
         documents={documents}
         deleteDocumentChat={deleteDocumentChat}
@@ -886,7 +319,6 @@ export function Chat({
         handleEnableRag={handleEnableRag}
         conversationTitles={conversationTitles}
         setShowStartupImage={setShowStartupImage}
-        setNewConv={setNewConv}
         setConversationTitle={setConversationTitle}
         conversationTitle={conversationTitle}
       />
@@ -903,7 +335,6 @@ export function Chat({
                 width={350}
                 height={200}
               />
-
               {[
                 "AI, or Artificial Intelligence, refers to the simulation of human intelligence in machines that are programmed to perform tasks that normally require human intelligence, such as speech recognition, decision-making, and natural language processing.",
                 "OpenJustice can help you with a wide variety of tasks, including answering legal questions, providing information on your case, and more. To use OpenJustice, simply type your question or prompt in the chat box and it will generate a response for you.",
@@ -933,172 +364,59 @@ export function Chat({
         )}
 
         {/* Normal Conversation */}
-        {!enableRag && userInputs && (
-          <div className="bg-[transparent] w-full pb-[100px]">
-            {userInputs.map((input, i) => (
-              <div key={i}>
-                {/* Conversation Seperator Line */}
-                {i !== 0 && <Divider></Divider>}
+        {conversation && (
+          <div
+            id="conversation"
+            className={cn(
+              `bg-[transparent] w-full pb-[150px] flex flex-col gap-5 bg-inherit items-end`
+            )}
+          >
+            {conversation.map((convoObj, i) => (
+              <Card
+                key={i}
+                className={cn(
+                  `bg-inherit max-w w-fit px-3`,
+                  {
+                    "shadow-none border-0 self-start":
+                      convoObj.role === "assistant",
+                  },
+                  {
+                    "px-5 py-3 rounded-[15px]": convoObj.role === "user",
+                  }
+                )}
+              >
+                {/* Conversation Title */}
+                <p className={cn(`mb-2 ${i % 2 == 0 ? "text-right" : "text-left"}`)}>
+                  <b>{convoObj?.role === "user" ? "You" : "OpenJustice"}</b>
+                </p>
 
-                {/* User's Input */}
-                <div
-                  style={{
-                    marginBlock: 40,
-                    overflowWrap: "break-word",
-                  }}
-                >
-                  <strong
-                    style={{
-                      marginRight: 10,
-                    }}
-                  >
-                    You:
-                  </strong>
-                  {input}
-                </div>
+                {/* Final Buffered Content */}
+                {convoObj.content !== "" && (
+                  <ReactMarkdown>{convoObj?.content}</ReactMarkdown>
+                )}
 
-                {/* Displays LLM Responses if there are any */}
-                {i < responses.length && (
-                  <>
-                    <Divider></Divider>
-                    <div
-                      className="relative flex-col gap-2"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "start",
-                        marginBlock: 32,
-                        overflowWrap: "break-word",
-                      }}
-                    >
-                      <div>
-                        <strong
-                          style={{
-                            marginRight: 10,
-                          }}
-                        >
-                          OpenJustice:
-                        </strong>
-
-                        {/* LLM Model Response */}
-                        <ReactMarkdown>
-                          {i === responses.length - 1 &&
-                          responses.length > 1 &&
-                          newConv
-                            ? latestResponse
-                            : responses[i].response}
-                        </ReactMarkdown>
-                      </div>
-
-                      {responses[i].is_satisfactory === "N/A" ? (
-                        <ButtonGroup className="translate-x-0 translate-y-0 self-end">
-                          {/* Thumbs Up */}
-                          <IconButton
-                            onClick={() => {
-                              setResponses(
-                                responses.map((res, idx) =>
-                                  idx !== i
-                                    ? res
-                                    : {
-                                        ...res,
-                                        is_satisfactory: true,
-                                      }
-                                )
-                              );
-                              setFeedbackState({
-                                index: i,
-                                dialogOpen: true,
-                                isSatisfactory: true,
-                                message: null,
-                              });
-                              setKwRefs(null);
-                            }}
-                          >
-                            <ThumbUp />
-                          </IconButton>
-
-                          {/* Thumbs Down */}
-                          <IconButton
-                            onClick={() => {
-                              setResponses(
-                                responses.map((res, idx) =>
-                                  idx !== i
-                                    ? res
-                                    : {
-                                        ...res,
-                                        is_satisfactory: false,
-                                      }
-                                )
-                              );
-                              setFeedbackState({
-                                index: i,
-                                dialogOpen: true,
-                                isSatisfactory: false,
-                                message: null,
-                              });
-                            }}
-                          >
-                            <ThumbDown />
-                          </IconButton>
-
-                          {/* Stop Text Generation */}
-                          {i === responses.length - 1 && generating && (
-                            <Button onClick={() => setGenerating(false)}>
-                              Stop
-                            </Button>
-                          )}
-                        </ButtonGroup>
-                      ) : (
-                        <IconButton
-                          disabled
-                          className="translate-x-0 translate-y-0 self-end"
-                        >
-                          {responses[i].is_satisfactory ? (
-                            <ThumbUp />
-                          ) : (
-                            <ThumbDown />
-                          )}
-                        </IconButton>
+                {/*  Buffered LLM Content */}
+                {convoObj.role === "assistant" &&
+                  i === conversation.length - 1 && (
+                    <div className="relative flex-col gap-2 flex justify-between break-normal">
+                      <ReactMarkdown>{latestResponse}</ReactMarkdown>
+                      {/* Loading Animation */}
+                      {loading && latestResponse === "" && (
+                        <div className="w-[10px] h-[10px] bg-[black] rounded-[50%] animate-pulse self-start"></div>
                       )}
                     </div>
-                  </>
-                )}
-              </div>
+                  )}
+              </Card>
             ))}
-
-            {/* Loading Animation */}
-            {loading && <CircularProgress></CircularProgress>}
+            {/* Scroll Into View Ref */}
+            <span ref={scrollIntoViewRef}></span>
           </div>
         )}
 
-        {/* RAG Conversation */}
-        {enableRag && (
-          <>
-            <div className="mb-[160px] bg-[transparent] flex flex-col gap-5 h-full w-full">
-              {ragConversation &&
-                ragConversation.length > 0 &&
-                ragConversation.map((conversation: any, i: number) => (
-                  <div key={i}>
-                    {i !== 0 && <hr />}
-                    <div className="flex flex-col gap-2">
-                      <Label className="font-bold">
-                        {conversation?.role === "user" ? "You" : "OpenJustice"}
-                      </Label>
-                      <p>{conversation.content}</p>
-                    </div>
-                  </div>
-                ))}
-              {loading && (
-                <div className="w-[10px] h-[10px] bg-[black] rounded-[50%] animate-pulse "></div>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* Prompt Input Text Field */}
+        {/* Query Input Text Field */}
         <div className="shadow-none bg-[#f5f5f7] fixed w-full h-[100px] bottom-0">
           <div className="relative w-[52.5%]">
-            <ButtonCN
+            <Button
               variant="ghost"
               className="hover:bg-[#E2E8F0] bg-[transparent] h-[56px] absolute left-[-70px]"
               type="button"
@@ -1106,31 +424,45 @@ export function Chat({
               onClick={openFilePicker}
             >
               <AttachFileIcon />
-            </ButtonCN>
-
+            </Button>
             <Input
-              className="w-full flex bg-[#f5f5f7] min-h-[56px] pr-[95px]"
+              className="w-full flex bg-[#f5f5f7] min-h-[56px] pr-[60px] focus-visible:ring-[none]"
               required
-              placeholder="Prompt"
-              value={currentInput}
-              onChange={(e) => setCurrentInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  handleSubmit();
-                  handleKeyDownImage();
-                  e.preventDefault();
-                }
+              placeholder="Ask OpenJustice"
+              value={userQuery}
+              onChange={(e) => setUserQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSubmit();
               }}
             />
-            <ButtonCN
-              className="absolute right-0 top-[50%] translate-y-[-50%]"
-              variant={"ghost"}
-              onClick={textBoxSubmission}
-              disabled={loading}
-            >
-              <Image src="/assets/icons/send-horizontal.svg" alt="send" width={20} height={20}/>
-            </ButtonCN>
-            <label className="text-[grey] text-[1rem] absolute bottom-[-30px] italic">
+            {loading ? (
+              <Button
+                className="absolute right-0 top-[50%] translate-y-[-50%]"
+                variant={"ghost"}
+                onClick={stopQuery}
+              >
+                <Image
+                  src="/assets/icons/pause.svg"
+                  alt="pause"
+                  width={20}
+                  height={20}
+                />
+              </Button>
+            ) : (
+              <Button
+                className="absolute right-0 top-[50%] translate-y-[-50%]"
+                variant={"ghost"}
+                onClick={handleSubmit}
+              >
+                <Image
+                  src="/assets/icons/send-horizontal.svg"
+                  alt="send"
+                  width={20}
+                  height={20}
+                />
+              </Button>
+            )}
+            <label className="text-[grey] text-sm absolute bottom-[-20px] italic ">
               {num === 0
                 ? "No more prompts allowed. Please enter your final feedback."
                 : `Prompts left: ${num}`}
@@ -1142,71 +474,6 @@ export function Chat({
         <Dialog open={!!alert} onClose={handleAlertClose}>
           <DialogContent>
             <DialogContentText>{alert}</DialogContentText>
-          </DialogContent>
-        </Dialog>
-
-        {/* Feedback Modal */}
-        <Dialog
-          open={feedbackState.dialogOpen}
-          onClose={handleFeedbackClose}
-          fullWidth
-        >
-          <DialogContent
-            style={{
-              display: "flex",
-              alignItems: "center",
-              flexDirection: "column",
-            }}
-          >
-            <h3>Provide additional feedback</h3>
-            <TextField
-              fullWidth
-              label={
-                feedbackState.isSatisfactory
-                  ? "What do you like about the response?"
-                  : "What was the issue with the response? How could it be improved?"
-              }
-              variant="outlined"
-              multiline
-              value={feedbackState.message}
-              onChange={(e) =>
-                setFeedbackState({
-                  ...feedbackState,
-                  message: e.target.value,
-                })
-              }
-            />
-            {!feedbackState.isSatisfactory && (
-              <FormControl component="fieldset" variant="standard">
-                <FormGroup>
-                  {Object.keys(feedbackSelect).map((key) => (
-                    <FormControlLabel
-                      key={key}
-                      control={
-                        <Checkbox
-                          checked={
-                            feedbackSelect[key as keyof FeedbackReasonsI]
-                          }
-                          onChange={(e) =>
-                            setFeedbackSelect({
-                              ...feedbackSelect,
-                              [e.target.name]: e.target.checked,
-                            })
-                          }
-                          name={key}
-                        ></Checkbox>
-                      }
-                      label={key}
-                    ></FormControlLabel>
-                  ))}
-                </FormGroup>
-              </FormControl>
-            )}
-            <br></br>
-            <Button variant="contained" onClick={submitFeedback}>
-              Submit feedback
-            </Button>
-            <br></br>
           </DialogContent>
         </Dialog>
       </div>
