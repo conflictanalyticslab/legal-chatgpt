@@ -9,7 +9,7 @@ import {
 import { editDocument } from "@/util/api/editDocument";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { Textarea } from "../ui/textarea";
@@ -17,6 +17,7 @@ import { Checkbox } from "../ui/checkbox";
 
 type Props = {
     documents: UserDocument[];
+    disabled: boolean,
     deleteDocument: (uid: string) => void;
     documentContent: string;
     setDocumentContent: React.Dispatch<React.SetStateAction<string>>;
@@ -24,22 +25,7 @@ type Props = {
     setIncludedDocuments: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
-const style = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    width: "85%",
-    height: "85%",
-    transform: "translate(-50%, -50%)",
-    backgroundColor: "background.paper",
-    border: "2px solid #000",
-    boxShadow: 24,
-    p: 4,
-    overflow: "scroll",
-    overflowY: "auto",
-};
-
-export default function PDFModal({ documents, deleteDocument, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments }: Props) {
+export default function PDFModal({ documents, disabled,  deleteDocument, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments }: Props) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -49,7 +35,7 @@ export default function PDFModal({ documents, deleteDocument, documentContent, s
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild disabled={disabled}>
         <Button
           variant={"ghost"}
           className="w-full flex gap-5 justify-start"
@@ -68,6 +54,7 @@ export default function PDFModal({ documents, deleteDocument, documentContent, s
         onOpenAutoFocus={(e) => e.preventDefault()}
         className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[60vw] flex flex-col gap-5 overflow-auto box-border"
       >
+        <DialogTitle className="hidden"></DialogTitle>
         <div className="flex flex-col gap-4">
           <Label className="font-bold">Uploaded PDFs</Label>
           <>

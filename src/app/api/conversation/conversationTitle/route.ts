@@ -50,6 +50,8 @@ export async function POST(req: Request) {
   }
 
   const { fullConversation, includedDocuments} = await req.json();
+  console.log("\nConversation Title ------>", fullConversation)
+
   if (fullConversation.length === 0) {
     return NextResponse.json(
       { error: "fullConversation is empty" },

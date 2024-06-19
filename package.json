@@ -34,6 +34,7 @@
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-switch": "^1.0.3",
+    "@radix-ui/react-toast": "^1.2.0",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@types/node": "20.6.3",
     "@types/react": "18.2.22",
@@ -62,6 +63,7 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.2.2",
+    "use-debounce": "^10.0.1",
     "use-file-picker": "^2.0.0",
     "yarn": "^1.22.21",
     "zod": "^3.23.8"

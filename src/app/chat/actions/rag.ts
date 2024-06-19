@@ -12,8 +12,10 @@ export async function useRag(query:string, namespace:string=''){
     const pinecone = new Pinecone({
         apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY || '',
       });
+
     const pineconeIndex = pinecone.Index('legal-pdf-documents');
     
+    // Create a vectore store (database of vectors) with the specified LLM and pinecone index
     const vectorStore = await PineconeStore.fromExistingIndex(
       new OpenAIEmbeddings({ apiKey: process.env.OPENAI_API_KEY }),
       {
@@ -21,12 +23,12 @@ export async function useRag(query:string, namespace:string=''){
       }
     );
 
-    vectorStore.namespace = namespace;
-    console.log("\n\nTHE NAME SPACE IS \n\n", vectorStore.namespace)
+    vectorStore.namespace = namespace; //Specify the namespace to use
+
     // ********************************* SEMANTIC SEARCH ********************************* //
     const retriever = vectorStore.asRetriever();
     
-    // ********************************* CREATING A PROMPT ********************************* //
+    // ********************************* CREATING A PROMPT FOR RAG ********************************* //
     const prompt = await pull<ChatPromptTemplate>("rlm/rag-prompt");
     
     // ********************************* LLM INITIALIZATION ********************************* //
@@ -44,7 +46,7 @@ export async function useRag(query:string, namespace:string=''){
     const retrievedDocs = await retriever.getRelevantDocuments(
         query
     );
-    console.log("\n\nHEEEEERE\n\n")
+
     // ********************************* INVOKING RAG ********************************* //
     const res = await ragChain.invoke({
         question: query,

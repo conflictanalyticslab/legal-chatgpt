@@ -59,6 +59,9 @@ export async function POST(req: Request) {
 
   if (user && user.prompts_left > 0) {
   const {searchPrompt, documentPrompt, fullConversation} = await req.json()
+
+  console.log("\n conversation", fullConversation )
+
   if (fullConversation.length === 0) {
     return NextResponse.json(
       { error: "fullConversation is empty" },
@@ -66,8 +69,6 @@ export async function POST(req: Request) {
     );
   }
   let gpt_flag = true;
-  
-      // console.log(fullConversation);
 
       let secondReplyRes:any;
         try {
@@ -127,7 +128,7 @@ export async function POST(req: Request) {
         }
       }
 
-      
+      console.log("WE ARE IN THE ROUTE- -----------------------")
       // console.log("Logging second response from OpenAi", secondReplyRes.body.getReader().read().value);
       if (secondReplyRes.choices[0].message.content) {
       return NextResponse.json({
