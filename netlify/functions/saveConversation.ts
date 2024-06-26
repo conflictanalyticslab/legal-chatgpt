@@ -40,6 +40,7 @@ exports.handler = async (event:any, context:any) => {
       console.log("uid: ", uid);
       console.log("=================saveConversation===================")
 
+      // create a new document for the conversation in the database
       await docRef.create({
         conversation: fullConversation,
         documents: includedDocuments,
