@@ -44,3 +44,9 @@ To learn more about Next.js, take a look at the following resources:
 - For Windows, download the `ngrok.exe` file from https://ngrok.com/download and click to open that file. This should open up an ngrok window.
 - In the ngrok window, run `ngrok config add-authtoken <token>` and `ngrok http --domain=chat.openjustice.ai 3000`. You may need to ask the developer for the token as well.
 - The app should be running at https://chat.openjustice.ai ! (Might take a couple minutes to spin up the app)
+
+# Developer Contributing Guidelines
+
+- Make only small changes to each commits
+- Create a new branch for every new request/ticket
+- Use git rebase for cherry picking, avoid using git commit reset --hard if possible
