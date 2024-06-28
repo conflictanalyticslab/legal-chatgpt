@@ -14,6 +14,7 @@ import admin from "firebase-admin";
     // const { earlyResponse, decodedToken } = await authenticateApiUser();
     // if (earlyResponse) return earlyResponse;
 
+    // check if firebase admin backend is initialized, if not, initialize it here
     if (admin.apps.length === 0) {
       admin.initializeApp({
         credential: admin.credential.cert(
@@ -26,6 +27,7 @@ import admin from "firebase-admin";
     initBackendFirebaseApp();
   
     try {
+      // get document reference in firestore
       const convoRef = getFirestore().collection("conversations").doc(uid);
   
       if (!convoRef) {
@@ -34,7 +36,8 @@ import admin from "firebase-admin";
           body: JSON.stringify({ error: "No matching conversation found" }),
         };
       }
-  
+      
+      // update the conversation with the new data
       await convoRef.update({conversation: fullConversation, documents: includedDocuments, title: title });
 
       console.log("conversation: ", fullConversation);
