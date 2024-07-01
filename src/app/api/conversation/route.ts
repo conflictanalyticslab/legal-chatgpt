@@ -1,12 +1,23 @@
+/**
+ * @file: route.ts - api/conversation - api route for calling the normal LLM's response
+ *
+ * @author Kevin Yu <yu.kevin2002@gmail.com>
+ * @date Jun 2024
+ */
 
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { loadUser } from "@/util/api/middleware/loadUser";
-import { queryOpenAi } from "@/util/api/queryOpenAi";
-import queryLlama2 from "@/util/api/queryLlama2";
+import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
+import queryLlama2 from "@/util/LLM_utils/queryLlama2";
 import { NextResponse } from "next/server";
 import GPT4Tokenizer from 'gpt4-tokenizer';
 import { getFirestore } from "firebase-admin/firestore";
 
+/**
+ * 
+ * @param req 
+ * @returns 
+ */
 export async function GET(req: Request) {
   const { earlyResponse, decodedToken } = await authenticateApiUser();
   if (earlyResponse) {
@@ -60,8 +71,6 @@ export async function POST(req: Request) {
   if (user && user.prompts_left > 0) {
   const {searchPrompt, documentPrompt, fullConversation} = await req.json()
 
-  console.log("\n conversation", fullConversation )
-
   if (fullConversation.length === 0) {
     return NextResponse.json(
       { error: "fullConversation is empty" },
@@ -70,28 +79,35 @@ export async function POST(req: Request) {
   }
   let gpt_flag = true;
 
-      let secondReplyRes:any;
+      let llmResponse:any;
         try {
-        secondReplyRes = await queryOpenAi({
-          model: "gpt-3.5-turbo-0125",
-          format: "markdown",
-          messages: [
+          if (fullConversation.length < 2) return;
+
+          fullConversation[fullConversation.length - 2].content =
+            "Answer in 500 words or less. Short answers are better.\n\n" +
+            documentPrompt +
+            "\n\n" +
+            searchPrompt;
+          console.log(fullConversation)
+          llmResponse = await queryOpenAi(
             {
-              role: "system",
-              content:
-                "Answer in 500 words or less. Short answers are better.\n\n" +
-                documentPrompt +
-                "\n\n" +
-                searchPrompt,
+              model: "gpt-3.5-turbo-0125",
+              format: "markdown",
+              messages: [...fullConversation],
             },
-            ...fullConversation,
-          ],
-        }, true);
-        if (!secondReplyRes) {
+            true
+          );
+
+
+        // Flag to determine whether we need to use LLAMA model
+        if (!llmResponse) {
           gpt_flag = false;
         }
-        return secondReplyRes;
-      } catch (error) {
+
+        return llmResponse; 
+      } 
+      catch (error) 
+      {
         console.error("queryOpenAi failed: " + error);
         gpt_flag = false;
       }
@@ -113,7 +129,7 @@ export async function POST(req: Request) {
         }
 
         try {
-          secondReplyRes = await queryLlama2({
+          llmResponse = await queryLlama2({
             "messages": [
               {
                 "role": "user",
@@ -122,17 +138,17 @@ export async function POST(req: Request) {
               ...fullConversation
             ]
           });
-          console.log("Logging second response from llama2", secondReplyRes.choices[0].message.content);
+          console.log("Logging second response from llama2", llmResponse.choices[0].message.content);
         } catch (error) {
           console.error("queryLlama2 failed in conversation/route.ts for second response: " + error);
         }
       }
 
       console.log("WE ARE IN THE ROUTE- -----------------------")
-      // console.log("Logging second response from OpenAi", secondReplyRes.body.getReader().read().value);
-      if (secondReplyRes.choices[0].message.content) {
+      // console.log("Logging second response from OpenAi", llmResponse.body.getReader().read().value);
+      if (llmResponse.choices[0].message.content) {
       return NextResponse.json({
-        latestBotResponse: secondReplyRes.choices[0].message.content
+        latestBotResponse: llmResponse.choices[0].message.content
       });
     } else {
       return NextResponse.json({

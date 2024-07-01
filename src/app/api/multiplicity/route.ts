@@ -1,10 +1,10 @@
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { loadUser } from "@/util/api/middleware/loadUser";
-import { queryOpenAi } from "@/util/api/queryOpenAi";
-import queryLlama2 from "@/util/api/queryLlama2";
+import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
+import queryLlama2 from "@/util/LLM_utils/queryLlama2";
 import { NextResponse } from "next/server";
-import { getDocumentText } from "@/util/api/getDocuments";
-import { generatePromptFromDocuments } from "@/util/api/generatePromptFromDocuments";
+import { getDocumentText } from "@/util/api/firebase_utils/getDocuments";
+import { generatePromptFromDocuments } from "@/util/api/firebase_utils/generatePromptFromDocuments";
 import { searchAndSummarize } from "@/util/api/searchAndSummarize";
 
 export async function POST(req: Request) {

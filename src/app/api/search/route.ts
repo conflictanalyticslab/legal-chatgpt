@@ -1,6 +1,6 @@
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
-import { queryOpenAi } from "@/util/api/queryOpenAi";
-import queryLlama2 from "@/util/api/queryLlama2";
+import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
+import queryLlama2 from "@/util/LLM_utils/queryLlama2";
 import { callSearchAPI } from "@/util/api/runSearch";
 import { NextResponse } from "next/server";
 

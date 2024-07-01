@@ -1,11 +1,15 @@
-import { similaritySearch } from "@/app/chat/actions/semantic-search";
 import { toast } from "@/components/ui/use-toast";
 import { postConversation } from "@/util/requests/postConversation";
 import { postSearchTerms } from "@/util/requests/postSearchTerms";
 import GPT4Tokenizer from "gpt4-tokenizer";
-import { updateConversationTitle } from "./firebase_utils";
+import { updateConversationTitle } from "../firebase/firebase_utils";
+import { getDocumentText } from "@/util/api/firebase_utils/getDocuments";
+import { elasticDtoToRelevantDocuments, pineconeDtoToRelevantDocuments } from "@/app/chat/api/documents/transform";
+import { similaritySearch } from "@/app/chat/api/semantic-search";
+import { useChatContext } from "../../store/ChatContext";
 
-export async function fetchWithLLM( documentContent:any, userQuery:string, conversation:any, setConversation:any, setUserQuery:any, num:any, setNum:any, setLoading:any, includedDocuments:any, setAlert:any, generateFlagRef:any, setLatestResponse:any, setPdfQuery:any, setRelevantPDFs:any, setSearchTerm:any, namespace:string, conversationTitle:any, setConversationTitle:any, conversationUid:any, setConversationUid:any, handleBeforeUnload:any) {
+export async function fetchWithLLM( documentContent:any, userQuery:string, conversation:any, setConversation:any, setUserQuery:any, num:any, setNum:any, setLoading:any, includedDocuments:any, setAlert:any, generateFlagRef:any, setLatestResponse:any, setDocumentQuery:any, setRelevantDocs:any, setSearchTerm:any, namespace:string, conversationTitle:any, setConversationTitle:any, conversationUid:any, setConversationUid:any, handleBeforeUnload:any, documentQueryMethod:any) {
+
   // Adds uploaded document content from user
   const addtionalUploadedDocContent =
     documentContent.length > 0
@@ -48,40 +52,19 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
   }
 
   let search_terms_res;
-  // ---------------------------------------------- AI GENERATED PROMPT? ---------------------------------------------- //
-  // Calls postSearchTerms to provide us a structured prompt query query OpenAI's Model
-  if (includedDocuments.length === 0) {
-    search_terms_res = await postSearchTerms(
-      fullConversation,
-      includedDocuments,
-      false
-    );
-  } else {
-    // uses conversationMult prompt to generate search terms
-    search_terms_res = await postSearchTerms(
-      fullConversation,
-      includedDocuments,
-      true
-    );
-  }
-  // Checks if the AI generated search term failed
-  if (!search_terms_res.ok) {
-    const errorData = await search_terms_res.json();
-    setAlert(errorData.error);
-    setLoading(false);
-    return;
-  }
+  // ---------------------------------------------- FETCH UPLOADED DOCUMENT CONTENT ---------------------------------------------- //
 
-  const { toSearch, searchPrompt, documentPrompt } =
-    await search_terms_res.json();
-
+  // const documentPrompt = await createDocumentPrompt(includedDocuments);
+  const documentPrompt = "";
   // ---------------------------------------------- LLM OUTPUT ---------------------------------------------- //
-  // Call OpenAI or LLAMA to generate response based on the AI generated prompt
+
+  // Retrieve LLM model output
   const response = await postConversation(
-    searchPrompt,
+    userQuery,
     documentPrompt,
     fullConversation
   );
+
   let buffer = "";
 
   // The output stream coming from the model
@@ -97,9 +80,8 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
     while (generateFlagRef.current) {
       const currentResponse = await reader.read();
 
-      if (currentResponse.done) {
-        break;
-      }
+      if (currentResponse.done) break;
+
       // decode content
       let valueOfCurrentResponse = "";
       valueOfCurrentResponse += decoder.decode(currentResponse.value, {
@@ -152,13 +134,39 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
 
   setConversation([...fullConversation]); // Have to update its pointer to reset state
   setLatestResponse(""); // Clear buffered response
-  setSearchTerm(toSearch); // Update search term for searching relevant pdfs
-  setLoading(false);
 
-  // ---------------------------------------------- SEMANTIC SEARCH ---------------------------------------------- //
-  setPdfQuery(userQuery);
-  const pdfs = await similaritySearch(userQuery, 3, namespace);
-  setRelevantPDFs(pdfs.matches);
+  // ---------------------------------------------- ELASTIC SEARCH ---------------------------------------------- //
+  if(documentQueryMethod === "elastic") {
+
+    // Generate elastic search prompt and document prompt from Open AI
+    search_terms_res = await postSearchTerms(userQuery);
+  
+    if (!search_terms_res.ok) {
+      const errorData = await search_terms_res.json();
+      setAlert(errorData.error);
+      setLoading(false);
+      return;
+    }
+  
+    // Retrieve elastic search results and get selected pdf document(s) text
+    const { elasticSearchResults } = await search_terms_res.json();
+    setRelevantDocs(elasticDtoToRelevantDocuments(elasticSearchResults));
+    setDocumentQuery(userQuery)
+  } 
+  else {
+
+    // Semantic Search
+    try {
+      const similarDocs = await similaritySearch(userQuery, 3, namespace);
+      setRelevantDocs(pineconeDtoToRelevantDocuments(similarDocs));
+      setDocumentQuery(userQuery);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  setSearchTerm(userQuery); // TODO: Update search term for searching relevant pdfs (no idea right now what this is for will ask later)
+  setLoading(false);
 
   // Update Conversation Title
   updateConversationTitle(
