@@ -1,6 +1,6 @@
 'use server'
 import { Pinecone } from "@pinecone-database/pinecone";
-import {embedder} from "@/components/Chat/utils/embeddings"
+import {embedder} from "@/components/Chat/utils/embeddings/embeddings"
 import { TextMetadata } from "@/types/chat";
 export async function similaritySearch (query:string, topK:number = 3, namespace='') {
   const pinecone = new Pinecone({
@@ -14,14 +14,13 @@ export async function similaritySearch (query:string, topK:number = 3, namespace
   // Embed the query
   const queryEmbedding = await embedder.embed(query);
 
-  console.log("query",query)
-
   // Query the index using the query embedding
-  const results = await index.query({
+  const documentResults = await index.query({
     vector: queryEmbedding.values,
     topK,
     includeMetadata: true,
     includeValues: false,
   });
-  return results
+
+  return documentResults
 }

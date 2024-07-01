@@ -1,5 +1,3 @@
-import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { DropdownMenuItem, DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Button } from "../ui/button";
 import SearchModal from "@/components/Chat/SearchModal";
@@ -9,12 +7,11 @@ import { Switch } from "../ui/switch";
 import Image from "next/image";
 import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Card } from "../ui/card";
 import { useChatContext } from "./store/ChatContext";
 
 function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments, enableRag, handleEnableRag, conversationTitles, setShowStartupImage, setConversationTitle, conversationTitle }) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const { namespace, setNamespace } = useChatContext();
+    const { setNamespace, documentQueryMethod, setDocumentQueryMethod } = useChatContext();
     return (
       <div className="absolute top-4 right-8">
         <Popover open={dropdownOpen}>
@@ -66,7 +63,31 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
               </div>
             </Button>
 
-            <div className="flex flex-col gap-2 pt-2">
+            <div className="flex flex-col gap-1 pt-1">
+
+              {/* Document Query Method */}
+              <Select onValueChange={setDocumentQueryMethod} value={documentQueryMethod}>
+                <SelectTrigger className="w-full outline-[none] focus:shadow-none focus:ring-offset-0 focus:ring-0 px-[1rem]">
+                  <div className="flex gap-3">
+                    <Image
+                      src="/assets/icons/scan-search.svg"
+                      height={18}
+                      width={18}
+                      alt="Jurisdiction"
+                    />
+                    <SelectValue defaultValue={"elastic"} placeholder="Elastic Search" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="elastic">Elastic Search</SelectItem>
+                    <SelectItem value="pinecone">
+                      Pinecone
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
               {/* Jurisdiction */}
               <Select onValueChange={setNamespace}>
                 <SelectTrigger className="w-full outline-[none] focus:shadow-none focus:ring-offset-0 focus:ring-0 px-[1rem]">
@@ -77,7 +98,7 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                       width={18}
                       alt="Jurisdiction"
                     />
-                    <SelectValue placeholder="Choose a Jurisdiction"/>
+                    <SelectValue placeholder="Choose a Jurisdiction" />
                   </div>
                 </SelectTrigger>
                 <SelectContent>

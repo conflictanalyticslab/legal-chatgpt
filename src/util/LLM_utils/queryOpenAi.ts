@@ -1,9 +1,19 @@
+/**
+ * 
+ * @param data the data object that is sent to OpenAi
+ * @param {boolean} stream indicates whether to retrieve a stream response or not.
+ * @returns 
+ */
 export const queryOpenAi = async (data: any, stream=false) => {
+  console.log("before calling openAI", data)
   if (!data.hasOwnProperty("model")) {
     // specifying default gpt model here
     data["model"] = "gpt-3.5-turbo-0125";
   }
-  if (!stream) {
+
+  // Generate stream response
+  if (!stream) 
+    {
     data["stream"] = false;
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       headers: {
@@ -15,7 +25,10 @@ export const queryOpenAi = async (data: any, stream=false) => {
     });
     const result = await response.json();
     return result;
-  } else {
+  } 
+  else 
+  {
+    // Generate Stream Response
     data["stream"] = true;
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       headers: {

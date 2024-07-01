@@ -1,9 +1,7 @@
 import { auth } from "@/firebase";
 
 export async function postSearchTerms(
-  fullConversation: object[],
-  includedDocuments: string[],
-  isMult: boolean
+  userQuery: string,
 ) {
   return await fetch("/api/conversation/searchTerms", {
     method: "POST",
@@ -11,6 +9,6 @@ export async function postSearchTerms(
       "Content-Type": "application/json",
       Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
     },
-    body: JSON.stringify({ fullConversation, includedDocuments, isMult }),
+    body: JSON.stringify({ userQuery }),
   });
 }

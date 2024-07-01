@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, MouseEventHandler } from "react";
 import Image from "next/image";
 
 // import external components
@@ -23,36 +23,31 @@ import { auth } from "@/firebase";
 import ChatPageOJ from "@/images/ChatPageOJ.png";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { postConversation } from "@/util/requests/postConversation";
-import { uploadPdfDocument } from "@/util/requests/uploadPdfDocument";
-import { useFilePicker } from "use-file-picker";
-import {
-  FileAmountLimitValidator,
-  FileSizeValidator,
-} from "use-file-picker/validators";
 
 // import OJ hooks
 import { getConversationTitles } from "@/util/requests/getConversationTitles";
-import { postPDF } from "@/util/requests/postPDF";
 
 // import OJ components
 import {
   UserDocument,
   getDocumentsOwnedByUser,
 } from "@/util/requests/getDocumentsOwnedByUser";
-import {deleteDocument} from "@/util/api/deleteDocument";
+import {deleteDocument} from "@/util/api/firebase_utils/deleteDocument";
 import { Card, CardContent, CardTitle } from "../ui/card";
-import { similaritySearch } from "../../app/chat/actions/semantic-search";
+import { similaritySearch } from "../../app/chat/api/semantic-search";
 import { useChatContext } from "./store/ChatContext";
-import { useRag } from "../../app/chat/actions/rag";
+import { useRag } from "../../app/chat/api/rag";
 import { Input } from "../ui/input";
 import ChatOptions from "./ChatOptions"
-import { toast } from "../ui/use-toast";
 import { Toaster } from "../ui/toaster";
-import {fetchWithRAG} from "@/components/Chat/utils/rag_utils"
+import {fetchWithRAG} from "@/components/Chat/utils/LLM/rag_utils"
 import { Conversation } from "./types/conversationTitles";
 import "./Chat.css"
 import { cn } from "@/lib/utils";
-import { fetchWithLLM } from "./utils/normal_LLM_utils";
+import { fetchWithLLM } from "./utils/LLM/normal_LLM_utils";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "../ui/tooltip";
+import { handleUploadFile } from "./utils/pdfs/pdf_utils";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
 
 export function Chat({
   wasSearched,
@@ -66,7 +61,6 @@ export function Chat({
   const [latestResponse, setLatestResponse] = useState('');
   const [userQuery, setUserQuery] = useState('');
   const [documentContent, setDocumentContent] = useState('');
-  const [loading, setLoading] = useState(false);
   const [num, setNum] = useState(-1);
   const [conversationTitles, setConversationTitles] = useState<
     { title: string; uid: string }[]
@@ -78,14 +72,20 @@ export function Chat({
   const [documents, setDocuments] = useState<UserDocument[]>([]);
   const scrollIntoViewRef = useRef<HTMLSpanElement>(null);
   const {
-    setPdfQuery,
-    setRelevantPDFs,
+    setDocumentQuery,
+    setRelevantDocs,
     enableRag,
     setEnableRag,
     namespace,
     generateFlagRef,
+    loadingPDF,
+    setLoadingPDF,
+    alert,
+    setAlert,
+    loading,
+    setLoading,
+    documentQueryMethod
   } = useChatContext();
-  const [alert, setAlert] = useState('');
 
   useEffect(()=> {
     if(scrollIntoViewRef?.current){
@@ -133,7 +133,8 @@ export function Chat({
       });
   };
 
-  const stopQuery = () =>{
+  const stopQuery = (event:React.MouseEvent<HTMLButtonElement>) =>{
+    event.preventDefault();
     generateFlagRef.current = false
   }
 
@@ -164,7 +165,9 @@ export function Chat({
    *
    * @returns {void}
    */
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     if (userQuery === "") return;
 
     // Check for authentication
@@ -192,11 +195,12 @@ export function Chat({
         conversationUid,
         setLoading,
         conversationTitle,
-        setPdfQuery,
-        setRelevantPDFs,
+        setDocumentQuery,
+        setRelevantDocs,
         similaritySearch,
         setAlert,
-        handleBeforeUnload
+        handleBeforeUnload,
+        documentQueryMethod
       );
     } else {
       try {
@@ -213,15 +217,16 @@ export function Chat({
           setAlert,
           generateFlagRef,
           setLatestResponse,
-          setPdfQuery,
-          setRelevantPDFs,
+          setDocumentQuery,
+          setRelevantDocs,
           setSearchTerm,
           namespace,
           conversationTitle,
           setConversationTitle,
           conversationUid,
           setConversationUid,
-          handleBeforeUnload
+          handleBeforeUnload,
+          documentQueryMethod
         );
       } catch (error) {
         console.error(error);
@@ -236,74 +241,15 @@ export function Chat({
     setAlert("");
   };
 
-  const { openFilePicker } = useFilePicker({
-    accept: ".pdf",
-
-    // ArrayBuffer takes exactly as much space as the original file. DataURL, the default, would make it bigger.
-    readAs: "ArrayBuffer",
-    validators: [
-      new FileAmountLimitValidator({ max: 1 }),
-      new FileSizeValidator({ maxFileSize: 5 * 1024 * 1024 /* 5 megabytes */ }),
-    ],
-    onFilesRejected: ({ errors }) => {
-      console.log(errors);
-      setAlert("File is too big. We have a 5 Mb limit.");
-    },
-    onFilesSuccessfullySelected: async ({ plainFiles }: any) => {
-      // this callback is called when there were no validation errors
-      let estimatedTokenCount = -1;
-      let pdfFileSize = -1;
-
-      try {
-        const pdfContent = await postPDF(plainFiles[0]);
-
-        pdfFileSize = plainFiles[0].size;
-
-        if (pdfFileSize > 5 * 1024 * 1024) {
-          throw new Error("PDF File uploaded too large");
-        }
-
-        const tokenizer = new GPT4Tokenizer({ type: "gpt3" });
-        estimatedTokenCount = tokenizer.estimateTokenCount(pdfContent.content);
-
-        if (estimatedTokenCount > 16384) {
-          throw new Error("PDF token limit exceeded");
-        }
-
-        // Log the string
-        setDocumentContent(pdfContent.content);
-        setIncludedDocuments([...includedDocuments, pdfContent.uid]);
-
-        const newDoc = await uploadPdfDocument({
-          content: pdfContent.content,
-          name: plainFiles[0].name,
-        });
-        setDocuments([...documents, newDoc]);
-        setIncludedDocuments([...includedDocuments, newDoc.uid]);
-
-        toast({
-          title: "PDF uploaded successfully!",
-        });
-      } catch (err: Error | any) {
-        if (err.message === "PDF File uploaded too large") {
-          toast({
-            title:
-              "The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ' + pdfFileSize/(1024*1024) + ' bytes!",
-            variant: "destructive",
-          });
-        } else if (
-          err.message === "PDF token limit exceeded" &&
-          estimatedTokenCount !== -1
-        ) {
-          toast({
-            title:
-              "The PDF file uploaded exceeds limit, maximum of 8192 token in each PDF uploaded, your pdf contains ' + estimatedTokenCount + ' tokens",
-            variant: "destructive",
-          });
-        }
-      }
-    },
-  });
+    const {openFilePicker}= handleUploadFile(
+      setDocumentContent,
+      setIncludedDocuments,
+      setDocuments,
+      documents,
+      includedDocuments,
+      setLoadingPDF,
+      setAlert
+    );
 
   return (
     <div className="flex justify-center relative w-full overflow-auto max-h-[100vh] min-h-[100vh] items-start">
@@ -386,7 +332,11 @@ export function Chat({
                 )}
               >
                 {/* Conversation Title */}
-                <p className={cn(`mb-2 ${i % 2 == 0 ? "text-right" : "text-left"}`)}>
+                <p
+                  className={cn(
+                    `mb-2 ${i % 2 == 0 ? "text-right" : "text-left"}`
+                  )}
+                >
                   <b>{convoObj?.role === "user" ? "You" : "OpenJustice"}</b>
                 </p>
 
@@ -414,26 +364,37 @@ export function Chat({
         )}
 
         {/* Query Input Text Field */}
-        <div className="shadow-none bg-[#f5f5f7] fixed w-full h-[100px] bottom-0">
+        <form className="shadow-none bg-[#f5f5f7] fixed w-full h-[100px] bottom-0" onSubmit={handleSubmit}>
           <div className="relative w-[52.5%]">
-            <Button
-              variant="ghost"
-              className="hover:bg-[#E2E8F0] bg-[transparent] h-[56px] absolute left-[-70px]"
-              type="button"
-              aria-label="Attach PDF"
-              onClick={openFilePicker}
-            >
-              <AttachFileIcon />
-            </Button>
+            {enableRag ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger className="bg-[transparent] p-3 absolute left-[-70px] opacity-[0.5] ">
+                    <AttachFileIcon />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Document Uploading isn't available when RAG is enabled.
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <Button
+                variant="ghost"
+                className="hover:bg-[#E2E8F0] bg-[transparent] h-[56px] absolute left-[-70px]"
+                type="button"
+                aria-label="Attach PDF"
+                onClick={openFilePicker}
+                disabled={enableRag || loadingPDF}
+              >
+                {loadingPDF ? <LoadingSpinner /> : <AttachFileIcon />}
+              </Button>
+            )}
             <Input
               className="w-full flex bg-[#f5f5f7] min-h-[56px] pr-[60px] focus-visible:ring-[none]"
               required
               placeholder="Ask OpenJustice"
               value={userQuery}
               onChange={(e) => setUserQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSubmit();
-              }}
             />
             {loading ? (
               <Button
@@ -452,7 +413,7 @@ export function Chat({
               <Button
                 className="absolute right-0 top-[50%] translate-y-[-50%]"
                 variant={"ghost"}
-                onClick={handleSubmit}
+                type="submit"
               >
                 <Image
                   src="/assets/icons/send-horizontal.svg"
@@ -468,7 +429,7 @@ export function Chat({
                 : `Prompts left: ${num}`}
             </label>
           </div>
-        </div>
+        </form>
 
         {/* Alert Modal */}
         <Dialog open={!!alert} onClose={handleAlertClose}>

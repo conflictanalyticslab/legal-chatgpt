@@ -5,18 +5,22 @@ const ChatContext = createContext();
 
 export const ChatContextProvider = ({ children }) => {
   const [state, setState] = useState("default value");
-  const [relevantPDFs, setRelevantPDFs] = useState([]);
-  const [pdfQuery, setPdfQuery] = useState('')
+  const [relevantDocs, setRelevantDocs] = useState([]);
+  const [documentQuery, setDocumentQuery] = useState('')
   const [enableRag, setEnableRag] = useState(false);
   const [ragConversation, setRagConversation] = useState([]);
   const [namespace, setNamespace] = useState('');
   const [userQuery, setUserQuery] = useState('');
   const [generateFlag, setGenerateFlag] = useState(true);
+  const [loadingPDF, setLoadingPDF] = useState(false);
+  const [documentQueryMethod, setDocumentQueryMethod] = useState('elastic')
+  const [alert, setAlert] = useState('');
+  const [loading, setLoading] = useState(false);
   const generateFlagRef = useRef(generateFlag);
 
   return (
     <ChatContext.Provider
-      value={{ state, setState, relevantPDFs, setRelevantPDFs, pdfQuery, setPdfQuery, enableRag, setEnableRag, ragConversation, setRagConversation, namespace, setNamespace, userQuery, setUserQuery, generateFlag, setGenerateFlag, generateFlagRef }}
+      value={{ state, setState, relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, enableRag, setEnableRag, ragConversation, setRagConversation, namespace, setNamespace, userQuery, setUserQuery, generateFlag, setGenerateFlag, generateFlagRef, loadingPDF, setLoadingPDF, documentQueryMethod, setDocumentQueryMethod, alert, setAlert, loading, setLoading }}
     >
       {children}
     </ChatContext.Provider>

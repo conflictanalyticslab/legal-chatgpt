@@ -1,12 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import Modal from '@mui/material/Modal';
 import Image from "next/image";
-import DocsImg from "../../images/doc_img.jpeg";
-import {
-    UserDocument,
-    getDocumentsOwnedByUser,
-} from "@/util/requests/getDocumentsOwnedByUser";
-import { editDocument } from "@/util/api/editDocument";
+import { UserDocument } from "@/util/requests/getDocumentsOwnedByUser";
+import { editDocument } from "@/util/api/firebase_utils/editDocument";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../ui/dialog";
@@ -26,20 +21,44 @@ type Props = {
 };
 
 export default function PDFModal({ documents, disabled,  deleteDocument, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments }: Props) {
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
   const [editing, setEditing] = useState("");
-  const textFieldRef = useRef<any>(null);
   const [inputValue, setInputValue] = useState("");
+  const textFieldRef = useRef<any>(null);
+
+  const handleUpdateDocumentContent = (document:any) => {
+    if (includedDocuments.includes(document.uid)) {
+      // Remove the document's content from the state variable
+      setDocumentContent(
+        documentContent.replace(document.text, "")
+      );
+      
+      // Remove the document's id from the list of included documents
+      setIncludedDocuments(
+        includedDocuments.filter(
+          (docUid: string) => docUid != document.uid
+        )
+      );
+    } else {
+      // Add the document's content from the state variable
+      setDocumentContent(
+        documentContent + " " + document.text
+      );
+
+      // Add the document's id from the list of included documents
+      setIncludedDocuments([
+        ...includedDocuments,
+        document.uid,
+      ]);
+    }
+  }
 
   return (
     <Dialog>
+      {/* Add Document Dropdown Menu Option */}
       <DialogTrigger asChild disabled={disabled}>
         <Button
           variant={"ghost"}
           className="w-full flex gap-5 justify-start"
-          onClick={handleOpen}
         >
           <Image
             src={"/assets/icons/file-text.svg"}
@@ -57,38 +76,23 @@ export default function PDFModal({ documents, disabled,  deleteDocument, documen
         <DialogTitle className="hidden"></DialogTitle>
         <div className="flex flex-col gap-4">
           <Label className="font-bold">Uploaded PDFs</Label>
-          <>
+          {/* Uploaded Documents */}
             <div className="grid grid-cols-1 gap-2">
               {documents.map((document, i) => (
                 <div key={i}>
                   <Card className="">
                     <CardHeader className="flex justify-between flex-row items-center">
-                      <Label className="font-bold">{document.name}</Label>
+
+                      {/* Document Title */}
+                      <Label className="font-bold break-words">{document.name}</Label>
+
+                      {/* Include Document In Conversation */}
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger className="!m-0" asChild>
                             <Checkbox
                               checked={includedDocuments.includes(document.uid)}
-                              onClick={() => {
-                                if (includedDocuments.includes(document.uid)) {
-                                  setDocumentContent(
-                                    documentContent.replace(document.text, "")
-                                  );
-                                  setIncludedDocuments(
-                                    includedDocuments.filter(
-                                      (docUid: string) => docUid != document.uid
-                                    )
-                                  );
-                                } else {
-                                  setDocumentContent(
-                                    documentContent + " " + document.text
-                                  );
-                                  setIncludedDocuments([
-                                    ...includedDocuments,
-                                    document.uid,
-                                  ]);
-                                }
-                              }}
+                              onClick={()=>handleUpdateDocumentContent(document)}
                             />
                           </TooltipTrigger>
                           <TooltipContent align="end" sideOffset={10}>
@@ -97,9 +101,14 @@ export default function PDFModal({ documents, disabled,  deleteDocument, documen
                         </Tooltip>
                       </TooltipProvider>
                     </CardHeader>
+
                     <CardContent className="flex flex-col gap-3">
+                      {/* Document Text */}
                       <p className="line-clamp-6">{document.text}</p>
+
+                      {/* Document Actions */}
                       <div className="flex gap-3 justify-end">
+                        {/* Edit Document */}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger
@@ -123,6 +132,8 @@ export default function PDFModal({ documents, disabled,  deleteDocument, documen
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
+
+                        {/* Delete Document */}
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger
@@ -190,7 +201,6 @@ export default function PDFModal({ documents, disabled,  deleteDocument, documen
                 </div>
               ))}
             </div>
-          </>
         </div>
       </DialogContent>
     </Dialog>

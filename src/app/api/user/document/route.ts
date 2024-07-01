@@ -2,7 +2,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { ocr } from "@/util/api/ocr";
-import { newDocument } from "@/util/api/newDocument";
+import { newDocument } from "@/util/api/firebase_utils/newDocument";
 import GPT4Tokenizer from 'gpt4-tokenizer';
 
 // Get all documents owned by the user in the authentication header
