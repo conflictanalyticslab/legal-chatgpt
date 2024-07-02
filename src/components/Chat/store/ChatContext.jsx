@@ -16,11 +16,12 @@ export const ChatContextProvider = ({ children }) => {
   const [documentQueryMethod, setDocumentQueryMethod] = useState('elastic')
   const [alert, setAlert] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const generateFlagRef = useRef(generateFlag);
 
   return (
     <ChatContext.Provider
-      value={{ state, setState, relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, enableRag, setEnableRag, ragConversation, setRagConversation, namespace, setNamespace, userQuery, setUserQuery, generateFlag, setGenerateFlag, generateFlagRef, loadingPDF, setLoadingPDF, documentQueryMethod, setDocumentQueryMethod, alert, setAlert, loading, setLoading }}
+      value={{ state, setState, relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, enableRag, setEnableRag, ragConversation, setRagConversation, namespace, setNamespace, userQuery, setUserQuery, generateFlag, setGenerateFlag, generateFlagRef, loadingPDF, setLoadingPDF, documentQueryMethod, setDocumentQueryMethod, alert, setAlert, loading, setLoading, pdfLoading, setPdfLoading }}
     >
       {children}
     </ChatContext.Provider>

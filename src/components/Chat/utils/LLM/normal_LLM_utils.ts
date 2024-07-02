@@ -1,21 +1,17 @@
 import { toast } from "@/components/ui/use-toast";
 import { postConversation } from "@/util/requests/postConversation";
-import { postSearchTerms } from "@/util/requests/postSearchTerms";
 import GPT4Tokenizer from "gpt4-tokenizer";
 import { updateConversationTitle } from "../firebase/firebase_utils";
-import { getDocumentText } from "@/util/api/firebase_utils/getDocuments";
-import { elasticDtoToRelevantDocuments, pineconeDtoToRelevantDocuments } from "@/app/chat/api/documents/transform";
-import { similaritySearch } from "@/app/chat/api/semantic-search";
-import { useChatContext } from "../../store/ChatContext";
+import { createDocumentPrompt, pdfSearch } from "../pdfs/pdf_utils";
 
-export async function fetchWithLLM( documentContent:any, userQuery:string, conversation:any, setConversation:any, setUserQuery:any, num:any, setNum:any, setLoading:any, includedDocuments:any, setAlert:any, generateFlagRef:any, setLatestResponse:any, setDocumentQuery:any, setRelevantDocs:any, setSearchTerm:any, namespace:string, conversationTitle:any, setConversationTitle:any, conversationUid:any, setConversationUid:any, handleBeforeUnload:any, documentQueryMethod:any) {
-
+export async function fetchWithLLM( documentContent:any, userQuery:string, conversation:any, setConversation:any, setUserQuery:any, num:any, setNum:any, setLoading:any, includedDocuments:any, setAlert:any, generateFlagRef:any, setLatestResponse:any, setDocumentQuery:any, setRelevantDocs:any, setPdfLoading:any, namespace:string, conversationTitle:any, setConversationTitle:any, conversationUid:any, setConversationUid:any, handleBeforeUnload:any, documentQueryMethod:any) {
   // Adds uploaded document content from user
   const addtionalUploadedDocContent =
     documentContent.length > 0
       ? "\n Here is a document for context: " + documentContent
       : "";
 
+  // Combined user query and additional uploaded doc content
   const queryAndDocContent = userQuery + addtionalUploadedDocContent;
 
   // Add the user's query to conversation
@@ -51,11 +47,9 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
     return;
   }
 
-  let search_terms_res;
   // ---------------------------------------------- FETCH UPLOADED DOCUMENT CONTENT ---------------------------------------------- //
+  const documentPrompt = await createDocumentPrompt(includedDocuments);
 
-  // const documentPrompt = await createDocumentPrompt(includedDocuments);
-  const documentPrompt = "";
   // ---------------------------------------------- LLM OUTPUT ---------------------------------------------- //
 
   // Retrieve LLM model output
@@ -123,9 +117,8 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
     } catch (e) {
       console.error("Failed to ccancel reader");
     }
-  }
-  // If the response is not a readable stream just jsonify it
-  else if (response.status === 200 && response.body != null) {
+  } else if (response.status === 200 && response.body != null) {
+    // If the response is not a readable stream just jsonify it
     setLatestResponse(await response.json());
   }
 
@@ -134,39 +127,19 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
 
   setConversation([...fullConversation]); // Have to update its pointer to reset state
   setLatestResponse(""); // Clear buffered response
-
-  // ---------------------------------------------- ELASTIC SEARCH ---------------------------------------------- //
-  if(documentQueryMethod === "elastic") {
-
-    // Generate elastic search prompt and document prompt from Open AI
-    search_terms_res = await postSearchTerms(userQuery);
-  
-    if (!search_terms_res.ok) {
-      const errorData = await search_terms_res.json();
-      setAlert(errorData.error);
-      setLoading(false);
-      return;
-    }
-  
-    // Retrieve elastic search results and get selected pdf document(s) text
-    const { elasticSearchResults } = await search_terms_res.json();
-    setRelevantDocs(elasticDtoToRelevantDocuments(elasticSearchResults));
-    setDocumentQuery(userQuery)
-  } 
-  else {
-
-    // Semantic Search
-    try {
-      const similarDocs = await similaritySearch(userQuery, 3, namespace);
-      setRelevantDocs(pineconeDtoToRelevantDocuments(similarDocs));
-      setDocumentQuery(userQuery);
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  setSearchTerm(userQuery); // TODO: Update search term for searching relevant pdfs (no idea right now what this is for will ask later)
   setLoading(false);
+
+  // ---------------------------------------------- DOCUMENT SEARCH ---------------------------------------------- //
+  // Chooses which method we are using to query for the pdf
+  pdfSearch(
+    documentQueryMethod,
+    userQuery,
+    namespace,
+    setAlert,
+    setRelevantDocs,
+    setPdfLoading
+  );
+  setDocumentQuery(userQuery);
 
   // Update Conversation Title
   updateConversationTitle(

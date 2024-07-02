@@ -75,7 +75,6 @@ export function Chat({
     setDocumentQuery,
     setRelevantDocs,
     enableRag,
-    setEnableRag,
     namespace,
     generateFlagRef,
     loadingPDF,
@@ -84,7 +83,10 @@ export function Chat({
     setAlert,
     loading,
     setLoading,
-    documentQueryMethod
+    documentQueryMethod,
+    setPdfLoading,
+    setEnableRag,
+    setDocumentQueryMethod,
   } = useChatContext();
 
   useEffect(()=> {
@@ -134,8 +136,10 @@ export function Chat({
   };
 
   const stopQuery = (event:React.MouseEvent<HTMLButtonElement>) =>{
+    if (enableRag) return;
+
     event.preventDefault();
-    generateFlagRef.current = false
+    generateFlagRef.current = false;
   }
 
   /**
@@ -149,14 +153,11 @@ export function Chat({
       "Are you sure you want to leave? The response will not be stored to your current chat's history if you exit right now.";
   };
 
-  const handleEnableRag = (value: boolean) => {
-    setEnableRag(value);
-    localStorage.setItem("enableRag", JSON.stringify(value));
-  };
-
   useEffect(() => {
     const enableRagStatus = localStorage.getItem("enableRag");
+    const documentQueryChoice = localStorage.getItem("documentQueryPrevChoice");
     if (enableRagStatus) setEnableRag(JSON.parse(enableRagStatus));
+    if (documentQueryChoice) setDocumentQueryMethod(JSON.parse(documentQueryChoice));
   }, []);
 
   /**
@@ -178,6 +179,7 @@ export function Chat({
 
     setShowStartupImage(false);
     setLoading(true);
+    setPdfLoading(true);
     setUserQuery("");
     window.addEventListener("beforeunload", handleBeforeUnload);
 
@@ -197,10 +199,10 @@ export function Chat({
         conversationTitle,
         setDocumentQuery,
         setRelevantDocs,
-        similaritySearch,
         setAlert,
         handleBeforeUnload,
-        documentQueryMethod
+        documentQueryMethod,
+        setPdfLoading
       );
     } else {
       try {
@@ -219,7 +221,7 @@ export function Chat({
           setLatestResponse,
           setDocumentQuery,
           setRelevantDocs,
-          setSearchTerm,
+          setPdfLoading,
           namespace,
           conversationTitle,
           setConversationTitle,
@@ -262,7 +264,6 @@ export function Chat({
         includedDocuments={includedDocuments}
         setIncludedDocuments={setIncludedDocuments}
         enableRag={enableRag}
-        handleEnableRag={handleEnableRag}
         conversationTitles={conversationTitles}
         setShowStartupImage={setShowStartupImage}
         setConversationTitle={setConversationTitle}
@@ -364,7 +365,10 @@ export function Chat({
         )}
 
         {/* Query Input Text Field */}
-        <form className="shadow-none bg-[#f5f5f7] fixed w-full h-[100px] bottom-0" onSubmit={handleSubmit}>
+        <form
+          className="shadow-none bg-[#f5f5f7] fixed w-full h-[100px] bottom-0"
+          onSubmit={handleSubmit}
+        >
           <div className="relative w-[52.5%]">
             {enableRag ? (
               <TooltipProvider>
@@ -380,7 +384,7 @@ export function Chat({
             ) : (
               <Button
                 variant="ghost"
-                className="hover:bg-[#E2E8F0] bg-[transparent] h-[56px] absolute left-[-70px]"
+                className="hover:bg-[#E2E8F0] bg-[transparent] h-[56px] w-[56px] absolute left-[-70px]"
                 type="button"
                 aria-label="Attach PDF"
                 onClick={openFilePicker}
@@ -391,7 +395,6 @@ export function Chat({
             )}
             <Input
               className="w-full flex bg-[#f5f5f7] min-h-[56px] pr-[60px] focus-visible:ring-[none]"
-              required
               placeholder="Ask OpenJustice"
               value={userQuery}
               onChange={(e) => setUserQuery(e.target.value)}
@@ -402,12 +405,16 @@ export function Chat({
                 variant={"ghost"}
                 onClick={stopQuery}
               >
-                <Image
-                  src="/assets/icons/pause.svg"
-                  alt="pause"
-                  width={20}
-                  height={20}
-                />
+                {enableRag ? (
+                  <LoadingSpinner />
+                ) : (
+                  <Image
+                    src="/assets/icons/pause.svg"
+                    alt="pause"
+                    width={20}
+                    height={20}
+                  />
+                )}
               </Button>
             ) : (
               <Button

@@ -1,3 +1,4 @@
+'use server'
 import { getFirestore } from "firebase-admin/firestore";
 
 /**
@@ -16,6 +17,7 @@ export async function getDocumentText(
   const querySnapshot = await getFirestore().getAll(
     ...documentIds.map((id) => getFirestore().doc(`documents/${id}`))
   );
+  
   return querySnapshot
     .map((doc) => doc.data() || null)
     .filter((doc) => doc != null) as any;

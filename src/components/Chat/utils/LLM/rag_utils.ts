@@ -1,7 +1,7 @@
 import { elasticDtoToRelevantDocuments, pineconeDtoToRelevantDocuments } from "@/app/chat/api/documents/transform";
-import { useChatContext } from "../../store/ChatContext";
 import { updateConversationTitle } from "../firebase/firebase_utils";
 import { postSearchTerms } from "@/util/requests/postSearchTerms";
+import { pdfSearch } from "../pdfs/pdf_utils";
 
 /**
  * Makes a query with OpenAi's LLM and implements RAG using Pinecone vector store
@@ -21,10 +21,10 @@ export async function fetchWithRAG(
   conversationTitle: any,
   setDocumentQuery: any,
   setRelevantDocs: any,
-  similaritySearch: any,
   setAlert: any,
   handleBeforeUnload: any,
-  documentQueryMethod: any
+  documentQueryMethod: any,
+  setPdfLoading:any,
 ) {
 
   // Update the chat with the user's userQuery first
@@ -49,27 +49,15 @@ export async function fetchWithRAG(
 
   // ---------------------------------------------- DOCUMENT SEARCH ---------------------------------------------- //
 
-  // Elastic Search
-  if (documentQueryMethod === "elastic") {
-    // Generate elastic search prompt and document prompt from Open AI
-    const search_terms_res = await postSearchTerms(userQuery);
-
-    if (!search_terms_res.ok) {
-      const errorData = await search_terms_res.json();
-      setAlert(errorData.error);
-      setLoading(false);
-      return;
-    }
-
-    // Retrieve elastic search results and get selected pdf document(s) text
-    const { elasticSearchResults } = await search_terms_res.json();
-    setRelevantDocs(elasticDtoToRelevantDocuments(elasticSearchResults));
-  } else {
-    // SemanticSearch
-    const similarDocs = await similaritySearch(userQuery, 3, namespace);
-    setRelevantDocs(pineconeDtoToRelevantDocuments(similarDocs));
-  }
-
+  // Chooses which method we are using to query for the pdf
+  pdfSearch(
+    documentQueryMethod,
+    userQuery,
+    namespace,
+    setAlert,
+    setRelevantDocs,
+    setPdfLoading,
+  );
   setDocumentQuery(userQuery);
 
   // Update Conversation Title

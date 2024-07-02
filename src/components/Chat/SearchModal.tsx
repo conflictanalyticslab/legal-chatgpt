@@ -8,21 +8,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { cn } from "@/lib/utils";
-import { similaritySearch } from "../../app/chat/api/semantic-search";
 import { useForm } from "react-hook-form";
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useChatContext } from "./store/ChatContext";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
-import { elasticDtoToRelevantDocuments, pineconeDtoToRelevantDocuments } from "@/app/chat/api/documents/transform";
-import { Switch } from "../ui/switch";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../ui/select";
-import Container from "../ui/Container";
-import { postSearchTerms } from "@/util/requests/postSearchTerms";
+import { pdfSearch } from "./utils/pdfs/pdf_utils";
 
 const SearchModal = () => {
-  const { relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, namespace, documentQueryMethod, setAlert, setLoading } = useChatContext();
-  const [isLoading, setIsLoading] = useState(false);
+  const { relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, namespace, documentQueryMethod, setAlert, pdfLoading, setPdfLoading } = useChatContext();
 
   const formSchema = z.object({
     documentQuery: z.string().min(0, {
@@ -38,41 +32,18 @@ const SearchModal = () => {
   });
 
   const onsubmit = async (form: z.infer<typeof formSchema>) => {
-    if(isLoading)
-      return;
-    
-    setIsLoading(true);
+    if (pdfLoading) return;
 
-    const query = form?.documentQuery as string;
-
-    if (documentQueryMethod=== "elastic") {
-      console.log("SEARCHING FROM ELASTIC")
-      // Generate elastic search prompt and document prompt from Open AI
-      const elasticSearchResp = await postSearchTerms(documentQuery);
-
-      if (!elasticSearchResp.ok) {
-        const errorData = await elasticSearchResp.json();
-        setAlert(errorData.error);
-        setLoading(false);
-        return;
-      }
-
-      // Retrieve elastic search results and get selected pdf document(s) text
-      const { elasticSearchResults } = await elasticSearchResp.json();
-
-      setRelevantDocs(elasticDtoToRelevantDocuments(elasticSearchResults))
-    } else {
-      console.log("SEARCHING FROM PINECONE")
-
-      try {
-        const similarDocs = await similaritySearch(query, 3, namespace);
-        setRelevantDocs(pineconeDtoToRelevantDocuments(similarDocs));
-      } catch (e) {
-        console.log(e);
-      }
-    }
-
-    setIsLoading(false);
+    const docQuery = form?.documentQuery as string;
+    // Chooses which method we are using to query for the pdf
+    pdfSearch(
+      documentQueryMethod,
+      docQuery,
+      namespace,
+      setAlert,
+      setRelevantDocs,
+      setPdfLoading
+    );
   };
 
   return (
@@ -93,6 +64,8 @@ const SearchModal = () => {
         className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[60vw] flex flex-col gap-5 overflow-auto box-border"
       >
         <DialogTitle className="hidden"></DialogTitle>
+
+        {/* Search Document Input */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onsubmit)} className="space-y-8">
             <FormField
@@ -113,7 +86,7 @@ const SearchModal = () => {
                         onChange={(event) =>
                           setDocumentQuery(event.target.value)
                         }
-                        disabled={isLoading}
+                        disabled={pdfLoading}
                       />
                     </FormControl>
                   </div>
@@ -123,7 +96,8 @@ const SearchModal = () => {
             />
           </form>
         </Form>
-
+        
+        {/* Document List Container */}
         <div
           className={cn(
             `flex flex-col gap-3 w-full bg-transparent relative ${
@@ -131,6 +105,7 @@ const SearchModal = () => {
             }`
           )}
         >
+          {/* List of Documents */}
           {relevantDocs && relevantDocs.length > 0 ? (
             relevantDocs.map((doc: any, i: number) => (
               <Card key={i}>
@@ -155,12 +130,14 @@ const SearchModal = () => {
                 </a>
               </Card>
             ))
-          ) : isLoading ? (
+          ) : pdfLoading ? (
+            // Loading animation for relevant documents
             <Label className="text-[grey] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex items-center gap-3 flex-col">
               Finding Relevant Documents
               <LoadingSpinner />
             </Label>
           ) : (
+            // No documents available
             <Label className="text-[grey] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
               No Documents Available.
             </Label>
