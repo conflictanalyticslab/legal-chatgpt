@@ -9,11 +9,21 @@ import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { useChatContext } from "./store/ChatContext";
 
-function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments, enableRag, handleEnableRag, conversationTitles, setShowStartupImage, setConversationTitle, conversationTitle }) {
+function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments, enableRag, conversationTitles, setShowStartupImage, setConversationTitle, conversationTitle }:any) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const { setNamespace, documentQueryMethod, setDocumentQueryMethod } = useChatContext();
+    const { setNamespace, documentQueryMethod, setDocumentQueryMethod, setEnableRag } = useChatContext();
+
+    const handleEnableRag = (value: boolean) => {
+      setEnableRag(value);
+      localStorage.setItem("enableRag", JSON.stringify(value));
+    };
+
+    const handleChangeDocumentQueryMethod = (queryMethod:string) => {
+      setDocumentQueryMethod(queryMethod)
+      localStorage.setItem("documentQueryPrevChoice", JSON.stringify(queryMethod));
+    }
     return (
-      <div className="absolute top-4 right-8">
+      <div className="fixed top-4 right-8">
         <Popover open={dropdownOpen}>
           <PopoverTrigger
             onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -41,7 +51,6 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
               includedDocuments={includedDocuments}
               setIncludedDocuments={setIncludedDocuments}
             />
-
             {/* Enable Rag */}
             <Button
               variant="ghost"
@@ -62,11 +71,9 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                 <Switch checked={enableRag} className="scale-[0.7]" />
               </div>
             </Button>
-
             <div className="flex flex-col gap-1 pt-1">
-
               {/* Document Query Method */}
-              <Select onValueChange={setDocumentQueryMethod} value={documentQueryMethod}>
+              <Select onValueChange={handleChangeDocumentQueryMethod} value={documentQueryMethod}>
                 <SelectTrigger className="w-full outline-[none] focus:shadow-none focus:ring-offset-0 focus:ring-0 px-[1rem]">
                   <div className="flex gap-3">
                     <Image
@@ -135,7 +142,7 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {conversationTitles.map((title, i) => (
+                    {conversationTitles.map((title:any, i:number) => (
                       <SelectItem
                         key={i}
                         value={title.title}

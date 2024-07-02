@@ -5,6 +5,10 @@ import { uploadPdfDocument } from "@/util/requests/uploadPdfDocument";
 import GPT4Tokenizer from "gpt4-tokenizer";
 import { useFilePicker } from "use-file-picker";
 import { FileAmountLimitValidator, FileSizeValidator } from "use-file-picker/validators";
+import { postSearchTerms } from "@/util/requests/postSearchTerms";
+import { elasticDtoToRelevantDocuments, pineconeDtoToRelevantDocuments } from "@/app/chat/api/documents/transform";
+import { similaritySearch } from "@/app/chat/api/semantic-search";
+import { getDocumentText } from "@/util/api/firebase_utils/getDocuments";
 
   /**
    * Extracts URLs from a given text
@@ -23,6 +27,11 @@ import { FileAmountLimitValidator, FileSizeValidator } from "use-file-picker/val
   };
 
 
+  /**
+   * 
+   * @param string 
+   * @returns 
+   */
   const isValidUrl = (string: string) => {
     try {
       new URL(string);
@@ -85,8 +94,18 @@ import { FileAmountLimitValidator, FileSizeValidator } from "use-file-picker/val
   }
 
 
+  /**
+   * 
+   * @param setDocumentContent 
+   * @param setIncludedDocuments 
+   * @param setDocuments 
+   * @param documents 
+   * @param includedDocuments 
+   * @param setLoadingPDF 
+   * @param setAlert 
+   * @returns 
+   */
 export function handleUploadFile(setDocumentContent:any, setIncludedDocuments:any, setDocuments:any, documents:any, includedDocuments:any, setLoadingPDF:any, setAlert:any) {
-  
   return useFilePicker({
     accept: ".pdf",
     readAs: "ArrayBuffer", // ArrayBuffer takes exactly as much space as the original file. DataURL, the default, would make it bigger.
@@ -108,7 +127,7 @@ export function handleUploadFile(setDocumentContent:any, setIncludedDocuments:an
   })
 }
 
-export async function filesSuccessfullyUploaded(plainFiles:any, setDocumentContent:any, setIncludedDocuments:any, setDocuments:any, documents:any, includedDocuments:any, setLoadingPDF:any ) {
+export async function filesSuccessfullyUploaded(plainFiles:any, setDocumentContent:any, setIncludedDocuments:any, setDocuments:any, documents:any, includedDocuments:any, setLoading:any ) {
 
   // this callback is called when there were no validation errors
   let estimatedTokenCount = -1;
@@ -144,7 +163,7 @@ export async function filesSuccessfullyUploaded(plainFiles:any, setDocumentConte
     toast({
       title: "PDF uploaded successfully!",
     });
-    setLoadingPDF(false)
+    setLoading(false)
   } catch (err: Error | any) {
     if (err.message === "PDF File uploaded too large") {
       toast({
@@ -162,6 +181,63 @@ export async function filesSuccessfullyUploaded(plainFiles:any, setDocumentConte
         variant: "destructive",
       });
     }
-    setLoadingPDF(false)
+    setLoading(false)
 }
 }
+
+/**
+ * 
+ * 
+ * @param documentQueryMethod 
+ * @param userQuery 
+ * @param namespace 
+ * @returns 
+ */
+export async function pdfSearch(documentQueryMethod:string, userQuery:string, namespace:string, setAlert:any, setRelevantDocs:any, setPdfLoading:any) {
+  try {
+    // Elastic Search
+    if (documentQueryMethod === "elastic") {
+      // Generate elastic search prompt and document prompt from Open AI
+      const search_terms_res = await postSearchTerms(userQuery);
+
+      if (!search_terms_res.ok) {
+        const errorData = await search_terms_res.json();
+        setAlert(errorData.error);
+      }
+
+      // Retrieve elastic search results and get selected pdf document(s) text
+      const { elasticSearchResults } = await search_terms_res.json();
+      setRelevantDocs(elasticDtoToRelevantDocuments(elasticSearchResults));
+    } else {
+      // SemanticSearch
+      const similarDocs = await similaritySearch(userQuery, 3, namespace);
+      setRelevantDocs(pineconeDtoToRelevantDocuments(similarDocs));
+    }
+  } catch (e) {
+    console.log(e);
+  } finally {
+    setPdfLoading(false);
+  }
+}
+
+/**
+ * Gathers all of the document text content that the user selects
+ * 
+ * @param includedDocuments list of ids that the user wants to include in the query
+ * @returns 
+ */
+export async function createDocumentPrompt(  
+  includedDocuments: string[]
+) {
+  const documents = await getDocumentText(includedDocuments); // Fetches documents from firebase
+  if (!documents) return '';
+
+  return (
+    "Here are some legal documents you can reference.\n\n" +
+    documents
+      .map((doc) => `Document Name: ${doc.name}.\nDocument Text: ${doc.text}`)
+      .join("\n\n")
+  );
+}
+
+
