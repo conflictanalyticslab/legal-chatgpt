@@ -1,5 +1,5 @@
 import { elasticDtoToRelevantDocuments, pineconeDtoToRelevantDocuments } from "@/app/chat/api/documents/transform";
-import { updateConversationTitle } from "../firebase/firebase_utils";
+import { updateConversation } from "../firebase/firebase_utils";
 import { postSearchTerms } from "@/util/requests/postSearchTerms";
 import { pdfSearch } from "../pdfs/pdf_utils";
 
@@ -61,7 +61,7 @@ export async function fetchWithRAG(
   setDocumentQuery(userQuery);
 
   // Update Conversation Title
-  updateConversationTitle(
+  updateConversation(
     fullConversation,
     includedDocuments,
     setAlert,

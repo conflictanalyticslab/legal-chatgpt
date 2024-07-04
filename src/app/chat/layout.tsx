@@ -1,4 +1,4 @@
-import SideBar from "@/components/Chat/SideBar";
+import SideBar from "@/app/chat/components/SideBar";
 
 export default function LoggedInLayout({
   children,

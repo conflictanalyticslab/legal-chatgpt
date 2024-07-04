@@ -1,6 +1,6 @@
 'use server'
 import { Pinecone } from "@pinecone-database/pinecone";
-import {embedder} from "@/components/Chat/utils/embeddings/embeddings"
+import {embedder} from "@/app/chat/components/utils/embeddings/embeddings"
 import { TextMetadata } from "@/types/chat";
 export async function similaritySearch (query:string, topK:number = 3, namespace='') {
   const pinecone = new Pinecone({

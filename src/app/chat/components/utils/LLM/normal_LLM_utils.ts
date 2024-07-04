@@ -1,8 +1,10 @@
 import { toast } from "@/components/ui/use-toast";
 import { postConversation } from "@/util/requests/postConversation";
 import GPT4Tokenizer from "gpt4-tokenizer";
-import { updateConversationTitle } from "../firebase/firebase_utils";
+import { updateConversation } from "../firebase/firebase_utils";
 import { createDocumentPrompt, pdfSearch } from "../pdfs/pdf_utils";
+import queryLlama2 from "@/util/LLM_utils/queryLlama2";
+import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
 
 export async function fetchWithLLM( documentContent:any, userQuery:string, conversation:any, setConversation:any, setUserQuery:any, num:any, setNum:any, setLoading:any, includedDocuments:any, setAlert:any, generateFlagRef:any, setLatestResponse:any, setDocumentQuery:any, setRelevantDocs:any, setPdfLoading:any, namespace:string, conversationTitle:any, setConversationTitle:any, conversationUid:any, setConversationUid:any, handleBeforeUnload:any, documentQueryMethod:any) {
   // Adds uploaded document content from user
@@ -27,6 +29,7 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
   ]);
   setConversation(fullConversation);
   setUserQuery("");
+  setDocumentQuery(userQuery); // Update the document search query after pdf
   setNum(num - 1);
 
   // ---------------------------------------------- TOKEN LIMIT VERIFICATION ---------------------------------------------- //
@@ -51,7 +54,6 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
   const documentPrompt = await createDocumentPrompt(includedDocuments);
 
   // ---------------------------------------------- LLM OUTPUT ---------------------------------------------- //
-
   // Retrieve LLM model output
   const response = await postConversation(
     userQuery,
@@ -139,10 +141,9 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
     setRelevantDocs,
     setPdfLoading
   );
-  setDocumentQuery(userQuery);
 
   // Update Conversation Title
-  updateConversationTitle(
+  updateConversation(
     fullConversation,
     includedDocuments,
     setAlert,
@@ -152,4 +153,61 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
     setConversationUid,
     handleBeforeUnload
   );
+}
+
+
+/**
+ * Query OpenAI's LLM
+ * 
+ * @returns 
+ */
+export function llama(searchPrompt:string, documentPrompt:string, fullConversation:any) {
+  return new Promise(async (resolve, reject) => {
+    console.log(
+      "\n-------------------------- Switching to llama2 in conversation/route.ts for second response --------------------------\n"
+    );
+
+    // Token Count Limitation
+    const tokenizer = new GPT4Tokenizer({ type: "gpt3" });
+
+    let token_count = 0;
+    for (let i = 0; i < fullConversation.length; i++) {
+      token_count += tokenizer.estimateTokenCount(fullConversation[i].content);
+    }
+
+    token_count +=
+      tokenizer.estimateTokenCount(documentPrompt) +
+      tokenizer.estimateTokenCount(searchPrompt) +
+      2;
+
+    // Checks for valid token count
+    if (token_count > 2048) {
+      return resolve({
+        latestBotResponse:
+          "Token limit of 2048 exceeded, your prompt includes " +
+          token_count +
+          " tokens",
+      });
+    }
+
+    // Querying LLAMA
+    try {
+      const llmResponse = await queryLlama2({
+        messages: [
+          {
+            role: "user",
+            content: documentPrompt + "\n\n" + searchPrompt,
+          },
+          ...fullConversation,
+        ],
+      });
+
+      resolve(llmResponse);
+    } catch (error) {
+      console.error(
+        "queryLlama2 failed in conversation/route.ts for second response: " + error
+      );
+      reject(error);
+    }
+  });
 }

@@ -6,7 +6,7 @@ const ChatContext = createContext();
 export const ChatContextProvider = ({ children }) => {
   const [state, setState] = useState("default value");
   const [relevantDocs, setRelevantDocs] = useState([]);
-  const [documentQuery, setDocumentQuery] = useState('')
+  const [documentQuery, setDocumentQuery] = useState("");
   const [enableRag, setEnableRag] = useState(false);
   const [ragConversation, setRagConversation] = useState([]);
   const [namespace, setNamespace] = useState('');
@@ -18,10 +18,48 @@ export const ChatContextProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const generateFlagRef = useRef(generateFlag);
+  const [conversationTitles, setConversationTitles] = useState([]);
+  const [conversationTitle, setConversationTitle] = useState('');
+  const [conversationUid, setConversationUid] = useState('');
+
 
   return (
     <ChatContext.Provider
-      value={{ state, setState, relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, enableRag, setEnableRag, ragConversation, setRagConversation, namespace, setNamespace, userQuery, setUserQuery, generateFlag, setGenerateFlag, generateFlagRef, loadingPDF, setLoadingPDF, documentQueryMethod, setDocumentQueryMethod, alert, setAlert, loading, setLoading, pdfLoading, setPdfLoading }}
+      value={{
+        state,
+        setState,
+        relevantDocs,
+        setRelevantDocs,
+        documentQuery,
+        setDocumentQuery,
+        enableRag,
+        setEnableRag,
+        ragConversation,
+        setRagConversation,
+        namespace,
+        setNamespace,
+        userQuery,
+        setUserQuery,
+        generateFlag,
+        setGenerateFlag,
+        generateFlagRef,
+        loadingPDF,
+        setLoadingPDF,
+        documentQueryMethod,
+        setDocumentQueryMethod,
+        alert,
+        setAlert,
+        loading,
+        setLoading,
+        pdfLoading,
+        setPdfLoading,
+        conversationTitles,
+        setConversationTitles,
+        conversationTitle,
+        setConversationTitle,
+        conversationUid,
+        setConversationUid
+      }}
     >
       {children}
     </ChatContext.Provider>

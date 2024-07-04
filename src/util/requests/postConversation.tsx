@@ -5,8 +5,6 @@ export async function postConversation(
   documentPrompt: string,
   fullConversation: object[]
 ) {
-
-  console.log("Here is the full conversation ---------> ", fullConversation)
   return await fetch("/api/conversation", {
     method: "POST",
     headers: {

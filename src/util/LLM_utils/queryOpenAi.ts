@@ -5,7 +5,6 @@
  * @returns 
  */
 export const queryOpenAi = async (data: any, stream=false) => {
-  console.log("before calling openAI", data)
   if (!data.hasOwnProperty("model")) {
     // specifying default gpt model here
     data["model"] = "gpt-3.5-turbo-0125";
@@ -40,5 +39,57 @@ export const queryOpenAi = async (data: any, stream=false) => {
     });
     return response;
   }
-  
 };
+
+
+/**
+ * Query OpenAI's LLM
+ * 
+ * @returns 
+ */
+export async function queryOpenAILLM(
+  searchPrompt: string,
+  documentPrompt: string,
+  fullConversation: any
+) {
+    // Conversation sent by the user is empty
+    if (fullConversation.length === 0) {
+      return { error: "fullConversation is empty", status: 400 };
+    }
+
+    try {
+      if (fullConversation.length < 2) return;
+
+      // Sets the user's content prompt
+      fullConversation[fullConversation.length - 2].content =
+        "Answer in 500 words or less. Short answers are better.\n\n" +
+        documentPrompt +
+        "\n\n" +
+        searchPrompt;
+
+
+        console.log("Search Prompt", searchPrompt)
+        console.log("document promtp",  documentPrompt )
+        console.log("full convo",  fullConversation, )
+
+      // Send the full conversation and the
+      const llmResponse = await queryOpenAi(
+        {
+          model: "gpt-3.5-turbo-0125",
+          format: "markdown",
+          messages: [...fullConversation],
+        },
+        true
+      );
+      console.log("AND NOWEWWWWWW: ", llmResponse)
+
+
+      // Flag to determine whether we need to use LLAMA model
+      if (!llmResponse) {
+        return null
+      }
+      return llmResponse;
+    } catch (error) {
+      return error;
+    }
+  };

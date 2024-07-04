@@ -11,7 +11,6 @@ import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { redirect } from "next/dist/server/api-utils";
 import { auth } from "@/firebase";
-// import ConversationContext from './ConversationContext'
 
 export default function SideBar() {
   const onLogout = useCallback(() => {

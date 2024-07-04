@@ -34,12 +34,6 @@ exports.handler = async (event:any, context:any) => {
     try {
       const docRef = await getFirestore().collection("conversations").doc();
 
-      console.log("conversation: ", fullConversation);
-      console.log("documents: ", includedDocuments);
-      console.log("title: ", title);
-      console.log("uid: ", uid);
-      console.log("=================saveConversation===================")
-
       await docRef.create({
         conversation: fullConversation,
         documents: includedDocuments,

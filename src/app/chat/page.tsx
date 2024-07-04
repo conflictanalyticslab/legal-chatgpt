@@ -1,9 +1,9 @@
 "use client";
 
-import { Chat } from "@/components/Chat/Chat";
+import { Chat } from "@/app/chat/components/Chat";
 import { WithSearch } from "@elastic/react-search-ui";
-import {ChatContextProvider} from "@/components/Chat/store/ChatContext"
-import SearchProviderShell from "@/components/Chat/SearchProviderShell";
+import {ChatContextProvider} from "@/app/chat/components/store/ChatContext"
+import SearchProviderShell from "@/app/chat/components/SearchProviderShell";
 
 export default function Page() {
   return (
@@ -16,7 +16,7 @@ export default function Page() {
       >
         {({ wasSearched, setSearchTerm }) => (
           <ChatContextProvider>
-            <Chat wasSearched={wasSearched} setSearchTerm={setSearchTerm} />
+            <Chat />
           </ChatContextProvider>
         )}
       </WithSearch>
