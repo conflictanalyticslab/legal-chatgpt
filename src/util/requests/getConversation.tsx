@@ -1,4 +1,3 @@
-// import ConversationContext from "@/components/Chat/ConversationContext";
 import { auth } from "@/firebase";
 
 export async function getConversation(title: string): Promise<{conversation: {role:string, content:string}[], documents: string[], title: string, conversationId: string}> {
@@ -11,7 +10,7 @@ export async function getConversation(title: string): Promise<{conversation: {ro
     headers: {
       Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
     },
-    body: JSON.stringify({ title: title}),
+    body: JSON.stringify({ title: title }),
   });
 
   return await res.json();

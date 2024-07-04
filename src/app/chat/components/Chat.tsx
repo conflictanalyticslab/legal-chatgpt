@@ -1,19 +1,13 @@
 "use client";
 
-import React, { useRef, useEffect, useState, MouseEventHandler } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 
 // import external components
 import { useRouter } from "next/navigation";
-import {
-  Dialog,
-  DialogContent,
-  DialogContentText,
-  CardHeader,
-} from "@mui/material";
-import { Button as Button } from "../ui/button";
+import { Dialog, DialogContent, } from "../../../components/ui/dialog";
+import { Button as Button } from "../../../components/ui/button";
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import GPT4Tokenizer from 'gpt4-tokenizer';
 import ReactMarkdown from 'react-markdown'
 
 // import external hooks
@@ -33,41 +27,30 @@ import {
   getDocumentsOwnedByUser,
 } from "@/util/requests/getDocumentsOwnedByUser";
 import {deleteDocument} from "@/util/api/firebase_utils/deleteDocument";
-import { Card, CardContent, CardTitle } from "../ui/card";
-import { similaritySearch } from "../../app/chat/api/semantic-search";
 import { useChatContext } from "./store/ChatContext";
-import { useRag } from "../../app/chat/api/rag";
-import { Input } from "../ui/input";
-import ChatOptions from "./ChatOptions"
-import { Toaster } from "../ui/toaster";
-import {fetchWithRAG} from "@/components/Chat/utils/LLM/rag_utils"
+import { useRag } from "../api/rag";
+import { Input } from "../../../components/ui/input";
+import ChatOptions from "./chat_options/ChatOptions"
+import { Toaster } from "../../../components/ui/toaster";
+import {fetchWithRAG} from "@/app/chat/components/utils/LLM/rag_utils"
 import { Conversation } from "./types/conversationTitles";
 import "./Chat.css"
 import { cn } from "@/lib/utils";
 import { fetchWithLLM } from "./utils/LLM/normal_LLM_utils";
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "../ui/tooltip";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "../../../components/ui/tooltip";
 import { handleUploadFile } from "./utils/pdfs/pdf_utils";
-import { LoadingSpinner } from "../ui/LoadingSpinner";
-
-export function Chat({
-  wasSearched,
-  setSearchTerm,
-}: {
-  wasSearched: boolean;
-  setSearchTerm: (searchTerm: string) => void;
-}) {
+import { LoadingSpinner } from "../../../components/ui/LoadingSpinner";
+import { Card, CardContent } from "@/components/ui/card";
+import { getConversation } from "@/util/requests/getConversation";
+import { toast } from "@/components/ui/use-toast";
+export function Chat() {
   const router = useRouter();
   const [conversation, setConversation] = useState<Conversation[]>([]);
   const [latestResponse, setLatestResponse] = useState('');
   const [userQuery, setUserQuery] = useState('');
   const [documentContent, setDocumentContent] = useState('');
   const [num, setNum] = useState(-1);
-  const [conversationTitles, setConversationTitles] = useState<
-    { title: string; uid: string }[]
-  >([]);
-  const [conversationTitle, setConversationTitle] = useState<string>('');
   const [includedDocuments, setIncludedDocuments] = useState<string[]>([]);
-  const [conversationUid, setConversationUid] = useState<string | null>('');
   const [showStartupImage, setShowStartupImage] = useState(true);
   const [documents, setDocuments] = useState<UserDocument[]>([]);
   const scrollIntoViewRef = useRef<HTMLSpanElement>(null);
@@ -87,14 +70,58 @@ export function Chat({
     setPdfLoading,
     setEnableRag,
     setDocumentQueryMethod,
+    conversationTitles,
+    setConversationTitles,
+    conversationTitle,
+    conversationUid,
+    setConversationUid,
+    setConversationTitle
   } = useChatContext();
 
+  /**
+   * Scrolls the conversation downwards while the LLM is generating output
+   */
   useEffect(()=> {
     if(scrollIntoViewRef?.current){
       scrollIntoViewRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [latestResponse, conversation])
 
+  /**
+   * Wrapper function to fetch selected previous conversation
+   * 
+   * @returns 
+   */
+  async function getSelectedConversation() {
+    try {
+      const selectedConversationContent = await getConversation(
+        conversationTitle
+      );
+      if (!selectedConversationContent) return;
+
+      // Update the chat conversation and the selected conversation Uid
+      setConversation(selectedConversationContent?.conversation);
+      setConversationUid(selectedConversationContent.conversationId)
+    }
+    catch (error:any) {
+      toast({
+        title:
+          "Failed to get conversation",
+        variant: "destructive",
+      });
+    }
+  }
+
+  /**
+   * Changes the conversation based on the selected conversation title
+   */
+  useEffect(()=>{
+    getSelectedConversation();
+  },[conversationTitle])
+
+  /**
+   * Authenticating User and getting user documents and setting conversation titles
+   */
   useEffect(() => {
     setAlert("Authenticating user...");
     getAuthenticatedUser()
@@ -127,14 +154,17 @@ export function Chat({
   const deleteDocumentChat = (uid: string) => {
     deleteDocument(uid)
       .then(() => setDocuments(documents.filter((doc) => doc.uid !== uid)))
-      .then(() => {
-        console.log("PDF deleted successfully");
-      })
       .catch((err) => {
         console.log("Error when deleting PDF, " + err);
       });
   };
 
+  /**
+   * Stops generating the normal LLM buffered output
+   * 
+   * @param event 
+   * @returns 
+   */
   const stopQuery = (event:React.MouseEvent<HTMLButtonElement>) =>{
     if (enableRag) return;
 
@@ -153,6 +183,9 @@ export function Chat({
       "Are you sure you want to leave? The response will not be stored to your current chat's history if you exit right now.";
   };
 
+  /**
+   * Resets all of the previously selected options for the chatbox
+   */
   useEffect(() => {
     const enableRagStatus = localStorage.getItem("enableRag");
     const documentQueryChoice = localStorage.getItem("documentQueryPrevChoice");
@@ -191,8 +224,8 @@ export function Chat({
         setConversation,
         useRag,
         namespace,
-        postConversation,
         includedDocuments,
+        setConversationTitle,
         setConversationUid,
         conversationUid,
         setLoading,
@@ -239,10 +272,13 @@ export function Chat({
     }
   };
 
+  /**
+   * Warns the user about leaving the page
+   */
   const handleAlertClose = () => {
     setAlert("");
   };
-
+  
     const {openFilePicker}= handleUploadFile(
       setDocumentContent,
       setIncludedDocuments,
@@ -266,7 +302,6 @@ export function Chat({
         enableRag={enableRag}
         conversationTitles={conversationTitles}
         setShowStartupImage={setShowStartupImage}
-        setConversationTitle={setConversationTitle}
         conversationTitle={conversationTitle}
       />
 
@@ -290,10 +325,7 @@ export function Chat({
                   key={i}
                   className="bg-[transparent] rounded-[15px] text-[#686868]"
                 >
-                  <CardHeader>
-                    <CardTitle>What is AI?</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex items-center gap-[20px]">
+                  <CardContent className="flex items-center gap-[20px] p-6">
                     <Image
                       src={`/assets/icons/${i == 0 ? "ai" : "cal-logo"}.svg`}
                       width={30}
@@ -439,9 +471,9 @@ export function Chat({
         </form>
 
         {/* Alert Modal */}
-        <Dialog open={!!alert} onClose={handleAlertClose}>
-          <DialogContent>
-            <DialogContentText>{alert}</DialogContentText>
+        <Dialog open={!!alert} onOpenChange={handleAlertClose}>
+          <DialogContent onOpenAutoFocus={(e)=> e.preventDefault()}>
+            {alert}
           </DialogContent>
         </Dialog>
       </div>

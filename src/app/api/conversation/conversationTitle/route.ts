@@ -1,16 +1,22 @@
 import {
   getFirestore,
 } from "firebase-admin/firestore";
-import { generatePromptFromDocuments } from "@/util/api/firebase_utils/generatePromptFromDocuments";
 import { getDocumentText } from "@/util/api/firebase_utils/getDocuments";
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { loadUser } from "@/util/api/middleware/loadUser";
 import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
 import queryLlama2 from "@/util/LLM_utils/queryLlama2";
-// import { searchAndSummarize } from "@/util/api/searchAndSummarize";
 import { NextResponse } from "next/server";
 
+/**
+ * Gets conversation titles
+ * 
+ * @param _ 
+ * @returns 
+ */
 export async function GET(_: Request) {
+
+  // Authentication
   const { earlyResponse, decodedToken } = await authenticateApiUser();
   if (earlyResponse) {
     return earlyResponse;
@@ -22,6 +28,7 @@ export async function GET(_: Request) {
       { status: 500 }
     );
   }
+
 
   const queryResults = await getFirestore()
     .collection("conversations")
@@ -36,8 +43,17 @@ export async function GET(_: Request) {
   return NextResponse.json({ conversations: plainJsObjects }, { status: 200 });
 }
 
+/**
+ * Upserting conversation to database
+ * 
+ * @param req 
+ * @returns 
+ */
 export async function POST(req: Request) {
+
+  // Authorization
   const { earlyResponse, decodedToken } = await authenticateApiUser();
+
   if (earlyResponse) {
     return earlyResponse;
   }
@@ -50,21 +66,21 @@ export async function POST(req: Request) {
   }
 
   const { fullConversation, includedDocuments} = await req.json();
-  console.log("\nConversation Title ------>", fullConversation)
+
 
   if (fullConversation.length === 0) {
     return NextResponse.json(
-      { error: "fullConversation is empty" },
+      { error: "Conversation data is empty" },
       { status: 400 }
     );
   }
 
+  // Load user from firestore database
   const { user, userRef } = await loadUser(decodedToken);
-  const documents = await getDocumentText(includedDocuments);
-  // const queryDocument = includedDocuments.length > 0 ? "Here is a document for context: " : "";
 
   if (user && user.prompts_left > 0) {
-    await userRef.update({ prompts_left: user.prompts_left - 1 });
+    await userRef.update({ prompts_left: user.prompts_left - 1 }); // Update the number of prompts the user has left in the database
+    
     let firstReplyRes: any;
     let gpt_flag = true;
     try {
@@ -117,26 +133,7 @@ export async function POST(req: Request) {
     }
 
     const conversationTitle = firstReplyRes.choices[0].message.content;
-    console.log("Logging response from OpenAi", firstReplyRes.choices[0].message.content);
-    // const {searchResults, toSearch} = await searchAndSummarize(firstReplyContent);
 
-    // console.log("Search Results", searchResults);
-
-    // if (Array.isArray(searchResults) && searchResults.length > 0) {
-    //   // const searchPrompt = searchResults
-    //   //   .map(
-    //   //     (result: SearchResult) =>
-    //   //       "Document title: " +
-    //   //       result.title +
-    //   //       "\n\nAbstract: " +
-    //   //       result.abstract
-    //   //   )
-    //   //   .join("\n\n");
-
-    //   // The chat context is too short when we include all the results. Revisit this when using a larger model.
-    //   // Can use tokenLength() to estimate the tokens used so far.
-    //   return NextResponse.json({toSearch: toSearch, searchPrompt: searchResults[0].abstract, documentPrompt: documentPrompt})
-    // }
     return NextResponse.json({title: conversationTitle})
   }
     return NextResponse.json({ error: "User has no prompts left" }, { status: 403 });

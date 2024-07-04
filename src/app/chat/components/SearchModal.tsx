@@ -1,18 +1,18 @@
 'use client'
 import React, { useState } from "react";
 import Image from "next/image";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
-import { Input } from "../ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../../../components/ui/button";
+import { Label } from "../../../components/ui/label";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../../../components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../../components/ui/form";
+import { Input } from "../../../components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useChatContext } from "./store/ChatContext";
-import { LoadingSpinner } from "../ui/LoadingSpinner";
+import { LoadingSpinner } from "../../../components/ui/LoadingSpinner";
 import { pdfSearch } from "./utils/pdfs/pdf_utils";
 
 const SearchModal = () => {
@@ -33,12 +33,12 @@ const SearchModal = () => {
 
   const onsubmit = async (form: z.infer<typeof formSchema>) => {
     if (pdfLoading) return;
-
-    const docQuery = form?.documentQuery as string;
+    setPdfLoading(true);
+    
     // Chooses which method we are using to query for the pdf
     pdfSearch(
       documentQueryMethod,
-      docQuery,
+      documentQuery,
       namespace,
       setAlert,
       setRelevantDocs,
@@ -96,17 +96,21 @@ const SearchModal = () => {
             />
           </form>
         </Form>
-        
+
         {/* Document List Container */}
         <div
           className={cn(
-            `flex flex-col gap-3 w-full bg-transparent relative ${
-              relevantDocs.length === 0 ? "h-full" : "h-[min-content]"
-            }`
+            `flex flex-col gap-3 w-full bg-transparent relative h-full `
           )}
         >
           {/* List of Documents */}
-          {relevantDocs && relevantDocs.length > 0 ? (
+          {pdfLoading ? (
+            // Loading animation for relevant documents
+            <Label className="text-[grey] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex items-center gap-3 flex-col">
+              Finding Relevant Documents
+              <LoadingSpinner />
+            </Label>
+          ) : relevantDocs && relevantDocs.length > 0 ? (
             relevantDocs.map((doc: any, i: number) => (
               <Card key={i}>
                 <a href={doc.url} target="_blank">
@@ -130,12 +134,6 @@ const SearchModal = () => {
                 </a>
               </Card>
             ))
-          ) : pdfLoading ? (
-            // Loading animation for relevant documents
-            <Label className="text-[grey] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex items-center gap-3 flex-col">
-              Finding Relevant Documents
-              <LoadingSpinner />
-            </Label>
           ) : (
             // No documents available
             <Label className="text-[grey] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">

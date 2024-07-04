@@ -10,43 +10,6 @@ import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { initBackendFirebaseApp } from "@/util/api/middleware/initBackendFirebaseApp";
 import { userConverter } from "@/util/User";
 
-// // Deprecated!!! Get the conversation for the current user given the title of the conversation
-// export async function GET(req: Request) {
-//   const { earlyResponse, decodedToken } = await authenticateApiUser();
-//   if (earlyResponse) {
-//     return earlyResponse;
-//   }
-
-//   if (!decodedToken) {
-//     return NextResponse.json(
-//       { error: "decodedToken is missing but there was no earlyResponse" },
-//       { status: 500 }
-//     );
-//   }
-
-//   const url = new URL(req.url);
-//   const title = url.searchParams.get('title');
-
-//   const queryResults = await getFirestore()
-//     .collection("conversations")
-//     .where("userUid", "==", decodedToken.user_id)
-//     .where("title", "==", title)
-//     .limit(1)
-//     .get();
-
-//   if (queryResults.empty) {
-//     return NextResponse.json(
-//       { error: "No matching conversation found" },
-//       { status: 404 }
-//     );
-//   }
-
-//   const doc = queryResults.docs[0];
-//   const data = doc.data();
-
-//   return NextResponse.json({ conversation: { ...data, uid: doc.id }}, { status: 200 });
-// }
-
 export async function PUT(req: Request) {
   const { earlyResponse, decodedToken } = await authenticateApiUser();
   if (earlyResponse) {

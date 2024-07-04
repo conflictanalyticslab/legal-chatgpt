@@ -14,7 +14,11 @@ export async function postConversationSave(
   title: string
 ) {
   // production endpoint: https://openjustice.ai/.netlify/functions/saveConversation
-  return await fetch("https://deploy-preview-80--cute-sprite-f73207.netlify.app/.netlify/functions/saveConversation", {
+  // TODO: Note this is a staging deploy link which most likely will cause sometype of cors error
+  // Original: https://deploy-preview-80--cute-sprite-f73207.netlify.app/.netlify/functions/saveConversation
+  // /api/conversation/conversationTitle
+  console.log("\n ---------------------------- HERE ---------------------------- \n")
+  return await fetch("/api/conversation/conversationTitle", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

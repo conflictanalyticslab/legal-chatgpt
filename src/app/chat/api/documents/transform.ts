@@ -1,4 +1,4 @@
-import { RelevantDocument } from "@/components/Chat/domain";
+import { RelevantDocument } from "@/app/chat/components/domain";
 import { ElasticDocument } from "./elasticDto";
 import { QueryResponse } from "@pinecone-database/pinecone";
 import { TextMetadata } from "@/types/chat";
