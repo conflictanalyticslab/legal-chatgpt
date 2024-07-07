@@ -135,7 +135,7 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                 </SelectTrigger>
                 <SelectContent align="end">
                   <SelectGroup>
-                    <SelectItem value="elastic">Elastic Search</SelectItem>
+                    <SelectItem value="elastic">Keyword Search</SelectItem>
                     <SelectItem value="semantic-search">
                       Semantic Search
                     </SelectItem>

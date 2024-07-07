@@ -35,13 +35,10 @@ export async function PUT(req: Request) {
 
   try {
     const convoRef = await getDocRef("conversations", uid);
-    console.log("Updating the conversation")
     if (!convoRef) {
       return NextResponse.json({ error: "No matching conversation found" }, { status: 404 });
     }
     
-    console.log("this is the uid", uid)
-
     await updateDoc(convoRef, { conversation, includedDocuments, title } )
     return NextResponse.json({ uid }, { status: 200 });
   } catch (error: any) {

@@ -33,7 +33,6 @@ export async function POST(req: Request) {
   const { conversation, includedDocuments, title } = await req.json();
 
   initBackendFirebaseApp();
-  console.log("THIS IS THE TITLE", title)
 
   try {
     const docInfo = await createDoc("conversations", {

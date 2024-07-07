@@ -75,7 +75,6 @@ export async function upsertConversation(
   if (!conversationUid) return;
 
 
-  console.log("BROTHA", conversationUid)
   // 1. UPDATE EXISTING CONVERSATION TO FIRESTORE
   await putConversationSave(
     conversationUid, // Note the conversation Uid is really just the user_id in firestore

@@ -57,7 +57,6 @@ export async function POST(req: Request) {
     elasticKeyWordsQuery = elasticSearchQuery?.choices[0]?.message?.content
   }
 
-  console.log("Key words--------->", elasticKeyWordsQuery)
   // Calls elastic search to search for related documents
   const searchResults = await callSearchAPI(userQuery);
 

@@ -1,0 +1,10 @@
+.llm-markdown ul {
+  list-style-type: disc;
+  margin-left: 1rem;
+}
+
+.llm-markdown ol {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
