@@ -72,10 +72,6 @@ export const callSearchAPI = async (searchTerm: string) => {
         source: "U.S. Case Law",
       });
     }
-
-  // console.log(results)
-
-  // console.log(elasticResults);
   } catch (e) {
   console.error(e);
   }

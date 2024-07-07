@@ -6,9 +6,10 @@
  */
 
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
-import { searchAndSummarize } from "@/util/api/elastic_search_utils/searchAndSummarize";
+// import { searchAndSummarize } from "@/util/api/elastic_search_utils/searchAndSummarize";
 import { NextResponse } from "next/server";
 import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
+import { callSearchAPI } from "@/util/api/elastic_search_utils/runSearch";
 
 interface ErrorResp {
   errors: string[];
@@ -44,15 +45,19 @@ export async function POST(req: Request) {
     {
       model: "gpt-3.5-turbo-0125",
       messages: [{
-        role: "system",
-        content: "Summarize the following text into 3 keywords: What is love?"
+        role: "assistant",
+        content: `Summarize the following text into 3 keywords: ${userQuery}`
       }],
     },
     false
   );
 
+  let elasticKeyWordsQuery;
+  if(elasticSearchQuery) {
+    elasticKeyWordsQuery = elasticSearchQuery?.choices[0]?.message?.content
+  }
   // Calls elastic search to search for related documents
-  const { searchResults } = await searchAndSummarize(userQuery);
+  const searchResults = await callSearchAPI(elasticKeyWordsQuery || userQuery);
 
   if(!searchResults || searchResults.length <= 0)
     errorResp.errors.push("Failed to generate elastic search result")
