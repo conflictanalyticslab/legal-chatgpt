@@ -11,12 +11,11 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import ReactMarkdown from 'react-markdown'
 
 // import external hooks
-import { auth } from "@/firebase";
+import { auth, db } from "@/firebase";
 
 // import images
 import ChatPageOJ from "@/images/ChatPageOJ.png";
 import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
-import { postConversation } from "@/util/requests/postConversation";
 
 // import OJ hooks
 import { getConversationTitles } from "@/util/requests/getConversationTitles";
@@ -43,6 +42,7 @@ import { LoadingSpinner } from "../../../components/ui/LoadingSpinner";
 import { Card, CardContent } from "@/components/ui/card";
 import { getConversation } from "@/util/requests/getConversation";
 import { toast } from "@/components/ui/use-toast";
+import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
 export function Chat() {
   const router = useRouter();
   const [conversation, setConversation] = useState<Conversation[]>([]);
@@ -101,7 +101,7 @@ export function Chat() {
 
       // Update the chat conversation and the selected conversation Uid
       setConversation(selectedConversationContent?.conversation);
-      setConversationUid(selectedConversationContent.conversationId)
+      setConversationUid(selectedConversationContent.conversationId) // Note the conversationUid is used to find
     }
     catch (error:any) {
       toast({
@@ -136,10 +136,9 @@ export function Chat() {
         const fetchData = async () => {
           try {
             setDocuments((await getDocumentsOwnedByUser()) as any);
-            setConversationTitles((await getConversationTitles()) as any);
+            setConversationTitles(await getConversationTitles());
           } catch (e) {
             console.log(e);
-            // router.push("/login");
           }
         };
         fetchData();
@@ -225,17 +224,18 @@ export function Chat() {
         useRag,
         namespace,
         includedDocuments,
+        conversationTitle,
         setConversationTitle,
         setConversationUid,
         conversationUid,
         setLoading,
-        conversationTitle,
         setDocumentQuery,
         setRelevantDocs,
         setAlert,
         handleBeforeUnload,
         documentQueryMethod,
-        setPdfLoading
+        setPdfLoading,
+        setConversationTitles
       );
     } else {
       try {
@@ -261,7 +261,8 @@ export function Chat() {
           conversationUid,
           setConversationUid,
           handleBeforeUnload,
-          documentQueryMethod
+          documentQueryMethod,
+          setConversationTitles
         );
       } catch (error) {
         console.error(error);

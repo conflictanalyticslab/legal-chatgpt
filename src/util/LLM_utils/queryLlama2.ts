@@ -26,7 +26,7 @@ const processQueue = async () => {
   const { data, resolve, reject } = llama2_queue.shift() as QueueItem;
 
   const messages = JSON.stringify(data);
-  console.log(messages);
+  console.log("messages from llama", messages);
 
   // send request to api
   try {
@@ -67,7 +67,7 @@ const queryLlama2 = (data: object) => {
 
   return new Promise((resolve, reject) => {
     llama2_queue.push({ data, resolve, reject });
-
+    console.log("llama", llama2_queue)
     if (!llama2_processing) {
       processQueue();
     }

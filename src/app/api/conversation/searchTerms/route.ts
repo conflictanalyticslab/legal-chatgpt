@@ -5,7 +5,6 @@
  * @date Jun 2024
  */
 
-import { getDocumentText } from "@/util/api/firebase_utils/getDocuments";
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { searchAndSummarize } from "@/util/api/elastic_search_utils/searchAndSummarize";
 import { NextResponse } from "next/server";

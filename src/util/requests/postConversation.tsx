@@ -11,6 +11,6 @@ export async function postConversation(
       "Content-Type": "application/json",
       Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
     },
-    body: JSON.stringify({ searchPrompt, documentPrompt, fullConversation}),
+    body: JSON.stringify({ searchPrompt, documentPrompt, conversation: fullConversation}),
   });
 }

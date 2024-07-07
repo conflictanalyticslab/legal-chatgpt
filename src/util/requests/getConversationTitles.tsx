@@ -11,6 +11,6 @@ export async function getConversationTitles(): Promise<string[]> {
       Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
     },
   });
-  const { conversations } = await res.json();
-  return conversations;
+  const { titles } = await res.json();
+  return titles;
 }

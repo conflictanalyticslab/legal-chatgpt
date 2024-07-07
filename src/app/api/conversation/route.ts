@@ -5,21 +5,23 @@
  * @date Jun 2024
  */
 
-import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
-import { loadUser } from "@/util/api/middleware/loadUser";
-import { queryOpenAILLM, queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
-import queryLlama2 from "@/util/LLM_utils/queryLlama2";
 import { NextResponse } from "next/server";
-import GPT4Tokenizer from 'gpt4-tokenizer';
 import { getFirestore } from "firebase-admin/firestore";
-import { llama } from "@/app/chat/components/utils/LLM/normal_LLM_utils";
+import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
+import queryLlama2 from "@/util/LLM_utils/queryLlama2";
+import { authenticateUser } from "./update/utils/update_validation";
+import { validateConversation, validateLoadedUser, validateTokenCount } from "./update/utils/update_validation";
+import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 
 /**
+ * Get a specific conversation that the user requests
  * 
- * @param req 
- * @returns 
+ * @param req - request data
+ * @param req.title - conversation title to search for
+ * @returns - the conversation including the title, and Uid
  */
 export async function GET(req: Request) {
+  // Authentication
   const { earlyResponse, decodedToken } = await authenticateApiUser();
   if (earlyResponse) {
     return earlyResponse;
@@ -32,8 +34,9 @@ export async function GET(req: Request) {
     );
   }
 
-  const {title} = await req.json();
+  const {title} = await req.json(); // The conversation title (which will be used alongside the uid to identify the document)
 
+  // Fetches conversation from firestore
   const queryResults = await getFirestore()
     .collection("conversations")
     .where("userUid", "==", decodedToken.user_id)
@@ -48,6 +51,7 @@ export async function GET(req: Request) {
     );
   }
 
+  // Get the first queried document and return its data
   const doc = queryResults.docs[0];
   const data = doc.data();
 
@@ -57,59 +61,78 @@ export async function GET(req: Request) {
 /**
  * Retrieve LLM output
  * 
- * @param req 
+ * @param req - request data
+ * @param req.searchPrompt - the user's query
+ * @param req.documentPrompt - the included document ids for the search prompt
+ * @param req.conversation - the full conversation between user and assistant (LLM)
  * @returns 
  */
 export async function POST(req: Request) {
-  // User authentication
-  const { earlyResponse, decodedToken } = await authenticateApiUser();
-  if (earlyResponse) {
-    return earlyResponse;
-  }
-
-  if (!decodedToken) {
-    return NextResponse.json(
-      { error: "decodedToken is missing but there was no earlyResponse" },
-      { status: 500 }
-    );
-  }
-
-  // Loads the user from the "users" collection
-  const { user } = await loadUser(decodedToken);
-
-  // Check if the user exists
-  if (!user)
-    return NextResponse.json({ error: "No user found" }, { status: 403 });
-
-  // Check if the user has any more prompts left
-  if (user.prompts_left < 0)
-    return NextResponse.json({ error: "No prompts left" }, { status: 403 });
-
   // Request body data
-  const { searchPrompt, documentPrompt, fullConversation } = await req.json();
+  const { searchPrompt, documentPrompt, conversation } = await req.json();
+
+  // Authenticate User
+  const decodedToken = await authenticateUser();
+  if (decodedToken instanceof NextResponse) return decodedToken;
+  
+  // Check for valid user
+  const user = await validateLoadedUser(decodedToken);
+  if (user instanceof NextResponse) return user;
+
+  // Check for valid user
+  const validConversation = await validateConversation(conversation);
+  if (validConversation instanceof NextResponse) return validConversation;
+
+  // Composing full user query with included uploaded document data and the user's query
+  const fullPrompt =`Answer in 500 words or less. Short answers are better.\n\n${documentPrompt}\n\n${searchPrompt}`;
+  conversation[conversation.length - 2].content = fullPrompt;
 
   // Query Open AI LLM
-  try {
-    return await queryOpenAILLM(searchPrompt, documentPrompt, fullConversation);
-  } catch (error) {
-    //Do nothing and continue to use llama
+  try 
+  {
+    const llmResponse = await queryOpenAi(
+      {
+        model: "gpt-3.5-turbo-0125",
+        format: "markdown",
+        messages: [...conversation],
+      },
+      true
+    );
+
+    // Return response back
+    if (llmResponse)
+      return llmResponse;
+  } 
+  catch (error) 
+  {
+    console.log("====================== QUERYING LLAMA2 ======================")
+    //Do nothing so we can proceed to LLAMA model
   }
 
-  try {
-    const llmResponse:any = await llama(
-      searchPrompt,
-      documentPrompt,
-      fullConversation
-    );
+  // Validate token count before sending input to LLAMA
+  const tokenCount = await validateTokenCount(searchPrompt, documentPrompt, conversation)
+  if (tokenCount instanceof NextResponse) return tokenCount;
+
+  // Querying LLAMA
+  try 
+  {
+    const llmResponse:any = await queryLlama2({
+        messages: [...conversation],
+    });
+
     return NextResponse.json({
       latestBotResponse: llmResponse.choices[0].message.content,
     });
-  } catch (error) {
+  } 
+  catch (error) 
+  {
+    console.error(
+      "queryLlama2 failed in conversation/route.ts for second response: ",
+      error
+    );
     return NextResponse.json({
       latestBotResponse: "Error retrieving LLM response",
     });
   }
 }
-
-
 

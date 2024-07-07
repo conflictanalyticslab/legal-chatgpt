@@ -1,12 +1,34 @@
 import { toast } from "@/components/ui/use-toast";
 import { postConversation } from "@/util/requests/postConversation";
 import GPT4Tokenizer from "gpt4-tokenizer";
-import { updateConversation } from "../firebase/firebase_utils";
+import { upsertConversation } from "../firebase/upsertConversation";
 import { createDocumentPrompt, pdfSearch } from "../pdfs/pdf_utils";
-import queryLlama2 from "@/util/LLM_utils/queryLlama2";
-import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
 
-export async function fetchWithLLM( documentContent:any, userQuery:string, conversation:any, setConversation:any, setUserQuery:any, num:any, setNum:any, setLoading:any, includedDocuments:any, setAlert:any, generateFlagRef:any, setLatestResponse:any, setDocumentQuery:any, setRelevantDocs:any, setPdfLoading:any, namespace:string, conversationTitle:any, setConversationTitle:any, conversationUid:any, setConversationUid:any, handleBeforeUnload:any, documentQueryMethod:any) {
+export async function fetchWithLLM(
+  documentContent: any,
+  userQuery: string,
+  conversation: any,
+  setConversation: any,
+  setUserQuery: any,
+  num: any,
+  setNum: any,
+  setLoading: any,
+  includedDocuments: any,
+  setAlert: any,
+  generateFlagRef: any,
+  setLatestResponse: any,
+  setDocumentQuery: any,
+  setRelevantDocs: any,
+  setPdfLoading: any,
+  namespace: string,
+  conversationTitle: any,
+  setConversationTitle: any,
+  conversationUid: any,
+  setConversationUid: any,
+  handleBeforeUnload: any,
+  documentQueryMethod: any,
+  setConversationTitles: any,
+) {
   // Adds uploaded document content from user
   const addtionalUploadedDocContent =
     documentContent.length > 0
@@ -62,7 +84,6 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
   );
 
   let buffer = "";
-
   // The output stream coming from the model
   if (
     response.status === 200 &&
@@ -75,7 +96,6 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
     // read the response content by iteration
     while (generateFlagRef.current) {
       const currentResponse = await reader.read();
-
       if (currentResponse.done) break;
 
       // decode content
@@ -143,71 +163,15 @@ export async function fetchWithLLM( documentContent:any, userQuery:string, conve
   );
 
   // Update Conversation Title
-  updateConversation(
+  upsertConversation(
     fullConversation,
     includedDocuments,
     setAlert,
     conversationTitle,
     setConversationTitle,
+    setConversationTitles,
     conversationUid,
     setConversationUid,
     handleBeforeUnload
   );
-}
-
-
-/**
- * Query OpenAI's LLM
- * 
- * @returns 
- */
-export function llama(searchPrompt:string, documentPrompt:string, fullConversation:any) {
-  return new Promise(async (resolve, reject) => {
-    console.log(
-      "\n-------------------------- Switching to llama2 in conversation/route.ts for second response --------------------------\n"
-    );
-
-    // Token Count Limitation
-    const tokenizer = new GPT4Tokenizer({ type: "gpt3" });
-
-    let token_count = 0;
-    for (let i = 0; i < fullConversation.length; i++) {
-      token_count += tokenizer.estimateTokenCount(fullConversation[i].content);
-    }
-
-    token_count +=
-      tokenizer.estimateTokenCount(documentPrompt) +
-      tokenizer.estimateTokenCount(searchPrompt) +
-      2;
-
-    // Checks for valid token count
-    if (token_count > 2048) {
-      return resolve({
-        latestBotResponse:
-          "Token limit of 2048 exceeded, your prompt includes " +
-          token_count +
-          " tokens",
-      });
-    }
-
-    // Querying LLAMA
-    try {
-      const llmResponse = await queryLlama2({
-        messages: [
-          {
-            role: "user",
-            content: documentPrompt + "\n\n" + searchPrompt,
-          },
-          ...fullConversation,
-        ],
-      });
-
-      resolve(llmResponse);
-    } catch (error) {
-      console.error(
-        "queryLlama2 failed in conversation/route.ts for second response: " + error
-      );
-      reject(error);
-    }
-  });
 }

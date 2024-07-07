@@ -11,6 +11,6 @@ export async function postConversationTitle(
       "Content-Type": "application/json",
       Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
     },
-    body: JSON.stringify({ fullConversation, includedDocuments }),
+    body: JSON.stringify({ conversation: fullConversation, includedDocuments }),
   });
 }
