@@ -199,7 +199,6 @@ export async function pdfSearch(documentQueryMethod:string, userQuery:string, na
     if (documentQueryMethod === "elastic") {
       // Generate elastic search prompt and document prompt from Open AI
       const search_terms_res = await postSearchTerms(userQuery);
-
       if (!search_terms_res.ok) {
         const errorData = await search_terms_res.json();
         setAlert(errorData.error);

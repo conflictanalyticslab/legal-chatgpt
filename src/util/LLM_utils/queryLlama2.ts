@@ -10,9 +10,7 @@ type QueueItem = {
 let llama2_queue: QueueItem[] = [];
 let llama2_processing = false;
 const url = 'https://Llama-2-70b-chat-openjustice-serverless.eastus2.inference.ai.azure.com/v1/chat/completions'
-//   const apiKey = process.env.LLAMA2_API_KEY;
-const apiKey = "OgWjb3oPCHbqfyMuTQ4pA2WoAxqtWtZ3";
-
+const apiKey = process.env.LLAMA2_API_KEY;
 // helper function: if queue is not empty and not processing, pop a request out and send to the api, wait for 1 second, then call itself again
 const processQueue = async () => {
   // check if queue is empty, if so, set processing to false (so we are not currently processing any api requests) and return
