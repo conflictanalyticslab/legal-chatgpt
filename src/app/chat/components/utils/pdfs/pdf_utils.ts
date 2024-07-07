@@ -197,7 +197,6 @@ export async function pdfSearch(documentQueryMethod:string, userQuery:string, na
   try {
     // Elastic Search
     if (documentQueryMethod === "elastic") {
-      console.log("user's query", userQuery);
 
       // Generate elastic search prompt and document prompt from Open AI
       const elastic_docs_resp = await postSearchTerms(userQuery);
@@ -208,7 +207,6 @@ export async function pdfSearch(documentQueryMethod:string, userQuery:string, na
       if(elastic_docs.status === 400) {
         throw("Couldn't generate Elastic Search results");
       }
-      console.log("Here are the search results", elastic_docs.elasticSearchResults);
 
       setRelevantDocs(elasticDtoToRelevantDocuments(elastic_docs.elasticSearchResults));
     } else {

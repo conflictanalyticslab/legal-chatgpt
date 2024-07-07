@@ -38,7 +38,7 @@ export async function GET(_: Request) {
   const queryResults = await getFirestore()
     .collection("conversations")
     .where("userUid", "==", decodedToken.user_id)
-    // .orderBy("timestamp", "desc") TODO: When timestamp index is added sort the conversations by timestamp
+    .orderBy("timestamp", "desc")
     .get();
 
   const titles = queryResults.docs.map((doc) => {
@@ -95,7 +95,6 @@ export async function POST(req: Request) {
     });
 
     const title = llmResponse.choices[0].message.content;
-    console.log("this is the conversationTitle from route", title)
 
     // Return LLM generated title
     if (llmResponse) {

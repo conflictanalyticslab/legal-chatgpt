@@ -10,7 +10,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import ReactMarkdown from 'react-markdown'
 
 // import external hooks
-import { auth, db } from "@/firebase";
+import { auth } from "@/firebase";
 
 // import images
 import ChatPageOJ from "@/images/ChatPageOJ.png";
@@ -41,8 +41,8 @@ import { LoadingSpinner } from "../../../components/ui/LoadingSpinner";
 import { Card, CardContent } from "@/components/ui/card";
 import { getConversation } from "@/util/requests/getConversation";
 import { toast } from "@/components/ui/use-toast";
-import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
 import { AlertDialog, AlertDialogContent } from "@/components/ui/alert-dialog";
+import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
 export function Chat() {
   const router = useRouter();
   const [conversation, setConversation] = useState<Conversation[]>([]);
@@ -376,14 +376,14 @@ export function Chat() {
 
                 {/* Final Buffered Content */}
                 {convoObj.content !== "" && (
-                  <ReactMarkdown>{convoObj?.content}</ReactMarkdown>
+                  <ReactMarkdown className="flex flex-col items-start gap-[10px] llm-markdown">{convoObj?.content}</ReactMarkdown>
                 )}
 
                 {/*  Buffered LLM Content */}
                 {convoObj.role === "assistant" &&
                   i === conversation.length - 1 && (
                     <div className="relative flex-col gap-2 flex justify-between break-normal">
-                      <ReactMarkdown>{latestResponse}</ReactMarkdown>
+                      <ReactMarkdown className="flex flex-col items-start gap-[10px] llm-markdown">{latestResponse}</ReactMarkdown>
                       {/* Loading Animation */}
                       {loading && latestResponse === "" && (
                         <div className="w-[10px] h-[10px] bg-[black] rounded-[50%] animate-pulse self-start"></div>
@@ -473,6 +473,7 @@ export function Chat() {
 
         {/* Alert Modal */}
         <AlertDialog open={!!alert} onOpenChange={handleAlertClose}>
+          <AlertDialogTitle className="hidden"></AlertDialogTitle>
           <AlertDialogContent onOpenAutoFocus={(e:any)=> e.preventDefault()}>
             {alert}
           </AlertDialogContent>
