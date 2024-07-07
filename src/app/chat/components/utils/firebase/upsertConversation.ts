@@ -27,7 +27,7 @@ export async function upsertConversation(
   setConversationUid: any,
   handleBeforeUnload: any
 ) {
-
+  console.log("this is the length", conversation)
   // Generate new conversation title and add it to the database
   if (conversation.length <= 2) {
     // 1. GENERATE CONVERSATION TITLE
@@ -43,6 +43,8 @@ export async function upsertConversation(
       return;
     }
 
+
+    
     // Generated title
     const { title } = await titleResPromise.json();
 
@@ -72,6 +74,8 @@ export async function upsertConversation(
 
   if (!conversationUid) return;
 
+
+  console.log("BROTHA", conversationUid)
   // 1. UPDATE EXISTING CONVERSATION TO FIRESTORE
   await putConversationSave(
     conversationUid, // Note the conversation Uid is really just the user_id in firestore

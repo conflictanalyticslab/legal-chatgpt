@@ -66,9 +66,9 @@ export async function fetchWithRAG(
     setAlert,
     conversationTitle,
     setConversationTitle,
+    setConversationTitles,
     conversationUid,
     setConversationUid,
     handleBeforeUnload,
-    setConversationTitles,
   );
 }
