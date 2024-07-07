@@ -5,7 +5,6 @@ import Image from "next/image";
 
 // import external components
 import { useRouter } from "next/navigation";
-import { Dialog, DialogContent, } from "../../../components/ui/dialog";
 import { Button as Button } from "../../../components/ui/button";
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import ReactMarkdown from 'react-markdown'
@@ -43,6 +42,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getConversation } from "@/util/requests/getConversation";
 import { toast } from "@/components/ui/use-toast";
 import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
+import { AlertDialog, AlertDialogContent } from "@/components/ui/alert-dialog";
 export function Chat() {
   const router = useRouter();
   const [conversation, setConversation] = useState<Conversation[]>([]);
@@ -472,11 +472,11 @@ export function Chat() {
         </form>
 
         {/* Alert Modal */}
-        <Dialog open={!!alert} onOpenChange={handleAlertClose}>
-          <DialogContent onOpenAutoFocus={(e)=> e.preventDefault()}>
+        <AlertDialog open={!!alert} onOpenChange={handleAlertClose}>
+          <AlertDialogContent onOpenAutoFocus={(e:any)=> e.preventDefault()}>
             {alert}
-          </DialogContent>
-        </Dialog>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
