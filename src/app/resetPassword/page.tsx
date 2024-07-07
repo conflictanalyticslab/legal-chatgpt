@@ -1,5 +1,5 @@
 "use client";
-import { AppBackground, GridContainer } from "@/styles/styles";
+import { AppBackground } from "@/styles/styles";
 import { resetPassword } from "@/util/api/firebase_utils/auth";
 import {
   FormControl,

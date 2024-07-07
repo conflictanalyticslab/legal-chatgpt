@@ -10,7 +10,7 @@ export async function getConversation(title: string): Promise<{conversation: {ro
     headers: {
       Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
     },
-    body: JSON.stringify({ title: title }),
+    body: JSON.stringify({ title }),
   });
 
   return await res.json();

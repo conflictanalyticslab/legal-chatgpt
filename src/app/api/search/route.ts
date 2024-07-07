@@ -1,7 +1,7 @@
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
 import queryLlama2 from "@/util/LLM_utils/queryLlama2";
-import { callSearchAPI } from "@/util/api/runSearch";
+import { callSearchAPI } from "@/util/api/elastic_search_utils/runSearch";
 import { NextResponse } from "next/server";
 
 

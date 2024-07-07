@@ -18,7 +18,7 @@ export default function ChatHistory({setShowStartupImage}:any) {
         value={conversationTitle}
       >
         <SelectTrigger className="w-full outline-[none] focus:shadow-none focus:ring-offset-0 focus:ring-0 px-[1rem]">
-          <div className="flex gap-3">
+          <div className="flex gap-3 overflow-hidden">
             <Image
               src="/assets/icons/history.svg"
               height={18}

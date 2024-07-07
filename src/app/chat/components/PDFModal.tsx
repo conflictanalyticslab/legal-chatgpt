@@ -5,7 +5,7 @@ import { editDocument } from "@/util/api/firebase_utils/editDocument";
 import { Button } from "../../../components/ui/button";
 import { Label } from "../../../components/ui/label";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../../../components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Card, CardContent, CardHeader } from "../../../components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../components/ui/tooltip";
 import { Textarea } from "../../../components/ui/textarea";
 import { Checkbox } from "../../../components/ui/checkbox";

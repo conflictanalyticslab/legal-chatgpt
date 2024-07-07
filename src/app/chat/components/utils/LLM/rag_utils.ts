@@ -1,6 +1,4 @@
-import { elasticDtoToRelevantDocuments, pineconeDtoToRelevantDocuments } from "@/app/chat/api/documents/transform";
-import { updateConversation } from "../firebase/firebase_utils";
-import { postSearchTerms } from "@/util/requests/postSearchTerms";
+import { upsertConversation } from "../firebase/upsertConversation";
 import { pdfSearch } from "../pdfs/pdf_utils";
 
 /**
@@ -14,17 +12,18 @@ export async function fetchWithRAG(
   useRag: any,
   namespace: string,
   includedDocuments: any,
+  conversationTitle: any,
   setConversationTitle: any,
   setConversationUid: any,
   conversationUid: any,
   setLoading: any,
-  conversationTitle: any,
   setDocumentQuery: any,
   setRelevantDocs: any,
   setAlert: any,
   handleBeforeUnload: any,
   documentQueryMethod: any,
   setPdfLoading:any,
+  setConversationTitles: any,
 ) {
 
   // Update the chat with the user's userQuery first
@@ -61,7 +60,7 @@ export async function fetchWithRAG(
   setDocumentQuery(userQuery);
 
   // Update Conversation Title
-  updateConversation(
+  upsertConversation(
     fullConversation,
     includedDocuments,
     setAlert,
@@ -69,6 +68,7 @@ export async function fetchWithRAG(
     setConversationTitle,
     conversationUid,
     setConversationUid,
-    handleBeforeUnload
+    handleBeforeUnload,
+    setConversationTitles,
   );
 }
