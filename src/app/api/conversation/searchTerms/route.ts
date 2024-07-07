@@ -46,7 +46,7 @@ export async function POST(req: Request) {
       model: "gpt-3.5-turbo-0125",
       messages: [{
         role: "assistant",
-        content: `Summarize the following text into 3 keywords: ${userQuery}`
+        content: `Summarize this query into 3 key words (eg. word1 word2 word3): ${userQuery}`
       }],
     },
     false
@@ -56,8 +56,10 @@ export async function POST(req: Request) {
   if(elasticSearchQuery) {
     elasticKeyWordsQuery = elasticSearchQuery?.choices[0]?.message?.content
   }
+
+  console.log("Key words--------->", elasticKeyWordsQuery)
   // Calls elastic search to search for related documents
-  const searchResults = await callSearchAPI(elasticKeyWordsQuery || userQuery);
+  const searchResults = await callSearchAPI(userQuery);
 
   if(!searchResults || searchResults.length <= 0)
     errorResp.errors.push("Failed to generate elastic search result")
