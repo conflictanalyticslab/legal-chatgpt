@@ -106,9 +106,9 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
               </SelectTrigger>
               <SelectContent align="end">
                 <SelectGroup>
-                  <SelectItem value="french_law">French Law</SelectItem>
+                  <SelectItem value="french_law">Leiden IAL</SelectItem>
                   <SelectItem value="austrialian_law">
-                    Austrialian Law
+                    Australia Scrutiny
                   </SelectItem>
                 </SelectGroup>
               </SelectContent>

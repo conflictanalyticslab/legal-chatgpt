@@ -104,10 +104,10 @@ export async function POST(req: Request) {
     }
 
   } catch (error) {
+    //Do nothing so we can proceed to LLAMA model
     console.log(
       "====================== QUERYING LLAMA2 ======================"
     );
-    //Do nothing so we can proceed to LLAMA model
   }
 
   // Querying LLAMA
@@ -130,14 +130,6 @@ export async function POST(req: Request) {
         { error: "Failed to generate title for conversation" },
         { status: 400 }
       );
-
-    //@ts-ignore
-    createDoc("conversations", {
-      conversation: conversation,
-      documents: includedDocuments,
-      title: title,
-      userUid: decodedToken?.uid,
-    });
     
     // Return back Response
     return NextResponse.json({

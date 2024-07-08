@@ -43,8 +43,6 @@ export async function upsertConversation(
       return;
     }
 
-
-    
     // Generated title
     const { title } = await titleResPromise.json();
 
@@ -61,8 +59,7 @@ export async function upsertConversation(
       setConversationUid(convo.uid); 
       setConversationTitle(title) // Update selected conversation
       setConversationTitles((curConversationTitles:any)=> {
-        const res = [{ title, userId: convo.uid },...curConversationTitles ];
-        return res
+        return [{ title, userUid: convo.uid },...curConversationTitles ];
       })
     } catch (error) {
       console.log(error);
