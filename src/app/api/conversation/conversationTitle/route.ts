@@ -1,6 +1,5 @@
 /**
  * @file: /conversation/conversationTitle/route.ts - Uses LLM to generate title based on conversation 
- * TODO: This route is called from postConversationSave.tsx this route therefore should not be called /convesationTitle
  * 
  * @author Kevin Yu <yu.kevin2002@gmail.com>
  * @date Jul 2024

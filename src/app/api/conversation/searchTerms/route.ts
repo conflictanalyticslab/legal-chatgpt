@@ -58,7 +58,7 @@ export async function POST(req: Request) {
   }
 
   // Calls elastic search to search for related documents
-  const searchResults = await callSearchAPI(userQuery);
+  const searchResults = await callSearchAPI(elasticKeyWordsQuery);
 
   if(!searchResults || searchResults.length <= 0)
     errorResp.errors.push("Failed to generate elastic search result")
