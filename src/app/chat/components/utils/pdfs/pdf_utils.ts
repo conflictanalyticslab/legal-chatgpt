@@ -203,7 +203,6 @@ export async function pdfSearch(documentQueryMethod:string, userQuery:string, na
 
       // Retrieve elastic search results and get selected pdf document(s) text
       const elastic_docs = await elastic_docs_resp.json();
-      console.log(elastic_docs)
       if(elastic_docs.status === 400) {
         throw("Couldn't generate Elastic Search results");
       }

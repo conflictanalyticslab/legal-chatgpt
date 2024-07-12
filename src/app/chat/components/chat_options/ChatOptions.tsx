@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../../../../components/
 import { useChatContext } from "../store/ChatContext";
 import ChatHistory from "./ChatHistory";
 import { cn } from "@/lib/utils";
+import BugReport from "./BugReport";
 
 function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments, enableRag, conversationTitles, setShowStartupImage, conversationTitle }:any) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -148,6 +149,8 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
             </div>
           </PopoverContent>
         </Popover>
+
+        <BugReport/>
       </div>
     );
 }
