@@ -24,6 +24,7 @@ export async function fetchWithRAG(
   documentQueryMethod: any,
   setPdfLoading:any,
   setConversationTitles: any,
+  globalSearch: any,
 ) {
 
   // Update the chat with the user's userQuery first
@@ -56,6 +57,7 @@ export async function fetchWithRAG(
     setAlert,
     setRelevantDocs,
     setPdfLoading,
+    globalSearch
   );
   setDocumentQuery(userQuery);
 

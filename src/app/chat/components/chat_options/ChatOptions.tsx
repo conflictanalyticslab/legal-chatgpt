@@ -12,20 +12,30 @@ import ChatHistory from "./ChatHistory";
 import { cn } from "@/lib/utils";
 import BugReport from "./BugReport";
 
-function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments, enableRag, conversationTitles, setShowStartupImage, conversationTitle }:any) {
+function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments, enableRag, setShowStartupImage }:any) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const { setNamespace, documentQueryMethod, setDocumentQueryMethod, setEnableRag } = useChatContext();
+    const { setNamespace, documentQueryMethod, setDocumentQueryMethod, setEnableRag, globalSearch, setGlobalSearch } = useChatContext();
 
     const handleEnableRag = (value: boolean) => {
       if (documentQueryMethod === "elastic") return;
       setEnableRag(value);
       localStorage.setItem("enableRag", JSON.stringify(value));
     };
+    
+    // toggle global search
+    const toggleGlobalSearch = (value: boolean) => {
+      if (documentQueryMethod === "elastic") return;
+      setGlobalSearch(value);
+      localStorage.setItem("globalSearch", JSON.stringify(value));
+    };
 
+    // Sets the appropriate local storage settings when toggling between elastic and keyword search
     const handleChangeDocumentQueryMethod = (queryMethod:string) => {
       if(queryMethod === "elastic"){
         setEnableRag(false);
+        setGlobalSearch(false);
         localStorage.setItem("enableRag", JSON.stringify(false));
+        localStorage.setItem("globalSearch", JSON.stringify(false));
       }
 
       setDocumentQueryMethod(queryMethod);
@@ -88,7 +98,34 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                 />
               </div>
             </Button>
-
+            {/* Global Search */}
+            <Button
+              variant="ghost"
+              className={cn(`w-full`)}
+              onClick={()=>toggleGlobalSearch(!globalSearch)}
+              asChild
+            >
+              <div
+                className={cn(`w-full flex justify-between items-center`, {
+                  "opacity-[0.5]": documentQueryMethod === "elastic",
+                })}
+              >
+                <div className="flex gap-5 justify-start">
+                  <Image
+                    src={"/assets/icons/globe.svg"}
+                    width={16}
+                    height={22}
+                    alt={"pdf file"}
+                  />
+                  <Label className="whitespace-nowrap">Global Search</Label>
+                </div>
+                <Switch
+                  disabled={documentQueryMethod === "elastic"}
+                  checked={globalSearch}
+                  className="scale-[0.7]"
+                />
+              </div>
+            </Button>
             {/* Jurisdiction */}
             <Select
               onValueChange={setNamespace}
@@ -149,8 +186,9 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
             </div>
           </PopoverContent>
         </Popover>
-
-        <BugReport/>
+        
+        {/* Ticketing System */}
+        {/* <BugReport/> */}
       </div>
     );
 }

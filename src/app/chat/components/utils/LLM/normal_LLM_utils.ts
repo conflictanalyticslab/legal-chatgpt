@@ -28,6 +28,7 @@ export async function fetchWithLLM(
   handleBeforeUnload: any,
   documentQueryMethod: any,
   setConversationTitles: any,
+  globalSearch: boolean
 ) {
   // Adds uploaded document content from user
   const addtionalUploadedDocContent =
@@ -159,7 +160,8 @@ export async function fetchWithLLM(
     namespace,
     setAlert,
     setRelevantDocs,
-    setPdfLoading
+    setPdfLoading,
+    globalSearch
   );
 
   // Update Conversation Title

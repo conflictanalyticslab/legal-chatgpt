@@ -16,7 +16,7 @@ import { LoadingSpinner } from "../../../components/ui/LoadingSpinner";
 import { pdfSearch } from "./utils/pdfs/pdf_utils";
 
 const SearchModal = () => {
-  const { relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, namespace, documentQueryMethod, setAlert, pdfLoading, setPdfLoading } = useChatContext();
+  const { relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, namespace, documentQueryMethod, setAlert, pdfLoading, setPdfLoading, globalSearch } = useChatContext();
 
   const formSchema = z.object({
     documentQuery: z.string().min(0, {
@@ -42,7 +42,8 @@ const SearchModal = () => {
       namespace,
       setAlert,
       setRelevantDocs,
-      setPdfLoading
+      setPdfLoading,
+      globalSearch
     );
   };
 

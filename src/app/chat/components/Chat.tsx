@@ -75,7 +75,9 @@ export function Chat() {
     conversationTitle,
     conversationUid,
     setConversationUid,
-    setConversationTitle
+    setConversationTitle,
+    globalSearch,
+    setGlobalSearch
   } = useChatContext();
 
   /**
@@ -188,8 +190,10 @@ export function Chat() {
   useEffect(() => {
     const enableRagStatus = localStorage.getItem("enableRag");
     const documentQueryChoice = localStorage.getItem("documentQueryPrevChoice");
+    const globalSearch = localStorage.getItem("globalSearch");
     if (enableRagStatus) setEnableRag(JSON.parse(enableRagStatus));
     if (documentQueryChoice) setDocumentQueryMethod(JSON.parse(documentQueryChoice));
+    if (globalSearch) setGlobalSearch(JSON.parse(globalSearch));
   }, []);
 
   /**
@@ -235,7 +239,8 @@ export function Chat() {
         handleBeforeUnload,
         documentQueryMethod,
         setPdfLoading,
-        setConversationTitles
+        setConversationTitles,
+        globalSearch
       );
     } else {
       try {
@@ -262,7 +267,8 @@ export function Chat() {
           setConversationUid,
           handleBeforeUnload,
           documentQueryMethod,
-          setConversationTitles
+          setConversationTitles,
+          globalSearch
         );
       } catch (error) {
         console.error(error);
