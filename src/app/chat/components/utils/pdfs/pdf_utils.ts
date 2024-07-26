@@ -6,9 +6,10 @@ import GPT4Tokenizer from "gpt4-tokenizer";
 import { useFilePicker } from "use-file-picker";
 import { FileAmountLimitValidator, FileSizeValidator } from "use-file-picker/validators";
 import { postSearchTerms } from "@/util/requests/postSearchTerms";
-import { elasticDtoToRelevantDocuments, pineconeDtoToRelevantDocuments } from "@/app/chat/api/documents/transform";
+import { elasticDtoToRelevantDocuments, globalSearchAPIDtoToRelevantDocuments, pineconeDtoToRelevantDocuments } from "@/app/chat/api/documents/transform";
 import { similaritySearch } from "@/app/chat/api/semantic-search";
 import { getDocumentText } from "@/util/api/firebase_utils/getDocuments";
+import { auth } from "@/firebase";
 
   /**
    * Extracts URLs from a given text
@@ -193,7 +194,7 @@ export async function filesSuccessfullyUploaded(plainFiles:any, setDocumentConte
  * @param namespace 
  * @returns 
  */
-export async function pdfSearch(documentQueryMethod:string, userQuery:string, namespace:string, setAlert:any, setRelevantDocs:any, setPdfLoading:any) {
+export async function pdfSearch(documentQueryMethod:string, userQuery:string, namespace:string, setAlert:any, setRelevantDocs:any, setPdfLoading:any, globalSearch:boolean) {
   try {
     // Elastic Search
     if (documentQueryMethod === "elastic") {
@@ -208,10 +209,36 @@ export async function pdfSearch(documentQueryMethod:string, userQuery:string, na
       }
 
       setRelevantDocs(elasticDtoToRelevantDocuments(elastic_docs.elasticSearchResults));
-    } else {
-      // SemanticSearch
-      const similarDocs = await similaritySearch(userQuery, 3, namespace);
-      setRelevantDocs(pineconeDtoToRelevantDocuments(similarDocs));
+    } 
+    else 
+    {
+
+      // Global Search
+      if(globalSearch)
+      {
+      const response = await fetch("https://global-search.openjustice.ai/search/", {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await auth?.currentUser?.getIdToken()}`
+          },
+          body: JSON.stringify({ user_query: userQuery }),
+        });
+        
+        if(!response?.ok)
+          throw("Failed to fetch response");
+
+        const responseData = await response.json()
+        const similarDocs = responseData.documents
+
+        setRelevantDocs(globalSearchAPIDtoToRelevantDocuments(similarDocs));
+      }
+      else
+      {
+        // Static PDF File Search
+        const similarDocs = await similaritySearch(userQuery, 3, namespace);
+        setRelevantDocs(pineconeDtoToRelevantDocuments(similarDocs));
+      }
     }
   } catch (e) {
     console.log(e);

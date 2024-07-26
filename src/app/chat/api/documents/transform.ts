@@ -3,6 +3,19 @@ import { ElasticDocument } from "./elasticDto";
 import { QueryResponse } from "@pinecone-database/pinecone";
 import { TextMetadata } from "@/types/chat";
 
+export function globalSearchAPIDtoToRelevantDocuments(pineconeDtos: any[]) {
+  const transformedDtos:RelevantDocument[] = [];
+
+  for (const dto of pineconeDtos) {
+    transformedDtos.push({
+      url: dto.url || '',
+      fileName: dto.fileName || '',
+      content: dto.text || '',
+    })
+  }
+  return transformedDtos;
+}
+
 export function pineconeDtoToRelevantDocuments(pineconeDtos: QueryResponse<TextMetadata>) {
   const transformedDtos:RelevantDocument[] = [];
 

@@ -8,6 +8,7 @@ export const ChatContextProvider = ({ children }) => {
   const [relevantDocs, setRelevantDocs] = useState([]);
   const [documentQuery, setDocumentQuery] = useState("");
   const [enableRag, setEnableRag] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState(false);
   const [ragConversation, setRagConversation] = useState([]);
   const [namespace, setNamespace] = useState('');
   const [userQuery, setUserQuery] = useState('');
@@ -58,7 +59,9 @@ export const ChatContextProvider = ({ children }) => {
         conversationTitle,
         setConversationTitle,
         conversationUid,
-        setConversationUid
+        setConversationUid,
+        globalSearch, 
+        setGlobalSearch
       }}
     >
       {children}
