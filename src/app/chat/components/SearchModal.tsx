@@ -123,7 +123,7 @@ const SearchModal = () => {
                   <CardContent className="flex flex-col gap-4">
                     <div className="flex flex-col">
                       <Label className="font-bold">URL:</Label>
-                      <output>{doc.url}</output>
+                      <output className="text-[#0000EE]">{doc.url}</output>
                     </div>
                     <div className="flex flex-col">
                       <Label className="font-bold">Abstract</Label>
