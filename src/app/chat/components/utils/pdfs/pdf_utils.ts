@@ -200,15 +200,15 @@ export async function pdfSearch(documentQueryMethod:string, userQuery:string, na
     if (documentQueryMethod === "elastic") {
 
       // Generate elastic search prompt and document prompt from Open AI
-      const elastic_docs_resp = await postSearchTerms(userQuery);
+      const response = await postSearchTerms(userQuery);
 
       // Retrieve elastic search results and get selected pdf document(s) text
-      const elastic_docs = await elastic_docs_resp.json();
-      if(elastic_docs.status === 400) {
+      const documents = await response.json();
+      if(documents.status === 400) {
         throw("Couldn't generate Elastic Search results");
       }
 
-      setRelevantDocs(elasticDtoToRelevantDocuments(elastic_docs.elasticSearchResults));
+      setRelevantDocs(elasticDtoToRelevantDocuments(documents.elasticSearchResults));
     } 
     else 
     {
@@ -230,7 +230,7 @@ export async function pdfSearch(documentQueryMethod:string, userQuery:string, na
 
         const responseData = await response.json()
         const similarDocs = responseData.documents
-
+        console.log("here")
         setRelevantDocs(globalSearchAPIDtoToRelevantDocuments(similarDocs));
       }
       else
