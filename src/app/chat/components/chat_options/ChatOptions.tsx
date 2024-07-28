@@ -79,32 +79,43 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    className={cn(`w-full flex justify-between items-center`, {
-                      "opacity-[0.5]": documentQueryMethod === "elastic",
-                    })}
-                    onClick={() => handleEnableRag(!enableRag)}
-                    disabled={documentQueryMethod === "elastic"}
-                  >
-                    <div className="flex gap-5 justify-start ">
-                      <Image
-                        src={"/assets/icons/database.svg"}
-                        width={16}
-                        height={22}
-                        alt={"pdf file"}
+                    asChild
+                    >
+                    <div
+                      onClick={() => handleEnableRag(!enableRag)}
+                      className={cn(
+                        `w-full flex justify-between items-center`,
+                        documentQueryMethod === "elastic"
+                          ? "opacity-[0.5]"
+                          : "cursor-pointer"
+                      )}
+                    >
+                      <div className="flex gap-5 justify-start">
+                        <Image
+                          src={"/assets/icons/database.svg"}
+                          width={16}
+                          height={22}
+                          alt={"pdf file"}
+                        />
+                        Enable RAG
+                      </div>
+                      <Switch
+                        checked={enableRag}
+                        className={cn(
+                          "scale-[0.7]",
+                          documentQueryMethod === "elastic"
+                            ? "cursor-default"
+                            : "cursor-pointer"
+                        )}
                       />
-                      <Label className="whitespace-nowrap">Enable RAG</Label>
                     </div>
-                    <Switch
-                      checked={enableRag}
-                      className="scale-[0.7]"
-                    />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent
                   side="left"
                   className={cn({ hidden: documentQueryMethod === "elastic" })}
                 >
-                  See uploaded documents
+                  Use retrieval augmented generation (RAG)
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -115,25 +126,36 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    className={cn(`w-full flex justify-between items-center`, {
-                      "opacity-[0.5] cursor-not-allowed": documentQueryMethod === "elastic",
-                    })}
-                    onClick={() => toggleGlobalSearch(!globalSearch)}
-                    disabled={documentQueryMethod === "elastic"}
+                    asChild
                   >
-                    <div className="flex gap-5 justify-start">
-                      <Image
-                        src={"/assets/icons/globe.svg"}
-                        width={16}
-                        height={22}
-                        alt={"pdf file"}
+                    <div
+                      onClick={() => toggleGlobalSearch(!globalSearch)}
+                      className={cn(
+                        `w-full flex justify-between items-center`,
+                        
+                         documentQueryMethod === "elastic" ? 'opacity-[0.5]': 'cursor-pointer',
+                        
+                      )}
+                    >
+                      <div className="flex gap-5 justify-start">
+                        <Image
+                          src={"/assets/icons/globe.svg"}
+                          width={16}
+                          height={22}
+                          alt={"pdf file"}
+                        />
+                        Global Search
+                      </div>
+                      <Switch
+                        checked={globalSearch}
+                        className={cn(
+                          "scale-[0.7]",
+                          documentQueryMethod === "elastic"
+                            ? "cursor-default"
+                            : "cursor-pointer"
+                        )}
                       />
-                      <Label className="whitespace-nowrap">Global Search</Label>
                     </div>
-                    <Switch
-                      checked={globalSearch}
-                      className="scale-[0.7]"
-                    />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent
@@ -145,6 +167,7 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+
             {/* Jurisdiction */}
             <Select
               onValueChange={setNamespace}

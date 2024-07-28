@@ -22,6 +22,7 @@ export const ChatContextProvider = ({ children }) => {
   const [conversationTitles, setConversationTitles] = useState([]);
   const [conversationTitle, setConversationTitle] = useState('');
   const [conversationUid, setConversationUid] = useState('');
+  const [infoAlert, setInfoAlert] = useState('');
 
 
   return (
@@ -61,7 +62,9 @@ export const ChatContextProvider = ({ children }) => {
         conversationUid,
         setConversationUid,
         globalSearch, 
-        setGlobalSearch
+        setGlobalSearch,
+        infoAlert, 
+        setInfoAlert
       }}
     >
       {children}

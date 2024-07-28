@@ -240,7 +240,8 @@ export async function pdfSearch(documentQueryMethod:string, userQuery:string, na
       }
     }
   } catch (e) {
-    console.log(e);
+    console.log("Failed to generate pdfs", e);
+    setRelevantDocs([])
   } finally {
     setPdfLoading(false);
   }
