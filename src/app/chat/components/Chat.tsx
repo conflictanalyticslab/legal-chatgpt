@@ -41,8 +41,8 @@ import { LoadingSpinner } from "../../../components/ui/LoadingSpinner";
 import { Card, CardContent } from "@/components/ui/card";
 import { getConversation } from "@/util/requests/getConversation";
 import { toast } from "@/components/ui/use-toast";
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter } from "@/components/ui/alert-dialog";
-import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 export function Chat() {
   const router = useRouter();
   const [conversation, setConversation] = useState<Conversation[]>([]);
@@ -242,7 +242,8 @@ export function Chat() {
         documentQueryMethod,
         setPdfLoading,
         setConversationTitles,
-        globalSearch
+        globalSearch,
+        setInfoAlert
       );
     } else {
       try {
@@ -270,11 +271,12 @@ export function Chat() {
           handleBeforeUnload,
           documentQueryMethod,
           setConversationTitles,
-          globalSearch
+          globalSearch,
+          setInfoAlert
         );
       } catch (error) {
         console.error(error);
-        setAlert(
+        setInfoAlert(
           "Chat length exceeds programming limitations. Please refresh the page to start a new session."
         );
       }
@@ -475,29 +477,27 @@ export function Chat() {
             </label>
           </div>
         </form>
-
-        {/* Alert Modal */}
-        <AlertDialog open={!!alert}>
-          <AlertDialogTitle className="hidden"></AlertDialogTitle>
-          <AlertDialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
-            <AlertDialogDescription className="text-center">{alert}</AlertDialogDescription>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Info Modal */}
-        <AlertDialog open={!!infoAlert}>
-          <AlertDialogTitle className="hidden"></AlertDialogTitle>
-
-          <AlertDialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
-            <AlertDialogDescription className="text-center">{infoAlert}</AlertDialogDescription>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={() => setInfoAlert("")}>
-                Close
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
+      {/* Alert Modal */}
+      <AlertDialog open={!!alert}>
+        <AlertDialogTitle className="hidden"></AlertDialogTitle>
+        <AlertDialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
+          <AlertDialogDescription className="text-md text-[black]">
+            {alert}
+          </AlertDialogDescription>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Info Alert Modal */}
+      <Dialog open={!!infoAlert}>
+        <DialogTitle className="hidden"></DialogTitle>
+        <DialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
+          <DialogDescription className="text-md text-[black]">{infoAlert}</DialogDescription>
+          <DialogFooter>
+            <Button onClick={() => setInfoAlert("")}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
