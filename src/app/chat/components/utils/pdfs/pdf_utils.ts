@@ -194,7 +194,7 @@ export async function filesSuccessfullyUploaded(plainFiles:any, setDocumentConte
  * @param namespace 
  * @returns 
  */
-export async function pdfSearch(documentQueryMethod:string, userQuery:string, namespace:string, setAlert:any, setRelevantDocs:any, setPdfLoading:any, globalSearch:boolean) {
+export async function pdfSearch(documentQueryMethod:string, userQuery:string, namespace:string, setAlert:any, setRelevantDocs:any, setPdfLoading:any, globalSearch:boolean, setInfoAlert:any) {
   try {
     // Elastic Search
     if (documentQueryMethod === "elastic") {
@@ -240,7 +240,8 @@ export async function pdfSearch(documentQueryMethod:string, userQuery:string, na
       }
     }
   } catch (e) {
-    console.log("Failed to generate pdfs", e);
+    console.log("Failed to fetch global documents", e);
+    setInfoAlert("Failed to fetch globally searched documents");
     setRelevantDocs([])
   } finally {
     setPdfLoading(false);

@@ -17,7 +17,7 @@ import { pdfSearch } from "./utils/pdfs/pdf_utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const SearchModal = () => {
-  const { relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, namespace, documentQueryMethod, setAlert, pdfLoading, setPdfLoading, globalSearch } = useChatContext();
+  const { relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, namespace, documentQueryMethod, setAlert, pdfLoading, setPdfLoading, globalSearch, setInfoAlert, searchModalOn, setSearchModalOn, infoAlert} = useChatContext();
 
   const formSchema = z.object({
     documentQuery: z.string().min(0, {
@@ -44,7 +44,8 @@ const SearchModal = () => {
       setAlert,
       setRelevantDocs,
       setPdfLoading,
-      globalSearch
+      globalSearch,
+      setInfoAlert
     );
   };
 

@@ -15,15 +15,14 @@ export const ChatContextProvider = ({ children }) => {
   const [generateFlag, setGenerateFlag] = useState(true);
   const [loadingPDF, setLoadingPDF] = useState(false);
   const [documentQueryMethod, setDocumentQueryMethod] = useState('elastic')
-  const [alert, setAlert] = useState('');
   const [loading, setLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const generateFlagRef = useRef(generateFlag);
   const [conversationTitles, setConversationTitles] = useState([]);
   const [conversationTitle, setConversationTitle] = useState('');
   const [conversationUid, setConversationUid] = useState('');
+  const [alert, setAlert] = useState('');
   const [infoAlert, setInfoAlert] = useState('');
-
 
   return (
     <ChatContext.Provider
@@ -61,10 +60,10 @@ export const ChatContextProvider = ({ children }) => {
         setConversationTitle,
         conversationUid,
         setConversationUid,
-        globalSearch, 
+        globalSearch,
         setGlobalSearch,
-        infoAlert, 
-        setInfoAlert
+        infoAlert,
+        setInfoAlert,
       }}
     >
       {children}

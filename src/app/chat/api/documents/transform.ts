@@ -51,7 +51,7 @@ export function elasticDtoToRelevantDocuments(elasticDtos: ElasticDocument[]) {
 
   for (const dto of elasticDtos) {
     //@ts-ignore
-    if(dto?.fileName in hashMap) 
+    if(dto?.title in hashMap) 
       continue
 
     //@ts-ignore
