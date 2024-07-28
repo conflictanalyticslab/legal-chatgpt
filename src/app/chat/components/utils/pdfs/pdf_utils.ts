@@ -230,7 +230,6 @@ export async function pdfSearch(documentQueryMethod:string, userQuery:string, na
 
         const responseData = await response.json()
         const similarDocs = responseData.documents
-        console.log("here")
         setRelevantDocs(globalSearchAPIDtoToRelevantDocuments(similarDocs));
       }
       else

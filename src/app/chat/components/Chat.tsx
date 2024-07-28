@@ -382,14 +382,18 @@ export function Chat() {
 
                 {/* Final Buffered Content */}
                 {convoObj.content !== "" && (
-                  <ReactMarkdown className="flex flex-col items-start gap-[10px] llm-markdown">{convoObj?.content}</ReactMarkdown>
+                  <ReactMarkdown className="flex flex-col items-start gap-[10px] llm-markdown">
+                    {convoObj?.content}
+                  </ReactMarkdown>
                 )}
 
                 {/*  Buffered LLM Content */}
                 {convoObj.role === "assistant" &&
                   i === conversation.length - 1 && (
                     <div className="relative flex-col gap-2 flex justify-between break-normal">
-                      <ReactMarkdown className="flex flex-col items-start gap-[10px] llm-markdown">{latestResponse}</ReactMarkdown>
+                      <ReactMarkdown className="flex flex-col items-start gap-[10px] llm-markdown">
+                        {latestResponse}
+                      </ReactMarkdown>
                       {/* Loading Animation */}
                       {loading && latestResponse === "" && (
                         <div className="w-[10px] h-[10px] bg-[black] rounded-[50%] animate-pulse self-start"></div>
@@ -410,9 +414,9 @@ export function Chat() {
         >
           <div className="relative w-[52.5%]">
             {enableRag ? (
-              <TooltipProvider>
+              <TooltipProvider delayDuration={0}>
                 <Tooltip>
-                  <TooltipTrigger className="bg-[transparent] p-3 absolute left-[-70px] opacity-[0.5] ">
+                  <TooltipTrigger className="bg-[transparent] p-3 absolute left-[-70px] opacity-[0.5] cursor-auto">
                     <AttachFileIcon />
                   </TooltipTrigger>
                   <TooltipContent>
@@ -480,7 +484,7 @@ export function Chat() {
         {/* Alert Modal */}
         <AlertDialog open={!!alert} onOpenChange={handleAlertClose}>
           <AlertDialogTitle className="hidden"></AlertDialogTitle>
-          <AlertDialogContent onOpenAutoFocus={(e:any)=> e.preventDefault()}>
+          <AlertDialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
             {alert}
           </AlertDialogContent>
         </AlertDialog>

@@ -167,7 +167,6 @@ export default function Login() {
     event.preventDefault();
 
     const errors = await validateUser();
-    console.log(errors);
     if (!errors) {
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
