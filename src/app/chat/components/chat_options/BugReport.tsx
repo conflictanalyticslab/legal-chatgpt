@@ -36,8 +36,8 @@ export default function BugReport() {
 
   const onsubmit = async (formValues: z.infer<typeof formSchema>) => {
     //Write your business logic here
-    console.log(formValues);
-    console.log(file)
+    // console.log(formValues);
+    // console.log(file)
   };
 
   return (

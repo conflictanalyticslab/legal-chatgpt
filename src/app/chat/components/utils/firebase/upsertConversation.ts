@@ -27,7 +27,6 @@ export async function upsertConversation(
   setConversationUid: any,
   handleBeforeUnload: any
 ) {
-  console.log("this is the length", conversation)
   // Generate new conversation title and add it to the database
   if (conversation.length <= 2) {
     // 1. GENERATE CONVERSATION TITLE

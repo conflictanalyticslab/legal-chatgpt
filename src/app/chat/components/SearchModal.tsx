@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useChatContext } from "./store/ChatContext";
 import { LoadingSpinner } from "../../../components/ui/LoadingSpinner";
 import { pdfSearch } from "./utils/pdfs/pdf_utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const SearchModal = () => {
   const { relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, namespace, documentQueryMethod, setAlert, pdfLoading, setPdfLoading, globalSearch } = useChatContext();
@@ -49,17 +50,29 @@ const SearchModal = () => {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant={"ghost"} className="w-full flex gap-5 justify-start">
-          <Image
-            src="/assets/icons/search.svg"
-            height={15}
-            width={15}
-            alt="search"
-          />
-          Search PDFs
-        </Button>
-      </DialogTrigger>
+      <TooltipProvider delayDuration={100}>
+        <Tooltip>
+          <DialogTrigger asChild>
+            <TooltipTrigger asChild>
+              <Button
+                variant={"ghost"}
+                className="w-full flex gap-5 justify-start"
+              >
+                <Image
+                  src="/assets/icons/search.svg"
+                  height={15}
+                  width={15}
+                  alt="search"
+                />
+                Search PDFs
+              </Button>
+            </TooltipTrigger>
+          </DialogTrigger>
+          <TooltipContent side="left">
+            Search our database of law documents
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <DialogContent
         onOpenAutoFocus={(e) => e.preventDefault()}
         className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[60vw] flex flex-col gap-5 overflow-auto box-border"

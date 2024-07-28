@@ -11,6 +11,8 @@ import { useChatContext } from "../store/ChatContext";
 import ChatHistory from "./ChatHistory";
 import { cn } from "@/lib/utils";
 import BugReport from "./BugReport";
+import { Tooltip } from "@radix-ui/react-tooltip";
+import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments, enableRag, setShowStartupImage }:any) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -59,6 +61,7 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
             align="end"
             className="p-1"
             onInteractOutside={() => setDropdownOpen(false)}
+            onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <SearchModal />
             <PDFModal
@@ -71,76 +74,107 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
               setIncludedDocuments={setIncludedDocuments}
             />
             {/* Enable Rag */}
-            <Button
-              variant="ghost"
-              className={cn(`w-full`)}
-              onClick={() => handleEnableRag(!enableRag)}
-              asChild
-            >
-              <div
-                className={cn(`w-full flex justify-between items-center`, {
-                  "opacity-[0.5]": documentQueryMethod === "elastic",
-                })}
-              >
-                <div className="flex gap-5 justify-start">
-                  <Image
-                    src={"/assets/icons/database.svg"}
-                    width={16}
-                    height={22}
-                    alt={"pdf file"}
-                  />
-                  <Label className="whitespace-nowrap">Enable RAG</Label>
-                </div>
-                <Switch
-                  disabled={documentQueryMethod === "elastic"}
-                  checked={enableRag}
-                  className="scale-[0.7]"
-                />
-              </div>
-            </Button>
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={cn(`w-full flex justify-between items-center`, {
+                      "opacity-[0.5]": documentQueryMethod === "elastic",
+                    })}
+                    onClick={() => handleEnableRag(!enableRag)}
+                    disabled={documentQueryMethod === "elastic"}
+                  >
+                    <div className="flex gap-5 justify-start ">
+                      <Image
+                        src={"/assets/icons/database.svg"}
+                        width={16}
+                        height={22}
+                        alt={"pdf file"}
+                      />
+                      <Label className="whitespace-nowrap">Enable RAG</Label>
+                    </div>
+                    <Switch
+                      checked={enableRag}
+                      className="scale-[0.7]"
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="left"
+                  className={cn({ hidden: documentQueryMethod === "elastic" })}
+                >
+                  See uploaded documents
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
             {/* Global Search */}
-            <Button
-              variant="ghost"
-              className={cn(`w-full`)}
-              onClick={()=>toggleGlobalSearch(!globalSearch)}
-              asChild
-            >
-              <div
-                className={cn(`w-full flex justify-between items-center`, {
-                  "opacity-[0.5]": documentQueryMethod === "elastic",
-                })}
-              >
-                <div className="flex gap-5 justify-start">
-                  <Image
-                    src={"/assets/icons/globe.svg"}
-                    width={16}
-                    height={22}
-                    alt={"pdf file"}
-                  />
-                  <Label className="whitespace-nowrap">Global Search</Label>
-                </div>
-                <Switch
-                  disabled={documentQueryMethod === "elastic"}
-                  checked={globalSearch}
-                  className="scale-[0.7]"
-                />
-              </div>
-            </Button>
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={cn(`w-full flex justify-between items-center`, {
+                      "opacity-[0.5] cursor-not-allowed": documentQueryMethod === "elastic",
+                    })}
+                    onClick={() => toggleGlobalSearch(!globalSearch)}
+                    disabled={documentQueryMethod === "elastic"}
+                  >
+                    <div className="flex gap-5 justify-start">
+                      <Image
+                        src={"/assets/icons/globe.svg"}
+                        width={16}
+                        height={22}
+                        alt={"pdf file"}
+                      />
+                      <Label className="whitespace-nowrap">Global Search</Label>
+                    </div>
+                    <Switch
+                      checked={globalSearch}
+                      className="scale-[0.7]"
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="left"
+                  className={cn({ hidden: documentQueryMethod === "elastic" })}
+                >
+                  Search for relevant documents on Court Listener (Longer
+                  Latency)
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             {/* Jurisdiction */}
             <Select
               onValueChange={setNamespace}
               disabled={documentQueryMethod === "elastic"}
             >
-              <SelectTrigger className="w-full outline-[none] focus:shadow-none focus:ring-offset-0 focus:ring-0 px-[1rem]">
-                <div className="flex gap-3">
-                  <Image
-                    src="/assets/icons/scale.svg"
-                    height={18}
-                    width={18}
-                    alt="Jurisdiction"
-                  />
-                  <SelectValue placeholder="Choose a Jurisdiction" />
-                </div>
+              <SelectTrigger>
+                <TooltipProvider delayDuration={100}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex gap-3">
+                        <Image
+                          src="/assets/icons/scale.svg"
+                          height={18}
+                          width={18}
+                          alt="Jurisdiction"
+                        />
+                        <SelectValue placeholder="Choose a Jurisdiction" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="left"
+                      sideOffset={22}
+                      className={cn({
+                        hidden: documentQueryMethod === "elastic",
+                      })}
+                    >
+                      Select Jurisdiction to fetch documents from
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </SelectTrigger>
               <SelectContent align="end">
                 <SelectGroup>
@@ -157,19 +191,28 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                 onValueChange={handleChangeDocumentQueryMethod}
                 value={documentQueryMethod}
               >
-                <SelectTrigger className="w-full outline-[none] focus:shadow-none focus:ring-offset-0 focus:ring-0 px-[1rem]">
-                  <div className="flex gap-3">
-                    <Image
-                      src="/assets/icons/scan-search.svg"
-                      height={18}
-                      width={18}
-                      alt="Jurisdiction"
-                    />
-                    <SelectValue
-                      defaultValue={"elastic"}
-                      placeholder="Elastic Search"
-                    />
-                  </div>
+                <SelectTrigger>
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex gap-3">
+                          <Image
+                            src="/assets/icons/scan-search.svg"
+                            height={18}
+                            width={18}
+                            alt="PDF search method"
+                          />
+                          <SelectValue
+                            defaultValue={"elastic"}
+                            placeholder="Elastic Search"
+                          />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="left" sideOffset={22}>
+                        Document search method
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </SelectTrigger>
                 <SelectContent align="end">
                   <SelectGroup>
@@ -186,7 +229,7 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
             </div>
           </PopoverContent>
         </Popover>
-        
+
         {/* Ticketing System */}
         {/* <BugReport/> */}
       </div>

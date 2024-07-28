@@ -12,7 +12,6 @@ export const editDocument = async (documentUid: string, newContent: string): Pro
             return;
         }  
 
-        console.log(`Editing document with ID: ${documentUid}`);
         await updateDoc(docRef, { text: newContent });
         console.log('Document has been editted.');
     } catch (error) {
