@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import { UserDocument } from "@/util/requests/getDocumentsOwnedByUser";
 import { editDocument } from "@/util/api/firebase_utils/editDocument";
@@ -25,9 +25,9 @@ export default function PDFModal({ documents, disabled,  deleteDocument, documen
   const [inputValue, setInputValue] = useState("");
   const textFieldRef = useRef<any>(null);
 
-  const handleUpdateDocumentContent = (document:any) => {
+  const toggleIncludeDocument = (document:any) => {
     if (includedDocuments.includes(document.uid)) {
-      // Remove the document's content from the state variable
+      // Remove the documents text
       setDocumentContent(
         documentContent.replace(document.text, "")
       );
@@ -39,7 +39,7 @@ export default function PDFModal({ documents, disabled,  deleteDocument, documen
         )
       );
     } else {
-      // Add the document's content from the state variable
+      // Add the toggled documents content
       setDocumentContent(
         documentContent + " " + document.text
       );
@@ -100,7 +100,7 @@ export default function PDFModal({ documents, disabled,  deleteDocument, documen
                           <Checkbox
                             checked={includedDocuments.includes(document.uid)}
                             onClick={() =>
-                              handleUpdateDocumentContent(document)
+                              toggleIncludeDocument(document)
                             }
                           />
                         </TooltipTrigger>

@@ -41,7 +41,7 @@ import { LoadingSpinner } from "../../../components/ui/LoadingSpinner";
 import { Card, CardContent } from "@/components/ui/card";
 import { getConversation } from "@/util/requests/getConversation";
 import { toast } from "@/components/ui/use-toast";
-import { AlertDialog, AlertDialogContent } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter } from "@/components/ui/alert-dialog";
 import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
 export function Chat() {
   const router = useRouter();
@@ -77,7 +77,9 @@ export function Chat() {
     setConversationUid,
     setConversationTitle,
     globalSearch,
-    setGlobalSearch
+    setGlobalSearch,
+    infoAlert,
+    setInfoAlert
   } = useChatContext();
 
   /**
@@ -130,7 +132,7 @@ export function Chat() {
       .then((user) => {
         if (user) {
           setNum(user.prompts_left);
-          handleAlertClose();
+          setAlert('');
         }
       })
       .then(() => {
@@ -279,13 +281,6 @@ export function Chat() {
     }
   };
 
-  /**
-   * Warns the user about leaving the page
-   */
-  const handleAlertClose = () => {
-    setAlert("");
-  };
-  
     const {openFilePicker}= handleUploadFile(
       setDocumentContent,
       setIncludedDocuments,
@@ -482,10 +477,24 @@ export function Chat() {
         </form>
 
         {/* Alert Modal */}
-        <AlertDialog open={!!alert} onOpenChange={handleAlertClose}>
+        <AlertDialog open={!!alert}>
           <AlertDialogTitle className="hidden"></AlertDialogTitle>
           <AlertDialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
-            {alert}
+            <AlertDialogDescription className="text-center">{alert}</AlertDialogDescription>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Info Modal */}
+        <AlertDialog open={!!infoAlert}>
+          <AlertDialogTitle className="hidden"></AlertDialogTitle>
+
+          <AlertDialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
+            <AlertDialogDescription className="text-center">{infoAlert}</AlertDialogDescription>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => setInfoAlert("")}>
+                Close
+              </AlertDialogAction>
+            </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </div>
