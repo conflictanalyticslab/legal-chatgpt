@@ -144,3 +144,11 @@ After rebase, if you want to update the remote branch with your rebased branch, 
 ```bash
 git push origin branch_name --force
 ```
+
+### Commit messages:
+
+https://www.conventionalcommits.org/en/v1.0.0/
+
+### React/JSX Style guide:
+
+https://airbnb.io/javascript/react/ 
