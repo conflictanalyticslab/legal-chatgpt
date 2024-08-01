@@ -44,6 +44,8 @@ export async function fetchWithRAG(
 
   // ---------------------------------------------- Generate RAG RESPONSE ---------------------------------------------- //
   const ragResponse = await useRag(userQuery, namespace);
+
+  // Add the new conversation to the list
   fullConversation[fullConversation.length - 1].content = ragResponse;
   setConversation([...fullConversation]);
   setLoading(false);
@@ -61,9 +63,10 @@ export async function fetchWithRAG(
     globalSearch,
     setInfoAlert
   );
+
   setDocumentQuery(userQuery);
 
-  // Update Conversation Title
+  // Update Conversation History
   upsertConversation(
     fullConversation,
     includedDocuments,
