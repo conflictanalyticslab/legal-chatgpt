@@ -160,10 +160,9 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                 </TooltipTrigger>
                 <TooltipContent
                   side="left"
-                  className={cn({ hidden: documentQueryMethod === "elastic" })}
+                  className={cn("max-w-[400px]",{ hidden: documentQueryMethod === "elastic" })}
                 >
-                  Search for relevant documents on Court Listener (Longer
-                  Latency)
+                  Global Search allows you to search courtlistener.com for relevant documents and can be used for RAG responses. (Expect longer latency)
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -184,7 +183,7 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                           width={18}
                           alt="Jurisdiction"
                         />
-                        <SelectValue placeholder="Choose a Jurisdiction" />
+                        <SelectValue placeholder="Choose a Dataset" />
                       </div>
                     </TooltipTrigger>
                     <TooltipContent

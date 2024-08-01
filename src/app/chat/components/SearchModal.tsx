@@ -65,7 +65,7 @@ const SearchModal = () => {
                   width={15}
                   alt="search"
                 />
-                Search PDFs
+                View Relevent Resources
               </Button>
             </TooltipTrigger>
           </DialogTrigger>
