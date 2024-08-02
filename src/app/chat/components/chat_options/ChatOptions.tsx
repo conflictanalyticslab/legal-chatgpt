@@ -16,7 +16,7 @@ import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui
 
 function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments, enableRag, setShowStartupImage }:any) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const { setNamespace, documentQueryMethod, setDocumentQueryMethod, setEnableRag, globalSearch, setGlobalSearch } = useChatContext();
+    const { setIndexName, namespace, setNamespace, documentQueryMethod, setDocumentQueryMethod, setEnableRag, globalSearch, setGlobalSearch } = useChatContext();
 
     const handleEnableRag = (value: boolean) => {
       if (documentQueryMethod === "elastic") return;
@@ -28,6 +28,14 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
     const toggleGlobalSearch = (value: boolean) => {
       if (documentQueryMethod === "elastic") return;
       setGlobalSearch(value);
+
+      if(value) {
+        setNamespace('')
+        setIndexName('global-search')
+      } else {
+        setIndexName('legal-pdf-documents')
+      }
+
       localStorage.setItem("globalSearch", JSON.stringify(value));
     };
 
@@ -162,17 +170,18 @@ function ChatOptions({ documents, deleteDocumentChat, documentContent, setDocume
                   side="left"
                   className={cn("max-w-[400px]",{ hidden: documentQueryMethod === "elastic" })}
                 >
-                  Global Search allows you to search courtlistener.com for relevant documents and can be used for RAG responses. (Expect longer latency)
+                  Global Search allows you to search courtlistener.com for relevant documents and those documents can be used for RAG responses. (Expect longer latency)
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
 
             {/* Jurisdiction */}
             <Select
+              value={namespace}
               onValueChange={setNamespace}
               disabled={documentQueryMethod === "elastic"}
             >
-              <SelectTrigger>
+              <SelectTrigger disabled={globalSearch}>
                 <TooltipProvider delayDuration={100}>
                   <Tooltip>
                     <TooltipTrigger asChild>

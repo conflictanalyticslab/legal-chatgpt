@@ -23,6 +23,7 @@ export const ChatContextProvider = ({ children }) => {
   const [conversationUid, setConversationUid] = useState('');
   const [alert, setAlert] = useState('');
   const [infoAlert, setInfoAlert] = useState('');
+  const [indexName, setIndexName] = useState('legal-pdf-documents');
 
   return (
     <ChatContext.Provider
@@ -64,6 +65,8 @@ export const ChatContextProvider = ({ children }) => {
         setGlobalSearch,
         infoAlert,
         setInfoAlert,
+        indexName,
+        setIndexName,
       }}
     >
       {children}

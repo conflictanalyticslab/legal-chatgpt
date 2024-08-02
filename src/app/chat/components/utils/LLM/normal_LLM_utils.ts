@@ -159,10 +159,8 @@ export async function fetchWithLLM(
     documentQueryMethod,
     userQuery,
     namespace,
-    setAlert,
     setRelevantDocs,
     setPdfLoading,
-    globalSearch,
     setInfoAlert
   );
 

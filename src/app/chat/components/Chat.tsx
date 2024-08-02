@@ -79,7 +79,8 @@ export function Chat() {
     globalSearch,
     setGlobalSearch,
     infoAlert,
-    setInfoAlert
+    setInfoAlert,
+    indexName
   } = useChatContext();
 
   /**
@@ -243,7 +244,8 @@ export function Chat() {
         setPdfLoading,
         setConversationTitles,
         globalSearch,
-        setInfoAlert
+        setInfoAlert,
+        indexName
       );
     } else {
       try {
