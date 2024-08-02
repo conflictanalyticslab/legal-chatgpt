@@ -1,5 +1,5 @@
 import { upsertConversation } from "../firebase/upsertConversation";
-import { pdfSearch } from "../pdfs/pdf_utils";
+import { fetchGlobalDocuments, pdfSearch } from "../pdfs/pdf_utils";
 
 /**
  * Makes a query with OpenAi's LLM and implements RAG using Pinecone vector store
@@ -26,6 +26,7 @@ export async function fetchWithRAG(
   setConversationTitles: any,
   globalSearch: any,
   setInfoAlert: any,
+  indexName: string,
 ) {
 
   // Update the chat with the user's userQuery first
@@ -42,27 +43,39 @@ export async function fetchWithRAG(
   ];
   setConversation(fullConversation);
 
-  // ---------------------------------------------- Generate RAG RESPONSE ---------------------------------------------- //
-  const ragResponse = await useRag(userQuery, namespace);
+  // ---------------------------------------------- GLOBAL SEARCH ---------------------------------------------- //
 
-  // Add the new conversation to the list
-  fullConversation[fullConversation.length - 1].content = ragResponse;
+  if(globalSearch)
+    await fetchGlobalDocuments(userQuery, namespace='', setRelevantDocs, setPdfLoading, setInfoAlert)
+
+  // ---------------------------------------------- Generate RAG RESPONSE ---------------------------------------------- //
+  const ragResponse = await useRag(userQuery, namespace, indexName);
+  
+  if(!ragResponse.ok){
+    fullConversation[fullConversation.length - 1].content = "Failed to generate RAG response";
+  } 
+  else
+  {
+    // Add the new conversation to the list
+    fullConversation[fullConversation.length - 1].content = ragResponse.data;
+  }
+
   setConversation([...fullConversation]);
   setLoading(false);
 
   // ---------------------------------------------- DOCUMENT SEARCH ---------------------------------------------- //
 
-  // Chooses which method we are using to query for the pdf
-  pdfSearch(
-    documentQueryMethod,
-    userQuery,
-    namespace,
-    setAlert,
-    setRelevantDocs,
-    setPdfLoading,
-    globalSearch,
-    setInfoAlert
-  );
+  if(!globalSearch){
+    // Chooses which method we are using to query for the pdf
+    pdfSearch(
+      documentQueryMethod,
+      userQuery,
+      namespace,
+      setRelevantDocs,
+      setPdfLoading,
+      setInfoAlert
+    );
+  }
 
   setDocumentQuery(userQuery);
 

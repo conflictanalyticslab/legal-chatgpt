@@ -41,10 +41,8 @@ const SearchModal = () => {
       documentQueryMethod,
       documentQuery,
       namespace,
-      setAlert,
       setRelevantDocs,
       setPdfLoading,
-      globalSearch,
       setInfoAlert
     );
   };

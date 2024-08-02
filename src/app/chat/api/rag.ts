@@ -7,13 +7,15 @@ import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { PineconeStore } from "@langchain/pinecone";
 
-export async function useRag(query:string, namespace:string=''){
+export async function useRag(query:string, namespace:string='', indexName='legal-pdf-documents') {
+  try{
+
     // ********************************* CREATING A VECTOR STORE ********************************* //
     const pinecone = new Pinecone({
-        apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY || '',
-      });
-
-    const pineconeIndex = pinecone.Index('legal-pdf-documents');
+      apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY || '',
+    });
+    
+    const pineconeIndex = pinecone.Index(indexName);
     
     // Create a vectore store (database of vectors) with the specified LLM and pinecone index
     const vectorStore = await PineconeStore.fromExistingIndex(
@@ -22,9 +24,9 @@ export async function useRag(query:string, namespace:string=''){
         pineconeIndex,
       }
     );
-
+    
     vectorStore.namespace = namespace; //Specify the namespace to use
-
+    
     // ********************************* SEMANTIC SEARCH ********************************* //
     const retriever = vectorStore.asRetriever();
     
@@ -37,22 +39,25 @@ export async function useRag(query:string, namespace:string=''){
     // ********************************* CHAIN THAT IMPLEMENTS RAG ********************************* //
     // Create a chain that passes a list of documents to a model.
     const ragChain = await createStuffDocumentsChain({
-        llm,
-        prompt,
-        outputParser: new StringOutputParser(),
+      llm,
+      prompt,
+      outputParser: new StringOutputParser(),
     });
     
     // ********************************* DOCUMENT RETRIEVAL ********************************* //
     const retrievedDocs = await retriever.getRelevantDocuments(
-        query
+      query
     );
-
+    
     // ********************************* INVOKING RAG ********************************* //
     const res = await ragChain.invoke({
-        question: query,
-        context: retrievedDocs,
+      question: query,
+      context: retrievedDocs,
     });
     
-    return res;
+    return { ok: true, data:res};
+  } catch(error) {
+    return {ok: false }
+  }
 }
 

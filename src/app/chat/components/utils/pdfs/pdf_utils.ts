@@ -187,14 +187,19 @@ export async function filesSuccessfullyUploaded(plainFiles:any, setDocumentConte
 }
 
 /**
+ * Retrieve relevant pdfs from either CourtListener or Static PDFs from Pinecone
  * 
+ * Note: since we are only doing either CourtListener or Static Semantic PDF search frrom Pinecone we don't need to specify the index name
  * 
  * @param documentQueryMethod 
  * @param userQuery 
  * @param namespace 
- * @returns 
+ * @param setRelevantDocs 
+ * @param setPdfLoading 
+ * @param globalSearch 
+ * @param setInfoAlert 
  */
-export async function pdfSearch(documentQueryMethod:string, userQuery:string, namespace:string, setAlert:any, setRelevantDocs:any, setPdfLoading:any, globalSearch:boolean, setInfoAlert:any) {
+export async function pdfSearch(documentQueryMethod:string, userQuery:string, namespace:string, setRelevantDocs:any, setPdfLoading:any, setInfoAlert:any) {
   try {
     // Elastic Search
     if (documentQueryMethod === "elastic") {
@@ -212,32 +217,9 @@ export async function pdfSearch(documentQueryMethod:string, userQuery:string, na
     } 
     else 
     {
-
-      // Global Search
-      if(globalSearch)
-      {
-      const response = await fetch("https://global-search.openjustice.ai/search/", {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${await auth?.currentUser?.getIdToken()}`
-          },
-          body: JSON.stringify({ user_query: userQuery }),
-        });
-        
-        if(!response?.ok)
-          throw("Failed to fetch response");
-
-        const responseData = await response.json()
-        const similarDocs = responseData.documents
-        setRelevantDocs(globalSearchAPIDtoToRelevantDocuments(similarDocs));
-      }
-      else
-      {
-        // Static PDF File Search
-        const similarDocs = await similaritySearch(userQuery, 3, namespace);
-        setRelevantDocs(pineconeDtoToRelevantDocuments(similarDocs));
-      }
+      // Static PDF File Search
+      const similarDocs = await similaritySearch(userQuery, 3, namespace);
+      setRelevantDocs(pineconeDtoToRelevantDocuments(similarDocs));
     }
   } catch (e) {
     console.log("Failed to fetch global documents", e);
@@ -247,6 +229,42 @@ export async function pdfSearch(documentQueryMethod:string, userQuery:string, na
     setPdfLoading(false);
   }
 }
+
+
+/**
+ * (Global Search) Retrieve documents from Courtlistener and upsert them to pinecone to allow for RAG
+ * 
+ * @param userQuery 
+ * @param namespace 
+ * @param setRelevantDocs 
+ * @param setPdfLoading 
+ * @param setInfoAlert 
+ */
+export async function fetchGlobalDocuments( userQuery:string, namespace:string = '', setRelevantDocs:any, setPdfLoading:any, setInfoAlert:any) {
+  try {
+      const response = await fetch(
+        "https://global-search.openjustice.ai/search/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${await auth?.currentUser?.getIdToken()}`,
+          },
+          body: JSON.stringify({ user_query: userQuery }),
+        }
+      );
+
+      if (!response?.ok) throw "Failed to fetch response";
+
+      const responseData = await response.json();
+      const similarDocs = responseData.documents;
+      setRelevantDocs(globalSearchAPIDtoToRelevantDocuments(similarDocs));
+      setPdfLoading(false);
+    } catch (error: any) {
+      setInfoAlert(error);
+    }
+}
+
 
 /**
  * Gathers all of the document text content that the user selects
