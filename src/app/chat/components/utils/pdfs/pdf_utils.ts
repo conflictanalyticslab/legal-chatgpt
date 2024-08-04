@@ -202,7 +202,7 @@ export async function filesSuccessfullyUploaded(plainFiles:any, setDocumentConte
 export async function pdfSearch(documentQueryMethod:string, userQuery:string, namespace:string, setRelevantDocs:any, setPdfLoading:any, setInfoAlert:any) {
   try {
     // Elastic Search
-    if (documentQueryMethod === "elastic") {
+    if (documentQueryMethod === "keyword-search") {
 
       // Generate elastic search prompt and document prompt from Open AI
       const response = await postSearchTerms(userQuery);
@@ -254,14 +254,20 @@ export async function fetchGlobalDocuments( userQuery:string, namespace:string =
         }
       );
 
-      if (!response?.ok) throw "Failed to fetch response";
+      if (!response?.ok) throw "unable to retrieve relevant documents from CourtListener";
 
+      console.log("SHOULD NOT GET HERE!")
       const responseData = await response.json();
       const similarDocs = responseData.documents;
       setRelevantDocs(globalSearchAPIDtoToRelevantDocuments(similarDocs));
+    } 
+    catch (error: any) 
+    {
+      setInfoAlert(`While fetching Relevant Resources: ${error.message}`);
+    } 
+    finally {
       setPdfLoading(false);
-    } catch (error: any) {
-      setInfoAlert(error);
+
     }
 }
 

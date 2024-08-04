@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
+import React, { useEffect, useRef, useState } from "react";
 
 // import external components
-import { useRouter } from "next/navigation";
-import { Button as Button } from "../../../components/ui/button";
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import ReactMarkdown from 'react-markdown'
+import { useRouter } from "next/navigation";
+import ReactMarkdown from 'react-markdown';
+import { Button } from "../../../components/ui/button";
 
 // import external hooks
 import { auth } from "@/firebase";
@@ -20,40 +20,29 @@ import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
 import { getConversationTitles } from "@/util/requests/getConversationTitles";
 
 // import OJ components
+import { fetchWithRAG } from "@/app/chat/components/utils/LLM/rag_utils";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
+import { getConversation } from "@/util/requests/getConversation";
 import {
-  UserDocument,
   getDocumentsOwnedByUser,
 } from "@/util/requests/getDocumentsOwnedByUser";
-import {deleteDocument} from "@/util/api/firebase_utils/deleteDocument";
-import { useChatContext } from "./store/ChatContext";
-import { useRag } from "../api/rag";
 import { Input } from "../../../components/ui/input";
-import ChatOptions from "./chat_options/ChatOptions"
-import { Toaster } from "../../../components/ui/toaster";
-import {fetchWithRAG} from "@/app/chat/components/utils/LLM/rag_utils"
-import { Conversation } from "./types/conversationTitles";
-import "./Chat.css"
-import { cn } from "@/lib/utils";
-import { fetchWithLLM } from "./utils/LLM/normal_LLM_utils";
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "../../../components/ui/tooltip";
-import { handleUploadFile } from "./utils/pdfs/pdf_utils";
 import { LoadingSpinner } from "../../../components/ui/LoadingSpinner";
-import { Card, CardContent } from "@/components/ui/card";
-import { getConversation } from "@/util/requests/getConversation";
-import { toast } from "@/components/ui/use-toast";
-import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import { Toaster } from "../../../components/ui/toaster";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../components/ui/tooltip";
+import "./Chat.css";
+import ChatOptions from "./chat_options/ChatOptions";
+import { useChatContext } from "./store/ChatContext";
+import { fetchWithLLM } from "./utils/LLM/normal_LLM_utils";
+import { handleUploadFile } from "./utils/pdfs/pdf_utils";
 export function Chat() {
   const router = useRouter();
-  const [conversation, setConversation] = useState<Conversation[]>([]);
-  const [latestResponse, setLatestResponse] = useState('');
-  const [userQuery, setUserQuery] = useState('');
-  const [documentContent, setDocumentContent] = useState('');
-  const [num, setNum] = useState(-1);
-  const [includedDocuments, setIncludedDocuments] = useState<string[]>([]);
-  const [showStartupImage, setShowStartupImage] = useState(true);
-  const [documents, setDocuments] = useState<UserDocument[]>([]);
   const scrollIntoViewRef = useRef<HTMLSpanElement>(null);
+
   const {
     setDocumentQuery,
     setRelevantDocs,
@@ -80,7 +69,25 @@ export function Chat() {
     setGlobalSearch,
     infoAlert,
     setInfoAlert,
-    indexName
+    indexName,
+    documents, 
+    setDocuments,
+    showStartupImage, 
+    setShowStartupImage,
+    includedDocuments,
+    setIncludedDocuments,
+    conversation,
+    setConversation,
+    latestResponse, 
+    setLatestResponse,
+    userQuery,
+    setUserQuery,
+    documentContent,
+    setDocumentContent,
+    num, 
+    setNum,
+    deleteDocumentChat,
+    handleBeforeUnload
   } = useChatContext();
 
   /**
@@ -154,15 +161,6 @@ export function Chat() {
       });
   }, []);
 
-  // handle delete documents from PDFModal
-  const deleteDocumentChat = (uid: string) => {
-    deleteDocument(uid)
-      .then(() => setDocuments(documents.filter((doc) => doc.uid !== uid)))
-      .catch((err) => {
-        console.log("Error when deleting PDF, " + err);
-      });
-  };
-
   /**
    * Stops generating the normal LLM buffered output
    * 
@@ -175,17 +173,6 @@ export function Chat() {
     event.preventDefault();
     generateFlagRef.current = false;
   }
-
-  /**
-   * Confirms with the user if they want to exit the tab
-   * 
-   * @param event the close tab event
-   */
-  const handleBeforeUnload = (event: any) => {
-    event.preventDefault();
-    event.returnValue =
-      "Are you sure you want to leave? The response will not be stored to your current chat's history if you exit right now.";
-  };
 
   /**
    * Resets all of the previously selected options for the chatbox
@@ -224,29 +211,7 @@ export function Chat() {
 
     // Call RAG
     if (enableRag) {
-      fetchWithRAG(
-        userQuery,
-        conversation,
-        setConversation,
-        useRag,
-        namespace,
-        includedDocuments,
-        conversationTitle,
-        setConversationTitle,
-        setConversationUid,
-        conversationUid,
-        setLoading,
-        setDocumentQuery,
-        setRelevantDocs,
-        setAlert,
-        handleBeforeUnload,
-        documentQueryMethod,
-        setPdfLoading,
-        setConversationTitles,
-        globalSearch,
-        setInfoAlert,
-        indexName
-      );
+      fetchWithRAG();
     } else {
       try {
         fetchWithLLM(
@@ -356,7 +321,7 @@ export function Chat() {
               `bg-[transparent] w-full pb-[150px] flex flex-col gap-5 bg-inherit items-end`
             )}
           >
-            {conversation.map((convoObj, i) => (
+            {conversation.map((convoObj:any, i:number) => (
               <Card
                 key={i}
                 className={cn(
