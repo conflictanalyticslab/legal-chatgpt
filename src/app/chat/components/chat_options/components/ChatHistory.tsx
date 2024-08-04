@@ -1,11 +1,10 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger } from '@/components/ui/select';
 import Image from 'next/image';
-import React from 'react'
-import { useChatContext } from '../store/ChatContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useChatContext } from '../../store/ChatContext';
 
-export default function ChatHistory({setShowStartupImage}:any) {
-  const {conversationTitle, setConversationTitle, conversationTitles} = useChatContext();
+export default function ChatHistory() {
+  const {conversationTitle, setConversationTitle, conversationTitles, setShowStartupImage} = useChatContext();
 
   return (
     <>

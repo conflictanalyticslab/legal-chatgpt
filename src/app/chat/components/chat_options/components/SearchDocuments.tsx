@@ -1,23 +1,23 @@
 'use client'
 import React, { useState } from "react";
 import Image from "next/image";
-import { Button } from "../../../components/ui/button";
-import { Label } from "../../../components/ui/label";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../../../components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../../components/ui/form";
-import { Input } from "../../../components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Button } from "../../../../../components/ui/button";
+import { Label } from "../../../../../components/ui/label";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../../../../../components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../../../../components/ui/form";
+import { Input } from "../../../../../components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../../../components/ui/card";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useChatContext } from "./store/ChatContext";
-import { LoadingSpinner } from "../../../components/ui/LoadingSpinner";
-import { pdfSearch } from "./utils/pdfs/pdf_utils";
+import { useChatContext } from "../../store/ChatContext";
+import { LoadingSpinner } from "../../../../../components/ui/LoadingSpinner";
+import { pdfSearch } from "../../utils/pdfs/pdf_utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-const SearchModal = () => {
-  const { relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, namespace, documentQueryMethod, setAlert, pdfLoading, setPdfLoading, globalSearch, setInfoAlert, searchModalOn, setSearchModalOn, infoAlert} = useChatContext();
+const SearchDocuments = () => {
+  const { relevantDocs, setRelevantDocs, documentQuery, setDocumentQuery, namespace, documentQueryMethod, setAlert, pdfLoading, setPdfLoading, globalSearch, setInfoAlert, SearchDocumentsOn, setSearchDocumentsOn, infoAlert} = useChatContext();
 
   const formSchema = z.object({
     documentQuery: z.string().min(0, {
@@ -36,6 +36,7 @@ const SearchModal = () => {
     if (pdfLoading) return;
     setPdfLoading(true);
     
+    console.log("here")
     // Chooses which method we are using to query for the pdf
     pdfSearch(
       documentQueryMethod,
@@ -54,8 +55,8 @@ const SearchModal = () => {
           <DialogTrigger asChild>
             <TooltipTrigger asChild>
               <Button
-                variant={"ghost"}
-                className="w-full flex gap-5 justify-start"
+                variant={"outline"}
+                className="w-full flex gap-3 justify-start px-3"
               >
                 <Image
                   src="/assets/icons/search.svg"
@@ -67,7 +68,7 @@ const SearchModal = () => {
               </Button>
             </TooltipTrigger>
           </DialogTrigger>
-          <TooltipContent side="left">
+          <TooltipContent side="left" sideOffset={9}>
             Search our database of law documents
           </TooltipContent>
         </Tooltip>
@@ -159,4 +160,4 @@ const SearchModal = () => {
   );
 };
 
-export default SearchModal;
+export default SearchDocuments;

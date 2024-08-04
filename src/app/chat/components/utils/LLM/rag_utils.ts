@@ -1,3 +1,5 @@
+import { useRag } from "@/app/chat/api/rag";
+import { useChatContext } from "../../store/ChatContext";
 import { upsertConversation } from "../firebase/upsertConversation";
 import { fetchGlobalDocuments, pdfSearch } from "../pdfs/pdf_utils";
 
@@ -5,29 +7,30 @@ import { fetchGlobalDocuments, pdfSearch } from "../pdfs/pdf_utils";
  * Makes a query with OpenAi's LLM and implements RAG using Pinecone vector store
  * @param query the query from the user
  */
-export async function fetchWithRAG(
-  userQuery: string,
-  conversation: any,
-  setConversation: any,
-  useRag: any,
-  namespace: string,
-  includedDocuments: any,
-  conversationTitle: any,
-  setConversationTitle: any,
-  setConversationUid: any,
-  conversationUid: any,
-  setLoading: any,
-  setDocumentQuery: any,
-  setRelevantDocs: any,
-  setAlert: any,
-  handleBeforeUnload: any,
-  documentQueryMethod: any,
-  setPdfLoading:any,
-  setConversationTitles: any,
-  globalSearch: any,
-  setInfoAlert: any,
-  indexName: string,
-) {
+export async function fetchWithRAG() {
+
+  const {
+    setDocumentQuery,
+    setRelevantDocs,
+    namespace,
+    setAlert,
+    setLoading,
+    documentQueryMethod,
+    setPdfLoading,
+    setConversationTitles,
+    conversationTitle,
+    conversationUid,
+    setConversationUid,
+    setConversationTitle,
+    globalSearch,
+    setInfoAlert,
+    indexName,
+    includedDocuments,
+    conversation,
+    setConversation,
+    userQuery,
+    handleBeforeUnload
+  } = useChatContext();
 
   // Update the chat with the user's userQuery first
   const fullConversation = [
@@ -45,8 +48,9 @@ export async function fetchWithRAG(
 
   // ---------------------------------------------- GLOBAL SEARCH ---------------------------------------------- //
 
-  if(globalSearch)
-    await fetchGlobalDocuments(userQuery, namespace='', setRelevantDocs, setPdfLoading, setInfoAlert)
+  if(globalSearch){
+    await fetchGlobalDocuments(userQuery, namespace, setRelevantDocs, setPdfLoading, setInfoAlert)
+  }
 
   // ---------------------------------------------- Generate RAG RESPONSE ---------------------------------------------- //
   const ragResponse = await useRag(userQuery, namespace, indexName);

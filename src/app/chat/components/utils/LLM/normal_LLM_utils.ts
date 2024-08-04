@@ -2,7 +2,7 @@ import { toast } from "@/components/ui/use-toast";
 import { postConversation } from "@/util/requests/postConversation";
 import GPT4Tokenizer from "gpt4-tokenizer";
 import { upsertConversation } from "../firebase/upsertConversation";
-import { createDocumentPrompt, pdfSearch } from "../pdfs/pdf_utils";
+import { createDocumentPrompt, fetchGlobalDocuments, pdfSearch } from "../pdfs/pdf_utils";
 
 export async function fetchWithLLM(
   documentContent: any,
@@ -154,15 +154,23 @@ export async function fetchWithLLM(
   setLoading(false);
 
   // ---------------------------------------------- DOCUMENT SEARCH ---------------------------------------------- //
+
+  if(globalSearch){
+    console.log('here')
+    await fetchGlobalDocuments(userQuery, namespace='', setRelevantDocs, setPdfLoading, setInfoAlert)
+  }
+  console.log('afterwards')
+
   // Chooses which method we are using to query for the pdf
-  pdfSearch(
-    documentQueryMethod,
-    userQuery,
-    namespace,
-    setRelevantDocs,
-    setPdfLoading,
-    setInfoAlert
-  );
+  if(!globalSearch)
+    pdfSearch(
+      documentQueryMethod,
+      userQuery,
+      namespace,
+      setRelevantDocs,
+      setPdfLoading,
+      setInfoAlert
+    );
 
   // Update Conversation Title
   upsertConversation(

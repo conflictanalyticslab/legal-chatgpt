@@ -2,28 +2,29 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { UserDocument } from "@/util/requests/getDocumentsOwnedByUser";
 import { editDocument } from "@/util/api/firebase_utils/editDocument";
-import { Button } from "../../../components/ui/button";
-import { Label } from "../../../components/ui/label";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../../../components/ui/dialog";
-import { Card, CardContent, CardHeader } from "../../../components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../components/ui/tooltip";
-import { Textarea } from "../../../components/ui/textarea";
-import { Checkbox } from "../../../components/ui/checkbox";
+import { Button } from "../../../../../../../components/ui/button";
+import { Label } from "../../../../../../../components/ui/label";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../../../../../../../components/ui/dialog";
+import { Card, CardContent, CardHeader } from "../../../../../../../components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../../../../../components/ui/tooltip";
+import { Textarea } from "../../../../../../../components/ui/textarea";
+import { Checkbox } from "../../../../../../../components/ui/checkbox";
+import { useChatContext } from "@/app/chat/components/store/ChatContext";
+import { deleteDocument } from "@/util/api/firebase_utils/deleteDocument";
 
-type Props = {
-    documents: UserDocument[];
-    disabled: boolean,
-    deleteDocument: (uid: string) => void;
-    documentContent: string;
-    setDocumentContent: React.Dispatch<React.SetStateAction<string>>;
-    includedDocuments: string[];
-    setIncludedDocuments: React.Dispatch<React.SetStateAction<string[]>>;
-};
-
-export default function PDFModal({ documents, disabled,  deleteDocument, documentContent, setDocumentContent, includedDocuments, setIncludedDocuments }: Props) {
+export default function UploadedDocuments() {
   const [editing, setEditing] = useState("");
   const [inputValue, setInputValue] = useState("");
   const textFieldRef = useRef<any>(null);
+
+  const {
+    documents, 
+    includedDocuments,
+    setIncludedDocuments,
+    documentContent,
+    setDocumentContent,
+  } = useChatContext();
+
 
   const toggleIncludeDocument = (document:any) => {
     if (includedDocuments.includes(document.uid)) {
@@ -56,11 +57,11 @@ export default function PDFModal({ documents, disabled,  deleteDocument, documen
     <Dialog>
       <TooltipProvider delayDuration={100}>
         <Tooltip>
-          <DialogTrigger asChild disabled={disabled}>
+          <DialogTrigger asChild>
             <TooltipTrigger asChild>
               <Button
-                variant={"ghost"}
-                className="w-full flex gap-5 justify-start"
+                variant={"outline"}
+                className="w-full flex gap-3 justify-start px-3"
               >
                 <Image
                   src={"/assets/icons/file-text.svg"}
@@ -68,11 +69,11 @@ export default function PDFModal({ documents, disabled,  deleteDocument, documen
                   height={22}
                   alt={"pdf file"}
                 />
-                Documents
+                Uploaded Documents
               </Button>
             </TooltipTrigger>
           </DialogTrigger>
-          <TooltipContent side="left">See uploaded documents</TooltipContent>
+          <TooltipContent side="left" sideOffset={9}>See uploaded documents</TooltipContent>
         </Tooltip>
       </TooltipProvider>
       <DialogContent
@@ -84,7 +85,7 @@ export default function PDFModal({ documents, disabled,  deleteDocument, documen
           <Label className="font-bold">Uploaded PDFs</Label>
           {/* Uploaded Documents */}
           <div className="grid grid-cols-1 gap-2">
-            {documents.map((document, i) => (
+            {documents.map((document:any, i:number) => (
               <div key={i}>
                 <Card className="">
                   <CardHeader className="flex justify-between flex-row items-center">
@@ -193,7 +194,7 @@ export default function PDFModal({ documents, disabled,  deleteDocument, documen
                                 textFieldRef.current?.value
                               );
                               documents.filter(
-                                (doc) => doc.uid == editing
+                                (doc:any) => doc.uid == editing
                               )[0].text = textFieldRef.current?.value;
                               setEditing("");
                             } catch (e) {
