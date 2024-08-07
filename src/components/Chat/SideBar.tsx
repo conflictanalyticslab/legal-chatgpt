@@ -54,7 +54,7 @@ export default function SideBar() {
   };
   return (
     <div
-      className={open ? styles.sidenav : styles.sidenavClosed}
+      className={`z-[5] ${open ? styles.sidenav : styles.sidenavClosed}`}
       style={{ overflow: "hidden" }}
     >
       <button

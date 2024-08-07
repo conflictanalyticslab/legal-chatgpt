@@ -19,13 +19,7 @@ const style = {
   overflowY: "auto",
 };
 
-const SearchModal = ({
-  wasSearched,
-  setSearchTerm,
-}: {
-  wasSearched: boolean;
-  setSearchTerm: (searchTerm: string) => void;
-}) => {
+const SearchModal = () => {
   const [modalOpen, setmodalOpen] = React.useState(false);
   const handleOpen = () => {
     setmodalOpen(true);
@@ -35,13 +29,7 @@ const SearchModal = ({
   };
 
   return (
-    <div
-      style={{
-        width: "20%",
-        paddingTop: "25px",
-        marginRight: "3rem"
-      }}
-    >
+    <div>
       <Button
         sx={{
           display: "flex",
@@ -58,14 +46,13 @@ const SearchModal = ({
           style={{ width: "14px", height: "14px", marginRight: "auto" }}
           alt={""}
         />
-        <Typography style={{ marginRight: "auto" }}>Search [Experimental]</Typography>
+        <Typography style={{ marginRight: "auto" }}>
+          Search [Experimental]
+        </Typography>
       </Button>
       <Modal open={modalOpen} onClose={handleClose}>
         <Box sx={style}>
-          <SearchPage
-            wasSearched={wasSearched}
-            setSearchTerm={setSearchTerm}
-          ></SearchPage>
+          <SearchPage></SearchPage>
         </Box>
       </Modal>
     </div>
