@@ -1,7 +1,6 @@
 import { auth } from "@/firebase";
 
 export async function uploadPdfDocument(file: {
-  // content: ArrayBuffer;
   content: string;
   name: string;
 }) {

@@ -1,10 +1,10 @@
-import { getFirestore, doc, getDoc, deleteDoc } from "firebase/firestore";
+import { db } from "@/firebase";
+import { doc, getDoc, deleteDoc } from "firebase/firestore";
 
-const db = getFirestore();
 
 export const deleteDocument = async (documentUid: string): Promise<void> => {
     const docRef = doc(db, "documents/", documentUid);
-  
+    console.log("here")
     try {
         const docSnap = await getDoc(docRef);
         if (!docSnap.exists()) {
