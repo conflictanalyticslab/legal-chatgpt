@@ -1,12 +1,13 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
+import { Inter, Roboto } from "next/font/google";
 import { IncludedDocumentsProvider } from "@/hooks/useIncludedDocuments";
 import { GoogleAnalytics } from "@next/third-parties/google";
 const roboto = Roboto({
   subsets: ["latin"],
   weight: ["400", "700"],
 });
+
 
 export const metadata: Metadata = {
   title: "OpenJustice",

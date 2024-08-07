@@ -19,6 +19,8 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+      },
       colors: {
         greyBg: "#f5f5f7",
         border: "hsl(var(--border))",

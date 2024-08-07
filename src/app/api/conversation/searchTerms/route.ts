@@ -1,12 +1,12 @@
 /**
- * @file: route.ts - api/conversation/searchTerms - Retrieves related documents via elastic search
+ * @file: route.ts - api/conversation/searchTerms - Retrieves related documents via courtListener and GoogleAPI
+ * TODO: fix the file route directory name it should really be called api/conversation/documents/route.ts
  *
  * @author Kevin Yu <yu.kevin2002@gmail.com>
  * @date Jun 2024
  */
 
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
-// import { searchAndSummarize } from "@/util/api/elastic_search_utils/searchAndSummarize";
 import { NextResponse } from "next/server";
 import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
 import { callSearchAPI } from "@/util/api/elastic_search_utils/runSearch";

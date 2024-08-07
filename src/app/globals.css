@@ -7,6 +7,29 @@ body {
   height: 100%;
 }
 
+h1 {
+  font-size: 3em;
+}
+
+/* styles/globals.css */
+@layer base {
+  html {
+    --inter-font: ${inter.style.fontFamily};
+  }
+}
+
+.shadow-1 {
+  box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;
+}
+
+.shadow-2 {
+  box-shadow: rgba(0, 0, 0, 0.1) 1px 1px 2px 0px;
+}
+
+label[data-details] {
+  color: #5b5b5b;
+}
+
 button:focus, input:focus, a:focus {
   outline: initial;
 }
