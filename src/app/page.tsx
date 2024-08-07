@@ -61,7 +61,7 @@ function Hero() {
                 className="w-[150px] bg-primaryOJ hover:bg-primaryOJ/90 text-white text-md md:text-lg py-[1.2rem] lg:py-[1.4rem]"
                 asChild
               >
-                <Link href="/login">Get Started</Link>
+                <Link href="/chat">Get Started</Link>
               </Button>
             </div>
           </div>
