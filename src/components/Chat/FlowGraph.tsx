@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ReactFlow,
+  ReactFlowProvider,
   useNodesState,
   useEdgesState,
   addEdge,
@@ -16,7 +17,6 @@ import {
 } from '@xyflow/react';
 
 import '@xyflow/react/dist/style.css';
-import './updatenode.css';
 
 const initialNodes = [
   {
@@ -36,7 +36,11 @@ const initialNodes = [
 let id = 1;
 const getId = () => `${id++}`; // generates unique ids
 
-const Graph = () => {
+function FlowGraphComp({
+  setUseFlow
+}: {
+  setUseFlow: (_: boolean) => void
+}) {
   // no need to trigger rerender
   const connectingNodeId = useRef<string>("");
   const chosenNodeId = useRef<string>("");
@@ -85,10 +89,10 @@ const Graph = () => {
     }, []
   );
 
-const onConnectStart: OnConnectStart = useCallback(
-    (_, { nodeId }) => connectingNodeId.current = nodeId ?? '', // record start node
-    []
-);
+  const onConnectStart: OnConnectStart = useCallback(
+      (_, { nodeId }) => connectingNodeId.current = nodeId ?? '', // record start node
+      []
+  );
 
   const onConnectEnd: OnConnectEnd = useCallback(
     (event) => {
@@ -140,34 +144,34 @@ const onConnectStart: OnConnectStart = useCallback(
     [screenToFlowPosition],
   );
 
-  const handleSubmit = () => {
-    fetch('http://localhost:8080/graph/update', {
-      method: 'POST',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        nodes: nodes,
-        edges: edges,
-        graphId: graphId
-      }) 
-    }).then(response => console.log(response)) // needs something better
-  }
-  useEffect(() => {
-    // create new graph
-    fetch('http://localhost:8080/graph/new', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(response => {
-      return response.json();
-    }).then(data => {
-      setGraphId(data.id);
-    })
-  }, []);
+  // const handleSubmit = () => {
+  //   fetch('http://localhost:8080/graph/update', {
+  //     method: 'POST',
+  //     mode: 'cors',
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify({
+  //       nodes: nodes,
+  //       edges: edges,
+  //       graphId: graphId
+  //     }) 
+  //   }).then(response => console.log(response)) // needs something better
+  // }
+  // useEffect(() => {
+  //   // create new graph
+  //   fetch('http://localhost:8080/graph/new', {
+  //     method: 'GET',
+  //     mode: 'cors',
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     }
+  //   }).then(response => {
+  //     return response.json();
+  //   }).then(data => {
+  //     setGraphId(data.id);
+  //   })
+  // }, []);
 
   useEffect(() => {
     if (chosenIsNode.current) { // chosenNodeId would be defined
@@ -239,7 +243,7 @@ const onConnectStart: OnConnectStart = useCallback(
   }, [chosenBody, setNodes]);
 
   return (
-    <div style={{ height: 800 }}>
+    <div style={{ height: 800, width: 800 }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -255,14 +259,21 @@ const onConnectStart: OnConnectStart = useCallback(
       >
         <Controls />
         <Background />
-        <div className="updatenode__controls">
-            <label>graphId: {graphId}</label>
-            <label>label:</label>
+        <div 
+          style={{
+            position: "absolute",
+            right: "10px",
+            top: "10px",
+            zIndex: 4,
+            fontSize: "12px",
+          }}
+        >
+            <label style={{display: "block"}}>label:</label>
             <input
               value={chosenLabel}
               onChange={(event) => setChosenLabel(event.target.value)}
             />
-            <label>body:</label>
+            <label style={{display: "block"}}>body:</label>
             <input 
               value={chosenBody} 
               onChange={(event) => setChosenBody(event.target.value)} 
@@ -270,11 +281,21 @@ const onConnectStart: OnConnectStart = useCallback(
         </div>
       </ReactFlow>
       <div>
-        <button onClick={handleSubmit}>SUBMIT</button>
+        <button onClick={() => setUseFlow(false)}>Change to Chat</button>
       </div>
     </div>
     
   );
 };
 
-export default Graph;
+export function FlowGraph({
+  setUseFlow
+}: {
+  setUseFlow: (_: boolean) => void
+}) {
+  return (
+    <ReactFlowProvider>
+      <FlowGraphComp setUseFlow={setUseFlow}/>
+    </ReactFlowProvider>
+  );
+}

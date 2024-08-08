@@ -92,9 +92,11 @@ import { set } from "firebase/database";
 export function Chat({
   wasSearched,
   setSearchTerm,
+  setUseFlow
 }: {
   wasSearched: boolean;
   setSearchTerm: (searchTerm: string) => void;
+  setUseFlow: (useFlow: boolean) => void;
 }) {
   const router = useRouter();
   const [userInputs, setUserInputs] = useState<string[]>([]);
@@ -765,6 +767,10 @@ export function Chat({
     },
   });
 
+  const openDialogFlows = () => {
+    setUseFlow(true);
+  }
+
   const hideStartupImage = () => {
     // Set the flag in sessionStorage to hide the image on subsequent text submission
     sessionStorage.setItem("isStartupImageHidden", "true");
@@ -1180,6 +1186,14 @@ export function Chat({
                   title="Attach a PDF File"
                   key={5}
                   onClick={openFilePicker}
+                >
+                  <AttachFileIcon />
+                </IconButton>
+
+                <IconButton
+                  title="Open Dialog Flow"
+                  key={6}
+                  onClick={openDialogFlows}
                 >
                   <AttachFileIcon />
                 </IconButton>
