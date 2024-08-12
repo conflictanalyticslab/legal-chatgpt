@@ -17,6 +17,8 @@ import {
 } from '@xyflow/react';
 
 import '@xyflow/react/dist/style.css';
+import { Modal, Box, IconButton } from "@mui/material"
+import RouteOutlinedIcon from '@mui/icons-material/RouteOutlined';
 
 const initialNodes = [
   {
@@ -35,12 +37,22 @@ const initialNodes = [
 
 let id = 1;
 const getId = () => `${id++}`; // generates unique ids
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  width: "85%",
+  height: "85%",
+  transform: "translate(-50%, -50%)",
+  backgroundColor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+  overflow: "scroll",
+  overflowY: "auto",
+};
 
-function FlowGraphComp({
-  setUseFlow
-}: {
-  setUseFlow: (_: boolean) => void
-}) {
+function FlowGraph() {
   // no need to trigger rerender
   const connectingNodeId = useRef<string>("");
   const chosenNodeId = useRef<string>("");
@@ -52,7 +64,7 @@ function FlowGraphComp({
   const [chosenLabel, setChosenLabel] = useState<string>("");
   const [chosenBody, setChosenBody] = useState<string>("");
   // TODO: disable save button until this has loaded
-  const [graphId, setGraphId] = useState("Loading..."); 
+  // const [graphId, setGraphId] = useState("Loading..."); 
 
   const { screenToFlowPosition } = useReactFlow();
 
@@ -243,7 +255,7 @@ function FlowGraphComp({
   }, [chosenBody, setNodes]);
 
   return (
-    <div style={{ height: 800, width: 800 }}>
+    <div style={{ height: "100%", width: "100%" }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -280,22 +292,26 @@ function FlowGraphComp({
             /> 
         </div>
       </ReactFlow>
-      <div>
-        <button onClick={() => setUseFlow(false)}>Change to Chat</button>
-      </div>
     </div>
     
   );
 };
 
-export function FlowGraph({
-  setUseFlow
-}: {
-  setUseFlow: (_: boolean) => void
-}) {
+export function FlowModal() {
+  const [modalOpen, setModalOpen] = useState(false);
   return (
     <ReactFlowProvider>
-      <FlowGraphComp setUseFlow={setUseFlow}/>
+      <IconButton
+        title="Open Dialog Flow"
+        onClick={() => setModalOpen(true)}
+      >
+        <RouteOutlinedIcon />
+      </IconButton>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Box sx={style}>
+          <FlowGraph/>
+        </Box>
+      </Modal>
     </ReactFlowProvider>
   );
 }

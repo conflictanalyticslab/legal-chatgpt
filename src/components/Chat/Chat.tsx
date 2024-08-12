@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState, use } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 
 // import external components
@@ -80,6 +80,7 @@ type FeedbackReasonsI = {
   "Lacks Relevant Facts": boolean;
   "Lacks Citation": boolean;
 };
+import { FlowModal } from "@/components/Chat/FlowGraph";
 import SearchModal from "@/components/Chat/SearchModal";
 import PDFModal from "@/components/Chat/PDFModal";
 import {deleteDocument} from "@/util/api/deleteDocument";
@@ -91,14 +92,13 @@ import { set } from "firebase/database";
 
 export function Chat({
   wasSearched,
-  setSearchTerm,
-  setUseFlow
+  setSearchTerm
 }: {
   wasSearched: boolean;
   setSearchTerm: (searchTerm: string) => void;
-  setUseFlow: (useFlow: boolean) => void;
 }) {
   const router = useRouter();
+  const [useFlow, setUseFlow] = useState<boolean>(false); 
   const [userInputs, setUserInputs] = useState<string[]>([]);
   const [conversation, setConversation] = useState<
     {
@@ -768,7 +768,7 @@ export function Chat({
   });
 
   const openDialogFlows = () => {
-    setUseFlow(true);
+    setUseFlow(!useFlow);
   }
 
   const hideStartupImage = () => {
@@ -1190,13 +1190,7 @@ export function Chat({
                   <AttachFileIcon />
                 </IconButton>
 
-                <IconButton
-                  title="Open Dialog Flow"
-                  key={6}
-                  onClick={openDialogFlows}
-                >
-                  <AttachFileIcon />
-                </IconButton>
+                <FlowModal />
 
                 <OutlinedInput
                     // fullWidth
@@ -1205,6 +1199,7 @@ export function Chat({
                     placeholder="Prompt"
                     value={currentInput}
                     onChange={(e) => setCurrentInput(e.target.value)}
+                    disabled={useFlow}
                     onKeyPress={(e) => {
                       if (e.key === "Enter") {
                         handleSubmit();
