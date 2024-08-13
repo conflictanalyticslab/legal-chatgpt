@@ -64,7 +64,7 @@ export function ConversationQuery() {
           </Button>
         ) : (
           <Button
-            className="absolute right-0 top-[50%] translate-y-[-50%]"
+            className="absolute right-[0.5rem] top-[50%] translate-y-[-50%]"
             variant={"ghost"}
             type="submit"
           >
