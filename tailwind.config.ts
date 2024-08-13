@@ -19,6 +19,8 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+      },
       colors: {
         greyBg: "#f5f5f7",
         border: "hsl(var(--border))",
@@ -30,6 +32,10 @@ const config = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -70,6 +76,11 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "pulse-bounce": {
+          from: {
+            
+          }
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",

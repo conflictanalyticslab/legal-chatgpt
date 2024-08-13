@@ -1,0 +1,4 @@
+div[data-selected-value] span {
+ overflow: hidden;
+ text-overflow: ellipsis;
+}

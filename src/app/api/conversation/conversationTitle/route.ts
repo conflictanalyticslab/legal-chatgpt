@@ -1,16 +1,27 @@
-import {
-  getFirestore,
-} from "firebase-admin/firestore";
-import { generatePromptFromDocuments } from "@/util/api/generatePromptFromDocuments";
-import { getDocumentText } from "@/util/api/getDocuments";
+/**
+ * @file: /conversation/conversationTitle/route.ts - Uses LLM to generate title based on conversation 
+ * 
+ * @author Kevin Yu <yu.kevin2002@gmail.com>
+ * @date Jul 2024
+ */
+
+import { getFirestore } from "firebase-admin/firestore";
 import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 import { loadUser } from "@/util/api/middleware/loadUser";
-import { queryOpenAi } from "@/util/api/queryOpenAi";
-import queryLlama2 from "@/util/api/queryLlama2";
-// import { searchAndSummarize } from "@/util/api/searchAndSummarize";
+import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
+import queryLlama2 from "@/util/LLM_utils/queryLlama2";
 import { NextResponse } from "next/server";
+import { authenticateUser, validatePromptCount } from "./utils/validation";
+import { createDoc } from "@/lib/firebase/crud_utils";
 
+/**
+ * Gets conversation titles
+ *
+ * @param _
+ * @returns
+ */
 export async function GET(_: Request) {
+  // Authentication
   const { earlyResponse, decodedToken } = await authenticateApiUser();
   if (earlyResponse) {
     return earlyResponse;
@@ -26,116 +37,112 @@ export async function GET(_: Request) {
   const queryResults = await getFirestore()
     .collection("conversations")
     .where("userUid", "==", decodedToken.user_id)
+    .orderBy("timestamp", "desc")
     .get();
 
-  const plainJsObjects = queryResults.docs.map((doc) => {
+  const titles = queryResults.docs.map((doc) => {
     const data = doc.data();
     return { title: data.title, uid: doc.id };
   });
 
-  return NextResponse.json({ conversations: plainJsObjects }, { status: 200 });
+  return NextResponse.json({ titles }, { status: 200 });
 }
 
+/**
+ * Upserting conversation to database
+ *
+ * @param req
+ * @returns
+ */
 export async function POST(req: Request) {
+  // Authorization
   const { earlyResponse, decodedToken } = await authenticateApiUser();
-  if (earlyResponse) {
-    return earlyResponse;
-  }
 
-  if (!decodedToken) {
-    return NextResponse.json(
-      { error: "decodedToken is missing but there was no earlyResponse" },
-      { status: 500 }
-    );
-  }
+  // Load user from firestore database
+  //@ts-ignore
+  const { user, userRef } = await loadUser(decodedToken);
 
-  const { fullConversation, includedDocuments} = await req.json();
-  if (fullConversation.length === 0) {
+  // Authenticates user
+  const decodedTokenResp = authenticateUser(earlyResponse, decodedToken);
+  if (decodedTokenResp instanceof NextResponse) return decodedTokenResp;
+
+  // Checks for user in database and updates their prompt count
+  const promptCount = validatePromptCount(decodedToken,user, userRef);
+  if (promptCount instanceof NextResponse) return promptCount;
+
+  const { conversation, includedDocuments } = await req.json();
+
+  // Check for empty conversation
+  if (conversation.length === 0) {
     return NextResponse.json(
-      { error: "fullConversation is empty" },
+      { error: "Conversation data is empty" },
       { status: 400 }
     );
   }
 
-  const { user, userRef } = await loadUser(decodedToken);
-  const documents = await getDocumentText(includedDocuments);
-  // const queryDocument = includedDocuments.length > 0 ? "Here is a document for context: " : "";
+  // Query Open AI
+  try {
+    const llmResponse: any = await queryOpenAi({
+      model: "gpt-4-turbo-2024-04-09",
+      messages: [
+        ...conversation,
+        {
+          role: "user",
+          content: "give a title to the current conversation with no quotes.",
+        },
+      ],
+    });
 
-  if (user && user.prompts_left > 0) {
-    await userRef.update({ prompts_left: user.prompts_left - 1 });
-    let firstReplyRes: any;
-    let gpt_flag = true;
-    try {
-      firstReplyRes = await queryOpenAi({
-        model: "gpt-4-turbo-2024-04-09",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a helpful assistant"
-          },
-          ...fullConversation,
-          {
-            role: "user",
-            content: "give a title to the current conversation."
-          }
-        ],
+    const title = llmResponse.choices[0].message.content;
+
+    // Return LLM generated title
+    if (llmResponse) {
+      return NextResponse.json({
+        title,
       });
-      if (!firstReplyRes || !firstReplyRes.choices || firstReplyRes.choices.length === 0) {
-        gpt_flag = false;
-      }
-    } catch (error) {
-      console.error("queryOpenAi failed: " + error);
-      gpt_flag = false;
     }
 
-    if (!gpt_flag) {
-        console.error("Error from OpenAI: " + firstReplyRes);
-        console.log("switching to llama2 in conversation/searchTerms/route.ts");
-
-        try {
-          firstReplyRes = await queryLlama2({
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You are a helpful assistant"
-              },
-              ...fullConversation,
-              {
-                role: "user",
-                content: "give a title to the current conversation."
-              }
-            ],
-          });
-          console.log("Logging response from llama2", firstReplyRes.choices[0].message.content);
-        } catch (error) {
-          console.error("queryLlama2 failed in conversation/searchTerms/route.ts: " + error);
-        };
-    }
-
-    const conversationTitle = firstReplyRes.choices[0].message.content;
-    console.log("Logging response from OpenAi", firstReplyRes.choices[0].message.content);
-    // const {searchResults, toSearch} = await searchAndSummarize(firstReplyContent);
-
-    // console.log("Search Results", searchResults);
-
-    // if (Array.isArray(searchResults) && searchResults.length > 0) {
-    //   // const searchPrompt = searchResults
-    //   //   .map(
-    //   //     (result: SearchResult) =>
-    //   //       "Document title: " +
-    //   //       result.title +
-    //   //       "\n\nAbstract: " +
-    //   //       result.abstract
-    //   //   )
-    //   //   .join("\n\n");
-
-    //   // The chat context is too short when we include all the results. Revisit this when using a larger model.
-    //   // Can use tokenLength() to estimate the tokens used so far.
-    //   return NextResponse.json({toSearch: toSearch, searchPrompt: searchResults[0].abstract, documentPrompt: documentPrompt})
-    // }
-    return NextResponse.json({title: conversationTitle})
+  } catch (error) {
+    //Do nothing so we can proceed to LLAMA model
+    console.log(
+      "====================== QUERYING LLAMA2 ======================"
+    );
   }
-    return NextResponse.json({ error: "User has no prompts left" }, { status: 403 });
-};
+
+  // Querying LLAMA
+  try {
+    const llmResponse: any = await queryLlama2({
+      messages: [
+        ...conversation,
+        {
+          role: "user",
+          content: "give a title to the current conversation.",
+        },
+      ],
+    });
+
+    const title = llmResponse.choices[0].message.content;
+
+    // Return LLM generated title
+    if (!llmResponse)
+      return NextResponse.json(
+        { error: "Failed to generate title for conversation" },
+        { status: 400 }
+      );
+    
+    // Return back Response
+    return NextResponse.json({
+      title,
+    });
+  } catch (error) {
+    console.error(
+      "queryLlama2 failed in conversation/route.ts for second response: ",
+      error
+    );
+    // Return error failed to generate title
+    return NextResponse.json(
+      { error: "Failed to generate title for conversation" },
+      { status: 400 }
+    );
+  }
+}

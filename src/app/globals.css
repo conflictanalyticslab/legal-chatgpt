@@ -7,6 +7,33 @@ body {
   height: 100%;
 }
 
+h1 {
+  font-size: 3em;
+}
+
+/* styles/globals.css */
+@layer base {
+  html {
+    --inter-font: ${inter.style.fontFamily};
+  }
+}
+
+.shadow-1 {
+  box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;
+}
+
+.shadow-2 {
+  box-shadow: rgba(0, 0, 0, 0.1) 1px 1px 2px 0px;
+}
+
+label[data-details] {
+  color: #5b5b5b;
+}
+
+button:focus, input:focus, a:focus {
+  outline: initial;
+}
+
 body {
   margin: 0px;
 }
@@ -42,12 +69,7 @@ body {
 #video-page {
   scroll-snap-align: start;
 }
-#main-id {
-  /* scroll-snap-type: y mandatory;
-  overflow-y: auto; 
-  height: 100vh; 
-  scroll-behavior: smooth; */
-}
+
 
 @layer base {
   :root {
@@ -73,6 +95,9 @@ body {
 
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
+
+    --success: 123, 43%, 39%;
+    --success-foreground: 123, 43%, 39%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;

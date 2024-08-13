@@ -6,12 +6,14 @@ export async function putConversationSave(
   includedDocuments: string[],
   title: string
 ) {
-  return await fetch("https://openjustice.ai/.netlify/functions/updateConversation", {
+  // production endpoint: https://openjustice.ai/.netlify/functions/updateConversation
+  // https://deploy-preview-80--cute-sprite-f73207.netlify.app/.netlify/functions/updateConversation
+  return await fetch("/api/conversation/update", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
     },
-    body: JSON.stringify({ uid, fullConversation, includedDocuments, title}),
+    body: JSON.stringify({ uid, conversation: fullConversation, includedDocuments, title}),
   });
 }

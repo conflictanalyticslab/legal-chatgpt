@@ -20,7 +20,6 @@ export async function POST(req: Request) {
       password,
     });
 
-    // console.log("Successfully created new user:", user.uid);
 
     if (validEmailRegex.test(email)) {
 

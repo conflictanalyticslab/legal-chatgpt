@@ -19,8 +19,6 @@ export async function getAuthenticatedUser(): Promise<UserI | null> {
 
       if (docSnap.exists()) {
         if (docSnap.data().verified) {
-          // console.debug("Document data:", docSnap.data());
-          // console.log(Number(docSnap.data().prompts_allowed) - Number(docSnap.data().prompts_used))
           return docSnap.data();
         } else {
           console.log("User not verified");

@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
+import { Inter, Roboto } from "next/font/google";
 import { IncludedDocumentsProvider } from "@/hooks/useIncludedDocuments";
 import { GoogleAnalytics } from "@next/third-parties/google";
 const roboto = Roboto({
@@ -20,9 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${roboto.className} bg-greyBg`}>
-        <IncludedDocumentsProvider>{children}</IncludedDocumentsProvider>
-      </body>
+      <body className={`${roboto.className} bg-greyBg`}>{children}</body>
       <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_MEASUREMENT_ID || ""} />
     </html>
   );

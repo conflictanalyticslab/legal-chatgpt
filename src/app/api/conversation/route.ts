@@ -1,13 +1,27 @@
+/**
+ * @file: route.ts - api/conversation - api route for calling the normal LLM's response
+ *
+ * @author Kevin Yu <yu.kevin2002@gmail.com>
+ * @date Jun 2024
+ */
 
-import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
-import { loadUser } from "@/util/api/middleware/loadUser";
-import { queryOpenAi } from "@/util/api/queryOpenAi";
-import queryLlama2 from "@/util/api/queryLlama2";
 import { NextResponse } from "next/server";
-import GPT4Tokenizer from 'gpt4-tokenizer';
 import { getFirestore } from "firebase-admin/firestore";
+import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
+import queryLlama2 from "@/util/LLM_utils/queryLlama2";
+import { authenticateUser } from "./update/utils/update_validation";
+import { validateConversation, validateLoadedUser, validateTokenCount } from "./update/utils/update_validation";
+import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
 
+/**
+ * Get a specific conversation that the user requests
+ * 
+ * @param req - request data
+ * @param req.title - conversation title to search for
+ * @returns - the conversation including the title, and Uid
+ */
 export async function GET(req: Request) {
+  // Authentication
   const { earlyResponse, decodedToken } = await authenticateApiUser();
   if (earlyResponse) {
     return earlyResponse;
@@ -20,8 +34,9 @@ export async function GET(req: Request) {
     );
   }
 
-  const {title} = await req.json();
+  const {title} = await req.json(); // The conversation title (which will be used alongside the uid to identify the document)
 
+  // Fetches conversation from firestore
   const queryResults = await getFirestore()
     .collection("conversations")
     .where("userUid", "==", decodedToken.user_id)
@@ -36,109 +51,88 @@ export async function GET(req: Request) {
     );
   }
 
+  // Get the first queried document and return its data
   const doc = queryResults.docs[0];
   const data = doc.data();
 
   return NextResponse.json({ conversation: { ...data, uid: doc.id }}, { status: 200 });
 }
 
+/**
+ * Retrieve LLM output
+ * 
+ * @param req - request data
+ * @param req.searchPrompt - the user's query
+ * @param req.documentPrompt - the included document ids for the search prompt
+ * @param req.conversation - the full conversation between user and assistant (LLM)
+ * @returns 
+ */
 export async function POST(req: Request) {
-  const { earlyResponse, decodedToken } = await authenticateApiUser();
-  if (earlyResponse) {
-    return earlyResponse;
-  }
+  // Request body data
+  const { searchPrompt, documentPrompt, conversation } = await req.json();
 
-  if (!decodedToken) {
-    return NextResponse.json(
-      { error: "decodedToken is missing but there was no earlyResponse" },
-      { status: 500 }
-    );
-  }
-
-  const { user, userRef } = await loadUser(decodedToken);
-
-  if (user && user.prompts_left > 0) {
-  const {searchPrompt, documentPrompt, fullConversation} = await req.json()
-  if (fullConversation.length === 0) {
-    return NextResponse.json(
-      { error: "fullConversation is empty" },
-      { status: 400 }
-    );
-  }
-  let gpt_flag = true;
+  // Authenticate User
+  const decodedToken = await authenticateUser();
+  if (decodedToken instanceof NextResponse) return decodedToken;
   
-      // console.log(fullConversation);
+  // Check for valid user
+  const user = await validateLoadedUser(decodedToken);
+  if (user instanceof NextResponse) return user;
 
-      let secondReplyRes:any;
-        try {
-        secondReplyRes = await queryOpenAi({
-          model: "gpt-3.5-turbo-0125",
-          format: "markdown",
-          messages: [
-            {
-              role: "system",
-              content:
-                "Answer in 500 words or less. Short answers are better.\n\n" +
-                documentPrompt +
-                "\n\n" +
-                searchPrompt,
-            },
-            ...fullConversation,
-          ],
-        }, true);
-        if (!secondReplyRes) {
-          gpt_flag = false;
-        }
-        return secondReplyRes;
-      } catch (error) {
-        console.error("queryOpenAi failed: " + error);
-        gpt_flag = false;
-      }
+  // Check for valid user
+  const validConversation = await validateConversation(conversation);
+  if (validConversation instanceof NextResponse) return validConversation;
 
-      if (!gpt_flag) {
-        console.log("switching to llama2 in conversation/route.ts for second response");
+  // Composing full user query with included uploaded document data and the user's query
+  const fullPrompt =`Answer in 500 words or less. Short answers are better.\n\n${documentPrompt}\n\n${searchPrompt}`;
+  conversation[conversation.length - 2].content = fullPrompt;
 
-        let token_count = 0;
-        const tokenizer = new GPT4Tokenizer({ type: 'gpt3' });
+  // Query Open AI LLM
+  try 
+  {
+    const llmResponse = await queryOpenAi(
+      {
+        model: "gpt-3.5-turbo-0125",
+        format: "markdown",
+        messages: [...conversation],
+      },
+      true
+    );
 
-        for (let i = 0; i < fullConversation.length; i++) {
-          token_count += tokenizer.estimateTokenCount(fullConversation[i].content);
-        }
-
-        token_count += tokenizer.estimateTokenCount(documentPrompt) + tokenizer.estimateTokenCount(searchPrompt) + 2;
-
-        if (token_count > 2048) {
-          return NextResponse.json({ latestBotResponse: "Token limit of 2048 exceeded, your prompt includes " + token_count + " tokens"});
-        }
-
-        try {
-          secondReplyRes = await queryLlama2({
-            "messages": [
-              {
-                "role": "user",
-                "content": documentPrompt + "\n\n" + searchPrompt
-              },
-              ...fullConversation
-            ]
-          });
-          console.log("Logging second response from llama2", secondReplyRes.choices[0].message.content);
-        } catch (error) {
-          console.error("queryLlama2 failed in conversation/route.ts for second response: " + error);
-        }
-      }
-
-      
-      // console.log("Logging second response from OpenAi", secondReplyRes.body.getReader().read().value);
-      if (secondReplyRes.choices[0].message.content) {
-      return NextResponse.json({
-        latestBotResponse: secondReplyRes.choices[0].message.content
-      });
-    } else {
-      return NextResponse.json({
-        latestBotResponse: ""
-      });
-    }
+    // Return response back
+    if (llmResponse)
+      return llmResponse;
+  } 
+  catch (error) 
+  {
+    console.log("====================== QUERYING LLAMA2 ======================")
+    //Do nothing so we can proceed to LLAMA model
   }
 
-  return NextResponse.json({ error: "No prompts left" }, { status: 403 });
+  // Validate token count before sending input to LLAMA
+  const tokenCount = await validateTokenCount(searchPrompt, documentPrompt, conversation)
+  if (tokenCount instanceof NextResponse) return tokenCount;
+
+  // Querying LLAMA
+  try 
+  {
+    const llmResponse:any = await queryLlama2({
+        messages: [...conversation],
+    });
+
+    return NextResponse.json({
+      latestBotResponse: llmResponse.choices[0].message.content,
+    });
+  } 
+  catch (error) 
+  {
+    console.error(
+      "queryLlama2 failed in conversation/route.ts for second response: ",
+      error
+    );
+    return NextResponse.json({
+      latestBotResponse: "Error retrieving LLM response",
+    });
+  }
 }
+

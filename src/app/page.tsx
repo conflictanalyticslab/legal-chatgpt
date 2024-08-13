@@ -21,18 +21,18 @@ function Hero() {
     <main id="main-id">
       <Container
         id="landing-page"
-        className="landing-page min-h-[100vh] sm:min-h-[100dvh] py-[70px] flex flex-col justify-center xl:justify-center "
+        className="landing-page min-h-[100vh] sm:min-h-[100dvh] pb-[70px] flex flex-col justify-center xl:justify-center "
       >
         {/* Info */}
-        <div className="flex flex-col lg:flex-row items-center justify-between w-[100%] h-[100%] lg:gap-[60px] pt-[10px] lg:pt-[0]">
-          <div className="flex flex-col  items-center lg:items-start gap-[5px] sm:gap-[35px] lg:gap-[15px] w-[100%] md:w-[80%] lg:w-[65%] order-2 lg:order-1 ">
+        <div className="flex flex-col lg:grid gap-5 grid-cols-[1fr_auto] lg:flex-row items-center justify-between w-[100%] h-[100%] lg:gap-[60px] pt-[10px] lg:pt-[0]">
+          <div className="flex flex-col items-start gap-[5px] sm:gap-[35px] lg:gap-[15px] w-full order-2 lg:order-1 ">
             {/* Title Heading */}
-            <div className="flex flex-col gap-[5px]">
-              <h1 className="text-3xl md:text-5xl font-bold text-center lg:text-left">
-                Generative AI <br className="block lg:hidden" /> Designed for
+            <div className="flex flex-col gap-[5px] w-full">
+              <h1 className="text-[2rem] sm:text-[2.2rem] md:text-[2.6rem] lg:text-5xl font-bold text-left w-full leading-tight">
+                Generative AI Designed for
                 Law
               </h1>
-              <div className="flex flex-wrap gap-x-[15px] justify-center lg:justify-start pl-1">
+              <div className="flex flex-wrap gap-x-[15px] justify-start pl-1">
                 <p className="text-sm sm:text-xl font-normal"> Expert-led </p>
                 <p className="text-sm sm:text-xl font-normal"> Non-Profit </p>
                 <p className="text-sm sm:text-xl font-normal"> Open-Access</p>
@@ -41,7 +41,7 @@ function Hero() {
             </div>
             {/* Description */}
             <div className="flex flex-col gap-[30px] items-center lg:items-start pl-1">
-              <div className=" text-xs sm:text-xl text-[--grey] text-center lg:text-left">
+              <div className=" text-sm sm:text-xl text-[--grey] text-left max-w-[900px]">
                 <p>
                   Our goal is to deliver accessible, reliable legal AI.
                   OpenJustice, built on advanced language models for law,
@@ -58,7 +58,7 @@ function Hero() {
               </div>
               <Button
                 variant="default"
-                className="w-[150px] bg-primaryOJ hover:bg-primaryOJ/90 text-white text-md md:text-lg py-[1.2rem] lg:py-[1.4rem]"
+                className="self-start w-[150px] bg-primaryOJ hover:bg-primaryOJ/90 text-white text-md md:text-lg py-[1.2rem] lg:py-[1.4rem]"
                 asChild
               >
                 <Link href="/login">Get Started</Link>
@@ -67,10 +67,11 @@ function Hero() {
           </div>
 
           {/* LOGO */}
-          <div className="order-1 min-w-[80px] lg:min-w-[250px] xl:min-w-[300px] min-h-[100px] lg:min-h-[250px] xl:min-h-[300px] max-h-[150px] lg:max-h-[300px] max-w-[150px] lg:max-w-[300px] relative">
+          <div className="order-1 justify-start items-center hidden lg:flex">
             <Image
-              src={"/assets/landing_page/OJ_ICON.svg"}
-              fill
+              src={"/assets/icons/oj-icon.svg"}
+              width={200}
+              height={200}
               alt="ICON"
               className="object-contain"
             />
@@ -126,6 +127,7 @@ function Hero() {
             url: "/assets/partners/non-profit/legal-clinic.png",
             width: "w-[100%]",
             height: "h-[120px]",
+
           },
         ]}
       />
@@ -138,7 +140,6 @@ function Hero() {
         <Container className="text-center flex flex-col items-center gap-[15px] pt-[100px] my-0">
           <h1 className="text-5xl font-bold">OpenJustice Demo</h1>
           <p className="text-xl text-[#646464]">
-            {" "}
             Watch our demo and learn more about OpenJustice.
           </p>
         </Container>
