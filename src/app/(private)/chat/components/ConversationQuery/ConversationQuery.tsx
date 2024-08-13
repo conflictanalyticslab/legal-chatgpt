@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 
 import UploadDocument from "./UploadDocument/UploadDocument";
+import { FlowModal } from "../FlowGraph/FlowGraph";
 import useFetchQuery from "../../hooks/useFetchQuery";
 import { useEffect } from "react";
 
@@ -38,6 +39,8 @@ export function ConversationQuery() {
     >
       <div className="relative w-[52.5%]">
         <UploadDocument/> 
+
+        <FlowModal />
 
         <Input
           className="w-full flex bg-[#F8F8F8] min-h-[56px] pr-[60px] focus-visible:ring-[none] "

@@ -127,7 +127,7 @@ export default function UploadDocument() {
         <TooltipTrigger asChild>
           <Button
             variant="ghost"
-            className={cn("hover:bg-[#E2E8F0] bg-[transparent] h-[56px] w-[56px] absolute left-[-70px]", 
+            className={cn("hover:bg-[#E2E8F0] bg-[transparent] h-[56px] w-[56px] absolute left-[-110px]", 
               {"opacity-[0.5] cursor-not-allowed": enableRag || loadingPDF}
             )}
             type="button"

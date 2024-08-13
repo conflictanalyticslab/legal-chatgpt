@@ -17,10 +17,12 @@ import {
 } from '@xyflow/react';
 
 import '@xyflow/react/dist/style.css';
-import { Modal, Box, IconButton } from "@mui/material"
-import { Unstable_Popup as Popup } from '@mui/base/Unstable_Popup'; // may have to update later
-import RouteOutlinedIcon from '@mui/icons-material/RouteOutlined';
-import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
+
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; 
+
+import { Route, HelpCircle } from 'lucide-react';
 
 const initialNodes = [
   {
@@ -53,28 +55,6 @@ const style = {
   overflow: "scroll",
   overflowY: "auto",
 };
-
-function HelpPopup() {
-  const [anchor, setAnchor] = React.useState<null | HTMLElement>(null);
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchor(anchor ? null : event.currentTarget);
-  };
-
-  const open = Boolean(anchor);
-  const id = open ? 'simple-popper' : undefined;
-
-  return (
-    <div>
-      <IconButton aria-describedby={id} type="button" onClick={handleClick}>
-        <HelpRoundedIcon />
-      </IconButton>
-      <Popup id={id} open={open} anchor={anchor}>
-        This is how to use the flow graph
-      </Popup>
-    </div>
-  );
-}
 
 function FlowGraph() {
   // no need to trigger rerender
@@ -322,21 +302,36 @@ function FlowGraph() {
 };
 
 export function FlowModal() {
-  const [modalOpen, setModalOpen] = useState(false);
   return (
     <ReactFlowProvider>
-      <IconButton
-        title="Open Dialog Flow"
-        onClick={() => setModalOpen(true)}
-      >
-        <RouteOutlinedIcon />
-      </IconButton>
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <Box sx={style}>
-          <HelpPopup />
+      <Dialog>
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <DialogTrigger asChild>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="hover:bg-[#E2E8F0] bg-[transparent] h-[56px] w-[56px] absolute left-[-60px]"
+                  type="button"
+                  aria-label="Flow Graph"
+                >
+                  <Route />
+                </Button>
+              </TooltipTrigger>
+            </DialogTrigger>
+            <TooltipContent>
+              Open Dialog Flows
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <DialogContent
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[60vw] flex flex-col gap-5 overflow-auto box-border"
+        >
+          <DialogTitle className="hidden"></DialogTitle>
           <FlowGraph />
-        </Box>
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </ReactFlowProvider>
   );
 }
