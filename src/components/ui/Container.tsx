@@ -6,7 +6,7 @@ function Container({ children, className, id }: any) {
     <div
       id={id}
       className={cn(
-        "px-[30px] max-w-[1300px] 2xl:max-w-[1400px] 3xl:max-w-[1900px] m-auto",
+        "px-[15px] sm:px-[30px] max-w-[1300px] 2xl:max-w-[1400px] 3xl:max-w-[1900px] m-auto",
         className
       )}
     >

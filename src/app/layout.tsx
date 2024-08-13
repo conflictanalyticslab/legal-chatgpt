@@ -8,7 +8,6 @@ const roboto = Roboto({
   weight: ["400", "700"],
 });
 
-
 export const metadata: Metadata = {
   title: "OpenJustice",
   description: "Built by the Conflict Analytics Lab",
@@ -21,9 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${roboto.className} bg-greyBg`}>
-        <IncludedDocumentsProvider>{children}</IncludedDocumentsProvider>
-      </body>
+      <body className={`${roboto.className} bg-greyBg`}>{children}</body>
       <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_MEASUREMENT_ID || ""} />
     </html>
   );

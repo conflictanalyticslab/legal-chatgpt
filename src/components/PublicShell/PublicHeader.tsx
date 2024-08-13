@@ -1,17 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import {
-  AppBar,
-  Box,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-  Drawer,
-} from "@mui/material";
-import useScrollTrigger from "@mui/material/useScrollTrigger";
-import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import logo from "../../images/RobotoLogo.png";
 import { BlackMenuIcon, MyToolbar } from "@/styles/styles";
@@ -19,18 +8,7 @@ import Container from "../ui/Container";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-
-function ElevationScroll({ children }: { children: React.ReactElement }) {
-  const trigger = useScrollTrigger({
-    disableHysteresis: true,
-    threshold: 0,
-    target: undefined, // used to pass in a window ref here but stopped because we don't have an iframe demo anymore
-  });
-
-  return React.cloneElement(children, {
-    elevation: trigger ? 4 : 0,
-  });
-}
+import { Menu } from "lucide-react";
 
 export function PublicHeader() {
   const links = [
@@ -50,71 +28,32 @@ export function PublicHeader() {
     { id: 6, route: "Login", url: "/login" },
   ];
 
-  const [state, setState] = React.useState({
-    right: false,
-  });
-
-  const toggleDrawer = (anchor: string, open: boolean) => (event: any) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
-
-    setState({ ...state, [anchor]: open });
-  };
-
-  const list = (anchor: string) => (
-    <Box
-      sx={{ width: 250 }}
-      role="presentation"
-      onClick={toggleDrawer(anchor, false)}
-      onKeyDown={toggleDrawer(anchor, false)}
-    >
-      <List>
-        {links.map((link) => (
-          <ListItem button key={link.id}>
-            <ListItemText primary={link.route} />
-          </ListItem>
-        ))}
-      </List>
-    </Box>
-  );
-
   const [navOpen, setNavOpen] = useState(false);
-  const isTablet = useMediaQuery("(max-width: 768px)");
+  const isTablet = useMediaQuery("(max-width: 850px)");
   return (
-    <nav className="fixed z-[2] top-0 left-0 right-0 bg-greyBg py-[10px] sm:py-[15px] border-b-[2px] border-border">
+    <nav className="bg-greyBg py-[10px] sm:py-[15px] border-b-[2px] border-border">
       <Container className="flex justify-between items-center">
         <Link href="/">
           <Image
-            src={logo}
+            src={"/assets/icons/logo.svg"}
             width={200}
             height={40}
             alt="Logo"
-            className="w-[200px] sm:w-auto"
           />
         </Link>
 
         <Button
-          variant={"outline"}
+          variant={"ghost"}
           className={cn("bg-greyBg h-auto px-[5px] hidden", {
             flex: isTablet,
           })}
           onClick={() => setNavOpen(!navOpen)}
         >
-          <Image
-            src={
-              !navOpen
-                ? "/assets/landing_page/nav_menu.png"
-                : "/assets/landing_page/close.svg"
-            }
-            height={30}
-            width={30}
-            className="w-[20px] sm:w-auto h-[20px] sm:h-auto"
-            alt="menu"
-          />
+          {!navOpen ? (
+            <Menu className="h-[30px] w-[30px]" />
+          ) : (
+            <Menu className="h-[30px] w-[30px]" />
+          )}
         </Button>
 
         <div
@@ -133,7 +72,7 @@ export function PublicHeader() {
             .filter((item) => item.id != 6)
             .map((link) => (
               <Link
-                className="text-black no-underline hover:text-primaryOJ"
+                className="text-black no-underline hover:text-primaryOJ text-nowrap"
                 href={link.url}
                 target="_blank"
                 key={link.url}
@@ -143,7 +82,7 @@ export function PublicHeader() {
             ))}
           <Button
             asChild
-            className="bg-primaryOJ px-[20px] border-primaryOJ border-[2px] text-md text-white"
+            className="bg-primaryOJ hover:bg-primaryOJ/90 px-[20px] border-primaryOJ border-[2px] text-md text-white"
           >
             <Link href={links[links.length - 1].url} className="no-underline">
               {links[links.length - 1].route}
