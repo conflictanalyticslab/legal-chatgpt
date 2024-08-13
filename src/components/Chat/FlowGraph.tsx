@@ -18,7 +18,9 @@ import {
 
 import '@xyflow/react/dist/style.css';
 import { Modal, Box, IconButton } from "@mui/material"
+import { Unstable_Popup as Popup } from '@mui/base/Unstable_Popup'; // may have to update later
 import RouteOutlinedIcon from '@mui/icons-material/RouteOutlined';
+import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 
 const initialNodes = [
   {
@@ -51,6 +53,28 @@ const style = {
   overflow: "scroll",
   overflowY: "auto",
 };
+
+function HelpPopup() {
+  const [anchor, setAnchor] = React.useState<null | HTMLElement>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchor(anchor ? null : event.currentTarget);
+  };
+
+  const open = Boolean(anchor);
+  const id = open ? 'simple-popper' : undefined;
+
+  return (
+    <div>
+      <IconButton aria-describedby={id} type="button" onClick={handleClick}>
+        <HelpRoundedIcon />
+      </IconButton>
+      <Popup id={id} open={open} anchor={anchor}>
+        This is how to use the flow graph
+      </Popup>
+    </div>
+  );
+}
 
 function FlowGraph() {
   // no need to trigger rerender
@@ -280,16 +304,16 @@ function FlowGraph() {
             fontSize: "12px",
           }}
         >
-            <label style={{display: "block"}}>label:</label>
-            <input
-              value={chosenLabel}
-              onChange={(event) => setChosenLabel(event.target.value)}
-            />
-            <label style={{display: "block"}}>body:</label>
-            <input 
-              value={chosenBody} 
-              onChange={(event) => setChosenBody(event.target.value)} 
-            /> 
+          <label style={{display: "block"}}>label:</label>
+          <input
+            value={chosenLabel}
+            onChange={(event) => setChosenLabel(event.target.value)}
+          />
+          <label style={{display: "block"}}>body:</label>
+          <input 
+            value={chosenBody} 
+            onChange={(event) => setChosenBody(event.target.value)} 
+          /> 
         </div>
       </ReactFlow>
     </div>
@@ -309,7 +333,8 @@ export function FlowModal() {
       </IconButton>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box sx={style}>
-          <FlowGraph/>
+          <HelpPopup />
+          <FlowGraph />
         </Box>
       </Modal>
     </ReactFlowProvider>
