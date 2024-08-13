@@ -18,11 +18,16 @@ import {
 
 import '@xyflow/react/dist/style.css';
 
+import { NodeTooltip } from './NodeTooltip';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; 
 
 import { Route, HelpCircle } from 'lucide-react';
+
+const nodeTypes = {
+  default: NodeTooltip,
+};
 
 const initialNodes = [
   {
@@ -55,6 +60,31 @@ const style = {
   overflow: "scroll",
   overflowY: "auto",
 };
+
+function HelpTooltip() {
+  return (
+    // <div style={{ zIndex: 4 }}>
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <DialogTrigger asChild>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                type="button"
+                aria-label="Flow Graph"
+              >
+                <HelpCircle />
+              </Button>
+            </TooltipTrigger>
+          </DialogTrigger>
+          <TooltipContent>
+            Open Dialog Flows
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    // </div>
+  );
+}
 
 function FlowGraph() {
   // no need to trigger rerender
@@ -263,6 +293,7 @@ function FlowGraph() {
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
@@ -273,28 +304,50 @@ function FlowGraph() {
         fitView
         minZoom={0.2}
       >
-        <Controls />
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger>
+              <Controls />
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              Controls for the flow graph.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
         <Background />
-        <div 
-          style={{
-            position: "absolute",
-            right: "10px",
-            top: "10px",
-            zIndex: 4,
-            fontSize: "12px",
-          }}
-        >
-          <label style={{display: "block"}}>label:</label>
-          <input
-            value={chosenLabel}
-            onChange={(event) => setChosenLabel(event.target.value)}
-          />
-          <label style={{display: "block"}}>body:</label>
-          <input 
-            value={chosenBody} 
-            onChange={(event) => setChosenBody(event.target.value)} 
-          /> 
-        </div>
+        {/* Need to figure out why this would not work. zIndex does not work */}
+        {/* <HelpTooltip /> */}
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div 
+                style={{
+                  position: "absolute",
+                  right: "10px",
+                  top: "10px",
+                  zIndex: 4, // ensure it is above the graph
+                  fontSize: "12px",
+                }}
+              >
+                <label style={{display: "block"}}>label:</label>
+                <input
+                  value={chosenLabel}
+                  onChange={(event) => setChosenLabel(event.target.value)}
+                />
+                <label style={{display: "block"}}>body:</label>
+                <input 
+                  value={chosenBody} 
+                  onChange={(event) => setChosenBody(event.target.value)} 
+                /> 
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="left" sideOffset={9}>
+              Edit the label and body of the chosen node or edge. <br />
+              Choose a node or edge by clicking on it.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </ReactFlow>
     </div>
     
