@@ -40,7 +40,7 @@ export function ConversationQuery() {
       <div className="relative w-[52.5%]">
         <UploadDocument/> 
 
-        <FlowModal />
+        <FlowModal setUserQuery={setUserQuery}/>
 
         <Input
           className="w-full flex bg-[#F8F8F8] min-h-[56px] pr-[60px] focus-visible:ring-[none] "

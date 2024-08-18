@@ -23,7 +23,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; 
 
-import { Route, HelpCircle } from 'lucide-react';
+import { Route } from 'lucide-react';
+import Image from "next/image";
 
 const nodeTypes = {
   default: NodeTooltip,
@@ -46,47 +47,31 @@ const initialNodes = [
 
 let id = 1;
 const getId = () => `${id++}`; // generates unique ids
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  width: "85%",
-  height: "85%",
-  transform: "translate(-50%, -50%)",
-  backgroundColor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-  overflow: "scroll",
-  overflowY: "auto",
-};
 
-function HelpTooltip() {
-  return (
-    // <div style={{ zIndex: 4 }}>
-      <TooltipProvider delayDuration={0}>
-        <Tooltip>
-          <DialogTrigger asChild>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                type="button"
-                aria-label="Flow Graph"
-              >
-                <HelpCircle />
-              </Button>
-            </TooltipTrigger>
-          </DialogTrigger>
-          <TooltipContent>
-            Open Dialog Flows
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    // </div>
-  );
-}
+// function HelpTooltip() {
+//   return (
+//     // <div style={{ zIndex: 4 }}>
+//     <Tooltip>
+//       <DialogTrigger asChild>
+//         <TooltipTrigger asChild>
+//           <Button
+//             variant="ghost"
+//             type="button"
+//             aria-label="Flow Graph"
+//           >
+//             <HelpCircle />
+//           </Button>
+//         </TooltipTrigger>
+//       </DialogTrigger>
+//       <TooltipContent>
+//         Hover over any component to see what they do.
+//       </TooltipContent>
+//     </Tooltip>
+//     // </div>
+//   );
+// }
 
-function FlowGraph() {
+function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
   // no need to trigger rerender
   const connectingNodeId = useRef<string>("");
   const chosenNodeId = useRef<string>("");
@@ -190,34 +175,17 @@ function FlowGraph() {
     [screenToFlowPosition],
   );
 
-  // const handleSubmit = () => {
-  //   fetch('http://localhost:8080/graph/update', {
-  //     method: 'POST',
-  //     mode: 'cors',
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     },
-  //     body: JSON.stringify({
-  //       nodes: nodes,
-  //       edges: edges,
-  //       graphId: graphId
-  //     }) 
-  //   }).then(response => console.log(response)) // needs something better
-  // }
-  // useEffect(() => {
-  //   // create new graph
-  //   fetch('http://localhost:8080/graph/new', {
-  //     method: 'GET',
-  //     mode: 'cors',
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     }
-  //   }).then(response => {
-  //     return response.json();
-  //   }).then(data => {
-  //     setGraphId(data.id);
-  //   })
-  // }, []);
+  const handleSubmit = () => {
+    let queryArray: [string, string, string][] = [];
+    edges.forEach((edge) => {
+      let source: Node | undefined = nodes.find((node) => node.id === edge.source);
+      let target: Node | undefined = nodes.find((node) => node.id === edge.target);
+      if (source && target) { // should always pass
+        queryArray.push([source.data.label, edge.label, target.data.label] as [string, string, string]);
+      }
+    });
+    setUserQuery(JSON.stringify(queryArray));
+  }
 
   useEffect(() => {
     if (chosenIsNode.current) { // chosenNodeId would be defined
@@ -313,12 +281,9 @@ function FlowGraph() {
               Controls for the flow graph.
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
         
-        <Background />
-        {/* Need to figure out why this would not work. zIndex does not work */}
-        {/* <HelpTooltip /> */}
-        <TooltipProvider delayDuration={0}>
+          <Background />
+
           <Tooltip>
             <TooltipTrigger asChild>
               <div 
@@ -347,6 +312,35 @@ function FlowGraph() {
               Choose a node or edge by clicking on it.
             </TooltipContent>
           </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+            <div 
+                style={{
+                  position: "absolute",
+                  right: "5px",
+                  bottom: "20px",
+                  zIndex: 4, // ensure it is above the graph
+                }}
+              >
+                <Button
+                  variant="ghost"
+                  type="button"
+                  aria-label="Save Graph"
+                  onClick={handleSubmit}
+                >
+                  <Image
+                    src="/assets/icons/send-horizontal.svg"
+                    alt="send"
+                    width={30}
+                    height={30}
+                  />
+                </Button>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="left" sideOffset={5}>
+              Save the current graph to a query.
+            </TooltipContent>
+          </Tooltip>
         </TooltipProvider>
       </ReactFlow>
     </div>
@@ -354,7 +348,7 @@ function FlowGraph() {
   );
 };
 
-export function FlowModal() {
+export function FlowModal({setUserQuery}: {setUserQuery: (_: string) => void}) {
   return (
     <ReactFlowProvider>
       <Dialog>
@@ -382,7 +376,7 @@ export function FlowModal() {
           className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[60vw] flex flex-col gap-5 overflow-auto box-border"
         >
           <DialogTitle className="hidden"></DialogTitle>
-          <FlowGraph />
+          <FlowGraph setUserQuery={setUserQuery}/>
         </DialogContent>
       </Dialog>
     </ReactFlowProvider>
