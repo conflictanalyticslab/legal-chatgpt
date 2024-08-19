@@ -19,6 +19,7 @@ import {
 import '@xyflow/react/dist/style.css';
 
 import { NodeTooltip } from './NodeTooltip';
+import { EditPopover } from './EditPopover';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; 
@@ -82,6 +83,7 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [chosenLabel, setChosenLabel] = useState<string>("");
   const [chosenBody, setChosenBody] = useState<string>("");
+  const [editOpen, setEditOpen] = useState<boolean>(false);
   // TODO: disable save button until this has loaded
   // const [graphId, setGraphId] = useState("Loading..."); 
 
@@ -93,6 +95,7 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
       chosenIsNode.current = true;
       setChosenLabel(node.data.label as string);
       setChosenBody(node.data.body as string);
+      setEditOpen(true); // will this consistently trigger a rerender after label and body has been set?
     }, []
   );
 
@@ -108,7 +111,7 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
       if (edge.data) {
         setChosenBody(edge.data.body as string);
       } else {
-        setChosenBody("");
+        setChosenBody("Click to edit");
       }
     }, []
   );
@@ -272,6 +275,14 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
         fitView
         minZoom={0.2}
       >
+        <EditPopover 
+          editOpen={editOpen}
+          setEditOpen={setEditOpen}
+          chosenLabel={chosenLabel}
+          setChosenLabel={setChosenLabel}
+          chosenBody={chosenBody}
+          setChosenBody={setChosenBody}
+        />
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger>
