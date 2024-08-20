@@ -30,6 +30,7 @@ export function EditPopover({
                 top: "200px",
                 zIndex: 4, // ensure it is above the graph
                 fontSize: "12px",
+                padding: "10px",
               }}
             >
               <label style={{display: "block"}}>label:</label>
