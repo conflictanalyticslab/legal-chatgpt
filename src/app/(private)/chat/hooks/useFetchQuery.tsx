@@ -72,7 +72,7 @@ const useFetchQuery = () => {
         );
 
         // Calling Fetch Rag
-        await fetchWithRag(fullConversation);
+        await fetchWithRag(fullConversation, queryInput);
       } else {
         await Promise.all([
           llmMethod(fullConversation, queryInput),
