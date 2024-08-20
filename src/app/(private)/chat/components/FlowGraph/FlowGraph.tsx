@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; 
 
-import { Route } from 'lucide-react';
 import Image from "next/image";
 
 const nodeTypes = {
@@ -373,7 +372,12 @@ export function FlowModal({setUserQuery}: {setUserQuery: (_: string) => void}) {
                   type="button"
                   aria-label="Flow Graph"
                 >
-                  <Route />
+                  <Image
+                    src="/assets/icons/route.svg"
+                    alt="send"
+                    width={30}
+                    height={30}
+                  />
                 </Button>
               </TooltipTrigger>
             </DialogTrigger>
