@@ -1,10 +1,7 @@
 import { useChatContext } from "../../store/ChatContext";
-import {
-  DocumentQueryOptions,
-  PineconeIndexes,
-} from "../../enum/document-query.enum";
+import { DocumentQueryOptions, PineconeIndexes } from "../../enum/enums";
 import { getRagResponse } from "../../api/actions/getRagResponse";
-
+import { auth } from "@/firebase";
 /**
  * Custom hook to fetch data with RAG
  * @returns {Object} hook API
@@ -19,18 +16,23 @@ export function useFetchWithRag() {
     enableRag,
   } = useChatContext();
 
-  const fetchWithRag = async (fullConversation: any, queryInput:string) => {
+  /**
+   * Fetch documents using RAG
+   * @param fullConversation
+   * @param queryInput
+   */
+  const fetchWithRag = async (fullConversation: any, queryInput: string) => {
     setLoading(true);
 
     // Update the chat with the user's userQuery first
     setConversation(fullConversation);
 
     // ---------------------------------------------- Generate RAG RESPONSE ---------------------------------------------- //
-
     const isGlobalRag =
       documentQueryMethod === DocumentQueryOptions.globalSearchValue &&
       enableRag;
     const ragResponse = await getRagResponse(
+      (await auth?.currentUser?.getIdToken()) ?? "",
       queryInput,
       isGlobalRag ? "" : namespace,
       isGlobalRag ? PineconeIndexes.dynamicDocuments : indexName

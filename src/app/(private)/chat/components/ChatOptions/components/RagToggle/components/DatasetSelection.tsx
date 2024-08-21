@@ -1,46 +1,36 @@
-import { DocumentQueryOptions } from "@/app/(private)/chat/enum/document-query.enum";
+import { DocumentQueryOptions } from "@/app/(private)/chat/enum/enums";
 import { useChatContext } from "@/app/(private)/chat/store/ChatContext";
-import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-import { Select } from "@radix-ui/react-select";
-import Image from "next/image";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useEffect } from "react";
 
 export function DatasetSelection() {
-  const {namespace, setNamespace, enableRag, documentQueryMethod } = useChatContext();
-  const isGlobalRagResponse = enableRag && documentQueryMethod === DocumentQueryOptions.globalSearchValue
+  const {
+    namespace,
+    setNamespace,
+    enableRag,
+    documentQueryMethod,
+    setIndexName,
+    indexName,
+  } = useChatContext();
+
+  useEffect(() => {
+    console.log(indexName);
+  }, [indexName]);
   return (
-    <Select
-      value={namespace}
-      onValueChange={setNamespace}
-      disabled={isGlobalRagResponse}
-    >
-      <SelectTrigger>
-        <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex gap-3">
-                <Image
-                  src="/assets/icons/scale.svg"
-                  height={18}
-                  width={18}
-                  alt="Jurisdiction"
-                />
-                <SelectValue placeholder="Choose a Dataset" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="left" sideOffset={22}>
-              Select Jurisdiction to fetch documents from
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </SelectTrigger>
-      <SelectContent align="end">
-        <SelectGroup>
-          <SelectItem value="french_law">Leiden IAL</SelectItem>
-          <SelectItem value="austrialian_law">Australia Scrutiny</SelectItem>
-        </SelectGroup>
-      </SelectContent>
-    </Select>
+    <div className="flex flex-col gap-3 px-2">
+      <Label className="font-bold">Datasets</Label>
+      <RadioGroup onValueChange={setIndexName}>
+        <span className="flex justify-start items-center gap-2">
+          <RadioGroupItem id="french_law" value={"french_law"} />
+          <Label htmlFor="french_law">Leidan IAL</Label>
+        </span>
+        <span className="flex justify-start items-center gap-2">
+          <RadioGroupItem id="australian_law" value={"australian_law"} />
+          <Label htmlFor="australian_law">Australian Scrutiny</Label>
+        </span>
+      </RadioGroup>
+    </div>
   );
 }

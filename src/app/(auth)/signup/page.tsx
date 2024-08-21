@@ -178,18 +178,8 @@ export default function Signup() {
       <div className="min-w-[300px] min-h-[100%] pt-[40px] pb-[80px]">
         <div style={{ marginBottom: "24px" }}>
           <Typography variant="h3" fontWeight={700} textAlign="center">
-            Create an account
+          Create an account
           </Typography>
-          {/* <Typography
-            variant="h6"
-            fontWeight={700}
-            textAlign="center"
-            color="#11335D"
-            className="px-[20px]"
->
-            with an email from{" "}
-            <a href="/institutionsList">approved institutions</a>
-          </Typography> */}
         </div>
 
         <div style={{ alignItems: "center" }}>

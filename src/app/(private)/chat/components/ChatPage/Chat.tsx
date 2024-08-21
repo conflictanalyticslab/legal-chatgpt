@@ -30,7 +30,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
 
-
 import "./Chat.css";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -146,80 +145,80 @@ export function Chat() {
   }, []);
 
   return (
-    <div className="flex justify-center relative w-full overflow-auto max-h-[100vh] min-h-[100vh] items-start">
+    <>
       <Toaster />
-      <ChatOptions />
-
-      {/* Main Content */}
-      <div
-        className={cn(
-          "w-[55%] max-w-[1400px] h-[100%] flex flex-col justify-center py-[60px] relative",
-          { "justify-start": !showStartupImage }
-        )}
-      >
-        {/* Open Justice Background Information */}
-        {showStartupImage && (
-          <div className="relative">
-            <div className="flex flex-col gap-[10px] items-center max-w-[708px] mx-[auto]">
-              <div className="p-3 flex flex-col gap-2">
-                <Image
-                  src={"/assets/icons/logo.svg"}
-                  alt="Open Justice Powered by the Conflict Analytics Lab"
-                  width={400}
-                  height={120}
-                />
-                <Label className="text-center text-md w-full text-[#838383]">
-                  Ask OpenJustice any legal questions.
-                </Label>
-              </div>
-              <div className="flex gap-3 flex-wrap justify-center">
-                {[
-                  "Data Privacy",
-                  "Service Terms",
-                  "GDPR Rules",
-                  "Copyright Laws",
-                ].map((prompt) => (
-                  <Button
-                    variant="outline"
-                    className="bg-transparent flex rounded-[3rem] hover:bg-[#F1F1F1] cursor-pointer h-auto py-1 px-4 text-nowrap"
-                    onClick={() => handleQueryPrompt(prompt)}
-                  >
-                    {prompt}
-                  </Button>
-                ))}
+      <div className="flex justify-center relative w-full overflow-auto max-h-[100vh] min-h-[100vh] items-start">
+        {/* Main Content */}
+        <div
+          className={cn(
+            "w-full h-[100%] grid grid-rows-[1fr_auto] pt-[30px] relative"
+          )}
+        >
+          {/* Open Justice Background Information */}
+          {showStartupImage && (
+            <div className="relative self-center w-chat mx-auto">
+              <div className="flex flex-col gap-[10px] items-center max-w-[708px] mx-[auto]">
+                <div className="p-3 flex flex-col gap-2">
+                  <Image
+                    src={"/assets/icons/logo.svg"}
+                    alt="Open Justice Powered by the Conflict Analytics Lab"
+                    width={400}
+                    height={120}
+                  />
+                  <Label className="text-center text-md w-full text-[#838383]">
+                    Ask any legal questions.
+                  </Label>
+                </div>
+                <div className="flex gap-3 flex-wrap justify-center">
+                  {[
+                    "Data Privacy",
+                    "Service Terms",
+                    "GDPR Rules",
+                    "Copyright Laws",
+                  ].map((prompt, key) => (
+                    <Button
+                      key={key}
+                      variant="outline"
+                      className="bg-transparent flex rounded-[3rem] hover:bg-[#F1F1F1] cursor-pointer h-auto py-1 px-4 text-nowrap"
+                      onClick={() => handleQueryPrompt(prompt)}
+                    >
+                      {prompt}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Conversation */}
-        <Conversation />
+          {/* Conversation */}
+          <Conversation />
 
-        {/* Query Input Text Field */}
-        <ConversationQuery />
+          {/* Query Input Text Field */}
+          <ConversationQuery />
+        </div>
+        {/* Alert Modal */}
+        <AlertDialog open={!!alert}>
+          <AlertDialogTitle className="hidden"></AlertDialogTitle>
+          <AlertDialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
+            <AlertDialogDescription className="text-md text-[black]">
+              {alert}
+            </AlertDialogDescription>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Info Alert Modal */}
+        <Dialog open={!!infoAlert}>
+          <DialogTitle className="hidden"></DialogTitle>
+          <DialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
+            <DialogDescription className="text-md text-[black]">
+              {infoAlert}
+            </DialogDescription>
+            <DialogFooter>
+              <Button onClick={() => setInfoAlert("")}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-      {/* Alert Modal */}
-      <AlertDialog open={!!alert}>
-        <AlertDialogTitle className="hidden"></AlertDialogTitle>
-        <AlertDialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
-          <AlertDialogDescription className="text-md text-[black]">
-            {alert}
-          </AlertDialogDescription>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Info Alert Modal */}
-      <Dialog open={!!infoAlert}>
-        <DialogTitle className="hidden"></DialogTitle>
-        <DialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
-          <DialogDescription className="text-md text-[black]">
-            {infoAlert}
-          </DialogDescription>
-          <DialogFooter>
-            <Button onClick={() => setInfoAlert("")}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+    </>
   );
 }

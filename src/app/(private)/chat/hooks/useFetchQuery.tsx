@@ -1,5 +1,5 @@
 import { auth } from "@/firebase";
-import { DocumentQueryOptions } from "../enum/document-query.enum";
+import { DocumentQueryOptions } from "../enum/enums";
 import { useChatContext } from "../store/ChatContext";
 import useUpsertConversation from "../utils/firebase/upsertConversation";
 import { useFetchWithLLM } from "../utils/LLM/normal_LLM_utils";
@@ -25,8 +25,8 @@ const useFetchQuery = () => {
     setRelevantDocs,
     handleBeforeUnload,
   } = useChatContext();
-  
-  const fetchQuery = async (queryInput:string) => {
+
+  const fetchQuery = async (queryInput: string) => {
     if (queryInput === "") return;
 
     // Check for authentication
@@ -39,6 +39,7 @@ const useFetchQuery = () => {
     setLoading(true);
     setPdfLoading(true);
     setUserQuery("");
+
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     try {
@@ -61,19 +62,20 @@ const useFetchQuery = () => {
         enableRag
       ) {
         setConversation(fullConversation);
-        
+
+        // 1. Perform PDF Search to populate Pincone DB
         await pdfSearch(
           documentQueryMethod,
-          queryInput, 
+          queryInput,
           namespace,
           setRelevantDocs,
           setPdfLoading,
           setInfoAlert
         );
 
-        // Calling Fetch Rag
-        await fetchWithRag(fullConversation);
-      } else {
+        // 2. Call fetch with RAG
+        await fetchWithRag(fullConversation, queryInput);
+      } else
         await Promise.all([
           llmMethod(fullConversation, queryInput),
           pdfSearch(
@@ -85,13 +87,13 @@ const useFetchQuery = () => {
             setInfoAlert
           ),
         ]);
-      }
 
       // Always save the conversation after we generate the LLM response
       upsertConversation(fullConversation);
     } catch (error: any) {
       if (typeof error === "string") setInfoAlert(error);
       else setInfoAlert(error.message);
+
       setLoading(false);
       setPdfLoading(false);
     }

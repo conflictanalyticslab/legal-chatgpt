@@ -12,3 +12,9 @@ export enum PineconeIndexes {
   staticDocuments = "legal-pdf-documents",
   dynamicDocuments = "global-search",
 }
+
+export enum ChatAction {
+  searchDocuments = "Search Documents",
+  uploadDocuments = "Upload Documents",
+  dataFilters = "Data Filters"
+}

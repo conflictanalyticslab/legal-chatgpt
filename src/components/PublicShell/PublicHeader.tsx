@@ -2,8 +2,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import logo from "../../images/RobotoLogo.png";
-import { BlackMenuIcon, MyToolbar } from "@/styles/styles";
 import Container from "../ui/Container";
 import { Button } from "../ui/button";
 import Link from "next/link";

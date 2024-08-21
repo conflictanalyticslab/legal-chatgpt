@@ -33,10 +33,10 @@ export function ConversationQuery() {
 
   return (
     <form
-      className="shadow-none bg-[#f5f5f7] fixed w-full h-[100px] bottom-0"
+      className="shadow-none bg-[#f5f5f7] w-chat mx-auto h-[100px]"
       onSubmit={handleSubmit}
     >
-      <div className="relative w-[52.5%]">
+      <div className="relative">
         <UploadDocument/> 
 
         <Input
