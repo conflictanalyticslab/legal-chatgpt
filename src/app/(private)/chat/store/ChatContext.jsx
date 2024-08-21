@@ -1,5 +1,6 @@
-'use client'
-import { createContext, useContext, useRef, useState } from 'react';
+"use client";
+import { createContext, useContext, useRef, useState } from "react";
+import { ChatAction } from "../enum/enums";
 
 // Create a context
 const ChatContext = createContext();
@@ -31,6 +32,7 @@ export const ChatContextProvider = ({ children }) => {
   const [latestResponse, setLatestResponse] = useState("");
   const [documentContent, setDocumentContent] = useState("");
   const [num, setNum] = useState(-1);
+  const [chatAction, setChatAction] = useState(ChatAction.searchDocuments);
 
   const scrollIntoViewRef = useRef(null);
 
@@ -56,7 +58,6 @@ export const ChatContextProvider = ({ children }) => {
 
   // Sets the appropriate local storage settings when toggling between elastic and keyword search
   const handleChangeDocumentQueryMethod = (queryMethod) => {
-
     setDocumentQueryMethod(queryMethod);
     localStorage.setItem(
       "documentQueryPrevChoice",
@@ -69,18 +70,18 @@ export const ChatContextProvider = ({ children }) => {
     localStorage.setItem("enableRag", JSON.stringify(value));
   };
 
-    /**
+  /**
    * Stops generating the normal LLM buffered output
    *
    * @param event
    * @returns
    */
-    const stopQuery = (event) => {
-      if (enableRag) return;
-  
-      event.preventDefault();
-      generateFlagRef.current = false;
-    };
+  const stopQuery = (event) => {
+    if (enableRag) return;
+
+    event.preventDefault();
+    generateFlagRef.current = false;
+  };
 
   return (
     <ChatContext.Provider
@@ -141,9 +142,11 @@ export const ChatContextProvider = ({ children }) => {
         deleteDocumentChat,
         handleBeforeUnload,
         handleChangeDocumentQueryMethod,
-        handleEnableRag, 
+        handleEnableRag,
         stopQuery,
-        scrollIntoViewRef
+        scrollIntoViewRef,
+        chatAction,
+        setChatAction,
       }}
     >
       {children}

@@ -2,7 +2,8 @@
 import { Pinecone } from "@pinecone-database/pinecone";
 import {Embedder} from "@/app/(private)/chat/utils/embeddings/embeddings"
 import { TextMetadata } from "@/types/chat";
-import { PineconeIndexes } from "../../enum/document-query.enum";
+import { PineconeIndexes } from "../../enum/enums";
+import admin from "firebase-admin";
 
 /**
  * Server Actio
@@ -13,11 +14,12 @@ import { PineconeIndexes } from "../../enum/document-query.enum";
  * @param indexName 
  * @returns 
  */
-export async function fetchSemanticSearch (query:string, topK:number = 3, namespace='', indexName:string=PineconeIndexes.staticDocuments) {
+export async function fetchSemanticSearch (token:string, query:string, topK:number = 3, namespace='', indexName:string=PineconeIndexes.staticDocuments) {
 
   console.log("THE SEMANTIC INDEX NAME IS: ", indexName)
   console.log("THE SEMANTIC NAMESPACE IS: ", namespace)
-
+  const decodedToken = admin.auth().verifyIdToken(token);
+  
   const pinecone = new Pinecone({
     apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY || '',
   });

@@ -1,11 +1,19 @@
 import { useChatContext } from "@/app/(private)/chat/store/ChatContext";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "@/components/ui/use-toast";
 import { Paperclip } from "lucide-react";
 import { useFilePicker } from "use-file-picker";
-import { FileAmountLimitValidator, FileSizeValidator } from "use-file-picker/validators";
+import {
+  FileAmountLimitValidator,
+  FileSizeValidator,
+} from "use-file-picker/validators";
 import { postPDF } from "@/util/requests/postPDF";
 import { uploadPdfDocument } from "@/util/requests/uploadPdfDocument";
 import GPT4Tokenizer from "gpt4-tokenizer";
@@ -15,7 +23,6 @@ export default function UploadDocument() {
   const {
     enableRag,
     setAlert,
-    setPdfLoading,
     documents,
     setDocuments,
     includedDocuments,
@@ -25,8 +32,7 @@ export default function UploadDocument() {
     setLoadingPDF,
   } = useChatContext();
 
-
-  const {openFilePicker} = useFilePicker({
+  const { openFilePicker } = useFilePicker({
     accept: ".pdf",
     readAs: "ArrayBuffer", // ArrayBuffer takes exactly as much space as the original file. DataURL, the default, would make it bigger.
     validators: [
@@ -44,15 +50,13 @@ export default function UploadDocument() {
       setLoadingPDF(false);
     },
     onFilesSuccessfullySelected: async ({ plainFiles }: any) => {
-      filesSuccessfullyUploaded(
-        plainFiles,
-      );
+      filesSuccessfullyUploaded(plainFiles);
     },
   });
-  
+
   function handleUploadFile() {
     if (enableRag || loadingPDF) return;
-    
+
     openFilePicker();
   }
 
@@ -91,44 +95,39 @@ export default function UploadDocument() {
       toast({
         title: "PDF uploaded successfully!",
       });
-      
-      setPdfLoading(false);
-    } 
-    catch (err: Error | any) 
-    {
-      if (err.message === "PDF File uploaded too large") 
-      {
+
+      setLoadingPDF(false);
+    } catch (err: Error | any) {
+      if (err.message === "PDF File uploaded too large") {
         toast({
           title:
             "The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ' + pdfFileSize/(1024*1024) + ' bytes!",
           variant: "destructive",
         });
-      } 
-      else if (
+      } else if (
         err.message === "PDF token limit exceeded" &&
         estimatedTokenCount !== -1
-      ) 
-      {
-
+      ) {
         toast({
           title:
             "The PDF file uploaded exceeds limit, maximum of 8192 token in each PDF uploaded, your pdf contains ' + estimatedTokenCount + ' tokens",
           variant: "destructive",
         });
       }
-
-      setPdfLoading(false);
+    } finally {
+      setLoadingPDF(false);
     }
   }
-  
+
   return (
     <TooltipProvider delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
             variant="ghost"
-            className={cn("hover:bg-[#E2E8F0] bg-[transparent] h-[56px] w-[56px] absolute left-[-70px]", 
-              {"opacity-[0.5] cursor-not-allowed": enableRag || loadingPDF}
+            className={cn(
+              "hover:bg-[#E2E8F0] bg-[transparent] h-[56px] w-[56px] absolute left-[-70px]",
+              { "opacity-[0.5] cursor-not-allowed": enableRag || loadingPDF }
             )}
             type="button"
             aria-label="Attach PDF"

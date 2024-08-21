@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/tabs"
 import { BookOpenText  } from "lucide-react"
 import { DatasetSelection } from "./components/DatasetSelection"
-import UploadedDocuments from "./components/UploadedDocuments"
+import UploadedDocuments from "../UploadedDocuments"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useChatContext } from "../../../../store/ChatContext"
 import { Switch } from "@/components/ui/switch"

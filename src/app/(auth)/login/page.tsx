@@ -29,6 +29,8 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import Link from "next/link";
+import InputFormField from "@/components/Auth/InputFormField";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -42,6 +44,7 @@ export default function Login() {
       email: "",
       password: "",
     },
+    reValidateMode: 'onSubmit'
   });
 
   const readWhitelistEmails = async () => {
@@ -69,7 +72,6 @@ export default function Login() {
   }: Zod.infer<typeof loginSchema>) => {
     try {
       setIsLoading(true);
-
       // Form validation
       loginSchema.parse({
         email,
@@ -85,24 +87,17 @@ export default function Login() {
       // }
 
       // Sign In With Firebase
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          router.push("/chat");
-        })
-        .catch((error: any) => {
-          console.log(error);
-          form.setError("email", {
-            type: "manual",
-            message: "Invalid email or password",
-          });
-          form.setError("password", {
-            type: "manual",
-            message: "Invalid email or password",
-          });
-        });
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push("/chat");
     } catch (error: unknown) {
-      console.log(error);
-      if (error instanceof Error) setAlert(error.message);
+      form.setError("email", {
+        type: "manual",
+        message: "Invalid email or password",
+      });
+      form.setError("password", {
+        type: "manual",
+        message: "Invalid email or password",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -114,77 +109,66 @@ export default function Login() {
         onSubmit={form.handleSubmit(handleLogin)}
         className="h-full flex justify-center"
       >
-        <div className="min-w-[300px] flex flex-col justify-start mt-[100px] gap-5">
-          <h1 className="text-center font-bold text-[2rem]">Login</h1>
+        <div className="min-w-[300px] w-full max-w-[460px] flex flex-col justify-start mt-[100px] gap-5">
+          <h1 className="text-center font-bold text-[3rem]">Welcome Back</h1>
 
           {/* Email */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem className="flex flex-col space-y-2">
-                <FormLabel>Email</FormLabel>
-                <div>
-                  <FormControl>
-                    <Input
-                      className="ring-0 focus:ring-0"
-                      placeholder="Email"
-                      type="email"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage className="mt-0" />
-                </div>
-              </FormItem>
-            )}
-          />
+          <InputFormField form={form} name="email" type="email" />
 
-          {/* Password */}
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Password</FormLabel>
-                <div>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        className="ring-0 focus:ring-0 pr-[2.5rem]"
-                        placeholder="Password"
-                        type={showPassword ? "text" : "password"}
-                        {...field}
-                      />
-                      {showPassword ? (
-                        <button
-                          type="button"
-                          className="absolute right-[1rem] top-[50%] translate-y-[-50%]"
-                          onClick={() => setShowPassword(false)}
-                        >
-                          <EyeOff className="w-4" />
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="absolute right-[1rem] top-[50%] translate-y-[-50%]"
-                          onClick={() => setShowPassword(true)}
-                        >
-                          <Eye className="w-4" />
-                        </button>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </div>
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-col gap-1">
+            {/* Password */}
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Password</FormLabel>
+                  <div>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          className="ring-0 focus:ring-0 pr-[2.5rem] h-[50px]"
+                          placeholder="Password"
+                          type={showPassword ? "text" : "password"}
+                          {...field}
+                        />
+                        {showPassword ? (
+                          <button
+                            type="button"
+                            className="absolute right-[1rem] top-[50%] translate-y-[-50%]"
+                            onClick={() => setShowPassword(false)}
+                          >
+                            <EyeOff className="w-4" />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="absolute right-[1rem] top-[50%] translate-y-[-50%]"
+                            onClick={() => setShowPassword(true)}
+                          >
+                            <Eye className="w-4" />
+                          </button>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
+            <Link
+              href="/reset-password"
+              className="text-xs ml-auto hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
 
           <Button
             className="bg-primaryOJ hover:bg-primaryOJ/90 disabled:opacity-[0.6]"
             disabled={isLoading}
           >
-            Login
+            Log In
           </Button>
         </div>
 

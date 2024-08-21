@@ -21,6 +21,10 @@ const config = {
     extend: {
       fontFamily: {
       },
+      width: {
+        chat: '50%',
+        'chat-options': '20%'
+      },
       colors: {
         greyBg: "#f5f5f7",
         border: "hsl(var(--border))",
