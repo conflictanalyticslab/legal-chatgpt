@@ -1,14 +1,13 @@
-import { postWebUrl } from "@/util/requests/postWebUrl";
 import { toast } from "@/components/ui/use-toast";
-import { postSearchTerms } from "@/util/requests/postSearchTerms";
 import {
   elasticDtoToRelevantDocuments,
-  globalSearchAPIDtoToRelevantDocuments,
   pineconeDtoToRelevantDocuments,
 } from "@/app/(private)/chat/api/documents/transform";
-import { getDocumentText } from "@/util/api/firebase_utils/getDocuments";
-import { auth } from "@/firebase";
 import { fetchSemanticSearch } from "../../api/actions/fetchSemanticSearch";
+import { postWebUrl } from "@/lib/requests/postWebUrl";
+import { postSearchTerms } from "@/lib/requests/postSearchTerms";
+import { auth } from "@/lib/firebase/firebase";
+import { getDocumentText } from "@/lib/api/firebase_utils/getDocuments";
 
 /**
  * Extracts URLs from a given text

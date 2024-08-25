@@ -1,14 +1,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
-import { editDocument } from "@/util/api/firebase_utils/editDocument";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Tooltip,
@@ -18,9 +11,11 @@ import {
 } from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { deleteDocument } from "@/util/api/firebase_utils/deleteDocument";
 import { useChatContext } from "@/app/(private)/chat/store/ChatContext";
 import { toast } from "@/components/ui/use-toast";
+import { deleteDocument } from "@/lib/api/firebase_utils/deleteDocument";
+import { editDocument } from "@/lib/api/firebase_utils/editDocument";
+import { Pencil, Trash } from "lucide-react";
 
 export default function UploadedDocuments() {
   const [editing, setEditing] = useState("");
@@ -90,19 +85,18 @@ export default function UploadedDocuments() {
                   </Label>
                 </CardHeader>
 
-                <CardContent className="flex flex-col gap-3">
+                <CardContent className="flex flex-col gap-6">
                   {/* Document Text */}
-                  <p className="line-clamp-6">{document.text}</p>
+                  <p className="line-clamp-6 text-sm">{document.text}</p>
 
                   {/* Document Actions */}
                   <div className="flex gap-3 justify-end">
-
                     {/* Include Document In Conversation */}
                     <TooltipProvider delayDuration={0}>
                       <Tooltip>
                         <TooltipTrigger className="!m-0" asChild>
                           <Checkbox
-                            className="border-[1.5px] self-start h-[20px] w-[20px]"
+                            className="border-[1.5px] self-start h-[15px] w-[15px]"
                             checked={includedDocuments.includes(document.uid)}
                             onClick={() => toggleIncludeDocument(document)}
                           />
@@ -125,12 +119,7 @@ export default function UploadedDocuments() {
                             }
                           }}
                         >
-                          <Image
-                            src={"/assets/icons/pencil.svg"}
-                            alt="delete"
-                            height={20}
-                            width={20}
-                          />
+                          <Pencil className="w-4 h-4"/>
                         </TooltipTrigger>
                         <TooltipContent align="end">
                           Edit document text
@@ -144,12 +133,7 @@ export default function UploadedDocuments() {
                         <TooltipTrigger
                           onClick={() => handleDeleteDoc(document.uid)}
                         >
-                          <Image
-                            src={"/assets/icons/trash.svg"}
-                            alt="delete"
-                            height={20}
-                            width={20}
-                          />
+                          <Trash className="w-4 h-4"/>
                         </TooltipTrigger>
                         <TooltipContent align="end">
                           Delete document

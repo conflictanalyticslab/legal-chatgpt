@@ -1,7 +1,6 @@
-import "./globals.css";
+import "@/styles/globals.css";
 import type { Metadata } from "next";
-import { Inter, Roboto } from "next/font/google";
-import { IncludedDocumentsProvider } from "@/hooks/useIncludedDocuments";
+import { Roboto } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 const roboto = Roboto({
   subsets: ["latin"],

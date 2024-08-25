@@ -17,3 +17,9 @@ export type Conversation = {
   content: string, 
   role: user
 }
+
+export type ApiResponse<T> = {
+  success: boolean;
+  error?: string | null;
+  data: T | null 
+};

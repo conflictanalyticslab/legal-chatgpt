@@ -1,6 +1,5 @@
-import SideNav from "../SideNav/SideNav";
+import SideNav from "../sideNav/SideNav";
 import ChatOptions from "./components/ChatOptions/ChatOptions";
-import SideBar from "./components/SideBar/SideBar";
 import { ChatContextProvider } from "./store/ChatContext";
 
 export default function LoggedInLayout({

@@ -2,7 +2,7 @@
 import { FileUp, FolderSearch, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchDocuments from "./components/SearchDocuments";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { ChatAction } from "../../enum/enums";
 import { useChatContext } from "../../store/ChatContext";
 import UploadDocument from "../ConversationQuery/UploadDocument/UploadDocument";
@@ -25,7 +25,7 @@ function ChatOptions() {
 
   return (
     <div className="relative h-screen grid border-solid border-[1px] border-border">
-      <div className="absolute top-3 left-[-150px] p-2 flex gap-3">
+      <div className="absolute left-[-150px] p-2 flex gap-3">
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger className="!m-0" asChild>

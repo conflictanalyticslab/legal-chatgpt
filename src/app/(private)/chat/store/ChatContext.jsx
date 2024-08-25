@@ -20,8 +20,7 @@ export const ChatContextProvider = ({ children }) => {
   const [pdfLoading, setPdfLoading] = useState(false);
   const generateFlagRef = useRef(generateFlag);
   const [conversationTitles, setConversationTitles] = useState([]);
-  const [conversationTitle, setConversationTitle] = useState("");
-  const [conversationUid, setConversationUid] = useState("");
+  const [conversationId, setConversationId] = useState("");
   const [alert, setAlert] = useState("");
   const [infoAlert, setInfoAlert] = useState("");
   const [indexName, setIndexName] = useState("legal-pdf-documents");
@@ -33,6 +32,7 @@ export const ChatContextProvider = ({ children }) => {
   const [documentContent, setDocumentContent] = useState("");
   const [num, setNum] = useState(-1);
   const [chatAction, setChatAction] = useState(ChatAction.searchDocuments);
+  const [user, setUser] = useState(null);
 
   const scrollIntoViewRef = useRef(null);
 
@@ -115,10 +115,8 @@ export const ChatContextProvider = ({ children }) => {
         setPdfLoading,
         conversationTitles,
         setConversationTitles,
-        conversationTitle,
-        setConversationTitle,
-        conversationUid,
-        setConversationUid,
+        conversationId,
+        setConversationId,
         infoAlert,
         setInfoAlert,
         indexName,
@@ -147,6 +145,7 @@ export const ChatContextProvider = ({ children }) => {
         scrollIntoViewRef,
         chatAction,
         setChatAction,
+        setUser
       }}
     >
       {children}

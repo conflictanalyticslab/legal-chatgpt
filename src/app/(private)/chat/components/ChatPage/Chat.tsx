@@ -5,17 +5,12 @@ import React, { useEffect, useRef } from "react";
 import { useChatContext } from "../../store/ChatContext";
 import { useRouter } from "next/navigation";
 
-import { getAuthenticatedUser } from "@/util/requests/getAuthenticatedUser";
-import { getConversationTitles } from "@/util/requests/getConversationTitles";
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getConversation } from "@/util/requests/getConversation";
-import { getDocumentsOwnedByUser } from "@/util/requests/getDocumentsOwnedByUser";
-import ChatOptions from "../ChatOptions/ChatOptions";
 import { Conversation } from "../Conversation/Conversation";
 import { ConversationQuery } from "../ConversationQuery/ConversationQuery";
 
@@ -32,8 +27,12 @@ import { Toaster } from "@/components/ui/toaster";
 
 import "./Chat.css";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { cn, errorResponse } from "@/utils/utils";
 import useFetchQuery from "../../hooks/useFetchQuery";
+import { getAuthenticatedUser } from "@/lib/requests/getAuthenticatedUser";
+import { getDocumentsOwnedByUser } from "@/lib/requests/getDocumentsOwnedByUser";
+import { getConversationTitles } from "@/lib/requests/getConversationTitles";
+import { getConversation } from "@/lib/requests/getConversation";
 
 export function Chat() {
   const router = useRouter();
@@ -44,8 +43,7 @@ export function Chat() {
     setEnableRag,
     setDocumentQueryMethod,
     setConversationTitles,
-    conversationTitle,
-    setConversationUid,
+    setConversationId,
     infoAlert,
     setInfoAlert,
     setDocuments,
@@ -55,7 +53,7 @@ export function Chat() {
     latestResponse,
     setNum,
     scrollIntoViewRef,
-    setUserQuery,
+    conversationId,
   } = useChatContext();
 
   const { fetchQuery } = useFetchQuery();
@@ -76,14 +74,12 @@ export function Chat() {
    */
   async function getSelectedConversation() {
     try {
-      const selectedConversationContent = await getConversation(
-        conversationTitle
-      );
+      const selectedConversationContent = await getConversation(conversationId);
       if (!selectedConversationContent) return;
 
       // Update the chat conversation and the selected conversation Uid
       setConversation(selectedConversationContent?.conversation);
-      setConversationUid(selectedConversationContent.conversationId); // Note the conversationUid is used to find
+      setConversationId(selectedConversationContent.conversationId); // Note the conversationId is used to find
     } catch (error: any) {
       toast({
         title: "Failed to get conversation",
@@ -93,40 +89,41 @@ export function Chat() {
   }
 
   /**
-   * Changes the conversation based on the selected conversation title
+   *  Changes the conversation based on the selected conversation title
    */
   useEffect(() => {
     getSelectedConversation();
-  }, [conversationTitle]);
+  }, [conversationId]);
+
+  async function initalizeChat() {
+    try {
+      const user = await getAuthenticatedUser();
+      if (user) {
+        setNum(user.prompts_left);
+        setAlert("");
+      }
+    } catch (error: unknown) {
+      router.push("/login");
+    }
+
+    try {
+      setDocuments(await getDocumentsOwnedByUser());
+      setConversationTitles(await getConversationTitles());
+    } catch (error: unknown) {
+      setInfoAlert(errorResponse(error));
+    }
+  }
 
   /**
    * Authenticating User and getting user documents and setting conversation titles
    */
   useEffect(() => {
     setAlert("Authenticating user...");
-    getAuthenticatedUser()
-      .then((user) => {
-        if (user) {
-          setNum(user.prompts_left);
-          setAlert("");
-        }
-      })
-      .then(() => {
-        // fetch documents from db and set state after authentication
-        const fetchData = async () => {
-          try {
-            setDocuments((await getDocumentsOwnedByUser()) as any);
-            setConversationTitles(await getConversationTitles());
-          } catch (e) {
-            console.log(e);
-          }
-        };
-        fetchData();
-      })
-      .catch((e) => {
-        console.error(e);
-        router.push("/login");
-      });
+    initalizeChat();
+
+    return () => {
+      setInfoAlert("");
+    };
   }, []);
 
   const handleQueryPrompt = (prompt: string) => {

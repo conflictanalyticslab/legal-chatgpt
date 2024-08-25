@@ -21,7 +21,6 @@ export default function InputFormField({
       render={({ field }) => (
         <FormItem className="flex flex-col space-y-2">
           <FormLabel>{label}</FormLabel>
-          <div>
             <FormControl>
               <Input
                 className="ring-0 focus:ring-0 h-[50px]"
@@ -30,8 +29,7 @@ export default function InputFormField({
                 {...field}
               />
             </FormControl>
-            <FormMessage className="mt-0" />
-          </div>
+            <FormMessage />
         </FormItem>
       )}
     />

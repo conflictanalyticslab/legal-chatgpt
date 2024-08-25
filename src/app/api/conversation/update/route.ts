@@ -1,14 +1,14 @@
 /**
- * @file: /api/conversation/update/route.ts - Update an existing conversation document 
+ * @file: /api/conversation/update/route.ts - Upsert an existing conversation document 
  *
  * @author Kevin Yu <yu.kevin2002@gmail.com>
  * @date Jul 2024
  */
 
 import { NextResponse } from "next/server";
-import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
+import { authenticateApiUser } from "@/lib/api/middleware/authenticateApiUser";
 
-import { initBackendFirebaseApp } from "@/util/api/middleware/initBackendFirebaseApp";
+import { initBackendFirebaseApp } from "@/lib/api/middleware/initBackendFirebaseApp";
 import { authenticateUser } from "../conversationTitle/utils/validation";
 import { getDocRef, updateDoc } from "@/lib/firebase/crud_utils";
 
@@ -28,13 +28,13 @@ export async function PUT(req: Request) {
   if (decodedTokenResp instanceof NextResponse) 
     return decodedTokenResp;
 
-  // Note uid is the conversationUid from the frontend
-  const { uid, conversation, includedDocuments, title } = await req.json();
+  // Note uid is the conversationId from the frontend
+  const { uid, conversation, includedDocuments, title, conversationId } = await req.json();
 
   initBackendFirebaseApp();
 
   try {
-    const convoRef = await getDocRef("conversations", uid);
+    const convoRef = await getDocRef("conversations", conversationId);
     if (!convoRef) {
       return NextResponse.json({ error: "No matching conversation found" }, { status: 404 });
     }

@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { useChatContext } from "../../store/ChatContext";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import ReactMarkdown from "react-markdown";
 import ChatOptions from "../ChatOptions/ChatOptions";
 
@@ -17,7 +17,7 @@ export function Conversation() {
     >
 
       <div className="w-chat mx-auto flex flex-col gap-5 items-end">
-        {conversation.map((convoObj: any, i: number) => (
+        {conversation && conversation.map((convoObj: any, i: number) => (
           <Card
             key={i}
             className={cn(
@@ -47,11 +47,11 @@ export function Conversation() {
 
             {/*  Buffered LLM Content */}
             {convoObj.role === "assistant" && i === conversation.length - 1 && (
-              <div className="relative flex-col gap-2 flex justify-between break-normal">
+              <div className="relative flex-col gap-2 flex justify-between break-normal pb-[50px]">
                 <ReactMarkdown className="flex flex-col items-start gap-[10px] llm-markdown">
                   {latestResponse}
                 </ReactMarkdown>
-                {/* Loading Animation */}
+                {/* Loading Animation Dot */}
                 {loading && latestResponse === "" && (
                   <div className="w-[10px] h-[10px] bg-[black] rounded-[50%] animate-pulse self-start"></div>
                 )}
