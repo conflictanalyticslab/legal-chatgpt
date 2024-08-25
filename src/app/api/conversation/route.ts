@@ -7,11 +7,11 @@
 
 import { NextResponse } from "next/server";
 import { getFirestore } from "firebase-admin/firestore";
-import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
-import queryLlama2 from "@/util/LLM_utils/queryLlama2";
-import { authenticateUser } from "./update/utils/update_validation";
-import { validateConversation, validateLoadedUser, validateTokenCount } from "./update/utils/update_validation";
-import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
+import { queryOpenAi } from "@/lib/LLM_utils/queryOpenAi";
+import queryLlama2 from "@/lib/LLM_utils/queryLlama2";
+import { authenticateUser } from "./update/utils/upsert_validation";
+import { validateConversation, validateLoadedUser, validateTokenCount } from "./update/utils/upsert_validation";
+import { authenticateApiUser } from "@/lib/api/middleware/authenticateApiUser";
 
 /**
  * Get a specific conversation that the user requests

@@ -6,7 +6,7 @@
  */
 
 import { getFirestore } from "firebase-admin/firestore";
-import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
+import { authenticateApiUser } from "@/lib/api/middleware/authenticateApiUser";
 import { NextResponse } from "next/server";
 
 /**

@@ -14,10 +14,10 @@ import {
   FileAmountLimitValidator,
   FileSizeValidator,
 } from "use-file-picker/validators";
-import { postPDF } from "@/util/requests/postPDF";
-import { uploadPdfDocument } from "@/util/requests/uploadPdfDocument";
 import GPT4Tokenizer from "gpt4-tokenizer";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
+import { postPDF } from "@/lib/requests/postPDF";
+import { uploadPdfDocument } from "@/lib/requests/uploadPdfDocument";
 
 export default function UploadDocument() {
   const {

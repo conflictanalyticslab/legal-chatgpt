@@ -1,9 +1,9 @@
+import { initBackendFirebaseApp } from "@/lib/api/middleware/initBackendFirebaseApp";
+import { validEmailRegex } from "@/lib/signup/validEmailRegex";
+import { publicEmailRegex } from "@/util/signup/publicEmailRegex";
 import admin from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
-import { initBackendFirebaseApp } from "@/util/api/middleware/initBackendFirebaseApp";
-import { validEmailRegex } from "@/util/signup/validEmailRegex";
-import { publicEmailRegex } from "@/util/signup/publicEmailRegex";
 
 export async function POST(req: Request) {
   const { email, password } = await req.json();
@@ -25,7 +25,6 @@ export async function POST(req: Request) {
 
       await getFirestore().collection("users").doc(user.uid).set({
         email,
-        conversations: [],
         role: "partner",
         prompts_allowed: 100,
         prompts_left: 100,
@@ -36,7 +35,6 @@ export async function POST(req: Request) {
 
       await getFirestore().collection("users").doc(user.uid).set({
         email,
-        conversations: [],
         role: "guest",
         prompts_allowed: 25,
         prompts_left: 25,

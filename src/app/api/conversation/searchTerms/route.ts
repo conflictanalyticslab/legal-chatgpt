@@ -6,10 +6,10 @@
  * @date Jun 2024
  */
 
-import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
+import { authenticateApiUser } from "@/lib/api/middleware/authenticateApiUser";
 import { NextResponse } from "next/server";
-import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
-import { callSearchAPI } from "@/util/api/elastic_search_utils/runSearch";
+import { queryOpenAi } from "@/lib/LLM_utils/queryOpenAi";
+import { callSearchAPI } from "@/lib/api/elastic_search_utils/runSearch";
 
 interface ErrorResp {
   errors: string[];

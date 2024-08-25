@@ -1,9 +1,9 @@
-import { auth } from "@/firebase";
+import { auth } from "@/lib/firebase/firebase";
 import { DocumentQueryOptions } from "../enum/enums";
 import { useChatContext } from "../store/ChatContext";
 import useUpsertConversation from "../utils/firebase/upsertConversation";
 import { useFetchWithLLM } from "../utils/LLM/normal_LLM_utils";
-import { useFetchWithRag } from "../utils/LLM/rag_utils";
+import { useFetchWithRag } from "../utils/LLM/fetchRAG";
 import { pdfSearch } from "../utils/pdfs/pdf_utils";
 
 const useFetchQuery = () => {

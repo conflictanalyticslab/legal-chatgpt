@@ -1,13 +1,21 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { LogOut, PanelRightClose } from "lucide-react";
 import { useState } from "react";
 import ChatHistory from "../chat/components/ChatOptions/components/ChatHistory";
-import Link from "next/link";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase/firebase";
+import { useRouter } from "next/navigation";
 
 export default function SideNav() {
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/login");
+  };
 
   return (
     <nav
@@ -29,14 +37,14 @@ export default function SideNav() {
         <div className="grid grid-rows-[1fr_auto] h-screen overflow-hidden pt-[60px]">
           <ChatHistory />
           <Button
-            className="my-5 mx-4 flex justify-start"
+            className="my-5 mx-4 flex justify-start gap-3 cursor-pointer border-[1px] border-transparent hover:border-border hover:border-[1px] px-2"
             variant={"ghost"}
-            asChild
+            onClick={() => handleLogout()}
           >
-            <span className="flex gap-3 cursor-pointer border-[1px] border-transparent hover:border-border hover:border-[1px]">
+            <>
               <LogOut className="h-5 w-5" />
-              <Link href="/">Log Out</Link>
-            </span>
+              Log Out
+            </>
           </Button>
         </div>
       )}
