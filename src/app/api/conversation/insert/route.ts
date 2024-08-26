@@ -36,7 +36,7 @@ export async function POST(req: Request) {
   try {
     const currentDate = Timestamp.now().toDate();
 
-    const validData = conversationSchema.omit({ conversationId: true }).parse({
+    const validData = conversationSchema.partial().parse({
       conversation,
       includedDocuments,
       userUid: decodedToken?.uid,
@@ -47,7 +47,12 @@ export async function POST(req: Request) {
     const docInfo = await createDoc("conversations", validData);
     if (!docInfo.success) throw new Error("Failed save conversation");
 
-    return NextResponse.json({ conversationId: docInfo.data }, { status: 200 });
+    validData["conversationId"] = docInfo.data; //Add back in the generated convo id which is the doc id
+
+    return NextResponse.json(
+      { success: true, error: null, data: validData },
+      { status: 200 }
+    );
   } catch (error: any) {
     console.error("conversation uid: ", decodedToken?.uid, error.message);
     return NextResponse.json({ error: error.message }, { status: 400 });

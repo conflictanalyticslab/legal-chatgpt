@@ -8,7 +8,7 @@
 
 import { authenticateApiUser } from "@/lib/api/middleware/authenticateApiUser";
 import { NextResponse } from "next/server";
-import { queryOpenAi } from "@/lib/LLM_utils/queryOpenAi";
+import { queryOpenAi } from "@/lib/LLM/queryOpenAi";
 import { callSearchAPI } from "@/lib/api/elastic_search_utils/runSearch";
 
 interface ErrorResp {

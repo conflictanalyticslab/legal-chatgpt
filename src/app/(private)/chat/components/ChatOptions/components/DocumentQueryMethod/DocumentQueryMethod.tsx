@@ -1,10 +1,10 @@
-import { DocumentQueryOptions } from "@/app/(private)/chat/enum/document-query.enum";
 import { useChatContext } from "@/app/(private)/chat/store/ChatContext";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Image from "next/image";
 
 import "./DocumentQueryMethod.css"
+import { DocumentQueryOptions } from "@/app/(private)/chat/enum/enums";
 
 export function DocumentQueryMethod() {
   const { documentQueryMethod, handleChangeDocumentQueryMethod } = useChatContext();

@@ -5,6 +5,7 @@ import useUpsertConversation from "../utils/firebase/upsertConversation";
 import { useFetchWithLLM } from "../utils/LLM/normal_LLM_utils";
 import { useFetchWithRag } from "../utils/LLM/fetchRAG";
 import { pdfSearch } from "../utils/pdfs/pdf_utils";
+import { errorResponse } from "@/utils/utils";
 
 const useFetchQuery = () => {
   const { fetchWithRag } = useFetchWithRag();
@@ -55,17 +56,13 @@ const useFetchQuery = () => {
         },
       ]);
 
-      const llmMethod = enableRag ? fetchWithRag : fetchWithLLM;
+      // const llmMethod = enableRag ? fetchWithRag : fetchWithLLM;
 
-      if (
-        documentQueryMethod === DocumentQueryOptions.globalSearchValue &&
-        enableRag
-      ) {
+      if (documentQueryMethod === DocumentQueryOptions.globalSearchValue) {
         setConversation(fullConversation);
 
         // 1. Perform PDF Search to populate Pincone DB
         await pdfSearch(
-          documentQueryMethod,
           queryInput,
           namespace,
           setRelevantDocs,
@@ -75,25 +72,25 @@ const useFetchQuery = () => {
 
         // 2. Call fetch with RAG
         await fetchWithRag(fullConversation, queryInput);
-      } else
-        await Promise.all([
-          llmMethod(fullConversation, queryInput),
-          pdfSearch(
-            documentQueryMethod,
-            queryInput,
-            namespace,
-            setRelevantDocs,
-            setPdfLoading,
-            setInfoAlert
-          ),
-        ]);
+      }
 
-      // Always save the conversation after we generate the LLM response
-      upsertConversation(fullConversation);
+      // Concurrently gets the pdf documents and saves the conversation
+      fetchWithRag(fullConversation, queryInput).then(() => {
+        // Always save the conversation after we generate the LLM response
+        upsertConversation(fullConversation);
+      }).catch((error:unknown)=>{
+        setInfoAlert(errorResponse(error))
+      });
+
+      // await pdfSearch(
+      //   queryInput,
+      //   namespace,
+      //   setRelevantDocs,
+      //   setPdfLoading,
+      //   setInfoAlert
+      // );
     } catch (error: any) {
-      if (typeof error === "string") setInfoAlert(error);
-      else setInfoAlert(error.message);
-
+      setInfoAlert(errorResponse(error));
       setLoading(false);
       setPdfLoading(false);
     }

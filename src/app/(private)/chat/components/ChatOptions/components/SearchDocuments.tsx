@@ -19,12 +19,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useChatContext } from "../../../store/ChatContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { pdfSearch } from "@/app/(private)/chat/utils/pdfs/pdf_utils";
 
 const SearchDocuments = () => {
@@ -61,7 +55,6 @@ const SearchDocuments = () => {
     setPdfLoading(true);
     // Chooses which method we are using to query for the pdf
     pdfSearch(
-      documentQueryMethod,
       documentQuery,
       namespace,
       setRelevantDocs,
