@@ -16,6 +16,7 @@ import {
   conversationTitleSchema,
   conversationTitleSchemaArray,
 } from "@/models/ConversationTitleSchema";
+import { Timestamp } from "firebase/firestore";
 
 const useUpsertConversation = () => {
   const {
@@ -63,14 +64,9 @@ const useUpsertConversation = () => {
             title
           );
           const data = await response.json();
-
           // Validate the new title
-          const validConversationTitle = conversationTitleSchema.parse({
-            title,
-            conversationId: data.conversationId,
-          });
+          const validConversationTitle = conversationTitleSchema.parse(data.data);
 
-          console.log(conversationTitles)
           // Setting the active conversation title and id to the newly created one
           setConversationId(validConversationTitle.conversationId);
           setConversationTitles(

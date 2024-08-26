@@ -7,8 +7,8 @@
 
 import { NextResponse } from "next/server";
 import { getFirestore } from "firebase-admin/firestore";
-import { queryOpenAi } from "@/lib/LLM_utils/queryOpenAi";
-import queryLlama2 from "@/lib/LLM_utils/queryLlama2";
+import { queryOpenAi } from "@/lib/LLM/queryOpenAi";
+import queryLlama2 from "@/lib/LLM/queryLlama2";
 import { authenticateUser } from "./update/utils/upsert_validation";
 import { validateConversation, validateLoadedUser, validateTokenCount } from "./update/utils/upsert_validation";
 import { authenticateApiUser } from "@/lib/api/middleware/authenticateApiUser";

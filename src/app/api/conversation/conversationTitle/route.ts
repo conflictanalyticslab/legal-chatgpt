@@ -8,8 +8,8 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { authenticateApiUser } from "@/lib/api/middleware/authenticateApiUser";
 import { loadUser } from "@/lib/api/middleware/loadUser";
-import { queryOpenAi } from "@/lib/LLM_utils/queryOpenAi";
-import queryLlama2 from "@/lib/LLM_utils/queryLlama2";
+import { queryOpenAi } from "@/lib/LLM/queryOpenAi";
+import queryLlama2 from "@/lib/LLM/queryLlama2";
 import { NextResponse } from "next/server";
 import { authenticateUser, validatePromptCount } from "./utils/validation";
 import {

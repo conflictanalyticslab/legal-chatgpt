@@ -193,6 +193,7 @@ export function Chat() {
           {/* Query Input Text Field */}
           <ConversationQuery />
         </div>
+        
         {/* Alert Modal */}
         <AlertDialog open={!!alert}>
           <AlertDialogTitle className="hidden"></AlertDialogTitle>

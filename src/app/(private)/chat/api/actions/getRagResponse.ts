@@ -8,6 +8,13 @@ import { Pinecone } from "@pinecone-database/pinecone";
 import { PineconeStore } from "@langchain/pinecone";
 import { PineconeIndexes } from "../../enum/enums";
 import admin from "firebase-admin";
+import { apiErrorResponse } from "@/utils/utils";
+import { OJ_PROMPT } from "@/lib/LLM/prompts";
+import {
+  langchainPineconeDtoToRelevantDocuments,
+  pineconeDtoToRelevantDocuments,
+} from "../documents/transform";
+import { retrieveDocs } from "./fetchSemanticSearch";
 
 export async function getRagResponse(
   token: string,
@@ -19,29 +26,10 @@ export async function getRagResponse(
     console.log("THE RAG INDEX NAME IS: ", indexName);
     console.log("THE RAG NAMESPACE IS: ", namespace);
     const decodedToken = admin.auth().verifyIdToken(token);
-    
-    // ********************************* CREATING A VECTOR STORE ********************************* //
-    const pinecone = new Pinecone({
-      apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY || "",
-    });
 
-    const pineconeIndex = pinecone.Index(indexName);
-
-    // Create a vectore store (database of vectors) with the specified LLM and pinecone index
-    const vectorStore = await PineconeStore.fromExistingIndex(
-      new OpenAIEmbeddings({ apiKey: process.env.OPENAI_API_KEY }),
-      {
-        pineconeIndex,
-      }
-    );
-
-    vectorStore.namespace = namespace; //Specify the namespace to use
-
-    // ********************************* SEMANTIC SEARCH ********************************* //
-    const retriever = vectorStore.asRetriever();
-
-    // ********************************* CREATING A PROMPT FOR RAG ********************************* //
-    const prompt = await pull<ChatPromptTemplate>("rlm/rag-prompt");
+    //TODO: TESTING PURPOSES REMOVE LATER:
+    indexName = PineconeIndexes.staticDocuments;
+    namespace = "australian_law";
 
     // ********************************* LLM INITIALIZATION ********************************* //
     const llm = new ChatOpenAI({
@@ -54,12 +42,14 @@ export async function getRagResponse(
     // Create a chain that passes a list of documents to a model.
     const ragChain = await createStuffDocumentsChain({
       llm,
-      prompt,
+      prompt: OJ_PROMPT,
       outputParser: new StringOutputParser(),
     });
 
     // ********************************* DOCUMENT RETRIEVAL ********************************* //
-    const retrievedDocs = await retriever.getRelevantDocuments(query);
+    const retrievedDocs = pineconeDtoToRelevantDocuments(
+      await retrieveDocs(query, indexName, namespace, 3)
+    );
 
     // ********************************* INVOKING RAG ********************************* //
     const res = await ragChain.invoke({
@@ -67,8 +57,12 @@ export async function getRagResponse(
       context: retrievedDocs,
     });
 
-    return { ok: true, data: res };
-  } catch (error) {
-    return { ok: false, data: null };
+    return {
+      success: true,
+      error: null,
+      data: { llmText: res, relevantDocs: retrievedDocs },
+    };
+  } catch (error: unknown) {
+    return apiErrorResponse(error);
   }
 }

@@ -8,6 +8,7 @@ import { postWebUrl } from "@/lib/requests/postWebUrl";
 import { postSearchTerms } from "@/lib/requests/postSearchTerms";
 import { auth } from "@/lib/firebase/firebase";
 import { getDocumentText } from "@/lib/api/firebase_utils/getDocuments";
+import { RelevantDocument } from "../../types/RelevantDocument";
 
 /**
  * Extracts URLs from a given text
@@ -107,7 +108,6 @@ export async function scrapePDFContent(
  * @param setInfoAlert
  */
 export async function pdfSearch(
-  documentQueryMethod: string,
   userQuery: string,
   namespace: string,
   setRelevantDocs: any,
@@ -115,20 +115,26 @@ export async function pdfSearch(
   setInfoAlert: any
 ) {
   try {
-    // Keyword Search Documents
-    const keywordDocs = await postSearchTerms(userQuery);
-    // Semantic Search Documents
-    const pineconeDocs = await fetchSemanticSearch(
-      (await auth?.currentUser?.getIdToken()) ?? "",
-      userQuery,
-      3,
-      namespace
-    );
+    const [keywordDocs, pineconeDocs] = await Promise.all([
+      postSearchTerms(userQuery),
+      fetchSemanticSearch(
+        (await auth?.currentUser?.getIdToken()) ?? "",
+        userQuery,
+        3,
+        namespace
+      ),
+    ]);
 
-    const searchedDocuments = [
-      ...pineconeDtoToRelevantDocuments(pineconeDocs),
-      ...elasticDtoToRelevantDocuments(keywordDocs.elasticSearchResults),
-    ];
+    const searchedDocuments: RelevantDocument[] = [];
+    if (pineconeDocs?.success)
+      searchedDocuments.concat(
+        pineconeDtoToRelevantDocuments(pineconeDocs.data)
+      );
+    if (keywordDocs.success)
+      searchedDocuments.concat(
+        elasticDtoToRelevantDocuments(keywordDocs.data.elasticSearchResults)
+      );
+
     setRelevantDocs(searchedDocuments);
     // else if(documentQueryMethod === DocumentQueryOptions.globalSearchValue) {
     //   console.log("global")

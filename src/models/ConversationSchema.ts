@@ -10,8 +10,8 @@ export const conversationSchema = z.object({
   includedDocuments: z.array(z.any()),
   userUid: z.string(), // This comes from decoding the user
   title: z.string(),
-  timestamp: z.date(),
-  updatedAt: z.date(),
+  timestamp: z.date().or(z.string()),
+  updatedAt: z.date().or(z.string()),
   conversationId: z.string(),
 });
 
