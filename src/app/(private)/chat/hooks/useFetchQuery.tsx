@@ -9,7 +9,6 @@ import { errorResponse } from "@/utils/utils";
 
 const useFetchQuery = () => {
   const { fetchWithRag } = useFetchWithRag();
-  const { fetchWithLLM } = useFetchWithLLM();
   const { upsertConversation } = useUpsertConversation();
   const {
     setAlert,
@@ -17,7 +16,6 @@ const useFetchQuery = () => {
     setPdfLoading,
     setLoading,
     setUserQuery,
-    enableRag,
     documentQueryMethod,
     setConversation,
     conversation,
