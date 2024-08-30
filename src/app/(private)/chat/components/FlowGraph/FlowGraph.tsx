@@ -11,6 +11,7 @@ import {
   MarkerType,
   type Node, 
   type Edge,
+  type ReactFlowJsonObject,
   type OnConnectStart,
   Connection,
   OnConnectEnd,
@@ -19,15 +20,15 @@ import {
 import '@xyflow/react/dist/style.css';
 
 import { NodeTooltip } from './NodeTooltip';
-import { EditPopover } from './EditPopover';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; 
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 import Image from "next/image";
 
-const DBURL = "http://localhost:8080"; // temporary solution, this would go in the .env preferably
+const DBURL = "http://48.217.241.192:8080"; // temporary solution, this would go in the .env preferably
 
 const nodeTypes = {
   default: NodeTooltip,
@@ -86,11 +87,14 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
   const [chosenLabel, setChosenLabel] = useState<string>("");
   const [chosenBody, setChosenBody] = useState<string>("");
   const [editOpen, setEditOpen] = useState<boolean>(false);
+  const [rfInstance, setRfInstance] = useState<any>(null);
   // TODO: disable save button until this has loaded
-  const [graphId, setGraphId] = useState("Make changes to save"); 
-  const [graphList, setGraphList] = useState<string[]>([]);
+  const [graphId, setGraphId] = useState<string|null>(null);
+  const [graphName, setGraphName] = useState<string>("Default"); 
+  const [graphList, setGraphList] = useState<{name:string, id:string}[]>([]);
 
   const { screenToFlowPosition } = useReactFlow();
+  const { setViewport } = useReactFlow();
 
   const onNodeClick = useCallback<{(_: any, node: Node): void}>(
     (_, node) => {
@@ -181,20 +185,26 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
     [screenToFlowPosition],
   );
 
-  const handleSubmit = () => {
+  const handleSubmit = () => { // only saves on submission for now
+    if (edges.length === 0 || nodes.length === 1) return; // no changes have been made
     // saves the graph to the database
-    fetch(new URL('/graph/update', DBURL), {
-      method: 'POST',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        nodes: nodes,
-        edges: edges,
-        graphId: graphId
-      }) 
-    }).then(response => console.log(response)) // needs something better
+    if (rfInstance) {
+      fetch(new URL('update', DBURL), {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: graphId, // if this is empty, it will create a new graph
+          name: graphName,
+          data: rfInstance.toObject()
+        }) // create a json object of the graph
+      }).then(response =>{ 
+        return response.json()
+      }).then(body => setGraphId(body.id)) // will waste an api call, but it's the simplest solution for now
+    }
+    
 
     // make the query. TODO: call the assistant agent
     let queryArray: [string, string, string][] = [];
@@ -205,13 +215,13 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
         queryArray.push([source.data.label, edge.label, target.data.label] as [string, string, string]);
       }
     });
-    setUserQuery(JSON.stringify(queryArray));
+    // setUserQuery(JSON.stringify(queryArray));
   }
 
   useEffect(() => {
     // TODO: make this a button instead, and default to the first retrieved graph
     // create new graph in the backend
-    fetch(new URL('/graph/retrieve/all', DBURL), {
+    fetch(new URL('retrieve/all', DBURL), {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -224,21 +234,31 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
     })
   }, []);
 
+  useEffect(() => {
+    if (!graphId) return;
+    // retrieve the graph from the backend
+    fetch(new URL(`retrieve/id/${graphId}`, DBURL), {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(response => {
+      return response.json();
+    }).then((body : {
+      data: ReactFlowJsonObject,
+      id: string,
+      name: string
+    }) => {
+      setGraphName(body.name);
+      setNodes(body.data.nodes);
+      setEdges(body.data.edges);
+      setViewport(body.data.viewport);
+    })
+  }, [graphId])
+
   // nodes and edges are detected as changed on movement and edit 
-  // useEffect(() => {
-  //   if (edges.length === 0 || nodes.length === 1) return; // no changes have been made
-  //   // only trigger once change is made to the current graph
-  //   fetch(new URL('/graph/new', DBURL), {
-  //     method: 'GET',
-  //     mode: 'cors',
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     }
-  //   }).then(response => {
-  //     return response.json();
-  //   }).then(data => {
-  //     setGraphId(data.id);
-  //   })
+  
   // }, [nodes, edges]);
 
   useEffect(() => {
@@ -311,39 +331,32 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
   }, [chosenBody, setNodes]);
 
   return (
-    <div style={{ display: "flex", height: "100%", width: "100%", flexDirection: "row" }}>
-      <div className="flex flex-col px-4 mt-[60px]">
-        <Label className="text-[#838383] mb-2">
-          Previous Conversations
-        </Label>
-        {/* Chat History */}
-        {graphList.map((item: any) => (
-          <button type="button" onClick={()=>setGraphId(item)} className="w-full text-left text-ellipsis text-nowrap px-3 py-2 overflow-hidden hover:bg-[#F1F1F1] rounded-md">{item}</button>
-        ))}
-      </div>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onNodeClick={onNodeClick}
-        onEdgeClick={onEdgeClick}
-        onConnect={onConnect}
-        onConnectStart={onConnectStart}
-        onConnectEnd={onConnectEnd}
-        fitView
-        minZoom={0.2}
-      >
-        <EditPopover 
-          editOpen={editOpen}
-          setEditOpen={setEditOpen}
-          chosenLabel={chosenLabel}
-          setChosenLabel={setChosenLabel}
-          chosenBody={chosenBody}
-          setChosenBody={setChosenBody}
-        />
-        <TooltipProvider delayDuration={0}>
+    <TooltipProvider delayDuration={0}>
+      <div style={{ display: "flex", height: "100%", width: "100%", flexDirection: "row" }}>
+        <div className="flex flex-col px-4 mt-[60px]">
+          <Label className="text-[#838383] mb-2">
+            Previous Conversations
+          </Label>
+          {/* Chat History */}
+          {graphList.map((item: {name: string, id: string}) => (
+            <button type="button" onClick={()=>setGraphId(item.id)} className="w-full text-left text-ellipsis text-nowrap px-3 py-2 overflow-hidden hover:bg-[#F1F1F1] rounded-md">{item.name}</button>
+          ))}
+        </div>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onNodeClick={onNodeClick}
+          onEdgeClick={onEdgeClick}
+          onConnect={onConnect}
+          onConnectStart={onConnectStart}
+          onConnectEnd={onConnectEnd}
+          onInit={setRfInstance}
+          fitView
+          minZoom={0.2}
+        >
           <Tooltip>
             <TooltipTrigger>
               <Controls />
@@ -413,10 +426,9 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
               Save the current graph to a query.
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
-      </ReactFlow>
-    </div>
-    
+        </ReactFlow>
+      </div>
+    </TooltipProvider>
   );
 };
 
@@ -450,7 +462,7 @@ export function FlowModal({setUserQuery}: {setUserQuery: (_: string) => void}) {
         </TooltipProvider>
         <DialogContent
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[70vw] flex flex-col gap-5 overflow-auto box-border"
+          className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[85vw] flex flex-col gap-5 overflow-auto box-border"
         >
           <DialogTitle className="hidden"></DialogTitle>
           <FlowGraph setUserQuery={setUserQuery}/>
