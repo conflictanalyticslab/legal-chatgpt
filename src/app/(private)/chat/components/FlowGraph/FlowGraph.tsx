@@ -19,6 +19,7 @@ import {
 
 import '@xyflow/react/dist/style.css';
 
+import { cn } from "@/utils/utils";
 import { NodeTooltip } from './NodeTooltip';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -28,7 +29,7 @@ import { Input } from "@/components/ui/input";
 
 import Image from "next/image";
 
-const DBURL = "http://48.217.241.192:8080"; // temporary solution, this would go in the .env preferably
+const DBURL = "https://48.217.241.192:8080"; // temporary solution, this would go in the .env preferably
 
 const nodeTypes = {
   default: NodeTooltip,
@@ -442,7 +443,9 @@ export function FlowModal({setUserQuery}: {setUserQuery: (_: string) => void}) {
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="hover:bg-[#E2E8F0] bg-[transparent] h-[56px] w-[56px] absolute left-[-60px]"
+                  className={cn(
+                    "hover:bg-[#E2E8F0] bg-[transparent] h-[56px] w-[56px] absolute left-[-115px]"
+                  )}
                   type="button"
                   aria-label="Flow Graph"
                 >
