@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Card } from "../ui/card";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import Container from "../ui/Container";
 
 export function TwoPartners({ title, description, partners, textLeft }: any) {

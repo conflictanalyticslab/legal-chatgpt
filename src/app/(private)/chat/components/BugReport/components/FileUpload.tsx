@@ -2,7 +2,7 @@ import React from "react"
 import Dropzone, { DropEvent, FileRejection } from "react-dropzone"
 import { Button } from "@/components/ui/button"
 import { FileUp } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/utils"
 
 export default function FileUpload({
 	onDrop,

@@ -1,51 +1,66 @@
 /**
- * @file: /conversation/conversationTitle/route.ts - Uses LLM to generate title based on conversation 
- * 
+ * @file: /conversation/conversationTitle/route.ts - Uses LLM to generate title based on conversation
+ *
  * @author Kevin Yu <yu.kevin2002@gmail.com>
  * @date Jul 2024
  */
 
 import { getFirestore } from "firebase-admin/firestore";
-import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
-import { loadUser } from "@/util/api/middleware/loadUser";
-import { queryOpenAi } from "@/util/LLM_utils/queryOpenAi";
-import queryLlama2 from "@/util/LLM_utils/queryLlama2";
+import { authenticateApiUser } from "@/lib/api/middleware/authenticateApiUser";
+import { loadUser } from "@/lib/api/middleware/loadUser";
+import { queryOpenAi } from "@/lib/LLM/queryOpenAi";
+import queryLlama2 from "@/lib/LLM/queryLlama2";
 import { NextResponse } from "next/server";
 import { authenticateUser, validatePromptCount } from "./utils/validation";
-import { createDoc } from "@/lib/firebase/crud_utils";
+import {
+  conversationTitleSchema,
+  conversationTitleSchemaArray,
+} from "@/models/ConversationTitleSchema";
+import { apiErrorResponse, errorResponse } from "@/utils/utils";
 
 /**
- * Gets conversation titles
+ * Fetches conversation titles from Firestore
  *
  * @param _
  * @returns
  */
 export async function GET(_: Request) {
-  // Authentication
-  const { earlyResponse, decodedToken } = await authenticateApiUser();
-  if (earlyResponse) {
-    return earlyResponse;
+  try {
+    // Authentication
+    const { earlyResponse, decodedToken } = await authenticateApiUser();
+    if (earlyResponse) {
+      return earlyResponse;
+    }
+
+    if (!decodedToken) {
+      return NextResponse.json(
+        { error: "decodedToken is missing but there was no earlyResponse" },
+        { status: 500 }
+      );
+    }
+
+    const queryResults = await getFirestore()
+      .collection("conversations")
+      .where("userUid", "==", decodedToken.user_id)
+      .orderBy("timestamp", "desc")
+      .get();
+
+    // Due to the refactor of the conversationTitleSchema we have to filter out old conversations
+    const queryResultsV2 = queryResults.docs
+      .map((doc) => doc.data())
+      .filter((doc) => doc.hasOwnProperty("updatedAt"))
+      .map((doc) => {
+        doc.timestamp = doc.timestamp.toDate();
+        doc.updatedAt = doc.updatedAt.toDate();
+        return doc;
+      });
+    const validTitles = conversationTitleSchemaArray.parse(queryResultsV2);
+
+    return NextResponse.json({ titles: validTitles }, { status: 200 });
+  } catch (error: unknown) {
+    // console.log(errorResponse(error));
+    return NextResponse.json(apiErrorResponse(error), { status: 400 });
   }
-
-  if (!decodedToken) {
-    return NextResponse.json(
-      { error: "decodedToken is missing but there was no earlyResponse" },
-      { status: 500 }
-    );
-  }
-
-  const queryResults = await getFirestore()
-    .collection("conversations")
-    .where("userUid", "==", decodedToken.user_id)
-    .orderBy("timestamp", "desc")
-    .get();
-
-  const titles = queryResults.docs.map((doc) => {
-    const data = doc.data();
-    return { title: data.title, uid: doc.id };
-  });
-
-  return NextResponse.json({ titles }, { status: 200 });
 }
 
 /**
@@ -67,7 +82,7 @@ export async function POST(req: Request) {
   if (decodedTokenResp instanceof NextResponse) return decodedTokenResp;
 
   // Checks for user in database and updates their prompt count
-  const promptCount = validatePromptCount(decodedToken,user, userRef);
+  const promptCount = validatePromptCount(decodedToken, user, userRef);
   if (promptCount instanceof NextResponse) return promptCount;
 
   const { conversation, includedDocuments } = await req.json();
@@ -101,7 +116,6 @@ export async function POST(req: Request) {
         title,
       });
     }
-
   } catch (error) {
     //Do nothing so we can proceed to LLAMA model
     console.log(
@@ -129,7 +143,7 @@ export async function POST(req: Request) {
         { error: "Failed to generate title for conversation" },
         { status: 400 }
       );
-    
+
     // Return back Response
     return NextResponse.json({
       title,

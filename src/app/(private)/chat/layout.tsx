@@ -1,5 +1,5 @@
-import SideNav from "../SideNav/SideNav";
-import SideBar from "./components/SideBar/SideBar";
+import SideNav from "@/app/(private)/sideNav/SideNav";
+import ChatOptions from "./components/ChatOptions/ChatOptions";
 import { ChatContextProvider } from "./store/ChatContext";
 
 export default function LoggedInLayout({
@@ -8,21 +8,11 @@ export default function LoggedInLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-full">
+    <div className="grid grid-cols-[auto_1fr_auto]">
       <ChatContextProvider>
         <SideNav />
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            overflow: "auto",
-            justifyContent: "center",
-            display: "flex",
-            backgroundColor: "#F5F5F7",
-          }}
-        >
-          {children}
-        </div>
+        <div className="w-full h-full flex">{children}</div>
+        <ChatOptions />
       </ChatContextProvider>
     </div>
   );

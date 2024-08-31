@@ -1,13 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import logo from "../../images/RobotoLogo.png";
-import { BlackMenuIcon, MyToolbar } from "@/styles/styles";
+import { useMediaQuery } from "react-responsive";
 import Container from "../ui/Container";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { Menu } from "lucide-react";
 
 export function PublicHeader() {
@@ -29,7 +27,7 @@ export function PublicHeader() {
   ];
 
   const [navOpen, setNavOpen] = useState(false);
-  const isTablet = useMediaQuery("(max-width: 850px)");
+  const isTablet = useMediaQuery({ maxWidth: "850px" });
   return (
     <nav className="bg-greyBg py-[10px] sm:py-[15px] border-b-[2px] border-border">
       <Container className="flex justify-between items-center">

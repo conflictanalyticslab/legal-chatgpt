@@ -1,7 +1,7 @@
 import admin from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
-import { initBackendFirebaseApp } from "@/util/api/middleware/initBackendFirebaseApp";
+import { initBackendFirebaseApp } from "@/lib/api/middleware/initBackendFirebaseApp";
 import { doc, setDoc } from "firebase/firestore"; 
 
 export async function POST(req: Request) {

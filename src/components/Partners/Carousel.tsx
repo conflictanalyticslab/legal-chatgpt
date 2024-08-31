@@ -2,7 +2,7 @@ import React from "react";
 import { ACADEMIC_PARTNERS } from "./Partners";
 import { Card } from "../ui/card";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 
 function Carousel({ slideRight, className, orderOpposite }: any) {
   const displayPartners = orderOpposite

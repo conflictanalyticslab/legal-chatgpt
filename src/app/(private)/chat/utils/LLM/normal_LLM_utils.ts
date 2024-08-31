@@ -1,8 +1,8 @@
 import { toast } from "@/components/ui/use-toast";
-import { postConversation } from "@/util/requests/postConversation";
 import GPT4Tokenizer from "gpt4-tokenizer";
 import { createDocumentPrompt } from "../pdfs/pdf_utils";
 import { useChatContext } from "../../store/ChatContext";
+import { postConversation } from "@/lib/requests/postConversation";
 
 export function useFetchWithLLM() {
   const {
