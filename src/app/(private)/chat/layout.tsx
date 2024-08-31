@@ -1,4 +1,4 @@
-import SideNav from "@/app/(private)/sideNav/SideNav";
+import SideNav from "@/app/(private)/SideNav/SideNav";
 import ChatOptions from "./components/ChatOptions/ChatOptions";
 import { ChatContextProvider } from "./store/ChatContext";
 
