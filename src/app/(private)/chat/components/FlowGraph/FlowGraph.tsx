@@ -91,7 +91,7 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
   const [rfInstance, setRfInstance] = useState<any>(null);
   // TODO: disable save button until this has loaded
   const [graphId, setGraphId] = useState<string|null>(null);
-  const [graphName, setGraphName] = useState<string>("Default"); 
+  const [graphName, setGraphName] = useState<string>("Default Name"); 
   const [graphList, setGraphList] = useState<{name:string, id:string}[]>([]);
 
   const { screenToFlowPosition } = useReactFlow();
@@ -333,6 +333,12 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
 
   return (
     <TooltipProvider delayDuration={0}>
+      <Input
+        className="w-[30vw] flex min-h-[56px] pr-[60px] focus-visible:ring-[none]"
+        placeholder="Graph Name"
+        value={graphName}
+        onChange={(e) => setGraphName(e.target.value)}
+      />
       <div style={{ display: "flex", height: "100%", width: "100%", flexDirection: "row" }}>
         <div className="flex flex-col px-4 mt-[60px]">
           <Label className="text-[#838383] mb-2">
