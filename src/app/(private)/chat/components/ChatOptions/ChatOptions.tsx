@@ -24,7 +24,7 @@ function ChatOptions() {
   };
 
   return (
-    <div className="relative h-screen grid border-solid border-[1px] border-border">
+    <div className="relative h-screen grid border-3 shadow-3">
       <div className="absolute left-[-150px] p-2 flex gap-3">
         <TooltipProvider delayDuration={0}>
           <Tooltip>

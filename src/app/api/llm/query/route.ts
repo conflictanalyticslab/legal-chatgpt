@@ -1,6 +1,5 @@
 "use server";
 import { ChatOpenAI } from "@langchain/openai";
-import { PineconeIndexes } from "../../enum/enums";
 import admin from "firebase-admin";
 import { apiErrorResponse } from "@/utils/utils";
 import { CONDENSE_QUESTION_PROMPT, OJ_PROMPT } from "@/lib/LLM/prompts";
@@ -10,24 +9,43 @@ import {
 } from "@langchain/core/runnables";
 import { formatChatHistory, formatDocumentsAsString } from "@/lib/LLM/utils";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import { langchainPineconeDtoToRelevantDocuments } from "../documents/transform";
 import { langchainDocType } from "@/models/schema";
-import { NextApiRequest, NextApiResponse } from "next";
+import { PineconeIndexes } from "@/app/(private)/chat/enum/enums";
+import { NextRequest } from "next/server";
 import { getRetriever } from "@/lib/LLM/getRetriever";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+const encoder = new TextEncoder();
 
-  let { token, query, namespace = "", indexName = PineconeIndexes.staticDocuments } = req.query;
+// https://developer.mozilla.org/docs/Web/API/ReadableStream#convert_async_iterator_to_stream
+function iteratorToStream(iterator: any) {
+  return new ReadableStream({
+    async pull(controller) {
+      const { value, done } = await iterator.next();
 
+      if (done) {
+        controller.close();
+      } else {
+        controller.enqueue(value);
+      }
+    },
+  });
+}
+
+async function* makeIterator({
+  token,
+  query,
+  namespace = "",
+  indexName = PineconeIndexes.staticDocuments,
+}: {
+  token: string;
+  query: string;
+  namespace: string;
+  indexName: string;
+}) {
   try {
     console.log("THE RAG INDEX NAME IS: ", indexName);
     console.log("THE RAG NAMESPACE IS: ", namespace);
-    const decodedToken = admin.auth().verifyIdToken(token as string);
-
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-    res.flushHeaders();
+    admin.auth().verifyIdToken(token as string);
 
     //TODO: TESTING PURPOSES REMOVE LATER:
     indexName = PineconeIndexes.staticDocuments;
@@ -42,11 +60,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // ********************************* INITIALIZING THE OPENAI AGENT ********************************* //
-
     type ConversationalRetrievalQAChainInput = {
       question: string;
       chat_history: [string, string][];
     };
+
     // The prompt has a question and chat_history parameter and we pass arguments to this chain which populates that data in the prompt
     // The parser is what the output of the LLM produces
     // This chain is used to generate a basic question based on the past conversation history
@@ -62,7 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       new StringOutputParser(),
     ]);
 
-    const { retriever } = await getRetriever(indexName,namespace);
+    const { retriever } = await getRetriever();
 
     let relevantDocs: langchainDocType[] = [];
     // When the sequence reaches the context step, it passes the refined question to the retriever, which automatically performs a semantic search.
@@ -84,7 +102,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const conversationalRetrievalQAChain =
       standaloneQuestionChain.pipe(answerChain);
 
-    console.log("Message from CHATGPT")
     for await (let chunk of await conversationalRetrievalQAChain.stream({
       question: query as string,
       chat_history: [
@@ -94,21 +111,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // ],
       ],
     })) {
-      res.write(`data: ${chunk.content}\n\n`);
+      yield encoder.encode(`${chunk.content}`);
     }
-
-    res.write(`data: [DONE]\n\n`);
-    res.end();
-
-    // return {
-    //   success: true,
-    //   error: null,
-    //   data: {
-    //     llmText: "Check server",
-    //     relevantDocs: langchainPineconeDtoToRelevantDocuments(relevantDocs),
-    //   },
-    // };
   } catch (error: unknown) {
     return apiErrorResponse(error);
   }
+}
+
+export async function POST(req: NextRequest, res: NextRequest) {
+  const iterator = makeIterator(await req.json());
+  const stream = iteratorToStream(iterator);
+
+  return new Response(stream);
 }

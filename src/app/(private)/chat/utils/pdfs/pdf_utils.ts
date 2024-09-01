@@ -1,14 +1,14 @@
 import { toast } from "@/components/ui/use-toast";
 import {
   elasticDtoToRelevantDocuments,
-  pineconeDtoToRelevantDocuments,
 } from "@/app/(private)/chat/api/documents/transform";
-import { fetchSemanticSearch } from "../../api/actions/fetchSemanticSearch";
 import { postWebUrl } from "@/lib/requests/postWebUrl";
 import { postSearchTerms } from "@/lib/requests/postSearchTerms";
 import { auth } from "@/lib/firebase/firebase";
 import { getDocumentText } from "@/lib/api/firebase_utils/getDocuments";
 import { RelevantDocument } from "../../types/RelevantDocument";
+import { fetchRelevantDocs } from "../../api/actions/fetchRelevantDocs";
+import { langchainDocType } from "@/models/schema";
 
 /**
  * Extracts URLs from a given text
@@ -117,7 +117,7 @@ export async function pdfSearch(
   try {
     const [keywordDocs, pineconeDocs] = await Promise.all([
       postSearchTerms(userQuery),
-      fetchSemanticSearch(
+      fetchRelevantDocs(
         (await auth?.currentUser?.getIdToken()) ?? "",
         userQuery,
         3,
@@ -126,10 +126,7 @@ export async function pdfSearch(
     ]);
 
     const searchedDocuments: RelevantDocument[] = [];
-    if (pineconeDocs?.success)
-      searchedDocuments.concat(
-        pineconeDtoToRelevantDocuments(pineconeDocs.data)
-      );
+    if (pineconeDocs?.success) searchedDocuments.concat(pineconeDocs.data);
     if (keywordDocs.success)
       searchedDocuments.concat(
         elasticDtoToRelevantDocuments(keywordDocs.data.elasticSearchResults)

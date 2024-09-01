@@ -39,7 +39,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "No matching conversation found" }, { status: 404 });
     }
     
-    await updateDoc(convoRef, { conversation, includedDocuments, title } )
+    await updateDoc(convoRef, { conversation, includedDocuments } )
     return NextResponse.json({ uid }, { status: 200 });
   } catch (error: any) {
     console.error("conversation uid: ", uid, error.message);
