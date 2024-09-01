@@ -4,11 +4,13 @@ import { useChatContext } from "../store/ChatContext";
 import useUpsertConversation from "../utils/firebase/upsertConversation";
 import { useFetchWithLLM } from "../utils/LLM/normal_LLM_utils";
 import { useFetchWithRag } from "../utils/LLM/fetchRAG";
+import { useFetchWithGraph } from "../utils/LLM/fetchGraph";
 import { pdfSearch } from "../utils/pdfs/pdf_utils";
 import { errorResponse } from "@/utils/utils";
 
 const useFetchQuery = () => {
-  const { fetchWithRag } = useFetchWithRag();
+  // const { fetchWithRag } = useFetchWithRag();
+  const { fetchWithGraph } = useFetchWithGraph();
   const { upsertConversation } = useUpsertConversation();
   const {
     setAlert,
@@ -69,11 +71,11 @@ const useFetchQuery = () => {
         );
 
         // 2. Call fetch with RAG
-        await fetchWithRag(fullConversation, queryInput);
+        await fetchWithGraph(fullConversation, queryInput);
       }
 
       // Concurrently gets the pdf documents and saves the conversation
-      fetchWithRag(fullConversation, queryInput).then(() => {
+      fetchWithGraph(fullConversation, queryInput).then(() => {
         // Always save the conversation after we generate the LLM response
         upsertConversation(fullConversation);
       }).catch((error:unknown)=>{

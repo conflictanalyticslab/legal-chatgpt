@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 
 import UploadDocument from "./UploadDocument/UploadDocument";
-import { FlowModal } from "../FlowGraph/FlowGraph";
+import { FlowModal } from "./FlowGraph/FlowGraph";
 import useFetchQuery from "../../hooks/useFetchQuery";
 import { useEffect } from "react";
 
