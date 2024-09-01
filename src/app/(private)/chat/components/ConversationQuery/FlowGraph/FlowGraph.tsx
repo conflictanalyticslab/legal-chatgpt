@@ -213,10 +213,10 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
       let source: Node | undefined = nodes.find((node) => node.id === edge.source);
       let target: Node | undefined = nodes.find((node) => node.id === edge.target);
       if (source && target) { // should always pass
-        queryArray.push([source.data.label, edge.label, target.data.label] as [string, string, string]);
+        queryArray.push([source.data.body, edge.data?.body, target.data.body] as [string, string, string]);
       }
     });
-    // setUserQuery(JSON.stringify(queryArray));
+    setUserQuery(JSON.stringify(queryArray));
   }
 
   useEffect(() => {
