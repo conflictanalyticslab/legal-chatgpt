@@ -56,9 +56,8 @@ const useFetchQuery = () => {
 
       // const llmMethod = enableRag ? fetchWithRag : fetchWithLLM;
 
+      setConversation(fullConversation);
       if (documentQueryMethod === DocumentQueryOptions.globalSearchValue) {
-        setConversation(fullConversation);
-
         // 1. Perform PDF Search to populate Pincone DB
         await pdfSearch(
           queryInput,
@@ -73,20 +72,15 @@ const useFetchQuery = () => {
       }
 
       // Concurrently gets the pdf documents and saves the conversation
-      fetchWithRag(fullConversation, queryInput).then(() => {
-        // Always save the conversation after we generate the LLM response
-        upsertConversation(fullConversation);
-      }).catch((error:unknown)=>{
-        setInfoAlert(errorResponse(error))
-      });
+      fetchWithRag(fullConversation, queryInput)
+        .then(() => {
+          // Always save the conversation after we generate the LLM response
+          upsertConversation(fullConversation);
+        })
+        .catch((error: unknown) => {
+          setInfoAlert(errorResponse(error));
+        });
 
-      // await pdfSearch(
-      //   queryInput,
-      //   namespace,
-      //   setRelevantDocs,
-      //   setPdfLoading,
-      //   setInfoAlert
-      // );
     } catch (error: any) {
       setInfoAlert(errorResponse(error));
       setLoading(false);

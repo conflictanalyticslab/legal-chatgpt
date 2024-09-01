@@ -78,9 +78,11 @@ export const ChatContextProvider = ({ children }) => {
    */
   const stopQuery = (event) => {
     if (enableRag) return;
-
+    console.log("we stopp this bich")
     event.preventDefault();
     generateFlagRef.current = false;
+    setLoading(false);
+    setPdfLoading(false);
   };
 
   return (

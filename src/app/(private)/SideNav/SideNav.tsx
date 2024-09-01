@@ -22,7 +22,7 @@ export default function SideNav() {
       className={cn(
         "relative transition-all flex flex-col w-[60px] border-r-[#e2e8f0] duration-300 ease-in-out h-screen overflow-auto scrollbar-thin",
         {
-          "w-[350px] shadow-2": isNavOpen,
+          "w-[350px] shadow-3": isNavOpen,
         }
       )}
     >
