@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/utils";
 import { LogOut, PanelRightClose } from "lucide-react";
 import { useState } from "react";
-import ChatHistory from "../chat/components/ChatOptions/components/ChatHistory";
+import ChatHistory from "../ChatOptions/components/ChatHistory";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/firebase";
 import { useRouter } from "next/navigation";
