@@ -1,14 +1,13 @@
 import { auth } from "@/lib/firebase/firebase";
-import { DocumentQueryOptions } from "../enum/enums";
+import { DocumentQueryOptions, PineconeNamespaces } from "../enum/enums";
 import { useChatContext } from "../store/ChatContext";
 import useUpsertConversation from "../utils/firebase/upsertConversation";
 import { useFetchWithLLM } from "../utils/LLM/normal_LLM_utils";
-import { useFetchWithRag } from "../utils/LLM/fetchRAG";
-import { pdfSearch } from "../utils/pdfs/pdf_utils";
+import { useFetchLLMResponse } from "../utils/LLM/useFetchLLMResponse";
 import { errorResponse } from "@/utils/utils";
 
 const useFetchQuery = () => {
-  const { fetchWithRag } = useFetchWithRag();
+  const { fetchLLMResponse } = useFetchLLMResponse();
   const { upsertConversation } = useUpsertConversation();
   const {
     setAlert,
@@ -16,13 +15,11 @@ const useFetchQuery = () => {
     setPdfLoading,
     setLoading,
     setUserQuery,
-    documentQueryMethod,
     setConversation,
     conversation,
     setInfoAlert,
-    namespace,
-    setRelevantDocs,
     handleBeforeUnload,
+    includedDocuments
   } = useChatContext();
 
   const fetchQuery = async (queryInput: string) => {
@@ -39,6 +36,7 @@ const useFetchQuery = () => {
     setPdfLoading(true);
     setUserQuery("");
 
+    // Prompts the user from leaving the page before the conversation is complete
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     try {
@@ -54,33 +52,14 @@ const useFetchQuery = () => {
         },
       ]);
 
-      // const llmMethod = enableRag ? fetchWithRag : fetchWithLLM;
-
+      // Displays the user's query first
       setConversation(fullConversation);
-      if (documentQueryMethod === DocumentQueryOptions.globalSearchValue) {
-        // 1. Perform PDF Search to populate Pincone DB
-        await pdfSearch(
-          queryInput,
-          namespace,
-          setRelevantDocs,
-          setPdfLoading,
-          setInfoAlert
-        );
 
-        // 2. Call fetch with RAG
-        await fetchWithRag(fullConversation, queryInput);
-      }
+      // Calls LLM to generate response to query
+      await fetchLLMResponse(fullConversation, queryInput, includedDocuments);
 
-      // Concurrently gets the pdf documents and saves the conversation
-      fetchWithRag(fullConversation, queryInput)
-        .then(() => {
-          // Always save the conversation after we generate the LLM response
-          upsertConversation(fullConversation);
-        })
-        .catch((error: unknown) => {
-          setInfoAlert(errorResponse(error));
-        });
-
+      // Save or update the conversation after calling
+      upsertConversation(fullConversation);
     } catch (error: any) {
       setInfoAlert(errorResponse(error));
       setLoading(false);

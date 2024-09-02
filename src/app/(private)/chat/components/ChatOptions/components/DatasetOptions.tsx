@@ -1,5 +1,5 @@
 import React from "react";
-import { DatasetSelection } from "./RagToggle/components/DatasetSelection";
+import { DatasetSelection } from "./DatasetSelection";
 
 export default function DatasetOptions() {
   return (

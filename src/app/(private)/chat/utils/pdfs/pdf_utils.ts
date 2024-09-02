@@ -1,14 +1,9 @@
 import { toast } from "@/components/ui/use-toast";
-import {
-  elasticDtoToRelevantDocuments,
-} from "@/app/(private)/chat/api/documents/transform";
+import { elasticDtoToRelevantDocuments } from "@/app/(private)/chat/api/documents/transform";
 import { postWebUrl } from "@/lib/requests/postWebUrl";
-import { postSearchTerms } from "@/lib/requests/postSearchTerms";
 import { auth } from "@/lib/firebase/firebase";
 import { getDocumentText } from "@/lib/api/firebase_utils/getDocuments";
-import { RelevantDocument } from "../../types/RelevantDocument";
-import { fetchRelevantDocs } from "../../api/actions/fetchRelevantDocs";
-import { langchainDocType } from "@/models/schema";
+import { UploadedDocument } from "@/types/Document";
 
 /**
  * Extracts URLs from a given text
@@ -69,7 +64,6 @@ export async function scrapePDFContent(
       urlContent = await postWebUrl(url);
       urlContentUserInput = urlContentUserInput.replace(url, urlContent.text);
     } catch (error: any) {
-      console.error(error);
       if (error.message.includes("400")) {
         console.log(error.status);
         toast({
@@ -96,80 +90,31 @@ export async function scrapePDFContent(
 }
 
 /**
- * Retrieve relevant pdfs from either CourtListener or Static PDFs from Pinecone
- *
- * Note: since we are only doing either CourtListener or Static Semantic PDF search frrom Pinecone we don't need to specify the index name
- *
- * @param documentQueryMethod
- * @param userQuery
- * @param namespace
- * @param setRelevantDocs
- * @param setPdfLoading
- * @param setInfoAlert
- */
-export async function pdfSearch(
-  userQuery: string,
-  namespace: string,
-  setRelevantDocs: any,
-  setPdfLoading: any,
-  setInfoAlert: any
-) {
-  try {
-    const [keywordDocs, pineconeDocs] = await Promise.all([
-      postSearchTerms(userQuery),
-      fetchRelevantDocs(
-        (await auth?.currentUser?.getIdToken()) ?? "",
-        userQuery,
-        3,
-        namespace
-      ),
-    ]);
-
-    const searchedDocuments: RelevantDocument[] = [];
-    if (pineconeDocs?.success) searchedDocuments.concat(pineconeDocs.data);
-    if (keywordDocs.success)
-      searchedDocuments.concat(
-        elasticDtoToRelevantDocuments(keywordDocs.data.elasticSearchResults)
-      );
-
-    setRelevantDocs(searchedDocuments);
-    // else if(documentQueryMethod === DocumentQueryOptions.globalSearchValue) {
-    //   console.log("global")
-
-    //   // Global Search Documents
-    //   const similarDocs = await fetchGlobalDocuments(userQuery, auth)
-    //   setRelevantDocs(globalSearchAPIDtoToRelevantDocuments(similarDocs));
-    // }
-  } catch (e) {
-    console.log("Failed to fetch global documents", e);
-    setRelevantDocs([]);
-    throw "Failed to fetch documents.";
-  } finally {
-    setPdfLoading(false);
-  }
-}
-
-/**
- * Gathers all of the document text content that the user selects
+ * Gathers all of the document text content and formats the text to be used in the prompt
  *
  * @param includedDocuments list of ids that the user wants to include in the query
  * @returns
  */
 export async function createDocumentPrompt(includedDocuments: string[]) {
-  // Fetches documents from firebase
-  const documents = await getDocumentText(
-    (await auth?.currentUser?.getIdToken()) ?? "",
-    includedDocuments
-  );
-  if (!documents || documents instanceof Error) {
-    console.log(documents);
+  try {
+    // Fetches documents from firebase
+    const documents = await getDocumentText(includedDocuments);
+
+    if (!documents.success || !documents.data)
+      throw new Error("Failed to upload document text");
+
+    // Return back the raw text of the document
+    return (
+      "Here are some additional legal documents you can reference.\n\n" +
+      documents.data
+        .map(
+          (doc: UploadedDocument) =>
+            `Document Name: ${doc.name}.\nDocument Text: ${doc.text}`
+        )
+        .join("\n\n")
+    );
+  } catch (error: unknown) {
+    console.log("Error in fetching document content from Firebase");
     return "";
   }
-
-  return (
-    "Here are some legal documents you can reference.\n\n" +
-    documents
-      .map((doc) => `Document Name: ${doc.name}.\nDocument Text: ${doc.text}`)
-      .join("\n\n")
-  );
 }

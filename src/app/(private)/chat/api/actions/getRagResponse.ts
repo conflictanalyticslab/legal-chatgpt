@@ -11,27 +11,30 @@ import {
 import { formatChatHistory, formatDocumentsAsString } from "@/lib/LLM/utils";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { langchainPineconeDtoToRelevantDocuments } from "../documents/transform";
-import { langchainDocType } from "@/models/schema";
+import { LangchainDocType } from "@/models/schema";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getRetriever } from "@/lib/LLM/getRetriever";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-
-  let { token, query, namespace = "", indexName = PineconeIndexes.staticDocuments } = req.query;
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  let {
+    token,
+    query,
+    namespace = "",
+    indexName = PineconeIndexes.staticDocuments,
+  } = req.query;
 
   try {
     console.log("THE RAG INDEX NAME IS: ", indexName);
     console.log("THE RAG NAMESPACE IS: ", namespace);
-    const decodedToken = admin.auth().verifyIdToken(token as string);
+    admin.auth().verifyIdToken(token as string);
 
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
     res.flushHeaders();
-
-    //TODO: TESTING PURPOSES REMOVE LATER:
-    indexName = PineconeIndexes.staticDocuments;
-    namespace = "australian_law";
 
     // ********************************* LLM INITIALIZATION ********************************* //
     const llm = new ChatOpenAI({
@@ -62,16 +65,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       new StringOutputParser(),
     ]);
 
-    const { retriever } = await getRetriever(indexName,namespace);
+    const { retriever } = await getRetriever(
+      indexName as string,
+      namespace as string
+    );
 
-    let relevantDocs: langchainDocType[] = [];
+    let relevantDocs: LangchainDocType[] = [];
     // When the sequence reaches the context step, it passes the refined question to the retriever, which automatically performs a semantic search.
     // This chain is used to generate the answer from the LLM using the past conversation information
     const answerChain = RunnableSequence.from([
       {
         context: async (input) => {
           // Invoke the retriever and capture the results
-          relevantDocs = (await retriever.invoke(input)) as langchainDocType[];
+          relevantDocs = (await retriever.invoke(input)) as LangchainDocType[];
           // Format the documents as a string for the next step in the sequence
           return formatDocumentsAsString(relevantDocs);
         },
@@ -84,7 +90,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const conversationalRetrievalQAChain =
       standaloneQuestionChain.pipe(answerChain);
 
-    console.log("Message from CHATGPT")
+    console.log("Message from CHATGPT");
     for await (let chunk of await conversationalRetrievalQAChain.stream({
       question: query as string,
       chat_history: [

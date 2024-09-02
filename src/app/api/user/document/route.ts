@@ -90,7 +90,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // console.log("route.ts POST /api/user/document, now creating new document")
 
   const newDoc = await newDocument(docText, file.name, decodedToken.user_id);
 

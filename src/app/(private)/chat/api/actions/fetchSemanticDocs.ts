@@ -1,17 +1,14 @@
 "use server";
-import { Pinecone } from "@pinecone-database/pinecone";
-import { Embedder } from "@/app/(private)/chat/utils/embeddings/embeddings";
-import { TextMetadata } from "@/types/chat";
 import { PineconeIndexes } from "../../enum/enums";
 import admin from "firebase-admin";
 import { apiErrorResponse } from "@/utils/utils";
 import { ChatOpenAI } from "@langchain/openai";
 import { langchainPineconeDtoToRelevantDocuments } from "../documents/transform";
-import { langchainDocType } from "@/models/schema";
+import { LangchainDocType } from "@/models/schema";
 import { getRetriever } from "@/lib/LLM/getRetriever";
 
 /**
- * Server Actio
+ * fe
  *
  * @param query
  * @param topK
@@ -19,7 +16,7 @@ import { getRetriever } from "@/lib/LLM/getRetriever";
  * @param indexName
  * @returns
  */
-export async function fetchRelevantDocs(
+export async function fetchSemanticDocs(
   token: string,
   query: string,
   topK: number = 3,
@@ -29,6 +26,8 @@ export async function fetchRelevantDocs(
   try {
     console.log("THE SEMANTIC INDEX NAME IS: ", indexName);
     console.log("THE SEMANTIC NAMESPACE IS: ", namespace);
+   
+    // Authenticate User
     admin.auth().verifyIdToken(token);
 
     return {
@@ -48,8 +47,8 @@ export async function retrieveDocs(
   topK: number
 ) {
   const { retriever } = await getRetriever(indexName, namespace, topK);
+
   // Query the index using the query embedding
-  const data = langchainPineconeDtoToRelevantDocuments(await retriever.invoke(query) as langchainDocType[]);
-  console.log("this is the data",  data)
+  const data = langchainPineconeDtoToRelevantDocuments(await retriever.invoke(query) as LangchainDocType[]);
   return data
 }

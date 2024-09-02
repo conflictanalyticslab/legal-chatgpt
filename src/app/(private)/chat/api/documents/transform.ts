@@ -3,7 +3,7 @@ import { QueryResponse } from "@pinecone-database/pinecone";
 import { TextMetadata } from "@/types/chat";
 import { RelevantDocument } from "../../types/RelevantDocument";
 import { z } from "zod";
-import { langchainDocType } from "@/models/schema";
+import { LangchainDocType } from "@/models/schema";
 
 export function globalSearchAPIDtoToRelevantDocuments(pineconeDtos: any[]) {
   const hashMap = [];
@@ -48,7 +48,7 @@ export function pineconeDtoToRelevantDocuments(
 }
 
 export function langchainPineconeDtoToRelevantDocuments(
-  langchainDtos: langchainDocType[] | null
+  langchainDtos: LangchainDocType[] | null
 ) {
   if(!langchainDtos) return []
 

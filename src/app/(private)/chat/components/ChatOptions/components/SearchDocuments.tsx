@@ -19,20 +19,17 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useChatContext } from "../../../store/ChatContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { pdfSearch } from "@/app/(private)/chat/utils/pdfs/pdf_utils";
+import { usePdfSearch } from "../../../hooks/usePdfSearch";
 
 const SearchDocuments = () => {
   const {
     relevantDocs,
-    setRelevantDocs,
     documentQuery,
     setDocumentQuery,
     namespace,
-    documentQueryMethod,
     pdfLoading,
-    setPdfLoading,
-    setInfoAlert,
   } = useChatContext();
+  const { pdfSearch } = usePdfSearch();
 
   const formSchema = z.object({
     documentQuery: z
@@ -52,15 +49,8 @@ const SearchDocuments = () => {
 
   const handleSearchDocuments = async (form: z.infer<typeof formSchema>) => {
     if (pdfLoading) return;
-    setPdfLoading(true);
     // Chooses which method we are using to query for the pdf
-    pdfSearch(
-      documentQuery,
-      namespace,
-      setRelevantDocs,
-      setPdfLoading,
-      setInfoAlert
-    );
+    pdfSearch(documentQuery, namespace);
   };
 
   return (
@@ -68,7 +58,10 @@ const SearchDocuments = () => {
       <div className="flex flex-col gap-3">
         <h2 className="text-xl text-center font-bold">Search Documents</h2>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSearchDocuments)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(handleSearchDocuments)}
+            className="space-y-8"
+          >
             <FormField
               control={form.control}
               name="documentQuery"
@@ -111,12 +104,16 @@ const SearchDocuments = () => {
             <Card key={i} className="bg-[#f8f8f8]">
               <a href={doc.url} target="_blank" className="cursor-pointer">
                 <CardHeader className="pt-4 pb-2 px-6">
-                  <CardTitle className="font-bold text-md truncate">{doc.fileName}</CardTitle>
+                  <CardTitle className="font-bold text-md truncate">
+                    {doc.fileName}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-2">
                   <div className="flex flex-col">
                     <Label className="font-normal">URL:</Label>
-                    <output className="text-[#0000EE] truncate text-xs">{doc.url}</output>
+                    <output className="text-[#0000EE] truncate text-xs">
+                      {doc.url}
+                    </output>
                   </div>
                   <div className="flex flex-col">
                     <Label className="font-normal">Abstract</Label>
