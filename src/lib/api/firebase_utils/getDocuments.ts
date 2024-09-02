@@ -1,6 +1,8 @@
 "use server";
 import { getFirestore } from "firebase-admin/firestore";
 import admin from "firebase-admin";
+import { apiErrorResponse, ApiResponse } from "@/utils/utils";
+import { UploadedDocument } from "@/types/Document";
 
 /**
  * Retrieves relevant firestore documents
@@ -8,24 +10,22 @@ import admin from "firebase-admin";
  * @returns returns back a snapshot of the queried documents
  */
 export async function getDocumentText(
-  token: string,
   documentIds: string[]
-): Promise<{ name: string; text: string }[] | Error> {
-  try {
-    const decodedToken = admin.auth().verifyIdToken(token);
-
-    if (!documentIds || documentIds.length === 0) {
-      return [];
-    }
-
-    const querySnapshot = await getFirestore().getAll(
-      ...documentIds.map((id) => getFirestore().doc(`documents/${id}`))
-    );
-
-    return querySnapshot
-      .map((doc) => doc.data() || null)
-      .filter((doc) => doc != null) as any;
-  } catch (error) {
-    return new Error("Invalid Credentials");
+): Promise<ApiResponse<UploadedDocument[]>> {
+  if (!documentIds || documentIds.length === 0) {
+    return { success: true, error: null, data: [] };
   }
+
+  const querySnapshot = await getFirestore().getAll(
+    ...documentIds.map((id) => getFirestore().doc(`documents/${id}`))
+  );
+
+  return {
+    success: true,
+    error: null,
+    data:
+      (querySnapshot
+        .map((doc) => doc.data() || null)
+        .filter((doc) => doc != null) as UploadedDocument[]) ?? [],
+  };
 }

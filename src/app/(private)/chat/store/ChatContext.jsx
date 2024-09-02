@@ -1,6 +1,6 @@
 "use client";
-import { createContext, useContext, useRef, useState } from "react";
-import { ChatAction } from "../enum/enums";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { ChatAction, PineconeIndexes, PineconeNamespaces } from "../enum/enums";
 
 // Create a context
 const ChatContext = createContext();
@@ -9,13 +9,11 @@ export const ChatContextProvider = ({ children }) => {
   const [state, setState] = useState("default value");
   const [relevantDocs, setRelevantDocs] = useState([]);
   const [documentQuery, setDocumentQuery] = useState("");
-  const [enableRag, setEnableRag] = useState(false);
   const [ragConversation, setRagConversation] = useState([]);
-  const [namespace, setNamespace] = useState("");
+  const [namespace, setNamespace] = useState(PineconeNamespaces.canadian_law);
   const [userQuery, setUserQuery] = useState("");
   const [generateFlag, setGenerateFlag] = useState(true);
   const [loadingPDF, setLoadingPDF] = useState(false);
-  const [documentQueryMethod, setDocumentQueryMethod] = useState("elastic");
   const [loading, setLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const generateFlagRef = useRef(generateFlag);
@@ -23,7 +21,7 @@ export const ChatContextProvider = ({ children }) => {
   const [conversationId, setConversationId] = useState("");
   const [alert, setAlert] = useState("");
   const [infoAlert, setInfoAlert] = useState("");
-  const [indexName, setIndexName] = useState("legal-pdf-documents");
+  const [indexName, setIndexName] = useState(PineconeIndexes.staticDocuments);
   const [documents, setDocuments] = useState([]);
   const [showStartupImage, setShowStartupImage] = useState(true);
   const [includedDocuments, setIncludedDocuments] = useState([]);
@@ -57,17 +55,10 @@ export const ChatContextProvider = ({ children }) => {
   };
 
   // Sets the appropriate local storage settings when toggling between elastic and keyword search
-  const handleChangeDocumentQueryMethod = (queryMethod) => {
-    setDocumentQueryMethod(queryMethod);
-    localStorage.setItem(
-      "documentQueryPrevChoice",
-      JSON.stringify(queryMethod)
-    );
-  };
-
-  const handleEnableRag = (value) => {
-    setEnableRag(value);
-    localStorage.setItem("enableRag", JSON.stringify(value));
+  const restoreUserPreferences = () => {
+    const namespacePref = localStorage.getItem("namespace");
+    if (!namespacePref) return;
+    setNamespace(JSON.parse(namespacePref));
   };
 
   /**
@@ -77,13 +68,15 @@ export const ChatContextProvider = ({ children }) => {
    * @returns
    */
   const stopQuery = (event) => {
-    if (enableRag) return;
-    console.log("we stopp this bich")
     event.preventDefault();
     generateFlagRef.current = false;
     setLoading(false);
     setPdfLoading(false);
   };
+
+  useEffect(() => {
+    restoreUserPreferences();
+  }, []);
 
   return (
     <ChatContext.Provider
@@ -94,8 +87,6 @@ export const ChatContextProvider = ({ children }) => {
         setRelevantDocs,
         documentQuery,
         setDocumentQuery,
-        enableRag,
-        setEnableRag,
         ragConversation,
         setRagConversation,
         namespace,
@@ -107,8 +98,6 @@ export const ChatContextProvider = ({ children }) => {
         generateFlagRef,
         loadingPDF,
         setLoadingPDF,
-        documentQueryMethod,
-        setDocumentQueryMethod,
         alert,
         setAlert,
         loading,
@@ -141,13 +130,12 @@ export const ChatContextProvider = ({ children }) => {
         setNum,
         deleteDocumentChat,
         handleBeforeUnload,
-        handleChangeDocumentQueryMethod,
-        handleEnableRag,
         stopQuery,
         scrollIntoViewRef,
         chatAction,
         setChatAction,
-        setUser
+        setUser,
+        user,
       }}
     >
       {children}

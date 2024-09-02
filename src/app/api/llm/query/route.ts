@@ -9,14 +9,20 @@ import {
 } from "@langchain/core/runnables";
 import { formatChatHistory, formatDocumentsAsString } from "@/lib/LLM/utils";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import { langchainDocType } from "@/models/schema";
+import { LangchainDocType } from "@/models/schema";
 import { PineconeIndexes } from "@/app/(private)/chat/enum/enums";
 import { NextRequest } from "next/server";
 import { getRetriever } from "@/lib/LLM/getRetriever";
+import { Conversation, ConversationalRetrievalQAChainInput } from "@/types/chat";
+import { createDocumentPrompt } from "@/app/(private)/chat/utils/pdfs/pdf_utils";
 
-const encoder = new TextEncoder();
 
-// https://developer.mozilla.org/docs/Web/API/ReadableStream#convert_async_iterator_to_stream
+/**
+ * Converts the LLM response to a streamed response for the client 
+ * https://developer.mozilla.org/docs/Web/API/ReadableStream#convert_async_iterator_to_stream
+ * @param iterator
+ * @returns
+ */
 function iteratorToStream(iterator: any) {
   return new ReadableStream({
     async pull(controller) {
@@ -36,20 +42,18 @@ async function* makeIterator({
   query,
   namespace = "",
   indexName = PineconeIndexes.staticDocuments,
+  fullConversation = [],
+  includedDocuments,
 }: {
   token: string;
   query: string;
   namespace: string;
   indexName: string;
+  fullConversation: Conversation[];
+  includedDocuments: string[]
 }) {
   try {
-    console.log("THE RAG INDEX NAME IS: ", indexName);
-    console.log("THE RAG NAMESPACE IS: ", namespace);
     admin.auth().verifyIdToken(token as string);
-
-    //TODO: TESTING PURPOSES REMOVE LATER:
-    indexName = PineconeIndexes.staticDocuments;
-    namespace = "australian_law";
 
     // ********************************* LLM INITIALIZATION ********************************* //
     const llm = new ChatOpenAI({
@@ -60,10 +64,6 @@ async function* makeIterator({
     });
 
     // ********************************* INITIALIZING THE OPENAI AGENT ********************************* //
-    type ConversationalRetrievalQAChainInput = {
-      question: string;
-      chat_history: [string, string][];
-    };
 
     // The prompt has a question and chat_history parameter and we pass arguments to this chain which populates that data in the prompt
     // The parser is what the output of the LLM produces
@@ -80,18 +80,23 @@ async function* makeIterator({
       new StringOutputParser(),
     ]);
 
-    const { retriever } = await getRetriever();
+    // Langchain document retriever which does semantic search for documents
+    const { retriever } = await getRetriever(indexName, namespace, 3);
 
-    let relevantDocs: langchainDocType[] = [];
     // When the sequence reaches the context step, it passes the refined question to the retriever, which automatically performs a semantic search.
     // This chain is used to generate the answer from the LLM using the past conversation information
     const answerChain = RunnableSequence.from([
       {
+        // 'context' is a variable in our prompt, the callback function value is what is passed into the prompt
         context: async (input) => {
-          // Invoke the retriever and capture the results
-          relevantDocs = (await retriever.invoke(input)) as langchainDocType[];
-          // Format the documents as a string for the next step in the sequence
-          return formatDocumentsAsString(relevantDocs);
+          // Retrieve documents from Pinecone and format the documents as a string for the prompt
+          const semanticDocsResponse = retriever.invoke(input);
+          const uploadedDocResponse = createDocumentPrompt(includedDocuments);
+          const [semanticDocs, uploadedDocs] = await Promise.all([semanticDocsResponse, uploadedDocResponse])
+
+          // Combines both the semantic searched docs with the uploaded document content
+          const docData = formatDocumentsAsString(semanticDocs as LangchainDocType[]) + "\n\n" + uploadedDocs;
+          return docData;
         },
         question: new RunnablePassthrough(),
       },
@@ -99,17 +104,15 @@ async function* makeIterator({
       llm,
     ]);
 
+    // Consolidate the standalone question chain and answer chain into one
     const conversationalRetrievalQAChain =
       standaloneQuestionChain.pipe(answerChain);
 
+    const encoder = new TextEncoder();
+
     for await (let chunk of await conversationalRetrievalQAChain.stream({
-      question: query as string,
-      chat_history: [
-        // [
-        //   "What is the powerhouse of the cell?",
-        //   "The powerhouse of the cell is the mitochondria.",
-        // ],
-      ],
+      question: query,
+      chat_history: fullConversation,
     })) {
       yield encoder.encode(`${chunk.content}`);
     }

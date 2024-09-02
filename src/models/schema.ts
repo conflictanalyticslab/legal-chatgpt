@@ -49,4 +49,4 @@ export const langchainDoc = z.object({
   }),
 });
 
-export type langchainDocType = z.infer<typeof langchainDoc>;
+export type LangchainDocType = z.infer<typeof langchainDoc>;
