@@ -1,3 +1,4 @@
+import { metadata } from "@/app/layout";
 import { validEmailRegex } from "@/lib/signup/validEmailRegex";
 import { z, ZodType } from "zod";
 
@@ -38,3 +39,14 @@ export const signupSchema = z
       });
     }
   });
+
+export const langchainDoc = z.object({
+  pageContent: z.string(),
+  metadata: z.object({
+    chunk: z.number(),
+    fileName: z.string(),
+    url: z.string(),
+  }),
+});
+
+export type LangchainDocType = z.infer<typeof langchainDoc>;

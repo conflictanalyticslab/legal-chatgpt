@@ -2,7 +2,6 @@ import { Card } from "@/components/ui/card";
 import { useChatContext } from "../../store/ChatContext";
 import { cn } from "@/utils/utils";
 import ReactMarkdown from "react-markdown";
-import ChatOptions from "../ChatOptions/ChatOptions";
 
 export function Conversation() {
   const { conversation, latestResponse, loading, scrollIntoViewRef } =
@@ -16,7 +15,7 @@ export function Conversation() {
       )}
     >
 
-      <div className="w-chat mx-auto flex flex-col gap-5 items-end">
+      <div className="w-chat mx-auto flex flex-col gap-[3.25rem] items-end">
         {conversation && conversation.map((convoObj: any, i: number) => (
           <Card
             key={i}

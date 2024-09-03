@@ -1,4 +1,4 @@
-import { useChatContext } from "../../store/ChatContext"
+import { useChatContext } from "../../store/ChatContext";
 
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
@@ -11,16 +11,9 @@ import useFetchQuery from "../../hooks/useFetchQuery";
 import { useEffect } from "react";
 
 export function ConversationQuery() {
-  const {
-    enableRag,
-    loading,
-    userQuery,
-    setUserQuery,
-    num,
-    stopQuery,
-  } = useChatContext();
+  const { loading, userQuery, setUserQuery, num, stopQuery } = useChatContext();
 
-  const {fetchQuery} = useFetchQuery()
+  const { fetchQuery } = useFetchQuery();
   /**
    * Submits the user's query
    * To Do: make it so that handle submit only calls the LLM output so we don't have to wait until all the other proccess are complete before generating output
@@ -38,7 +31,7 @@ export function ConversationQuery() {
       onSubmit={handleSubmit}
     >
       <div className="relative">
-        <UploadDocument/> 
+        <UploadDocument />
 
         <FlowModal setUserQuery={setUserQuery}/>
 
@@ -50,20 +43,16 @@ export function ConversationQuery() {
         />
         {loading ? (
           <Button
-            className="absolute right-0 top-[50%] translate-y-[-50%]"
+            className="absolute right-2 top-[50%] translate-y-[-50%]"
             variant={"ghost"}
             onClick={stopQuery}
           >
-            {enableRag ? (
-              <LoadingSpinner />
-            ) : (
-              <Image
-                src="/assets/icons/pause.svg"
-                alt="pause"
-                width={20}
-                height={20}
-              />
-            )}
+            <Image
+              src="/assets/icons/pause.svg"
+              alt="pause"
+              width={20}
+              height={20}
+            />
           </Button>
         ) : (
           <Button

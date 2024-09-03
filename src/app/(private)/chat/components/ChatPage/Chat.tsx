@@ -40,7 +40,6 @@ export function Chat() {
   const {
     alert,
     setAlert,
-    setEnableRag,
     setDocumentQueryMethod,
     setConversationTitles,
     setConversationId,
@@ -131,14 +130,12 @@ export function Chat() {
   };
 
   /**
-   * Resets all of the previously selected options for the chatbox
+   * Resets all of the previously selected options for dataset options
    */
   useEffect(() => {
-    const enableRagStatus = localStorage.getItem("enableRag");
-    const documentQueryChoice = localStorage.getItem("documentQueryPrevChoice");
-    if (enableRagStatus) setEnableRag(JSON.parse(enableRagStatus));
-    if (documentQueryChoice)
-      setDocumentQueryMethod(JSON.parse(documentQueryChoice));
+    // const documentQuerChoice = localStorage.getItem("documentQueryPrevChoice");
+    // if (documentQueryChoice)
+    //   setDocumentQueryMethod(JSON.parse(documentQueryChoice));
   }, []);
 
   return (

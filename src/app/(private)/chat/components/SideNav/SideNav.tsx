@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/utils";
 import { LogOut, PanelRightClose } from "lucide-react";
 import { useState } from "react";
-import ChatHistory from "../chat/components/ChatOptions/components/ChatHistory";
+import ChatHistory from "../ChatOptions/components/ChatHistory";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/firebase";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,7 @@ export default function SideNav() {
       className={cn(
         "relative transition-all flex flex-col w-[60px] border-r-[#e2e8f0] duration-300 ease-in-out h-screen overflow-auto scrollbar-thin",
         {
-          "w-[350px] shadow-2": isNavOpen,
+          "w-[350px] shadow-3": isNavOpen,
         }
       )}
     >

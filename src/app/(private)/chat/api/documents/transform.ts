@@ -2,6 +2,8 @@ import { ElasticDocument } from "./elasticDto";
 import { QueryResponse } from "@pinecone-database/pinecone";
 import { TextMetadata } from "@/types/chat";
 import { RelevantDocument } from "../../types/RelevantDocument";
+import { z } from "zod";
+import { LangchainDocType } from "@/models/schema";
 
 export function globalSearchAPIDtoToRelevantDocuments(pineconeDtos: any[]) {
   const hashMap = [];
@@ -46,11 +48,10 @@ export function pineconeDtoToRelevantDocuments(
 }
 
 export function langchainPineconeDtoToRelevantDocuments(
-  langchainDtos: {
-    pageContent: string;
-    metadata: { chunk: number; fileName: string; url: string };
-  }[]
+  langchainDtos: LangchainDocType[] | null
 ) {
+  if(!langchainDtos) return []
+
   const hashMap = {};
   const transformedDtos: RelevantDocument[] = [];
 

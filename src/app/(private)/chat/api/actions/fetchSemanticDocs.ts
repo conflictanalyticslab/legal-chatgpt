@@ -1,13 +1,14 @@
 "use server";
-import { Pinecone } from "@pinecone-database/pinecone";
-import { Embedder } from "@/app/(private)/chat/utils/embeddings/embeddings";
-import { TextMetadata } from "@/types/chat";
 import { PineconeIndexes } from "../../enum/enums";
 import admin from "firebase-admin";
 import { apiErrorResponse } from "@/utils/utils";
+import { ChatOpenAI } from "@langchain/openai";
+import { langchainPineconeDtoToRelevantDocuments } from "../documents/transform";
+import { LangchainDocType } from "@/models/schema";
+import { getRetriever } from "@/lib/LLM/getRetriever";
 
 /**
- * Server Actio
+ * fe
  *
  * @param query
  * @param topK
@@ -15,7 +16,7 @@ import { apiErrorResponse } from "@/utils/utils";
  * @param indexName
  * @returns
  */
-export async function fetchSemanticSearch(
+export async function fetchSemanticDocs(
   token: string,
   query: string,
   topK: number = 3,
@@ -25,7 +26,9 @@ export async function fetchSemanticSearch(
   try {
     console.log("THE SEMANTIC INDEX NAME IS: ", indexName);
     console.log("THE SEMANTIC NAMESPACE IS: ", namespace);
-    const decodedToken = admin.auth().verifyIdToken(token);
+   
+    // Authenticate User
+    admin.auth().verifyIdToken(token);
 
     return {
       success: true,
@@ -43,21 +46,9 @@ export async function retrieveDocs(
   namespace: string,
   topK: number
 ) {
-  const pinecone = new Pinecone({
-    apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY || "",
-  });
-
-  const index = pinecone.index<TextMetadata>(indexName).namespace(namespace);
-  await Embedder.init();
-
-  // Embed the query
-  const queryEmbedding = await Embedder.embed(query);
+  const { retriever } = await getRetriever(indexName, namespace, topK);
 
   // Query the index using the query embedding
-  return await index.query({
-    vector: queryEmbedding.embeddings,
-    topK,
-    includeMetadata: true,
-    includeValues: false,
-  });
+  const data = langchainPineconeDtoToRelevantDocuments(await retriever.invoke(query) as LangchainDocType[]);
+  return data
 }

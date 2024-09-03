@@ -21,8 +21,7 @@ import { uploadPdfDocument } from "@/lib/requests/uploadPdfDocument";
 
 export default function UploadDocument() {
   const {
-    enableRag,
-    setAlert,
+    setInfoAlert,
     documents,
     setDocuments,
     includedDocuments,
@@ -45,8 +44,7 @@ export default function UploadDocument() {
       setLoadingPDF(true);
     },
     onFilesRejected: ({ errors }) => {
-      console.log(errors);
-      setAlert("File is too big. We have a 5 Mb limit.");
+      setInfoAlert("File is too big. We have a 5 Mb limit.");
       setLoadingPDF(false);
     },
     onFilesSuccessfullySelected: async ({ plainFiles }: any) => {
@@ -55,8 +53,7 @@ export default function UploadDocument() {
   });
 
   function handleUploadFile() {
-    if (enableRag || loadingPDF) return;
-
+    if (loadingPDF) return;
     openFilePicker();
   }
 
@@ -127,7 +124,7 @@ export default function UploadDocument() {
             variant="ghost"
             className={cn(
               "hover:bg-[#E2E8F0] bg-[transparent] h-[56px] w-[56px] absolute left-[-70px]",
-              { "opacity-[0.5] cursor-not-allowed": enableRag || loadingPDF }
+              { "opacity-[0.5] cursor-not-allowed": loadingPDF }
             )}
             type="button"
             aria-label="Attach PDF"
@@ -140,11 +137,7 @@ export default function UploadDocument() {
             )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
-          {enableRag
-            ? "Document Uploading isn't available when RAG is enabled."
-            : "Upload document for the LLM to use"}
-        </TooltipContent>
+        <TooltipContent>Upload document for the LLM to use</TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
