@@ -50,9 +50,6 @@ const initialNodes = [
   }
 ];
 
-let id = 1;
-const getId = () => `${id++}`; // generates unique ids
-
 // function HelpTooltip() {
 //   return (
 //     // <div style={{ zIndex: 4 }}>
@@ -144,7 +141,7 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
 
       if (targetIsPane && event instanceof MouseEvent) { // touch does not work
         // we need to remove the wrapper bounds, in order to get the correct position
-        const id = getId();
+        const id = (nodes.length + 1).toString();
         const newNode: Node = {
           id,
           position: screenToFlowPosition({
@@ -339,8 +336,8 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
         value={graphName}
         onChange={(e) => setGraphName(e.target.value)}
       />
-      <div style={{ display: "flex", height: "100%", width: "100%", flexDirection: "row" }}>
-        <div className="flex flex-col px-4 mt-[60px]">
+      <div className="flex flex-row min-h-[550px] min-w-[320px] h-full max-h-[85vh]">
+        <div className="flex flex-col px-4 mt-[60px] min-w-[180px] w-1/5">
           <Label className="text-[#838383] mb-2">
             Previous Conversations
           </Label>
@@ -377,35 +374,6 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <div 
-                style={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "10px",
-                  zIndex: 4, // ensure it is above the graph
-                  fontSize: "12px",
-                }}
-              >
-                <label style={{display: "block"}}>{graphId}</label>
-                <label style={{display: "block"}}>label:</label>
-                <input
-                  value={chosenLabel}
-                  onChange={(event) => setChosenLabel(event.target.value)}
-                />
-                <label style={{display: "block"}}>body:</label>
-                <input 
-                  value={chosenBody} 
-                  onChange={(event) => setChosenBody(event.target.value)} 
-                /> 
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="left" sideOffset={9}>
-              Edit the label and body of the chosen node or edge. <br />
-              Choose a node or edge by clicking on it.
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
             <div 
                 style={{
                   position: "absolute",
@@ -434,6 +402,32 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
             </TooltipContent>
           </Tooltip>
         </ReactFlow>
+        
+        <nav
+          className={cn(
+            "relative transition-all flex flex-col w-[0px] border-l-[#e2e8f0] duration-300 ease-in-out h-screen overflow-auto scrollbar-thin",
+            {
+              "w-1/3": editOpen,
+            }
+          )}
+        >
+          {editOpen && (
+            <div className="px-4">
+              <Label>{graphId}</Label>
+              <Label>Label:</Label>
+              <Input
+                value={chosenLabel}
+                onChange={(event) => setChosenLabel(event.target.value)}
+              />
+              <Label>Body:</Label>
+              <Input 
+                value={chosenBody} 
+                onChange={(event) => setChosenBody(event.target.value)} 
+              /> 
+            </div>
+          )}
+        </nav>
+        
       </div>
     </TooltipProvider>
   );
