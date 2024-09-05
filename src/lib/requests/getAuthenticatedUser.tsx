@@ -5,8 +5,6 @@ import { getDoc, doc } from "firebase/firestore";
 
 export async function getAuthenticatedUser(): Promise<UserI | null> {
   const userDataPromise = async () => {
-    console.log("Authenticating user info...");
-
     if (!auth.currentUser) {
       throw new FirebaseError("400", "User is not signed in");
     } else {

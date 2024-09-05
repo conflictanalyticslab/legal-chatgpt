@@ -1,6 +1,6 @@
 import { initBackendFirebaseApp } from "@/lib/api/middleware/initBackendFirebaseApp";
 import { validEmailRegex } from "@/lib/signup/validEmailRegex";
-import { publicEmailRegex } from "@/util/signup/publicEmailRegex";
+import { publicEmailRegex } from "@/utils/publicEmailRegex";
 import admin from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";

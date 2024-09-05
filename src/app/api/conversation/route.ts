@@ -8,7 +8,6 @@
 import { NextResponse } from "next/server";
 import { getFirestore } from "firebase-admin/firestore";
 import { queryOpenAi } from "@/lib/LLM/queryOpenAi";
-import queryLlama2 from "@/lib/LLM/queryLlama2";
 import { authenticateUser } from "./update/utils/upsert_validation";
 import { validateConversation, validateLoadedUser, validateTokenCount } from "./update/utils/upsert_validation";
 import { authenticateApiUser } from "@/lib/api/middleware/authenticateApiUser";
@@ -105,31 +104,6 @@ export async function POST(req: Request) {
   } 
   catch (error) 
   {
-    console.log("====================== QUERYING LLAMA2 ======================")
-    //Do nothing so we can proceed to LLAMA model
-  }
-
-  // Validate token count before sending input to LLAMA
-  const tokenCount = await validateTokenCount(searchPrompt, documentPrompt, conversation)
-  if (tokenCount instanceof NextResponse) return tokenCount;
-
-  // Querying LLAMA
-  try 
-  {
-    const llmResponse:any = await queryLlama2({
-        messages: [...conversation],
-    });
-
-    return NextResponse.json({
-      latestBotResponse: llmResponse.choices[0].message.content,
-    });
-  } 
-  catch (error) 
-  {
-    console.error(
-      "queryLlama2 failed in conversation/route.ts for second response: ",
-      error
-    );
     return NextResponse.json({
       latestBotResponse: "Error retrieving LLM response",
     });

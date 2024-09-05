@@ -82,7 +82,6 @@ export function usePdfSearch() {
           variant: "default",
         });
 
-      console.log("these are the document results", documentResults);
       setRelevantDocs(documentResults);
     } catch (e: unknown) {
       setInfoAlert(errorResponse(e));

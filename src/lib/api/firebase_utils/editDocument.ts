@@ -13,7 +13,6 @@ export const editDocument = async (documentUid: string, newContent: string): Pro
         }  
 
         await updateDoc(docRef, { text: newContent });
-        console.log('Document has been editted.');
     } catch (error) {
         console.error("Error deleting document:", error);
         throw error;

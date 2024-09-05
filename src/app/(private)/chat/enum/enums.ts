@@ -19,7 +19,7 @@ export enum PineconeNamespaces {
   australian_law = "australian_law",
 }
 
-export enum ChatAction {
+export enum ChatPanelOptions {
   searchDocuments = "Search Documents",
   uploadDocuments = "Upload Documents",
   dataFilters = "Data Filters",
