@@ -61,10 +61,8 @@ export default function Signup() {
       get(child(dbRef, `whitelist-emails`))
         .then((snapshot: { exists: () => any; val: () => unknown }) => {
           if (snapshot.exists()) {
-            console.log(snapshot);
             resolve(snapshot.val());
           } else {
-            console.log("No whitelist email available");
             resolve("No white list email available");
           }
         })

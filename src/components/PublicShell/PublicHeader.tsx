@@ -1,12 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { useMediaQuery } from "react-responsive";
 import Container from "../ui/Container";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { cn } from "@/utils/utils";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 export function PublicHeader() {
   const links = [
@@ -27,7 +26,6 @@ export function PublicHeader() {
   ];
 
   const [navOpen, setNavOpen] = useState(false);
-  const isTablet = useMediaQuery({ maxWidth: "850px" });
   return (
     <nav className="bg-greyBg py-[10px] sm:py-[15px] border-b-[2px] border-border">
       <Container className="flex justify-between items-center">
@@ -42,30 +40,29 @@ export function PublicHeader() {
 
         <Button
           variant={"ghost"}
-          className={cn("bg-greyBg h-auto px-[5px] hidden", {
-            flex: isTablet,
-          })}
-          onClick={() => setNavOpen(!navOpen)}
+          className={cn("bg-greyBg h-auto px-[5px] lg:hidden flex")}
+          onClick={() => setNavOpen(true)}
         >
-          {!navOpen ? (
-            <Menu className="h-[30px] w-[30px]" />
-          ) : (
-            <Menu className="h-[30px] w-[30px]" />
-          )}
+          {!navOpen && <Menu className="h-[30px] w-[30px]" />}
         </Button>
 
         <div
           className={cn(
-            `flex gap-[20px] text-[1.2rem] items-center`,
+            `lg:flex gap-[20px] text-[1.2rem] items-center z-[2]`,
             {
-              hidden: !navOpen && isTablet,
+              'hidden': !navOpen,
             },
             {
-              "flex-col fixed top-[60px] pt-[30px] left-0 right-0 bottom-0 bg-greyBg":
-                navOpen && isTablet,
+              "flex-col fixed top-[0] pt-[90px] left-0 right-0 bottom-0 bg-greyBg":
+                navOpen,
             }
           )}
         >
+          {navOpen && (
+            <Button onClick={() => setNavOpen(false)} variant={"ghost"} className="fixed top-3   right-3">
+              <X className="h-[25px] w-[25px]" />
+            </Button>
+          )}
           {links
             .filter((item) => item.id != 6)
             .map((link) => (
