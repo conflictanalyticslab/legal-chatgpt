@@ -51,28 +51,8 @@ const initialNodes = [
   }
 ];
 
-// function HelpTooltip() {
-//   return (
-//     // <div style={{ zIndex: 4 }}>
-//     <Tooltip>
-//       <DialogTrigger asChild>
-//         <TooltipTrigger asChild>
-//           <Button
-//             variant="ghost"
-//             type="button"
-//             aria-label="Flow Graph"
-//           >
-//             <HelpCircle />
-//           </Button>
-//         </TooltipTrigger>
-//       </DialogTrigger>
-//       <TooltipContent>
-//         Hover over any component to see what they do.
-//       </TooltipContent>
-//     </Tooltip>
-//     // </div>
-//   );
-// }
+let id = 1;
+function getId() { return `${id++}`; }
 
 function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   const { setDialogFlow } = useChatContext();
@@ -102,7 +82,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
       chosenIsNode.current = true;
       setChosenLabel(node.data.label as string);
       setChosenBody(node.data.body as string);
-      setEditOpen(true); // will this consistently trigger a rerender after label and body has been set?
+      setEditOpen(true);
     }, []
   );
 
@@ -120,6 +100,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
       } else {
         setChosenBody("Click to edit");
       }
+      setEditOpen(true);
     }, []
   );
 
@@ -143,15 +124,15 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
 
       if (targetIsPane && event instanceof MouseEvent) { // touch does not work
         // we need to remove the wrapper bounds, in order to get the correct position
-        const id = (nodes.length + 1).toString();
+        const nodeId = getId();
         const newNode: Node = {
-          id,
+          id: nodeId,
           position: screenToFlowPosition({
             x: event.clientX,
             y: event.clientY,
           }),
           data: { 
-            label: `node ${id}`,
+            label: `node ${nodeId}`,
             body: 'default body'
           },
           origin: [0.5, 0.0],
@@ -159,9 +140,9 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
 
         setNodes((nds) => nds.concat(newNode));
         const edgeParams = { 
-          id,
+          id: nodeId,
           source: connectingNodeId.current, 
-          target: id, 
+          target: nodeId, 
           style: {
             strokeWidth: 2,
             stroke: 'blue',
@@ -222,6 +203,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   useEffect(() => {
     // TODO: make this a button instead, and default to the first retrieved graph
     // create new graph in the backend
+    id = 1; // reset id
     fetch(new URL('retrieve/all', DBURL), {
       method: 'GET',
       mode: 'cors',
@@ -416,7 +398,6 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
         >
           {editOpen && (
             <div className="px-4">
-              <Label>{graphId}</Label>
               <Label>Label:</Label>
               <Input
                 value={chosenLabel}
