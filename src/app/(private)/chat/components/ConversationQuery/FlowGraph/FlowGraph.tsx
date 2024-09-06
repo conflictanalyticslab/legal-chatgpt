@@ -27,6 +27,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 import Image from "next/image";
 
@@ -48,6 +49,7 @@ const initialNodes = [
       x: 0,
       y: 0,
     },
+    origin: [0.5, 0.0],
   }
 ];
 
@@ -144,8 +146,8 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           source: connectingNodeId.current, 
           target: nodeId, 
           style: {
-            strokeWidth: 2,
-            stroke: 'blue',
+            strokeWidth: 1,
+            stroke: 'gray',
           },
           label: 'edge',
           data: { body: 'default body' }
@@ -157,7 +159,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
               type: MarkerType.ArrowClosed,
               width: 10,
               height: 10,
-              color: 'blue',
+              color: 'gray',
             },
           }, eds)
         );
@@ -404,10 +406,14 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                 onChange={(event) => setChosenLabel(event.target.value)}
               />
               <Label>Body:</Label>
-              <Input 
+              <Textarea
+                wrap="soft" 
                 value={chosenBody} 
                 onChange={(event) => setChosenBody(event.target.value)} 
               /> 
+              <Label className="text-[grey] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] text-nowrap">
+                Use this dialog to edit the selected node or edge. 
+              </Label>
             </div>
           )}
         </nav>
