@@ -1,3 +1,4 @@
+import { useChatContext } from "@/app/(private)/chat/store/ChatContext";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ReactFlow,
@@ -73,7 +74,8 @@ const initialNodes = [
 //   );
 // }
 
-function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
+function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
+  const { setDialogFlow } = useChatContext();
   // no need to trigger rerender
   const connectingNodeId = useRef<string>("");
   const chosenNodeId = useRef<string>("");
@@ -213,7 +215,8 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
         queryArray.push([source.data.body, edge.data?.body, target.data.body] as [string, string, string]);
       }
     });
-    setUserQuery(JSON.stringify(queryArray));
+    setDialogFlow(JSON.stringify(queryArray));
+    setOpen(false);
   }
 
   useEffect(() => {
@@ -433,10 +436,11 @@ function FlowGraph({setUserQuery}: {setUserQuery: (_: string) => void}) {
   );
 };
 
-export function FlowModal({setUserQuery}: {setUserQuery: (_: string) => void}) {
+export function FlowModal() {
+  const [open, setOpen] = useState(false);
   return (
     <ReactFlowProvider>
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <DialogTrigger asChild>
@@ -468,7 +472,7 @@ export function FlowModal({setUserQuery}: {setUserQuery: (_: string) => void}) {
           className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[85vw] flex flex-col gap-5 overflow-auto box-border"
         >
           <DialogTitle className="hidden"></DialogTitle>
-          <FlowGraph setUserQuery={setUserQuery}/>
+          <FlowGraph setOpen={setOpen}/>
         </DialogContent>
       </Dialog>
     </ReactFlowProvider>

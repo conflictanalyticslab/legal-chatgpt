@@ -19,7 +19,8 @@ const useFetchQuery = () => {
     conversation,
     setInfoAlert,
     handleBeforeUnload,
-    includedDocuments
+    includedDocuments,
+    dialogFlow
   } = useChatContext();
 
   const fetchQuery = async (queryInput: string) => {
@@ -56,7 +57,7 @@ const useFetchQuery = () => {
       setConversation(fullConversation);
 
       // Calls LLM to generate response to query
-      await fetchLLMResponse(fullConversation, queryInput, includedDocuments);
+      await fetchLLMResponse(fullConversation, queryInput, includedDocuments, dialogFlow);
 
       // Save or update the conversation after calling
       upsertConversation(fullConversation);

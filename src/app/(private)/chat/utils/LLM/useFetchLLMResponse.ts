@@ -35,7 +35,8 @@ export function useFetchLLMResponse() {
   const fetchLLMResponse = async (
     fullConversation: any,
     queryInput: string,
-    includedDocuments: UploadedDocument
+    includedDocuments: UploadedDocument,
+    dialogFlow: string
   ) => {
     try {
       generateFlagRef.current = true;
@@ -55,6 +56,7 @@ export function useFetchLLMResponse() {
           indexName,
           fullConversation,
           includedDocuments,
+          dialogFlow,
         }),
       });
       const relevantDocPromise = pdfSearch(queryInput, namespace);

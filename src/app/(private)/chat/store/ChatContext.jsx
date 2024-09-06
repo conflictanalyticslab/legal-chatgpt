@@ -25,6 +25,7 @@ export const ChatContextProvider = ({ children }) => {
   const [documents, setDocuments] = useState([]);
   const [showStartupImage, setShowStartupImage] = useState(true);
   const [includedDocuments, setIncludedDocuments] = useState([]);
+  const [dialogFlow, setDialogFlow] = useState("");
   const [conversation, setConversation] = useState([]);
   const [latestResponse, setLatestResponse] = useState("");
   const [documentContent, setDocumentContent] = useState("");
@@ -136,6 +137,8 @@ export const ChatContextProvider = ({ children }) => {
         setChatAction,
         setUser,
         user,
+        dialogFlow,
+        setDialogFlow
       }}
     >
       {children}
