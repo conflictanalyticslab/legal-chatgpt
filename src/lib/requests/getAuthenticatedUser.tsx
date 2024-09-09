@@ -1,39 +1,51 @@
+import { useChatContext } from "@/app/(private)/chat/store/ChatContext";
 import { auth, db } from "@/lib/firebase/firebase";
-import { userConverter, UserI } from "@/models/User";
-import { FirebaseError } from "firebase/app";
+import { userConverter } from "@/models/User";
 import { getDoc, doc } from "firebase/firestore";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 
-export async function getAuthenticatedUser(): Promise<UserI | null> {
-  const userDataPromise = async () => {
-    if (!auth.currentUser) {
-      throw new FirebaseError("400", "User is not signed in");
-    } else {
-      const docRef = doc(db, "users", auth.currentUser.uid).withConverter(
-        userConverter
-      );
+export function useGetAuthenticatedUser() {
+  const { setUser, setAlert } = useChatContext();
+  const router = useRouter();
+
+  const getAuthenticatedUser = async (user: any) => {
+    try {
+      console.log("user uid", user.uid)
+      const docRef = doc(db, "users", user.uid).withConverter(userConverter);
 
       const docSnap = await getDoc(docRef);
-      console.log("docSnap",docSnap)
-      console.log("docSnap exists()",docSnap.exists())
+      console.log("this is the snap", docSnap.data())
       if (docSnap.exists()) {
-        if (docSnap.data().verified) return docSnap.data();
+        if (docSnap.data().verified) {
+          console.log(docSnap.data());
+          setUser(docSnap.data());
+          setAlert("");
+        }
+      } else {
+        router.push("/login");
       }
-      return null;
+    } catch (e: unknown) {
+      router.push("/login");
     }
   };
 
-  var i = 0;
-  var max = 5;
-  while (i < max) {
-    try {
-      console.log("retrying userdataPromise")
-      return await userDataPromise();
-    } catch (e) {
-      i += 1;
-      // Wait one second before next attempt
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-  }
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("here")
+      console.log("bruh", user)
+      if (user) {
+        // Auth state resolved, user is signed in
+        getAuthenticatedUser(user);
+      } else {
+        console.log("here", user)
+        // Auth state resolved, but no user signed in
+        router.push("/login");
+      }
+    });
 
-  throw new Error("Could not load the user after " + max + " tries");
+    return () => unsubscribe();
+  }, [router]);
+
 }
