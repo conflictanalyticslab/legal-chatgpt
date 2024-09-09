@@ -13,7 +13,8 @@ export async function getAuthenticatedUser(): Promise<UserI | null> {
       );
 
       const docSnap = await getDoc(docRef);
-
+      console.log("docSnap",docSnap)
+      console.log("docSnap exists()",docSnap.exists())
       if (docSnap.exists()) {
         if (docSnap.data().verified) return docSnap.data();
       }
@@ -25,6 +26,7 @@ export async function getAuthenticatedUser(): Promise<UserI | null> {
   var max = 5;
   while (i < max) {
     try {
+      console.log("retrying userdataPromise")
       return await userDataPromise();
     } catch (e) {
       i += 1;

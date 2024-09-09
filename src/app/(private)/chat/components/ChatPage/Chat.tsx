@@ -97,6 +97,8 @@ export function Chat() {
   async function initalizeChat() {
     try {
       const user = await getAuthenticatedUser();
+      console.log(user)
+      
       if (user) {
         setNum(user.prompts_left);
         setAlert("");
