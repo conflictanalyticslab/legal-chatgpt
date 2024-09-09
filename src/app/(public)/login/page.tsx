@@ -105,10 +105,6 @@ export default function Login() {
     }
   };
 
-  useEffect(() => {
-    console.log(form.formState.errors);
-  }, [form.formState.errors]);
-
   return (
     <Form {...form}>
       <form
