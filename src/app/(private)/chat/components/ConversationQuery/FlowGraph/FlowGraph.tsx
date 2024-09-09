@@ -48,8 +48,7 @@ const initialNodes = [
     position: {
       x: 0,
       y: 0,
-    },
-    origin: [0.5, 0.0],
+    }
   }
 ];
 
