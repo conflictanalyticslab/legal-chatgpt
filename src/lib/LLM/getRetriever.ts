@@ -17,6 +17,7 @@ export async function getRetriever(
 ) {
   const embeddings = new OpenAIEmbeddings({
     model: "text-embedding-ada-002",
+    apiKey: process.env.OPENAI_API_KEY || "",
   });
 
   // Will automatically read the PINECONE_API_KEY and PINECONE_ENVIRONMENT env vars
