@@ -56,8 +56,11 @@ export function usePdfSearch() {
       // Checks to see whether we are using Keyword and/or Semantic search
       if (useSemanticPromise && useKeywordPromise) {
         // Semantic && Keyword Promise
-        if (!pineconeDocs?.success || !keywordDocs.success)
-          throw new Error("Failed to fetch relevant documents");
+        if (!pineconeDocs?.success || !keywordDocs.success) {
+          console.log("Pinecone docs", pineconeDocs);
+          console.log("keyword docs", keywordDocs);
+          throw new Error(pineconeDocs?.error ?? "");
+        }
 
         documentResults.push(...pineconeDocs.data);
         documentResults.push(...keywordDocs.data);

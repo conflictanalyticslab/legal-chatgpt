@@ -2,7 +2,6 @@
 import { PineconeIndexes } from "../../enum/enums";
 import admin from "firebase-admin";
 import { apiErrorResponse } from "@/utils/utils";
-import { ChatOpenAI } from "@langchain/openai";
 import { langchainPineconeDtoToRelevantDocuments } from "../documents/transform";
 import { LangchainDocType } from "@/models/schema";
 import { getRetriever } from "@/lib/LLM/getRetriever";

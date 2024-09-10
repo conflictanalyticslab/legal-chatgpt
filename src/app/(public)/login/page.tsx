@@ -31,8 +31,9 @@ import {
 import Link from "next/link";
 import InputFormField from "@/components/Auth/InputFormField";
 import { Label } from "@/components/ui/label";
-import { auth } from "@/lib/firebase/firebase";
+import { auth, db } from "@/lib/firebase/firebase";
 import Image from "next/image";
+import { setDoc } from "firebase/firestore";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -90,7 +91,7 @@ export default function Login() {
 
       // Sign In With Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-
+      // setDoc(doc(db, "users", userCredential.user.uid), {})
       router.push("/chat");
     } catch (error: unknown) {
       form.setError("email", {
