@@ -53,6 +53,9 @@ async function* makeIterator({
   includedDocuments: string[]
 }) {
   try {
+
+    
+    //TODO: Check if i need to implement firebase initialize app
     admin.auth().verifyIdToken(token as string);
 
     // ********************************* LLM INITIALIZATION ********************************* //
