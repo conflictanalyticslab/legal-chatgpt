@@ -18,6 +18,8 @@ import {
   OnConnectEnd,
 } from '@xyflow/react';
 
+import { auth } from "@/lib/firebase/firebase";
+
 import '@xyflow/react/dist/style.css';
 
 import { cn } from "@/utils/utils";
@@ -32,7 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 
 const DBURL = "https://48.217.241.192:8080"; // temporary solution, this would go in the .env preferably
-
+// const DBURL = "http://localhost:8080";
 const nodeTypes = {
   default: NodeTooltip,
 };
@@ -171,24 +173,28 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
     if (edges.length === 0 || nodes.length === 1) return; // no changes have been made
     // saves the graph to the database
     if (rfInstance) {
-      fetch(new URL('update', DBURL), {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          id: graphId, // if this is empty, it will create a new graph
-          name: graphName,
-          data: rfInstance.toObject()
-        }) // create a json object of the graph
-      }).then(response =>{ 
-        return response.json()
-      }).then(body => setGraphId(body.id)) // will waste an api call, but it's the simplest solution for now
+      if (!auth.currentUser) throw new Error("User is not authenticated");
+      auth.currentUser.getIdToken().then(token => {
+        fetch(new URL('update', DBURL), {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            id: graphId, // if this is empty, it will create a new graph
+            name: graphName,
+            data: rfInstance.toObject()
+          }) // create a json object of the graph
+        }).then(response =>{ 
+          if (!response.ok) throw new Error("Failed to save graph");
+          else return response.json()
+        }).then(body => setGraphId(body.id)) // will waste an api call, but it's the simplest solution for now
+      })
     }
     
-
-    // make the query. TODO: call the assistant agent
+    // make the query. 
     let queryArray: [string, string, string][] = [];
     edges.forEach((edge) => {
       let source: Node | undefined = nodes.find((node) => node.id === edge.source);
@@ -202,42 +208,49 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   }
 
   useEffect(() => {
-    // TODO: make this a button instead, and default to the first retrieved graph
     // create new graph in the backend
     id = 1; // reset id
-    fetch(new URL('retrieve/all', DBURL), {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(response => {
-      return response.json();
-    }).then(data => {
-      setGraphList(data);
+    if (!auth.currentUser) throw new Error("User is not authenticated");
+    auth.currentUser.getIdToken().then(token => {
+      fetch(new URL('retrieve/all', DBURL), {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }).then(response => {
+        return response.json();
+      }).then(data => {
+        setGraphList(data);
+      })
     })
   }, []);
 
   useEffect(() => {
     if (!graphId) return;
     // retrieve the graph from the backend
-    fetch(new URL(`retrieve/id/${graphId}`, DBURL), {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(response => {
-      return response.json();
-    }).then((body : {
-      data: ReactFlowJsonObject,
-      id: string,
-      name: string
-    }) => {
-      setGraphName(body.name);
-      setNodes(body.data.nodes);
-      setEdges(body.data.edges);
-      setViewport(body.data.viewport);
+    if (!auth.currentUser) throw new Error("User is not authenticated");
+    auth.currentUser.getIdToken().then(token => {
+      fetch(new URL(`retrieve/id/${graphId}`, DBURL), {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }).then(response => {
+        return response.json();
+      }).then((body : {
+        data: ReactFlowJsonObject,
+        id: string,
+        name: string
+      }) => {
+        setGraphName(body.name);
+        setNodes(body.data.nodes);
+        setEdges(body.data.edges);
+        setViewport(body.data.viewport);
+      })
     })
   }, [graphId])
 
@@ -398,13 +411,18 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           )}
         >
           {editOpen && (
-            <div className="px-4">
-              <Label>Label:</Label>
+            <div className="px-4 flex flex-col">
+              {chosenIsNode.current ? (
+                <Label className="py-4 text-[grey]">Editing Node</Label>
+              ) : (
+                <Label  className="py-4 text-[grey]">Editing Edge</Label>
+              )}
+              <Label className="py-2">Label:</Label>
               <Input
                 value={chosenLabel}
                 onChange={(event) => setChosenLabel(event.target.value)}
               />
-              <Label>Body:</Label>
+              <Label className="py-2">Body:</Label>
               <Textarea
                 wrap="soft" 
                 value={chosenBody} 
