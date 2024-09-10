@@ -5,6 +5,7 @@ import { apiErrorResponse } from "@/utils/utils";
 import { langchainPineconeDtoToRelevantDocuments } from "../documents/transform";
 import { LangchainDocType } from "@/models/schema";
 import { getRetriever } from "@/lib/LLM/getRetriever";
+import { initBackendFirebaseApp } from "@/lib/api/middleware/initBackendFirebaseApp";
 
 /**
  * fe
@@ -27,12 +28,7 @@ export async function fetchSemanticDocs(
     console.log("THE SEMANTIC NAMESPACE IS: ", namespace);
 
     // change the following to process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT when deploying to production
-    admin.initializeApp({
-      credential: admin.credential.cert(
-        JSON.parse(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT ?? "")
-      ),
-      databaseURL: "https://legal-gpt-default-rtdb.firebaseio.com",
-    });
+    initBackendFirebaseApp()
     // Authenticate User
     admin.auth().verifyIdToken(token);
 
