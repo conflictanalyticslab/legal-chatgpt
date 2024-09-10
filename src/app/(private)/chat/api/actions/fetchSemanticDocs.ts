@@ -35,7 +35,7 @@ export async function fetchSemanticDocs(
       data: await retrieveDocs(query, indexName, namespace, topK),
     };
   } catch (error) {
-    apiErrorResponse(error);
+    return apiErrorResponse(error);
   }
 }
 

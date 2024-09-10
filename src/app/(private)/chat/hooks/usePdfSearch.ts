@@ -62,14 +62,14 @@ export function usePdfSearch() {
           throw new Error(pineconeDocs?.error ?? "");
         }
 
-        documentResults.push(...pineconeDocs.data);
+        documentResults.push(...pineconeDocs.data as RelevantDocument[]);
         documentResults.push(...keywordDocs.data);
       } else if (useSemanticPromise) {
         // Semantic Promise
         if (!pineconeDocs?.success)
           throw new Error("Failed to fetch relevant documents");
 
-        documentResults.push(...pineconeDocs.data);
+        documentResults.push(...pineconeDocs.data as RelevantDocument[]);
       } else if (useKeywordPromise) {
         // Keyword Promise
         if (!keywordDocs?.success)
