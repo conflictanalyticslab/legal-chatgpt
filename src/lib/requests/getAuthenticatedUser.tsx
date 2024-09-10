@@ -7,19 +7,17 @@ import { useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 
 export function useGetAuthenticatedUser() {
-  const { setUser, setAlert } = useChatContext();
+  const { setUser, setAlert, setInfoAlert, setNum } = useChatContext();
   const router = useRouter();
 
   const getAuthenticatedUser = async (user: any) => {
     try {
-      console.log("user uid", user.uid)
       const docRef = doc(db, "users", user.uid).withConverter(userConverter);
 
       const docSnap = await getDoc(docRef);
-      console.log("this is the snap", docSnap.data())
       if (docSnap.exists()) {
         if (docSnap.data().verified) {
-          console.log(docSnap.data());
+          setNum(docSnap.data().prompts_left)
           setUser(docSnap.data());
           setAlert("");
         }
@@ -27,19 +25,17 @@ export function useGetAuthenticatedUser() {
         router.push("/login");
       }
     } catch (e: unknown) {
+      setInfoAlert("User doesn't have priviledge to access chat.");
       router.push("/login");
     }
   };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log("here")
-      console.log("bruh", user)
       if (user) {
         // Auth state resolved, user is signed in
         getAuthenticatedUser(user);
       } else {
-        console.log("here", user)
         // Auth state resolved, but no user signed in
         router.push("/login");
       }
@@ -47,5 +43,4 @@ export function useGetAuthenticatedUser() {
 
     return () => unsubscribe();
   }, [router]);
-
 }

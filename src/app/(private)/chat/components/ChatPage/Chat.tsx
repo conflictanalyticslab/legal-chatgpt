@@ -47,7 +47,6 @@ export function Chat() {
     conversation,
     setConversation,
     latestResponse,
-    setNum,
     scrollIntoViewRef,
     conversationId,
   } = useChatContext();
@@ -116,15 +115,6 @@ export function Chat() {
   const handleQueryPrompt = (prompt: string) => {
     fetchQuery(prompt);
   };
-
-  /**
-   * Resets all of the previously selected options for dataset options
-   */
-  useEffect(() => {
-    // const documentQuerChoice = localStorage.getItem("documentQueryPrevChoice");
-    // if (documentQueryChoice)
-    //   setDocumentQueryMethod(JSON.parse(documentQueryChoice));
-  }, []);
 
   return (
     <>

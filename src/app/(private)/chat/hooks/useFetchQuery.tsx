@@ -18,10 +18,17 @@ const useFetchQuery = () => {
     conversation,
     setInfoAlert,
     handleBeforeUnload,
-    includedDocuments
+    includedDocuments,
+    num,
   } = useChatContext();
 
   const fetchQuery = async (queryInput: string) => {
+
+    // Checks if the user used up their available number of prompts
+    if (num <= 0) {
+      setInfoAlert("No more prompts available...");
+    }
+
     if (queryInput === "") return;
 
     // Check for authentication
@@ -56,7 +63,6 @@ const useFetchQuery = () => {
 
       // Calls LLM to generate response to query
       await fetchLLMResponse(fullConversation, queryInput, includedDocuments);
-
       // Save or update the conversation after calling
       upsertConversation(fullConversation);
     } catch (error: any) {

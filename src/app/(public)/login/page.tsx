@@ -89,7 +89,8 @@ export default function Login() {
       // }
 
       // Sign In With Firebase
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
       router.push("/chat");
     } catch (error: unknown) {
       form.setError("email", {
@@ -125,7 +126,7 @@ export default function Login() {
           </div>
 
           {/* Email */}
-          <InputFormField form={form} name="email" type="email" />
+          <InputFormField form={form} label="Email" name="email" type="email" />
 
           <div className="flex flex-col gap-1">
             {/* Password */}
