@@ -42,7 +42,10 @@ export function usePdfSearch() {
       const useSemanticPromise =
         namespace === PineconeNamespaces.canadian_law ||
         namespace === PineconeNamespaces.french_law ||
-        namespace === PineconeNamespaces.australian_law;
+        namespace === PineconeNamespaces.australian_law ||
+        namespace === PineconeNamespaces.minimum_standards_termination ||
+        namespace === PineconeNamespaces.reasonable_notice_termination ||
+        namespace === PineconeNamespaces.without_cause_termination;
 
       const useKeywordPromise =
         namespace === PineconeNamespaces.canadian_law ||

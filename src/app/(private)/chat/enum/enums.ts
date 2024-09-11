@@ -17,6 +17,9 @@ export enum PineconeNamespaces {
   unitedStates_law = "usa_law",
   french_law = "french_law",
   australian_law = "australian_law",
+  without_cause_termination = "without_cause_termination",
+  reasonable_notice_termination = "reasonable_notice_termination",
+  minimum_standards_termination = "minimum_standards_termination",
 }
 
 export enum ChatPanelOptions {
