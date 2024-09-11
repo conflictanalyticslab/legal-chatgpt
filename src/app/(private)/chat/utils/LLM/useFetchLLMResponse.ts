@@ -59,7 +59,7 @@ export function useFetchLLMResponse() {
       });
       const relevantDocPromise = pdfSearch(queryInput, namespace);
 
-      // Use Promise.all to wait for both promises to complete
+      // Use Promise.all to wait for both the LLM response and semantic search documents to complete
       const [llmResponse, _relevantDocResponse] = await Promise.all([
         llmPromise,
         relevantDocPromise,
