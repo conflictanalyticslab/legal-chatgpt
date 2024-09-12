@@ -43,13 +43,12 @@ function Hero() {
             <div className="flex flex-col gap-[30px] items-center lg:items-start pl-1">
               <div className=" text-xs sm:text-xl text-[--grey] text-center lg:text-left">
                 <p>
-                  Our goal is to deliver accessible, reliable legal AI.
-                  OpenJustice, built on advanced language models for law,
-                  processes queries and documents, drawing from vast legal
-                  sources to provide precise, comprehensive answers and
-                  innovative tools for law students and lawyers. As a growing
-                  prototype, we value your feedback to improve and ensure
-                  OpenJustice's dependability.
+                  OpenJustice currently provides legal data for the US and
+                  Canada (with limited coverage). We are working on expanding
+                  our coverage to include legal data from the EU, France, and
+                  select Australian jurisdictions. Additionally, we are working
+                  on integrating International Law, particularly for civil
+                  service matters.
                 </p>
                 <p className="font-normal text-primaryOJ mt-4">
                   OpenJustice is open to all lawyers and legal professionals
@@ -110,7 +109,11 @@ function Hero() {
         ]}
       />
 
-      <SlidingPartners className="overflow-x-hidden" title="Academic Partners" description="We work alongside top academic institutions worldwide, conducting cutting-edge research on the mechanization of legal reasoning and ethical design of legal AIs. Through our collaborative research, we aim to set new standards for  transparency and fairness in legal technology development." />
+      <SlidingPartners
+        className="overflow-x-hidden"
+        title="Academic Partners"
+        description="We work alongside top academic institutions worldwide, conducting cutting-edge research on the mechanization of legal reasoning and ethical design of legal AIs. Through our collaborative research, we aim to set new standards for  transparency and fairness in legal technology development."
+      />
 
       <TwoPartners
         title="Non-Profit Partners"
