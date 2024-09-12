@@ -30,11 +30,17 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { PlusSquare } from "lucide-react";
 
 import Image from "next/image";
+import { set } from "firebase/database";
 
 const DBURL = "https://48.217.241.192:8080"; // temporary solution, this would go in the .env preferably
 // const DBURL = "http://localhost:8080";
+
+const lastGraphKey = 'OJLatestGraphId';
+
 const nodeTypes = {
   default: NodeTooltip,
 };
@@ -75,6 +81,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   const [graphId, setGraphId] = useState<string|null>(null);
   const [graphName, setGraphName] = useState<string>("Default Name"); 
   const [graphList, setGraphList] = useState<{name:string, id:string}[]>([]);
+  const [graphLoading, setGraphLoading] = useState<boolean>(false);
 
   const { screenToFlowPosition } = useReactFlow();
   const { setViewport } = useReactFlow();
@@ -190,7 +197,10 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
         }).then(response =>{ 
           if (!response.ok) throw new Error("Failed to save graph");
           else return response.json()
-        }).then(body => setGraphId(body.id)) // will waste an api call, but it's the simplest solution for now
+        }).then(body => {
+          localStorage.setItem(lastGraphKey, JSON.stringify(graphId));
+          setGraphId(body.id)
+        }) // will waste an api call, but it's the simplest solution for now
       })
     }
     
@@ -207,9 +217,16 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
     setOpen(false);
   }
 
+  const handleNewGraph = () => {
+    setGraphId(null);
+    setGraphName("Default Name");
+    setNodes(initialNodes);
+    setEdges([]);
+    setViewport({ zoom: 2, x: 500, y: 500 });
+    setGraphLoading(false);
+  }
+
   useEffect(() => {
-    // create new graph in the backend
-    id = 1; // reset id
     if (!auth.currentUser) throw new Error("User is not authenticated");
     auth.currentUser.getIdToken().then(token => {
       fetch(new URL('retrieve/all', DBURL), {
@@ -224,7 +241,12 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
       }).then(data => {
         setGraphList(data);
       })
-    })
+      const latestGraphData = localStorage.getItem(lastGraphKey);
+      if (latestGraphData) {
+        setGraphId(JSON.parse(latestGraphData));
+        setGraphLoading(true)
+      }
+    })  
   }, []);
 
   useEffect(() => {
@@ -248,8 +270,10 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
       }) => {
         setGraphName(body.name);
         setNodes(body.data.nodes);
+        id = body.data.nodes.length;
         setEdges(body.data.edges);
         setViewport(body.data.viewport);
+        setGraphLoading(false); // preferablly, this would use a proper trigger
       })
     })
   }, [graphId])
@@ -338,69 +362,92 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
       <div className="flex flex-row min-h-[550px] min-w-[320px] h-full max-h-[85vh]">
         <div className="flex flex-col px-4 mt-[60px] min-w-[180px] w-1/5">
           <Label className="text-[#838383] mb-2">
-            Previous Conversations
+            Previous Graphs
           </Label>
-          {/* Chat History */}
+          {/* Graph History */}
           {graphList.map((item: {name: string, id: string}) => (
-            <button type="button" onClick={()=>setGraphId(item.id)} className="w-full text-left text-ellipsis text-nowrap px-3 py-2 overflow-hidden hover:bg-[#F1F1F1] rounded-md">{item.name}</button>
+            <button type="button" onClick={()=>{
+              setGraphLoading(true)
+              setGraphId(item.id)
+            }} className="w-full text-left text-ellipsis text-nowrap px-3 py-2 overflow-hidden hover:bg-[#F1F1F1] rounded-md">
+              {item.name}
+            </button>
           ))}
-        </div>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onNodeClick={onNodeClick}
-          onEdgeClick={onEdgeClick}
-          onConnect={onConnect}
-          onConnectStart={onConnectStart}
-          onConnectEnd={onConnectEnd}
-          onInit={setRfInstance}
-          fitView
-          minZoom={0.2}
-        >
-          <Tooltip>
-            <TooltipTrigger>
-              <Controls />
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              Controls for the flow graph.
-            </TooltipContent>
-          </Tooltip>
-        
-          <Background />
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-            <div 
-                style={{
-                  position: "absolute",
-                  right: "5px",
-                  bottom: "20px",
-                  zIndex: 4, // ensure it is above the graph
-                }}
-              >
-                <Button
-                  variant="ghost"
-                  type="button"
-                  aria-label="Save Graph"
-                  onClick={handleSubmit}
+          <Button
+            className="flex justify-start gap-3 cursor-pointer border-[1px] border-transparent hover:border-border hover:border-[1px] px-2"
+            variant={"ghost"}
+            onClick={() => handleNewGraph()}
+          >
+            <>
+              <PlusSquare className="h-5 w-5" />
+              New Graph
+            </>
+          </Button>
+        </div>
+        {graphLoading ? (
+          <Label className="text-[grey] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex items-center gap-3 flex-col text-nowrap">
+            Loading Graph
+            <LoadingSpinner />
+          </Label> 
+        ) : 
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            nodeTypes={nodeTypes}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onNodeClick={onNodeClick}
+            onEdgeClick={onEdgeClick}
+            onConnect={onConnect}
+            onConnectStart={onConnectStart}
+            onConnectEnd={onConnectEnd}
+            onInit={setRfInstance}
+            fitView
+            minZoom={0.2}
+          >
+            <Tooltip>
+              <TooltipTrigger>
+                <Controls />
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                Controls for the flow graph.
+              </TooltipContent>
+            </Tooltip>
+          
+            <Background />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+              <div 
+                  style={{
+                    position: "absolute",
+                    right: "5px",
+                    bottom: "20px",
+                    zIndex: 4, // ensure it is above the graph
+                  }}
                 >
-                  <Image
-                    src="/assets/icons/send-horizontal.svg"
-                    alt="send"
-                    width={30}
-                    height={30}
-                  />
-                </Button>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="left" sideOffset={5}>
-              Save the current graph to a query.
-            </TooltipContent>
-          </Tooltip>
-        </ReactFlow>
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    aria-label="Save Graph"
+                    onClick={handleSubmit}
+                  >
+                    <Image
+                      src="/assets/icons/send-horizontal.svg"
+                      alt="send"
+                      width={30}
+                      height={30}
+                    />
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="left" sideOffset={5}>
+                Save the current graph to a query.
+              </TooltipContent>
+            </Tooltip>
+          </ReactFlow>
+        } 
         
         <nav
           className={cn(
