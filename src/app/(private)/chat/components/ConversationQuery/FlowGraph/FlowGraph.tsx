@@ -367,8 +367,10 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           {/* Graph History */}
           {graphList.map((item: {name: string, id: string}) => (
             <button type="button" onClick={()=>{
-              setGraphLoading(true)
-              setGraphId(item.id)
+              if (graphId !== item.id) {
+                setGraphLoading(true)
+                setGraphId(item.id)
+              }
             }} className="w-full text-left text-ellipsis text-nowrap px-3 py-2 overflow-hidden hover:bg-[#F1F1F1] rounded-md">
               {item.name}
             </button>
