@@ -35,6 +35,7 @@ import { PlusSquare } from "lucide-react";
 
 import Image from "next/image";
 import { set } from "firebase/database";
+import { Switch } from "@/components/ui/switch";
 
 const DBURL = "https://48.217.241.192:8080"; // temporary solution, this would go in the .env preferably
 // const DBURL = "http://localhost:8080";
@@ -70,18 +71,18 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   const chosenNodeId = useRef<string>("");
   const chosenEdgeId = useRef<string>("");
   const chosenIsNode = useRef<boolean>(false);
-  // changing these should trigger rerender
+  // trigger rerender
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [chosenLabel, setChosenLabel] = useState<string>("");
   const [chosenBody, setChosenBody] = useState<string>("");
   const [editOpen, setEditOpen] = useState<boolean>(false);
   const [rfInstance, setRfInstance] = useState<any>(null);
-  // TODO: disable save button until this has loaded
   const [graphId, setGraphId] = useState<string|null>(null);
   const [graphName, setGraphName] = useState<string>("Default Name"); 
   const [graphList, setGraphList] = useState<{name:string, id:string}[]>([]);
   const [graphLoading, setGraphLoading] = useState<boolean>(false);
+  const [useCustomLabel, setUseCustomLabel] = useState<boolean>(false);
 
   const { screenToFlowPosition } = useReactFlow();
   const { setViewport } = useReactFlow();
@@ -89,28 +90,22 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   const onNodeClick = useCallback<{(_: any, node: Node): void}>(
     (_, node) => {
       chosenNodeId.current = node.id;
+      let prevChosenIsNode = chosenIsNode.current; // stores the value before it is changed
       chosenIsNode.current = true;
       setChosenLabel(node.data.label as string);
       setChosenBody(node.data.body as string);
-      setEditOpen(true);
+      setEditOpen(prevEditOpen => !prevEditOpen || !prevChosenIsNode); // only closes if a node is clicked again
     }, []
   );
 
   const onEdgeClick = useCallback<{(_: any, edge: Edge): void}>(
     (_, edge) => {
       chosenEdgeId.current = edge.id;
+      let prevChosenIsNode = chosenIsNode.current; // stores the value before it is changed
       chosenIsNode.current = false;
-      if (edge.label){
-        setChosenLabel(edge.label as string);
-      } else {
-        setChosenLabel("");
-      }
-      if (edge.data) {
-        setChosenBody(edge.data.body as string);
-      } else {
-        setChosenBody("Click to edit");
-      }
-      setEditOpen(true);
+      setChosenLabel(edge.label as string);
+      setChosenBody(edge.data?.body as string);
+      setEditOpen(prevEditOpen => !prevEditOpen || prevChosenIsNode); // only closes if an edge is clicked again
     }, []
   );
 
@@ -460,27 +455,60 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           )}
         >
           {editOpen && (
-            <div className="px-4 flex flex-col">
-              {chosenIsNode.current ? (
-                <Label className="py-4 text-[grey]">Editing Node</Label>
-              ) : (
-                <Label  className="py-4 text-[grey]">Editing Edge</Label>
-              )}
-              <Label className="py-2">Label:</Label>
-              <Input
-                value={chosenLabel}
-                onChange={(event) => setChosenLabel(event.target.value)}
-              />
-              <Label className="py-2">Body:</Label>
-              <Textarea
-                wrap="soft" 
-                value={chosenBody} 
-                onChange={(event) => setChosenBody(event.target.value)} 
-              /> 
-              <Label className="text-[grey] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] text-nowrap">
+            <>
+              <div className="px-4 flex flex-col divide-y">
+                <div className="py-4">
+                  {chosenIsNode.current ? (
+                    <Label className="text-[grey]">Editing Node</Label>
+                  ) : (
+                    <Label  className="text-[grey]">Editing Edge</Label>
+                  )}
+                </div>
+                
+                <Tooltip>
+                  <TooltipTrigger className="flex flex-row space-x-2 py-4">
+                    <Switch onCheckedChange={(checked: boolean) => setUseCustomLabel(checked)}/>
+                    <Label className="py-2">Use Custom Label</Label>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">
+                    Customize how your graph is displayed. OpenJustice will NOT use this to generate a response.
+                  </TooltipContent>
+                </Tooltip>
+                
+                <div className="py-4">
+                  {useCustomLabel && (
+                    <Tooltip>
+                      <TooltipTrigger className="flex flex-col">
+                        <Label className="py-2">Label:</Label>
+                        <Input
+                          value={chosenLabel}
+                          onChange={(event) => setChosenLabel(event.target.value)} 
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent side="left">
+                          Edit how the node or edge is shown in the Dialog Flow window. OpenJustice will NOT use this to generate a response.
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  <Tooltip>
+                    <TooltipTrigger className="flex flex-col">
+                      <Label className="py-2">Body:</Label>
+                      <Textarea
+                        wrap="soft" 
+                        value={chosenBody} 
+                        onChange={(event) => setChosenBody(event.target.value)} 
+                      /> 
+                    </TooltipTrigger>
+                    <TooltipContent side="left">
+                      Edit the content of the node or edge. OpenJustice will use this to generate a response.
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+              <Label className="text-[grey] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] text-nowrap border-top-width-0">
                 Use this dialog to edit the selected node or edge. 
               </Label>
-            </div>
+            </>
           )}
         </nav>
         
