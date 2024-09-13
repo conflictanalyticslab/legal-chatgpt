@@ -44,13 +44,10 @@ function Hero() {
             <div className="flex flex-col gap-[30px] items-center lg:items-start pl-1">
               <div className=" text-xs sm:text-xl text-[--grey] text-center lg:text-left">
                 <p>
-                  Our goal is to deliver accessible, reliable legal AI.
-                  OpenJustice, built on advanced language models for law,
-                  processes queries and documents, drawing from vast legal
-                  sources to provide precise, comprehensive answers and
-                  innovative tools for law students and lawyers. As a growing
-                  prototype, we value your feedback to improve and ensure
-                  OpenJustice's dependability.
+                  We aim to deliver reliable legal AI. OpenJustice uses advanced
+                  language models to process legal queries and documents,
+                  providing accurate answers and tools for students and lawyers.
+                  Your feedback helps us improve its dependability.
                 </p>
                 <p className="font-normal text-primaryOJ mt-4">
                   OpenJustice is open to all lawyers and legal professionals
@@ -83,7 +80,7 @@ function Hero() {
         <Container className="flex flex-col items-center gap-3">
           {/* <Map className="w-7 h-7" /> */}
           <p className="text-center">
-            OpenJustice currently provides legal data for the US and Canada
+            OpenJustice is currently trained on legal data for the US and Canada
             (with limited coverage). We are working on expanding our coverage to
             include legal data from the EU, France, and select Australian
             jurisdictions. Additionally, we are working on integrating
