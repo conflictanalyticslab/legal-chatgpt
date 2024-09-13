@@ -7,6 +7,7 @@ import Link from "next/link";
 import { TwoPartners } from "@/components/Partners/TwoPartners";
 import SlidingPartners from "@/components/Partners/SlidingPartners";
 import PublicFooter from "@/components/PublicShell/PublicFooter";
+import { Lightbulb, Map } from "lucide-react";
 
 export default function Home() {
   return (
@@ -43,12 +44,13 @@ function Hero() {
             <div className="flex flex-col gap-[30px] items-center lg:items-start pl-1">
               <div className=" text-xs sm:text-xl text-[--grey] text-center lg:text-left">
                 <p>
-                  OpenJustice currently provides legal data for the US and
-                  Canada (with limited coverage). We are working on expanding
-                  our coverage to include legal data from the EU, France, and
-                  select Australian jurisdictions. Additionally, we are working
-                  on integrating International Law, particularly for civil
-                  service matters.
+                  Our goal is to deliver accessible, reliable legal AI.
+                  OpenJustice, built on advanced language models for law,
+                  processes queries and documents, drawing from vast legal
+                  sources to provide precise, comprehensive answers and
+                  innovative tools for law students and lawyers. As a growing
+                  prototype, we value your feedback to improve and ensure
+                  OpenJustice's dependability.
                 </p>
                 <p className="font-normal text-primaryOJ mt-4">
                   OpenJustice is open to all lawyers and legal professionals
@@ -76,6 +78,19 @@ function Hero() {
           </div>
         </div>
       </Container>
+
+      <div className="w-full bg-[#193a63] text-white border-solid border-[1px] py-4 shadow-lg">
+        <Container className="flex flex-col items-center gap-3">
+          {/* <Map className="w-7 h-7" /> */}
+          <p className="text-center">
+            OpenJustice currently provides legal data for the US and Canada
+            (with limited coverage). We are working on expanding our coverage to
+            include legal data from the EU, France, and select Australian
+            jurisdictions. Additionally, we are working on integrating
+            International Law, particularly for civil service matters.
+          </p>
+        </Container>
+      </div>
 
       {/* Partners Page */}
       <div className="bg-white py-[50px] md:py-0 md:min-h-[446px] flex items-center ">

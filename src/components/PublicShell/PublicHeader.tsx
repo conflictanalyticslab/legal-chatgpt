@@ -45,7 +45,7 @@ export function PublicHeader() {
       url: "https://conflictanalytics.queenslaw.ca/publications",
     },
     { id: 3, route: "Blogs", url: "https://myopencourt.org/blog/" },
-    { id: 4, route: "FAQs", url: "https://myopencourt.org/faqs/" },
+    { id: 4, route: "FAQs", url: "/faq" },
     { id: 5, route: "Waitlist", url: "/waitlist" },
     { id: 6, route: "Login", url: "/login" },
   ];
