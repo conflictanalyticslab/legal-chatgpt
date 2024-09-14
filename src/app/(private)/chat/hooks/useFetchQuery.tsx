@@ -2,7 +2,6 @@ import { auth } from "@/lib/firebase/firebase";
 import { DocumentQueryOptions, PineconeNamespaces } from "../enum/enums";
 import { useChatContext } from "../store/ChatContext";
 import useUpsertConversation from "../utils/firebase/upsertConversation";
-import { useFetchWithLLM } from "../utils/LLM/normal_LLM_utils";
 import { useFetchLLMResponse } from "../utils/LLM/useFetchLLMResponse";
 import { errorResponse } from "@/utils/utils";
 
@@ -20,10 +19,17 @@ const useFetchQuery = () => {
     setInfoAlert,
     handleBeforeUnload,
     includedDocuments,
-    dialogFlow
+    dialogFlow,
+    num,
   } = useChatContext();
 
   const fetchQuery = async (queryInput: string) => {
+
+    // Checks if the user used up their available number of prompts
+    if (num <= 0) {
+      setInfoAlert("No more prompts available...");
+    }
+
     if (queryInput === "") return;
 
     // Check for authentication

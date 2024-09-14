@@ -29,18 +29,15 @@ import "./Chat.css";
 import { Label } from "@/components/ui/label";
 import { cn, errorResponse } from "@/utils/utils";
 import useFetchQuery from "../../hooks/useFetchQuery";
-import { getAuthenticatedUser } from "@/lib/requests/getAuthenticatedUser";
 import { getDocumentsOwnedByUser } from "@/lib/requests/getDocumentsOwnedByUser";
 import { getConversationTitles } from "@/lib/requests/getConversationTitles";
 import { getConversation } from "@/lib/requests/getConversation";
+import { useGetAuthenticatedUser } from "@/lib/requests/getAuthenticatedUser";
 
 export function Chat() {
-  const router = useRouter();
-
   const {
     alert,
     setAlert,
-    setDocumentQueryMethod,
     setConversationTitles,
     setConversationId,
     infoAlert,
@@ -50,10 +47,10 @@ export function Chat() {
     conversation,
     setConversation,
     latestResponse,
-    setNum,
     scrollIntoViewRef,
     conversationId,
   } = useChatContext();
+  useGetAuthenticatedUser();
 
   const { fetchQuery } = useFetchQuery();
 
@@ -96,16 +93,6 @@ export function Chat() {
 
   async function initalizeChat() {
     try {
-      const user = await getAuthenticatedUser();
-      if (user) {
-        setNum(user.prompts_left);
-        setAlert("");
-      }
-    } catch (error: unknown) {
-      router.push("/login");
-    }
-
-    try {
       setDocuments(await getDocumentsOwnedByUser());
       setConversationTitles(await getConversationTitles());
     } catch (error: unknown) {
@@ -128,15 +115,6 @@ export function Chat() {
   const handleQueryPrompt = (prompt: string) => {
     fetchQuery(prompt);
   };
-
-  /**
-   * Resets all of the previously selected options for dataset options
-   */
-  useEffect(() => {
-    // const documentQuerChoice = localStorage.getItem("documentQueryPrevChoice");
-    // if (documentQueryChoice)
-    //   setDocumentQueryMethod(JSON.parse(documentQueryChoice));
-  }, []);
 
   return (
     <>
@@ -190,7 +168,7 @@ export function Chat() {
           {/* Query Input Text Field */}
           <ConversationQuery />
         </div>
-        
+
         {/* Alert Modal */}
         <AlertDialog open={!!alert}>
           <AlertDialogTitle className="hidden"></AlertDialogTitle>

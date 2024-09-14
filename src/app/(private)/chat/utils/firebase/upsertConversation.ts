@@ -12,11 +12,9 @@ import { useChatContext } from "../../store/ChatContext";
 import { postConversationSave } from "@/lib/requests/postConversationSave";
 import { postConversationTitle } from "@/lib/requests/postConversationTitle";
 import { conversationSchemaArray } from "@/models/ConversationSchema";
-import {
-  conversationTitleSchema,
-  conversationTitleSchemaArray,
-} from "@/models/ConversationTitleSchema";
-import { Timestamp } from "firebase/firestore";
+import { conversationTitleSchema } from "@/models/ConversationTitleSchema";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase/firebase";
 
 const useUpsertConversation = () => {
   const {
@@ -29,6 +27,9 @@ const useUpsertConversation = () => {
     setConversationId,
     handleBeforeUnload,
     conversationTitles,
+    num,
+    setNum,
+    user,
   } = useChatContext();
 
   /**
@@ -63,9 +64,13 @@ const useUpsertConversation = () => {
             includedDocuments,
             title
           );
+
           const data = await response.json();
+
           // Validate the new title
-          const validConversationTitle = conversationTitleSchema.parse(data.data);
+          const validConversationTitle = conversationTitleSchema.parse(
+            data.data
+          );
 
           // Setting the active conversation title and id to the newly created one
           setConversationId(validConversationTitle.conversationId);
@@ -77,17 +82,26 @@ const useUpsertConversation = () => {
         }
 
         window.removeEventListener("beforeunload", handleBeforeUnload);
+      } else {
+        // 1. UPDATE EXISTING CONVERSATION TO FIRESTORE
+        await putConversationSave(
+          conversationId, // Note the conversation Uid is really just the user_id in firestore
+          conversation,
+          includedDocuments,
+          conversationTitle,
+          conversationId
+        );
       }
 
-      if (!conversationId) return;
-
-      // 1. UPDATE EXISTING CONVERSATION TO FIRESTORE
-      await putConversationSave(
-        conversationId, // Note the conversation Uid is really just the user_id in firestore
-        conversation,
-        includedDocuments,
-        conversationTitle,
-        conversationId
+      // Decrement the prompt count
+      // Todo: refactor this:
+      setNum((prevNum: number) => prevNum - 1);
+      await setDoc(
+        doc(db, "users", (await auth?.currentUser?.getIdToken()) ?? ""),
+        {
+          ...user,
+          prompts_left: num - 1,
+        }
       );
     } catch (error) {
       console.error("Error upserting conversation:", error);

@@ -61,7 +61,7 @@ export function useFetchLLMResponse() {
       });
       const relevantDocPromise = pdfSearch(queryInput, namespace);
 
-      // Use Promise.all to wait for both promises to complete
+      // Use Promise.all to wait for both the LLM response and semantic search documents to complete
       const [llmResponse, _relevantDocResponse] = await Promise.all([
         llmPromise,
         relevantDocPromise,
@@ -102,7 +102,7 @@ export function useFetchLLMResponse() {
           if (!generateFlagRef.current) return;
 
           // Introduce a delay between words
-          await sleep(30); // Adjust the delay as needed
+          await sleep(20); // Adjust the delay as needed
         }
 
         // Read the next chunk
@@ -119,6 +119,7 @@ export function useFetchLLMResponse() {
 
       // Add in the content for the LLM's response
       fullConversation[fullConversation.length - 1].content = latestText;
+
       setLatestResponse("");
       setConversation([...fullConversation]);
       setDocumentQuery(queryInput);

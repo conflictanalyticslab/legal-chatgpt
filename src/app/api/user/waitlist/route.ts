@@ -18,7 +18,6 @@ export async function POST(req: Request) {
         })
         return NextResponse.json({  }, { status: 201} )
     }  catch (error: any) {
-        console.log("Waitlist registration not successful")
         console.error(error.message);
         return NextResponse.json({ error: error.message }, { status: 400 });
     }

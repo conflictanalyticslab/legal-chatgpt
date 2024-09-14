@@ -42,7 +42,10 @@ export function usePdfSearch() {
       const useSemanticPromise =
         namespace === PineconeNamespaces.canadian_law ||
         namespace === PineconeNamespaces.french_law ||
-        namespace === PineconeNamespaces.australian_law;
+        namespace === PineconeNamespaces.australian_law ||
+        namespace === PineconeNamespaces.minimum_standards_termination ||
+        namespace === PineconeNamespaces.reasonable_notice_termination ||
+        namespace === PineconeNamespaces.without_cause_termination;
 
       const useKeywordPromise =
         namespace === PineconeNamespaces.canadian_law ||
@@ -56,17 +59,20 @@ export function usePdfSearch() {
       // Checks to see whether we are using Keyword and/or Semantic search
       if (useSemanticPromise && useKeywordPromise) {
         // Semantic && Keyword Promise
-        if (!pineconeDocs?.success || !keywordDocs.success)
-          throw new Error("Failed to fetch relevant documents");
+        if (!pineconeDocs?.success || !keywordDocs.success) {
+          console.log("Pinecone docs", pineconeDocs);
+          console.log("keyword docs", keywordDocs);
+          throw new Error(pineconeDocs?.error ?? "");
+        }
 
-        documentResults.push(...pineconeDocs.data);
+        documentResults.push(...pineconeDocs.data as RelevantDocument[]);
         documentResults.push(...keywordDocs.data);
       } else if (useSemanticPromise) {
         // Semantic Promise
         if (!pineconeDocs?.success)
           throw new Error("Failed to fetch relevant documents");
 
-        documentResults.push(...pineconeDocs.data);
+        documentResults.push(...pineconeDocs.data as RelevantDocument[]);
       } else if (useKeywordPromise) {
         // Keyword Promise
         if (!keywordDocs?.success)
@@ -82,7 +88,6 @@ export function usePdfSearch() {
           variant: "default",
         });
 
-      console.log("these are the document results", documentResults);
       setRelevantDocs(documentResults);
     } catch (e: unknown) {
       setInfoAlert(errorResponse(e));

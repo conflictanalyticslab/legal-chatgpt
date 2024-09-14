@@ -6,7 +6,6 @@ import { authenticateApiUser } from "@/lib/api/middleware/authenticateApiUser";
 
 // Get all documents owned by the user in the authentication header
 export async function GET(_: Request) {
-  // console.log("GET /api/user/document")
   const { earlyResponse, decodedToken } = await authenticateApiUser();
   if (earlyResponse) {
     return earlyResponse;

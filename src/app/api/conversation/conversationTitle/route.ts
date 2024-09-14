@@ -9,7 +9,6 @@ import { getFirestore } from "firebase-admin/firestore";
 import { authenticateApiUser } from "@/lib/api/middleware/authenticateApiUser";
 import { loadUser } from "@/lib/api/middleware/loadUser";
 import { queryOpenAi } from "@/lib/LLM/queryOpenAi";
-import queryLlama2 from "@/lib/LLM/queryLlama2";
 import { NextResponse } from "next/server";
 import { authenticateUser, validatePromptCount } from "./utils/validation";
 import {
@@ -58,7 +57,6 @@ export async function GET(_: Request) {
 
     return NextResponse.json({ titles: validTitles }, { status: 200 });
   } catch (error: unknown) {
-    // console.log(errorResponse(error));
     return NextResponse.json(apiErrorResponse(error), { status: 400 });
   }
 }
@@ -117,46 +115,11 @@ export async function POST(req: Request) {
       });
     }
   } catch (error) {
-    //Do nothing so we can proceed to LLAMA model
-    console.log(
-      "====================== QUERYING LLAMA2 ======================"
-    );
-  }
-
-  // Querying LLAMA
-  try {
-    const llmResponse: any = await queryLlama2({
-      messages: [
-        ...conversation,
-        {
-          role: "user",
-          content: "give a title to the current conversation.",
-        },
-      ],
-    });
-
-    const title = llmResponse.choices[0].message.content;
-
-    // Return LLM generated title
-    if (!llmResponse)
-      return NextResponse.json(
-        { error: "Failed to generate title for conversation" },
-        { status: 400 }
-      );
-
-    // Return back Response
-    return NextResponse.json({
-      title,
-    });
-  } catch (error) {
-    console.error(
-      "queryLlama2 failed in conversation/route.ts for second response: ",
-      error
-    );
-    // Return error failed to generate title
     return NextResponse.json(
       { error: "Failed to generate title for conversation" },
       { status: 400 }
     );
   }
 }
+
+

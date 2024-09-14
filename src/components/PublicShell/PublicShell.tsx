@@ -10,10 +10,12 @@ export function PublicShell({
   showFooter?: boolean;
 }) {
   return (
-    <div className="grid grid-rows-[auto_1fr_auto] min-h-screen">
+    <>
       <PublicHeader />
-      {children}
+      <div className="grid grid-rows-[auto_1fr_auto] min-h-screen mx-5">
+        {children}
+      </div>
       {showFooter && <PublicFooter />}
-    </div>
+    </>
   );
 }

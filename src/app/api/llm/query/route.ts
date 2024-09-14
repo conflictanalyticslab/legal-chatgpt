@@ -56,6 +56,9 @@ async function* makeIterator({
   dialogFlow: string;
 }) {
   try {
+
+    
+    //TODO: Check if i need to implement firebase initialize app
     admin.auth().verifyIdToken(token as string);
 
     // ********************************* LLM INITIALIZATION ********************************* //
@@ -92,7 +95,7 @@ async function* makeIterator({
       {
         // 'context' is a variable in our prompt, the callback function value is what is passed into the prompt
         context: async (input) => {
-          // Retrieve documents from Pinecone and format the documents as a string for the prompt
+          // Retrieve documents from Pinecone as well as the uploaded documents and format the documents as a string for the prompt
           const semanticDocsResponse = retriever.invoke(input);
           const uploadedDocResponse = createDocumentPrompt(includedDocuments);
           const [semanticDocs, uploadedDocs] = await Promise.all([semanticDocsResponse, uploadedDocResponse])

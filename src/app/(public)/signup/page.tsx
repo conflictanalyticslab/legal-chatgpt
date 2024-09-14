@@ -29,12 +29,15 @@ import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/models/schema";
-import { auth } from "@/lib/firebase/firebase";
+import { auth, db } from "@/lib/firebase/firebase";
 import { errorResponse } from "@/utils/utils";
 import { useChatContext } from "@/app/(private)/chat/store/ChatContext";
 import { getDatabase, ref, child, get } from "firebase/database";
 import { z } from "zod";
 import Image from "next/image";
+import { createDoc } from "@/lib/firebase/crud_utils";
+import { userSchema } from "@/models/UserSchema";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -61,10 +64,8 @@ export default function Signup() {
       get(child(dbRef, `whitelist-emails`))
         .then((snapshot: { exists: () => any; val: () => unknown }) => {
           if (snapshot.exists()) {
-            console.log(snapshot);
             resolve(snapshot.val());
           } else {
-            console.log("No whitelist email available");
             resolve("No white list email available");
           }
         })
@@ -102,6 +103,18 @@ export default function Signup() {
         email,
         password
       );
+
+      // Adding user to list of valid users
+      const validData = userSchema.parse({
+        email,
+        prompts_allowed: 100,
+        prompts_left: 100,
+        role: "default",
+        verified: true,
+      });
+      // Add a new document in collection "cities"
+      await setDoc(doc(db, "users", userCredential.user.uid), validData);
+
       const user = userCredential.user;
       setUser(user);
       router.push("/chat");

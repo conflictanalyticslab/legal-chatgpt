@@ -31,8 +31,9 @@ import {
 import Link from "next/link";
 import InputFormField from "@/components/Auth/InputFormField";
 import { Label } from "@/components/ui/label";
-import { auth } from "@/lib/firebase/firebase";
+import { auth, db } from "@/lib/firebase/firebase";
 import Image from "next/image";
+import { setDoc } from "firebase/firestore";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -89,7 +90,8 @@ export default function Login() {
       // }
 
       // Sign In With Firebase
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // setDoc(doc(db, "users", userCredential.user.uid), {})
       router.push("/chat");
     } catch (error: unknown) {
       form.setError("email", {
@@ -104,10 +106,6 @@ export default function Login() {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log(form.formState.errors);
-  }, [form.formState.errors]);
 
   return (
     <Form {...form}>
@@ -129,7 +127,7 @@ export default function Login() {
           </div>
 
           {/* Email */}
-          <InputFormField form={form} name="email" type="email" />
+          <InputFormField form={form} label="Email" name="email" type="email" />
 
           <div className="flex flex-col gap-1">
             {/* Password */}

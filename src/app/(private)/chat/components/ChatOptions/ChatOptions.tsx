@@ -3,7 +3,6 @@ import { FileUp, FolderSearch, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchDocuments from "./components/SearchDocuments";
 import { cn } from "@/utils/utils";
-import { ChatAction } from "../../enum/enums";
 import { useChatContext } from "../../store/ChatContext";
 import UploadDocument from "../ConversationQuery/UploadDocument/UploadDocument";
 import UploadedDocuments from "./components/UploadedDocuments";
@@ -14,13 +13,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ChatPanelOptions } from "../../enum/enums";
 
 function ChatOptions() {
-  const { chatAction, setChatAction } = useChatContext();
+  const { chatPanelOption, setChatPanelOption } = useChatContext();
 
-  const toggleChatAction = (actionLabel: string) => {
-    if (chatAction === actionLabel) setChatAction(null);
-    else setChatAction(actionLabel);
+  const togglechatPanelOption = (actionLabel: string) => {
+    if (chatPanelOption === actionLabel) setChatPanelOption(null);
+    else setChatPanelOption(actionLabel);
   };
 
   return (
@@ -30,10 +30,10 @@ function ChatOptions() {
           <Tooltip>
             <TooltipTrigger className="!m-0" asChild>
               <Button
-                onClick={() => toggleChatAction(ChatAction.searchDocuments)}
+                onClick={() => togglechatPanelOption(ChatPanelOptions.searchDocuments)}
                 variant={"ghost"}
                 className={cn("p-2 cursor-pointer hover:bg-initial", {
-                  "bg-[#E2E8F0]": chatAction === ChatAction.searchDocuments,
+                  "bg-[#E2E8F0]": chatPanelOption === ChatPanelOptions.searchDocuments,
                 })}
               >
                 <FolderSearch className="h-5 w-5" />
@@ -48,10 +48,10 @@ function ChatOptions() {
           <Tooltip>
             <TooltipTrigger className="!m-0" asChild>
               <Button
-                onClick={() => toggleChatAction(ChatAction.uploadDocuments)}
+                onClick={() => togglechatPanelOption(ChatPanelOptions.uploadDocuments)}
                 variant={"ghost"}
                 className={cn("p-2 cursor-pointer hover:bg-initial", {
-                  "bg-[#E2E8F0]": chatAction === ChatAction.uploadDocuments,
+                  "bg-[#E2E8F0]": chatPanelOption === ChatPanelOptions.uploadDocuments,
                 })}
               >
                 <FileUp className="h-5 w-5" />
@@ -66,10 +66,10 @@ function ChatOptions() {
           <Tooltip>
             <TooltipTrigger className="!m-0" asChild>
               <Button
-                onClick={() => toggleChatAction(ChatAction.dataFilters)}
+                onClick={() => togglechatPanelOption(ChatPanelOptions.dataFilters)}
                 variant={"ghost"}
                 className={cn("p-2 cursor-pointer hover:bg-initial", {
-                  "bg-[#E2E8F0]": chatAction === ChatAction.dataFilters,
+                  "bg-[#E2E8F0]": chatPanelOption === ChatPanelOptions.dataFilters,
                 })}
               >
                 <Settings2 className="h-5 w-5" />
@@ -84,12 +84,12 @@ function ChatOptions() {
       <div
         className={cn(
           "w-0 overflow-y-hidden transition-all duration-300 ease-in-out",
-          { "px-2 w-[300px]": chatAction }
+          { "px-2 w-[300px]": chatPanelOption }
         )}
       >
-        {chatAction === ChatAction.searchDocuments && <SearchDocuments />}
-        {chatAction === ChatAction.uploadDocuments && <UploadedDocuments />}
-        {chatAction === ChatAction.dataFilters && <DatasetOptions />}
+        {chatPanelOption === ChatPanelOptions.searchDocuments && <SearchDocuments />}
+        {chatPanelOption === ChatPanelOptions.uploadDocuments && <UploadedDocuments />}
+        {chatPanelOption === ChatPanelOptions.dataFilters && <DatasetOptions />}
       </div>
     </div>
   );
