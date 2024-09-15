@@ -9,7 +9,8 @@ export const OJ_PROMPT = ChatPromptTemplate.fromTemplate(
   Your answers will be used in serious court-based and legal situations, so it is essential that the information is correct.
   Also, use the following context to answer the question.
   It is ESSENTIAL to provide the 'url:' and not the 'file name' (but label it as 'Reference:') value from the context below to support your answer (if applicable).
-  If the context is irrelevant just provide an answer with your current knowledge base to answer the question and don't provide a 'reference:' label and don't put references that aren't provided in the context below.
+  Also ALWAYS give your answer in ENGLISH, unless specified otherwise.
+  If the context is irrelevant just provide an answer with your current knowledge base to answer the question and don't provide a 'Reference:' label in the output if there is none and don't put references that aren't provided in the context below.
   
   {context}
   
