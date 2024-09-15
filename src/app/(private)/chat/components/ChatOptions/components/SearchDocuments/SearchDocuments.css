@@ -1,0 +1,11 @@
+#search-documents {
+  div[data-orientation="vertical"] {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  h3 + div {
+    height:100%;
+    overflow:hidden
+  }
+}

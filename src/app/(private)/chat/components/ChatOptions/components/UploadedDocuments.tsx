@@ -70,8 +70,9 @@ export default function UploadedDocuments() {
   };
 
   return (
-    <div className="grid grid-rows-[auto_1fr] items-center gap-4 py-5">
-      <h2 className="text-xl text-center font-bold">Uploaded Documents</h2>
+    <div className="grid grid-rows-[auto_1fr] items-center gap-4 py-8">
+      <Label className="font-bold pt-[1rem]">Uploaded Documents</Label>
+
       {/* Uploaded Documents */}
       <div className="grid grid-cols-1 gap-2">
         {documents.length > 0 ? (
@@ -186,7 +187,7 @@ export default function UploadedDocuments() {
             </div>
           ))
         ) : (
-          <Card className="bg-transparent w-full">
+          <Card className="bg-transparent w-full ">
             <CardContent className="p-3 flex justify-center h-[100px] items-center">
               <Label className="text-center">No Documents Uploaded</Label>
             </CardContent>

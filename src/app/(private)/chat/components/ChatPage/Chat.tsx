@@ -33,6 +33,8 @@ import { getDocumentsOwnedByUser } from "@/lib/requests/getDocumentsOwnedByUser"
 import { getConversationTitles } from "@/lib/requests/getConversationTitles";
 import { getConversation } from "@/lib/requests/getConversation";
 import { useGetAuthenticatedUser } from "@/lib/requests/getAuthenticatedUser";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase/firebase";
 
 export function Chat() {
   const {
@@ -91,24 +93,25 @@ export function Chat() {
     getSelectedConversation();
   }, [conversationId]);
 
-  async function initalizeChat() {
-    try {
-      setDocuments(await getDocumentsOwnedByUser());
-      setConversationTitles(await getConversationTitles());
-    } catch (error: unknown) {
-      setInfoAlert(errorResponse(error));
-    }
-  }
-
   /**
    * Authenticating User and getting user documents and setting conversation titles
    */
   useEffect(() => {
     setAlert("Authenticating user...");
-    initalizeChat();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      try {
+        setDocuments(await getDocumentsOwnedByUser());
+        setConversationTitles(await getConversationTitles());
+      } catch (error: unknown) {
+        setInfoAlert(errorResponse(error));
+      }
+    });
 
     return () => {
-      setInfoAlert("");
+      setInfoAlert(""); // Clearing alerts if needed
+      if (unsubscribe) {
+        unsubscribe(); // Ensures unsubscribe is called only if it's defined
+      }
     };
   }, []);
 

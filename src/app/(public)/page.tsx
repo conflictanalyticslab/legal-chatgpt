@@ -30,8 +30,7 @@ function Hero() {
             {/* Title Heading */}
             <div className="flex flex-col gap-[5px] w-full">
               <h1 className="text-[2rem] sm:text-[2.2rem] md:text-[2.6rem] lg:text-5xl font-bold text-left w-full leading-tight">
-                Generative AI Designed for
-                Law
+                Generative AI Designed for Law
               </h1>
               <div className="flex flex-wrap gap-x-[15px] justify-start pl-1">
                 <p className="text-sm sm:text-xl font-normal"> Expert-led </p>
@@ -142,7 +141,6 @@ function Hero() {
             url: "/assets/partners/non-profit/legal-clinic.png",
             width: "w-[100%]",
             height: "h-[120px]",
-
           },
         ]}
       />
@@ -168,9 +166,7 @@ function Hero() {
         </div>
       </div>
 
-      <div className="w-full">
-        <PublicFooter />
-      </div>
+      <PublicFooter />
     </main>
   );
 }
