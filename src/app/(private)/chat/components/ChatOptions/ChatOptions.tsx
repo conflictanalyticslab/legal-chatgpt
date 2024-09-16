@@ -22,7 +22,7 @@ function ChatOptions() {
   };
 
   return (
-    <div className="fixed right-0 top-[60px] h-[calc(100vh-60px)] grid border-3  mt-auto">
+    <div className="fixed right-0 top-[60px] h-[calc(100vh-60px)] grid border-3 mt-auto">
       <div className="fixed right-[10px] top-0 p-2 flex gap-3 z-50">
         <TooltipProvider delayDuration={0}>
           <Tooltip>
@@ -75,7 +75,7 @@ function ChatOptions() {
       </div>
       <div
         className={cn(
-          "w-0 overflow-y-hidden transition-all duration-500 ease-in-out shadow-3 rounded-md relative pt-0",
+          "w-0 overflow-y-hidden transition-all duration-500 ease-in-out shadow-3 rounded-md relative pt-0 bg-[#f5f5f7]",
           { "px-4 w-[300px] m-4 mt-0": chatPanelOption }
         )}
       >

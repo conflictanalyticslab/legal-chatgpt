@@ -1,7 +1,5 @@
 "use client";
 import React from "react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Form,
@@ -27,25 +25,22 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import "./SearchDocuments.css"
+import "./SearchDocuments.css";
+import { PineconeNamespaces } from "@/app/(private)/chat/enum/enums";
 
 const SearchDocuments = () => {
   const {
     relevantDocs,
     documentQuery,
-    setDocumentQuery,
     namespace,
     pdfLoading,
   } = useChatContext();
   const { pdfSearch } = usePdfSearch();
 
   const formSchema = z.object({
-    documentQuery: z
-      .string()
-      .min(0, {
-        message: "Query shouldn't be empty",
-      })
-      .optional(),
+    documentQuery: z.string().min(0, {
+      message: "Query shouldn't be empty",
+    }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -57,12 +52,14 @@ const SearchDocuments = () => {
 
   const handleSearchDocuments = async (form: z.infer<typeof formSchema>) => {
     if (pdfLoading) return;
-    // Chooses which method we are using to query for the pdf
-    pdfSearch(documentQuery, namespace);
+    pdfSearch(form.documentQuery, namespace);
   };
 
   return (
-    <div id="search-documents" className="py-8 grid grid-rows-[auto_1fr] h-full gap-0 overflow-hidden">
+    <div
+      id="search-documents"
+      className="py-8 grid grid-rows-[auto_1fr] h-full gap-0 overflow-hidden"
+    >
       <DatasetSelection />
 
       <div className="flex flex-col gap-3 overflow-hidden">
@@ -88,10 +85,7 @@ const SearchDocuments = () => {
                             placeholder="What is employment Law?"
                             {...field}
                             value={documentQuery}
-                            onChange={(event) =>
-                              setDocumentQuery(event.target.value)
-                            }
-                            disabled={pdfLoading}
+                            disabled={pdfLoading || namespace === PineconeNamespaces.no_dataset}
                             className="w-full bg-[#f8f8f8] text-left"
                           />
                         </FormControl>
@@ -109,7 +103,7 @@ const SearchDocuments = () => {
                 )}
               >
                 {/* List of Documents */}
-                {pdfLoading ? (
+                {pdfLoading && namespace !== PineconeNamespaces.no_dataset ? (
                   // Loading animation for relevant documents
                   <Label className="text-[grey] flex items-center gap-3 justify-center h-full flex-col text-nowrap">
                     Finding Relevant Documents

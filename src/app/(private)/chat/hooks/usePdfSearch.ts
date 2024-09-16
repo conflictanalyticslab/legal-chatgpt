@@ -30,6 +30,7 @@ export function usePdfSearch() {
   const pdfSearch = async (userQuery: string, namespace: string) => {
     try {
       setPdfLoading(true);
+      
       // Assign promises to variables to be called concurrently
       const keywordDocPromise = fetchKeywordDocs(userQuery, namespace);
       const semanticDocPromise = fetchSemanticDocs(

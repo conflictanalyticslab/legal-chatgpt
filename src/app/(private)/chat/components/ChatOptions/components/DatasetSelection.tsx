@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/accordion";
 
 export function DatasetSelection() {
-  const { setNamespace, namespace, setIndexName } = useChatContext();
+  const { setNamespace, namespace, setIndexName, loading } = useChatContext();
 
   const handleChangeDataset = (value: string) => {
     setNamespace(value);
@@ -33,20 +33,28 @@ export function DatasetSelection() {
               value={namespace}
               onValueChange={handleChangeDataset}
               className="flex flex-col gap-5"
+              disabled={loading}
             >
+              <span className="flex justify-start items-center gap-2">
+                <RadioGroupItem
+                  id={PineconeNamespaces.no_dataset}
+                  value={PineconeNamespaces.no_dataset}
+                />
+                <Label className="cursor-pointer" htmlFor={PineconeNamespaces.no_dataset}>No Dataset</Label>
+              </span>
               <span className="flex justify-start items-center gap-2">
                 <RadioGroupItem
                   id={PineconeNamespaces.canadian_law}
                   value={PineconeNamespaces.canadian_law}
                 />
-                <Label htmlFor={PineconeNamespaces.canadian_law}>Canada</Label>
+                <Label className="cursor-pointer" htmlFor={PineconeNamespaces.canadian_law}>Canada</Label>
               </span>
               <span className="flex justify-start items-center gap-2">
                 <RadioGroupItem
                   id={PineconeNamespaces.unitedStates_law}
                   value={PineconeNamespaces.unitedStates_law}
                 />
-                <Label htmlFor={PineconeNamespaces.unitedStates_law}>
+                <Label className="cursor-pointer" htmlFor={PineconeNamespaces.unitedStates_law}>
                   United States
                 </Label>
               </span>
@@ -55,14 +63,14 @@ export function DatasetSelection() {
                   id="french_law"
                   value={PineconeNamespaces.french_law}
                 />
-                <Label htmlFor="french_law">Leiden IAL</Label>
+                <Label className="cursor-pointer" htmlFor="french_law">Leiden IAL</Label>
               </span>
               <span className="flex justify-start items-center gap-2">
                 <RadioGroupItem
                   id={PineconeNamespaces.australian_law}
                   value={PineconeNamespaces.australian_law}
                 />
-                <Label htmlFor={PineconeNamespaces.australian_law}>
+                <Label className="cursor-pointer" htmlFor={PineconeNamespaces.australian_law}>
                   Australian Scrutiny
                 </Label>
               </span>
@@ -72,7 +80,7 @@ export function DatasetSelection() {
                   value={PineconeNamespaces.minimum_standards_termination}
                 />
                 <Label
-                  htmlFor={PineconeNamespaces.minimum_standards_termination}
+                  className="cursor-pointer" htmlFor={PineconeNamespaces.minimum_standards_termination}
                 >
                   Notice of Termination (Minimum Standards)
                 </Label>
@@ -83,7 +91,7 @@ export function DatasetSelection() {
                   value={PineconeNamespaces.reasonable_notice_termination}
                 />
                 <Label
-                  htmlFor={PineconeNamespaces.reasonable_notice_termination}
+                  className="cursor-pointer" htmlFor={PineconeNamespaces.reasonable_notice_termination}
                 >
                   Reasonable Notice of Termination
                 </Label>
@@ -93,7 +101,7 @@ export function DatasetSelection() {
                   id={PineconeNamespaces.without_cause_termination}
                   value={PineconeNamespaces.without_cause_termination}
                 />
-                <Label htmlFor={PineconeNamespaces.without_cause_termination}>
+                <Label className="cursor-pointer" htmlFor={PineconeNamespaces.without_cause_termination}>
                   Reviewing a Without Cause Termination Clause
                 </Label>
               </span>
@@ -103,7 +111,7 @@ export function DatasetSelection() {
                   id={PineconeNamespaces.constructive_dismissal}
                   value={PineconeNamespaces.constructive_dismissal}
                 />
-                <Label htmlFor={PineconeNamespaces.constructive_dismissal}>
+                <Label className="cursor-pointer" htmlFor={PineconeNamespaces.constructive_dismissal}>
                   Constructive Dismissal
                 </Label>
               </span>
@@ -112,7 +120,7 @@ export function DatasetSelection() {
                   id={PineconeNamespaces.factors_affecting_notice}
                   value={PineconeNamespaces.factors_affecting_notice}
                 />
-                <Label htmlFor={PineconeNamespaces.factors_affecting_notice}>
+                <Label className="cursor-pointer" htmlFor={PineconeNamespaces.factors_affecting_notice}>
                   Factors Affecting Notice
                 </Label>
               </span>
@@ -121,7 +129,7 @@ export function DatasetSelection() {
                   id={PineconeNamespaces.just_cause_dismissal}
                   value={PineconeNamespaces.just_cause_dismissal}
                 />
-                <Label htmlFor={PineconeNamespaces.just_cause_dismissal}>
+                <Label className="cursor-pointer" htmlFor={PineconeNamespaces.just_cause_dismissal}>
                   Just Cause Dismissal
                 </Label>
               </span>
@@ -130,7 +138,7 @@ export function DatasetSelection() {
                   id={PineconeNamespaces.procedure_on_dismissal}
                   value={PineconeNamespaces.procedure_on_dismissal}
                 />
-                <Label htmlFor={PineconeNamespaces.procedure_on_dismissal}>
+                <Label className="cursor-pointer" htmlFor={PineconeNamespaces.procedure_on_dismissal}>
                   Procedure on Dismissal
                 </Label>
               </span>

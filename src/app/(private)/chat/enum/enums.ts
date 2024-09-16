@@ -13,6 +13,7 @@ export enum PineconeIndexes {
 }
 
 export enum PineconeNamespaces {
+  no_dataset = "no_dataset",
   canadian_law = "canadian_law",
   unitedStates_law = "usa_law",
   french_law = "french_law",
