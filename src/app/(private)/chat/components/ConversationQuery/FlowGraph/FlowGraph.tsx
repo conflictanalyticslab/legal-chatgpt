@@ -36,8 +36,8 @@ import { PlusSquare } from "lucide-react";
 import Image from "next/image";
 import { Switch } from "@/components/ui/switch";
 
-const DBURL = "https://graph-module.openjustice.ai"; 
-// const DBURL = "http://localhost:8080";
+// const DBURL = "https://graph-module.openjustice.ai"; 
+const DBURL = "http://localhost:8080";
 
 const lastGraphKey = 'OJLatestGraphId';
 
@@ -195,7 +195,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           if (!response.ok) throw new Error("Failed to save graph");
           else return response.json()
         }).then(body => {
-          localStorage.setItem(lastGraphKey, JSON.stringify(graphId));
+          localStorage.setItem(lastGraphKey, JSON.stringify(body.id));
           setGraphId(body.id)
         }) // will waste an api call, but it's the simplest solution for now
       })
@@ -218,6 +218,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
     setGraphId(null);
     setGraphName("Default Name");
     setNodes(initialNodes);
+    id = 1;
     setEdges([]);
     setViewport({ zoom: 2, x: 500, y: 500 });
     setGraphLoading(false);
@@ -276,6 +277,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           'Authorization': `Bearer ${token}`
         }
       }).then(response => {
+        if (!response.ok) throw new Error("Failed to retrieve graph. Creating new graph.");
         return response.json();
       }).then((body : {
         data: ReactFlowJsonObject,
@@ -288,6 +290,9 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
         setEdges(body.data.edges);
         setViewport(body.data.viewport);
         setGraphLoading(false); // preferablly, this would use a proper trigger
+      }).catch((error) => {
+        console.error(error);
+        handleNewGraph();
       })
     })
   }, [graphId])
