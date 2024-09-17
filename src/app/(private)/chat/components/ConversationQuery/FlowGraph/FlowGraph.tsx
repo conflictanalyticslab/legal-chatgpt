@@ -36,7 +36,7 @@ import { PlusSquare } from "lucide-react";
 import Image from "next/image";
 import { Switch } from "@/components/ui/switch";
 
-const DBURL = "https://48.217.241.192:8080"; // temporary solution, this would go in the .env preferably
+const DBURL = "https://graph-module.openjustice.ai"; 
 // const DBURL = "http://localhost:8080";
 
 const lastGraphKey = 'OJLatestGraphId';
