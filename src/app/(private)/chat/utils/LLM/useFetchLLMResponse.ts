@@ -119,6 +119,11 @@ export function useFetchLLMResponse() {
 
       if (data) await processChunk(data);
 
+      if (latestText === "")
+        throw new Error(
+          "Something went wrong. LLM failed to generate response. Please try again."
+        );
+        
       // Add in the content for the LLM's response
       fullConversation[fullConversation.length - 1].content = latestText;
 
