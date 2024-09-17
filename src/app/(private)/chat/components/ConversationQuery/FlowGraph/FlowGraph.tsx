@@ -446,7 +446,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
 
             <Tooltip>
               <TooltipTrigger asChild>
-              <div 
+                <div 
                   style={{
                     position: "absolute",
                     right: "5px",
@@ -497,8 +497,10 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                 
                 <Tooltip>
                   <TooltipTrigger asChild className="flex flex-row space-x-2 py-4">
-                    <Switch onCheckedChange={(checked: boolean) => setUseCustomLabel(checked)}/>
-                    <Label className="py-2">Use Custom Label</Label>
+                    <>
+                      <Switch onCheckedChange={(checked: boolean) => setUseCustomLabel(checked)}/>
+                      <Label className="py-2">Use Custom Label</Label>
+                    </>
                   </TooltipTrigger>
                   <TooltipContent side="left">
                     Customize how your graph is displayed. OpenJustice will NOT use this to generate a response.
@@ -509,11 +511,13 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                   {useCustomLabel && (
                     <Tooltip>
                       <TooltipTrigger asChild className="flex flex-col">
-                        <Label className="py-2">Label:</Label>
-                        <Input
-                          value={chosenLabel}
-                          onChange={(event) => setChosenLabel(event.target.value)} 
-                        />
+                        <>
+                          <Label className="py-2">Label:</Label>
+                          <Input
+                            value={chosenLabel}
+                            onChange={(event) => setChosenLabel(event.target.value)} 
+                          />
+                        </>
                       </TooltipTrigger>
                       <TooltipContent side="left">
                           Edit how the node or edge is shown in the Dialog Flow window. OpenJustice will NOT use this to generate a response.
@@ -522,12 +526,14 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                   )}
                   <Tooltip>
                     <TooltipTrigger asChild className="flex flex-col">
-                      <Label className="py-2">Body:</Label>
-                      <Textarea
-                        wrap="soft" 
-                        value={chosenBody} 
-                        onChange={(event) => setChosenBody(event.target.value)} 
-                      /> 
+                      <>
+                        <Label className="py-2">Body:</Label>
+                        <Textarea
+                          wrap="soft" 
+                          value={chosenBody} 
+                          onChange={(event) => setChosenBody(event.target.value)} 
+                        /> 
+                      </>
                     </TooltipTrigger>
                     <TooltipContent side="left">
                       Edit the content of the node or edge. OpenJustice will use this to generate a response.
@@ -582,7 +588,6 @@ export function FlowModal() {
           onOpenAutoFocus={(e) => e.preventDefault()}
           className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[85vw] flex flex-col gap-5 overflow-auto box-border"
         >
-          <DialogTitle className="hidden"></DialogTitle>
           <FlowGraph setOpen={setOpen}/>
         </DialogContent>
       </Dialog>
