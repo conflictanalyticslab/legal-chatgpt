@@ -89,23 +89,25 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
 
   const onNodeClick = useCallback<{(_: any, node: Node): void}>(
     (_, node) => {
+      let prevChosenNodeId = chosenNodeId.current; // stores the value before it is changed
+      let prevChosenIsNode = chosenIsNode.current;
       chosenNodeId.current = node.id;
-      let prevChosenIsNode = chosenIsNode.current; // stores the value before it is changed
       chosenIsNode.current = true;
       setChosenLabel(node.data.label as string);
       setChosenBody(node.data.body as string);
-      setEditOpen(prevEditOpen => !prevEditOpen || !prevChosenIsNode); // only closes if a node is clicked again
+      setEditOpen(prevEditOpen => !prevEditOpen || !prevChosenIsNode || node.id != prevChosenNodeId); // only closes if a node is clicked again
     }, []
   );
 
   const onEdgeClick = useCallback<{(_: any, edge: Edge): void}>(
     (_, edge) => {
+      let prevChosenEdgeId = chosenEdgeId.current; // stores the value before it is changed
+      let prevChosenIsNode = chosenIsNode.current;
       chosenEdgeId.current = edge.id;
-      let prevChosenIsNode = chosenIsNode.current; // stores the value before it is changed
       chosenIsNode.current = false;
       setChosenLabel(edge.label as string);
       setChosenBody(edge.data?.body as string);
-      setEditOpen(prevEditOpen => !prevEditOpen || prevChosenIsNode); // only closes if an edge is clicked again
+      setEditOpen(prevEditOpen => !prevEditOpen || prevChosenIsNode || edge.id != prevChosenEdgeId); // only closes if an edge is clicked again
     }, []
   );
 
@@ -496,11 +498,11 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                 </div>
                 
                 <Tooltip>
-                  <TooltipTrigger asChild className="flex flex-row space-x-2 py-4">
-                    <>
+                  <TooltipTrigger asChild>
+                    <div className="flex flex-row space-x-2 py-4">
                       <Switch onCheckedChange={(checked: boolean) => setUseCustomLabel(checked)}/>
                       <Label className="py-2">Use Custom Label</Label>
-                    </>
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent side="left">
                     Customize how your graph is displayed. OpenJustice will NOT use this to generate a response.
@@ -510,14 +512,14 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                 <div className="py-4">
                   {useCustomLabel && (
                     <Tooltip>
-                      <TooltipTrigger asChild className="flex flex-col">
-                        <>
+                      <TooltipTrigger asChild>
+                        <div className="flex flex-col">
                           <Label className="py-2">Label:</Label>
                           <Input
                             value={chosenLabel}
                             onChange={(event) => setChosenLabel(event.target.value)} 
                           />
-                        </>
+                        </div>
                       </TooltipTrigger>
                       <TooltipContent side="left">
                           Edit how the node or edge is shown in the Dialog Flow window. OpenJustice will NOT use this to generate a response.
@@ -525,15 +527,15 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                     </Tooltip>
                   )}
                   <Tooltip>
-                    <TooltipTrigger asChild className="flex flex-col">
-                      <>
+                    <TooltipTrigger asChild>
+                      <div className="flex flex-col">
                         <Label className="py-2">Body:</Label>
                         <Textarea
                           wrap="soft" 
                           value={chosenBody} 
                           onChange={(event) => setChosenBody(event.target.value)} 
                         /> 
-                      </>
+                      </div>
                     </TooltipTrigger>
                     <TooltipContent side="left">
                       Edit the content of the node or edge. OpenJustice will use this to generate a response.
