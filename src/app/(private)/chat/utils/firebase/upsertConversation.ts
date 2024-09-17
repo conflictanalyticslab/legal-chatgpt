@@ -13,7 +13,7 @@ import { postConversationSave } from "@/lib/requests/postConversationSave";
 import { postConversationTitle } from "@/lib/requests/postConversationTitle";
 import { conversationSchemaArray } from "@/models/ConversationSchema";
 import { conversationTitleSchema } from "@/models/ConversationTitleSchema";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase/firebase";
 
 const useUpsertConversation = () => {
@@ -96,13 +96,13 @@ const useUpsertConversation = () => {
       // Decrement the prompt count
       // Todo: refactor this:
       setNum((prevNum: number) => prevNum - 1);
-      await setDoc(
-        doc(db, "users", (await auth?.currentUser?.getIdToken()) ?? ""),
-        {
-          ...user,
-          prompts_left: num - 1,
-        }
-      );
+
+      const newUser = {
+        ...user,
+        prompts_left: num - 1,
+      };
+      const docRef = doc(db, "users", user.uid);
+      await updateDoc(docRef, newUser);
     } catch (error) {
       console.error("Error upserting conversation:", error);
     }

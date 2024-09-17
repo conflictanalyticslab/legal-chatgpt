@@ -13,12 +13,12 @@ export function useGetAuthenticatedUser() {
   const getAuthenticatedUser = async (user: any) => {
     try {
       const docRef = doc(db, "users", user.uid).withConverter(userConverter);
-
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         if (docSnap.data().verified) {
-          setNum(docSnap.data().prompts_left)
-          setUser(docSnap.data());
+          setNum(docSnap.data().prompts_left);
+          let data = { ...docSnap.data(), uid: docSnap.id };
+          setUser(data);
           setAlert("");
         }
       } else {

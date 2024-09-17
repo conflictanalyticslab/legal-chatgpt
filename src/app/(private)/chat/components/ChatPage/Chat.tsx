@@ -34,7 +34,8 @@ import { getConversationTitles } from "@/lib/requests/getConversationTitles";
 import { getConversation } from "@/lib/requests/getConversation";
 import { useGetAuthenticatedUser } from "@/lib/requests/getAuthenticatedUser";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/lib/firebase/firebase";
+import { auth, db } from "@/lib/firebase/firebase";
+import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
 
 export function Chat() {
   const {
@@ -93,6 +94,7 @@ export function Chat() {
     getSelectedConversation();
   }, [conversationId]);
 
+  
   /**
    * Authenticating User and getting user documents and setting conversation titles
    */
@@ -100,6 +102,8 @@ export function Chat() {
     setAlert("Authenticating user...");
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
+        if(user)
+        // await deleteDocumentsWithEmail();
         setDocuments(await getDocumentsOwnedByUser());
         setConversationTitles(await getConversationTitles());
       } catch (error: unknown) {

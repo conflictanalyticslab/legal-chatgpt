@@ -91,7 +91,6 @@ export default function Login() {
 
       // Sign In With Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // setDoc(doc(db, "users", userCredential.user.uid), {})
       router.push("/chat");
     } catch (error: unknown) {
       form.setError("email", {

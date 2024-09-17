@@ -1,5 +1,4 @@
 import { auth } from "@/lib/firebase/firebase";
-import { DocumentQueryOptions, PineconeNamespaces } from "../enum/enums";
 import { useChatContext } from "../store/ChatContext";
 import useUpsertConversation from "../utils/firebase/upsertConversation";
 import { useFetchLLMResponse } from "../utils/LLM/useFetchLLMResponse";

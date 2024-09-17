@@ -76,6 +76,9 @@ export const ChatContextProvider = ({ children }) => {
     restoreUserPreferences();
   }, []);
 
+  if (ChatContext === null) {
+    throw new Error("useChatContext must be used within a ChatContextProvider");
+  }
   return (
     <ChatContext.Provider
       value={{

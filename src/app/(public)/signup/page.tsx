@@ -112,7 +112,6 @@ export default function Signup() {
         role: "default",
         verified: true,
       });
-      // Add a new document in collection "cities"
       await setDoc(doc(db, "users", userCredential.user.uid), validData);
 
       const user = userCredential.user;
