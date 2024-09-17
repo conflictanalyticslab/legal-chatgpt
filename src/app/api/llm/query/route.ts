@@ -15,7 +15,6 @@ import { NextRequest } from "next/server";
 import { getRetriever } from "@/lib/LLM/getRetriever";
 import { Conversation, ConversationalRetrievalQAChainInput } from "@/types/chat";
 import { createDocumentPrompt } from "@/app/(private)/chat/utils/pdfs/pdf_utils";
-import { createGraphPrompt } from "@/app/(private)/chat/utils/graph/graph_utils";
 
 
 /**
@@ -45,15 +44,13 @@ async function* makeIterator({
   indexName = PineconeIndexes.staticDocuments,
   fullConversation = [],
   includedDocuments,
-  dialogFlow
 }: {
   token: string;
   query: string;
   namespace: string;
   indexName: string;
   fullConversation: Conversation[];
-  includedDocuments: string[];
-  dialogFlow: string;
+  includedDocuments: string[]
 }) {
   try {
 
@@ -64,7 +61,7 @@ async function* makeIterator({
     // ********************************* LLM INITIALIZATION ********************************* //
     const llm = new ChatOpenAI({
       apiKey: process.env.OPENAI_API_KEY,
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       temperature: 0,
       streaming: true,
     });
@@ -100,11 +97,8 @@ async function* makeIterator({
           const uploadedDocResponse = createDocumentPrompt(includedDocuments);
           const [semanticDocs, uploadedDocs] = await Promise.all([semanticDocsResponse, uploadedDocResponse])
 
-          const graphPrompt = createGraphPrompt(dialogFlow);
-          // console.log("Graph Prompt", graphPrompt);
-
           // Combines both the semantic searched docs with the uploaded document content
-          const docData = formatDocumentsAsString(semanticDocs as LangchainDocType[]) + "\n\n" + uploadedDocs + "\n\n" + graphPrompt;
+          const docData = formatDocumentsAsString(semanticDocs as LangchainDocType[]) + "\n\n" + uploadedDocs;
           return docData;
         },
         question: new RunnablePassthrough(),

@@ -4,6 +4,7 @@ import { errorResponse } from "@/utils/utils";
 import { usePdfSearch } from "../../hooks/usePdfSearch";
 import { RelevantDocument } from "../../types/RelevantDocument";
 import { UploadedDocument } from "@/types/Document";
+import { PineconeNamespaces } from "../../enum/enums";
 
 /**
  * Custom hook to fetch data with RAG
@@ -35,8 +36,7 @@ export function useFetchLLMResponse() {
   const fetchLLMResponse = async (
     fullConversation: any,
     queryInput: string,
-    includedDocuments: UploadedDocument,
-    dialogFlow: string
+    includedDocuments: UploadedDocument
   ) => {
     try {
       generateFlagRef.current = true;
@@ -46,7 +46,7 @@ export function useFetchLLMResponse() {
       // ---------------------------------------------- Generate RAG RESPONSE ---------------------------------------------- //
 
       // Assign the LLM Response and pdf search promises to variables to be called concurrently
-      const llmPromise = await fetch("/api/llm/query", {
+      const llmPromise = fetch("/api/llm/query", {
         method: "POST", // Specify the request method as POST
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -56,10 +56,12 @@ export function useFetchLLMResponse() {
           indexName,
           fullConversation,
           includedDocuments,
-          dialogFlow,
         }),
       });
-      const relevantDocPromise = pdfSearch(queryInput, namespace);
+      const relevantDocPromise =
+        namespace === PineconeNamespaces.no_dataset
+          ? new Promise((resolve, reject) => resolve(true))
+          : pdfSearch(queryInput, namespace);
 
       // Use Promise.all to wait for both the LLM response and semantic search documents to complete
       const [llmResponse, _relevantDocResponse] = await Promise.all([
@@ -117,6 +119,11 @@ export function useFetchLLMResponse() {
 
       if (data) await processChunk(data);
 
+      if (latestText === "")
+        throw new Error(
+          "Something went wrong. LLM failed to generate response. Please try again."
+        );
+        
       // Add in the content for the LLM's response
       fullConversation[fullConversation.length - 1].content = latestText;
 

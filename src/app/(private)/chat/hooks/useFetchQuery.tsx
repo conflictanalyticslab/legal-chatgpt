@@ -1,5 +1,4 @@
 import { auth } from "@/lib/firebase/firebase";
-import { DocumentQueryOptions, PineconeNamespaces } from "../enum/enums";
 import { useChatContext } from "../store/ChatContext";
 import useUpsertConversation from "../utils/firebase/upsertConversation";
 import { useFetchLLMResponse } from "../utils/LLM/useFetchLLMResponse";
@@ -19,7 +18,6 @@ const useFetchQuery = () => {
     setInfoAlert,
     handleBeforeUnload,
     includedDocuments,
-    dialogFlow,
     num,
   } = useChatContext();
 
@@ -63,8 +61,7 @@ const useFetchQuery = () => {
       setConversation(fullConversation);
 
       // Calls LLM to generate response to query
-      await fetchLLMResponse(fullConversation, queryInput, includedDocuments, dialogFlow);
-
+      await fetchLLMResponse(fullConversation, queryInput, includedDocuments);
       // Save or update the conversation after calling
       upsertConversation(fullConversation);
     } catch (error: any) {

@@ -1,0 +1,28 @@
+#faq {
+  p,
+  li,
+  ul,
+  span {
+    font-weight: normal;
+    line-height: 25px;
+    font-size: 0.875rem;
+    color: rgb(81, 74, 74);
+    text-align: left;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  span {
+    text-align: left;
+  }
+
+  a {
+    color: rgb(0, 34, 255);
+    text-decoration: underline;
+  }
+}

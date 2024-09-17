@@ -1,12 +1,10 @@
 "use client";
-import { FileUp, FolderSearch, Settings2 } from "lucide-react";
+import { FileUp, FolderSearch, Settings2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import SearchDocuments from "./components/SearchDocuments";
+import SearchDocuments from "./components/SearchDocuments/SearchDocuments";
 import { cn } from "@/utils/utils";
 import { useChatContext } from "../../store/ChatContext";
-import UploadDocument from "../ConversationQuery/UploadDocument/UploadDocument";
 import UploadedDocuments from "./components/UploadedDocuments";
-import DatasetOptions from "./components/DatasetOptions";
 import {
   Tooltip,
   TooltipContent,
@@ -24,22 +22,28 @@ function ChatOptions() {
   };
 
   return (
-    <div className="relative h-screen grid border-3 shadow-3">
-      <div className="absolute left-[-150px] p-2 flex gap-3">
+    <div className="fixed right-0 top-[60px] h-[calc(100vh-60px)] grid border-3 mt-auto">
+      <div className="fixed right-[10px] top-0 p-2 flex gap-3 z-50">
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger className="!m-0" asChild>
               <Button
-                onClick={() => togglechatPanelOption(ChatPanelOptions.searchDocuments)}
+                onClick={() =>
+                  togglechatPanelOption(ChatPanelOptions.searchDocuments)
+                }
                 variant={"ghost"}
-                className={cn("p-2 cursor-pointer hover:bg-initial", {
-                  "bg-[#E2E8F0]": chatPanelOption === ChatPanelOptions.searchDocuments,
-                })}
+                className={cn(
+                  "p-2 flex justify-center items-center h-fit cursor-pointer hover:bg-initial rounded-sm border-[1px] border-transparent",
+                  {
+                    "border-border bg-[#f8f8f8]":
+                      chatPanelOption === ChatPanelOptions.searchDocuments,
+                  }
+                )}
               >
-                <FolderSearch className="h-5 w-5" />
+                <FolderSearch className="h-[18px] w-[18px]" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent align="end" sideOffset={10}>
+            <TooltipContent align="end" side="bottom"  sideOffset={10}>
               Search Document
             </TooltipContent>
           </Tooltip>
@@ -48,48 +52,49 @@ function ChatOptions() {
           <Tooltip>
             <TooltipTrigger className="!m-0" asChild>
               <Button
-                onClick={() => togglechatPanelOption(ChatPanelOptions.uploadDocuments)}
+                onClick={() =>
+                  togglechatPanelOption(ChatPanelOptions.uploadDocuments)
+                }
                 variant={"ghost"}
-                className={cn("p-2 cursor-pointer hover:bg-initial", {
-                  "bg-[#E2E8F0]": chatPanelOption === ChatPanelOptions.uploadDocuments,
-                })}
+                className={cn(
+                  "p-2 flex justify-center items-center h-fit cursor-pointer hover:bg-initial rounded-sm border-[1px] border-transparent",
+                  {
+                    "border-border bg-[#f8f8f8]":
+                      chatPanelOption === ChatPanelOptions.uploadDocuments,
+                  }
+                )}
               >
-                <FileUp className="h-5 w-5" />
+                <FileUp className="h-[18px] w-[18px]" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent align="end" sideOffset={10}>
+            <TooltipContent align="end" side="bottom" sideOffset={10}>
               Uploaded Documents
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger className="!m-0" asChild>
-              <Button
-                onClick={() => togglechatPanelOption(ChatPanelOptions.dataFilters)}
-                variant={"ghost"}
-                className={cn("p-2 cursor-pointer hover:bg-initial", {
-                  "bg-[#E2E8F0]": chatPanelOption === ChatPanelOptions.dataFilters,
-                })}
-              >
-                <Settings2 className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent align="end" sideOffset={10}>
-              Dataset Filters
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>
       <div
         className={cn(
-          "w-0 overflow-y-hidden transition-all duration-300 ease-in-out",
-          { "px-2 w-[300px]": chatPanelOption }
+          "w-0 overflow-y-hidden transition-all duration-500 ease-in-out shadow-3 rounded-md relative pt-0 bg-[#f5f5f7]",
+          { "px-4 w-[300px] m-4 mt-0": chatPanelOption }
         )}
       >
-        {chatPanelOption === ChatPanelOptions.searchDocuments && <SearchDocuments />}
-        {chatPanelOption === ChatPanelOptions.uploadDocuments && <UploadedDocuments />}
-        {chatPanelOption === ChatPanelOptions.dataFilters && <DatasetOptions />}
+        <Button
+          variant={"ghost"}
+          className={cn("w-auto h-auto p-0 top-4 right-4 absolute transition-all opacity-1", {
+            "opacity-0": !chatPanelOption,
+          })}
+          onClick={() => setChatPanelOption(null)}
+        >
+          <X className="h-4 w-4 text-black" />
+        </Button>
+
+        {chatPanelOption === ChatPanelOptions.searchDocuments && (
+          <SearchDocuments />
+        )}
+        {chatPanelOption === ChatPanelOptions.uploadDocuments && (
+          <UploadedDocuments />
+        )}
       </div>
     </div>
   );

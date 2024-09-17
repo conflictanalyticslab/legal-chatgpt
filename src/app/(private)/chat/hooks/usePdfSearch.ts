@@ -30,6 +30,7 @@ export function usePdfSearch() {
   const pdfSearch = async (userQuery: string, namespace: string) => {
     try {
       setPdfLoading(true);
+      
       // Assign promises to variables to be called concurrently
       const keywordDocPromise = fetchKeywordDocs(userQuery, namespace);
       const semanticDocPromise = fetchSemanticDocs(
@@ -45,8 +46,11 @@ export function usePdfSearch() {
         namespace === PineconeNamespaces.australian_law ||
         namespace === PineconeNamespaces.minimum_standards_termination ||
         namespace === PineconeNamespaces.reasonable_notice_termination ||
-        namespace === PineconeNamespaces.without_cause_termination;
-
+        namespace === PineconeNamespaces.without_cause_termination ||
+        namespace === PineconeNamespaces.constructive_dismissal ||
+        namespace === PineconeNamespaces.factors_affecting_notice ||
+        namespace === PineconeNamespaces.just_cause_dismissal ||
+        namespace === PineconeNamespaces.procedure_on_dismissal;
       const useKeywordPromise =
         namespace === PineconeNamespaces.canadian_law ||
         namespace === PineconeNamespaces.unitedStates_law;
@@ -65,14 +69,14 @@ export function usePdfSearch() {
           throw new Error(pineconeDocs?.error ?? "");
         }
 
-        documentResults.push(...pineconeDocs.data as RelevantDocument[]);
+        documentResults.push(...(pineconeDocs.data as RelevantDocument[]));
         documentResults.push(...keywordDocs.data);
       } else if (useSemanticPromise) {
         // Semantic Promise
         if (!pineconeDocs?.success)
           throw new Error("Failed to fetch relevant documents");
 
-        documentResults.push(...pineconeDocs.data as RelevantDocument[]);
+        documentResults.push(...(pineconeDocs.data as RelevantDocument[]));
       } else if (useKeywordPromise) {
         // Keyword Promise
         if (!keywordDocs?.success)

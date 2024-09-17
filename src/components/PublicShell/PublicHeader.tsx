@@ -20,14 +20,14 @@ export function PublicHeader() {
       url: "https://conflictanalytics.queenslaw.ca/publications",
     },
     { id: 3, route: "Blogs", url: "https://myopencourt.org/blog/" },
-    { id: 4, route: "FAQs", url: "https://myopencourt.org/faqs/" },
+    { id: 4, route: "FAQs", url: "/faq" },
     { id: 5, route: "Waitlist", url: "/waitlist" },
     { id: 6, route: "Login", url: "/login" },
   ];
 
   const [navOpen, setNavOpen] = useState(false);
   return (
-    <nav className="bg-greyBg py-[10px] sm:py-[15px] border-b-[2px] border-border">
+    <nav className="bg-greyBg py-[10px] sm:py-[15px] border-b-[1px] border-border">
       <Container className="flex justify-between items-center">
         <Link href="/">
           <Image
@@ -77,10 +77,12 @@ export function PublicHeader() {
             ))}
           <Button
             asChild
-            className="bg-primaryOJ hover:bg-primaryOJ/90 px-[20px] border-primaryOJ border-[2px] text-md text-white"
+            variant={'ghost'}
+            className="bg-primaryOJ hover:bg-primaryOJ/90 px-[20px] border-primaryOJ border-[2px] text-md text-white hover:text-white"
           >
-            <Link href={links[links.length - 1].url} className="no-underline">
-              {links[links.length - 1].route}
+            <Link href={links[links.length - 1].url}>
+            {links[links.length - 1].route}
+
             </Link>
           </Button>
         </div>

@@ -4,7 +4,6 @@ export async function getConversationTitles(): Promise<string[]> {
   if (!auth.currentUser) {
     return [];
   }
-
   const res = await fetch(`/api/conversation/conversationTitle`, {
     method: "GET",
     headers: {
