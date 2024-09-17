@@ -376,8 +376,8 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           <Label className="text-[#838383] mb-2">
             User Created Graphs
           </Label>
-          {graphList.map((item: {name: string, id: string}) => (
-            <button type="button" onClick={()=>{
+          {graphList.map((item: {name: string, id: string}, key: number) => (
+            <button key={key} type="button" onClick={()=>{
               if (graphId !== item.id) {
                 setGraphLoading(true)
                 setGraphId(item.id)
@@ -401,8 +401,8 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           <Label className="text-[#838383] mb-2">
             Provided Graphs
           </Label>
-          {universalGraphList.map((item: {name: string, id: string}) => (
-            <button type="button" onClick={()=>{
+          {universalGraphList.map((item: {name: string, id: string}, key: number) => (
+            <button key={key} type="button" onClick={()=>{
               if (graphId !== item.id) {
                 setGraphLoading(true)
                 setGraphId(item.id)
@@ -434,7 +434,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
             minZoom={0.2}
           >
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <Controls />
               </TooltipTrigger>
               <TooltipContent side="right">
@@ -496,7 +496,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                 </div>
                 
                 <Tooltip>
-                  <TooltipTrigger className="flex flex-row space-x-2 py-4">
+                  <TooltipTrigger asChild className="flex flex-row space-x-2 py-4">
                     <Switch onCheckedChange={(checked: boolean) => setUseCustomLabel(checked)}/>
                     <Label className="py-2">Use Custom Label</Label>
                   </TooltipTrigger>
@@ -508,7 +508,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                 <div className="py-4">
                   {useCustomLabel && (
                     <Tooltip>
-                      <TooltipTrigger className="flex flex-col">
+                      <TooltipTrigger asChild className="flex flex-col">
                         <Label className="py-2">Label:</Label>
                         <Input
                           value={chosenLabel}
@@ -521,7 +521,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                     </Tooltip>
                   )}
                   <Tooltip>
-                    <TooltipTrigger className="flex flex-col">
+                    <TooltipTrigger asChild className="flex flex-col">
                       <Label className="py-2">Body:</Label>
                       <Textarea
                         wrap="soft" 
