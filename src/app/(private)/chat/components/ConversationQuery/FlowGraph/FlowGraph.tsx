@@ -36,8 +36,8 @@ import { PlusSquare } from "lucide-react";
 import Image from "next/image";
 import { Switch } from "@/components/ui/switch";
 
-// const DBURL = "https://graph-module.openjustice.ai"; 
-const DBURL = "http://localhost:8080";
+const DBURL = "https://graph-module.openjustice.ai"; 
+// const DBURL = "http://localhost:8080";
 
 const lastGraphKey = 'OJLatestGraphId';
 
