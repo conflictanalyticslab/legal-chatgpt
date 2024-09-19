@@ -99,9 +99,9 @@ export function useFetchLLMResponse() {
 
         // Display each word with a delay
         for (let i = 0; i < words.length; i++) {
-          latestText += words[i];
-          if (0 < i && i < words.length - 1) latestText += " ";
-          else latestText += words[i] === "" ? " " : "";
+          if (i < words.length - 1) latestText += words[i] === "" ? " " : words[i] + " ";
+          else latestText += words[i];
+
           setLatestResponse(latestText);
           if (!generateFlagRef.current) return;
 
