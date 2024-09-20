@@ -1,9 +1,8 @@
 #search-documents {
-  div[data-orientation="vertical"]{
-    
+  div[data-orientation="vertical"] {
+    overflow: hidden;
+    height: 100%;
   }
-  overflow: hidden;
-  height: 100%;
 }
 
 #search-documents h3 + div {
