@@ -98,8 +98,10 @@ export function useFetchLLMResponse() {
         const words = chunkText.split(" ");
 
         // Display each word with a delay
-        for (const word of words) {
-          latestText += word + " ";
+        for (let i = 0; i < words.length; i++) {
+          if (i < words.length - 1) latestText += words[i] === "" ? " " : words[i] + " ";
+          else latestText += words[i];
+
           setLatestResponse(latestText);
           if (!generateFlagRef.current) return;
 

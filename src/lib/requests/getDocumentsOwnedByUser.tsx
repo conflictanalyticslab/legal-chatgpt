@@ -10,6 +10,7 @@ export type UserDocument = {
 export async function getDocumentsOwnedByUser(): Promise<UserDocument[]> {
   if (!auth.currentUser) return [];
 
+
   const res = await fetch(`/api/user/document`, {
     method: "GET",
     headers: {

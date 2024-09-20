@@ -3,6 +3,14 @@ import { useChatContext } from "../../store/ChatContext";
 import { cn } from "@/utils/utils";
 import ReactMarkdown from "react-markdown";
 
+function LinkRenderer(props: any) {
+  return (
+    <a href={props.href} className="underline" target="_blank" rel="noreferrer">
+      {props.children}
+    </a>
+  );
+}
+
 export function Conversation() {
   const { conversation, latestResponse, loading, scrollIntoViewRef } =
     useChatContext();
@@ -39,7 +47,10 @@ export function Conversation() {
 
             {/* Final Buffered Content */}
             {convoObj.content !== "" && (
-              <ReactMarkdown className="flex flex-col items-start gap-[10px] llm-markdown">
+              <ReactMarkdown 
+                className="flex flex-col items-start gap-[10px] llm-markdown"
+                components={{ a: LinkRenderer }}
+              >
                 {convoObj?.content}
               </ReactMarkdown>
             )}
@@ -47,7 +58,10 @@ export function Conversation() {
             {/*  Buffered LLM Content */}
             {convoObj.role === "assistant" && i === conversation.length - 1 && (
               <div className="relative flex-col gap-2 flex justify-between break-normal pb-[50px]">
-                <ReactMarkdown className="flex flex-col items-start gap-[10px] llm-markdown">
+                <ReactMarkdown 
+                  className="flex flex-col items-start gap-[10px] llm-markdown"
+                  components={{ a: LinkRenderer }}
+                >
                   {latestResponse}
                 </ReactMarkdown>
                 {/* Loading Animation Dot */}
