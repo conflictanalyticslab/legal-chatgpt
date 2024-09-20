@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 
 function LinkRenderer(props: any) {
   return (
-    <a href={props.href} target="_blank" rel="noreferrer">
+    <a href={props.href} className="underline" target="_blank" rel="noreferrer">
       {props.children}
     </a>
   );
