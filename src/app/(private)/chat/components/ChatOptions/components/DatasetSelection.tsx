@@ -22,7 +22,7 @@ export function DatasetSelection() {
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div id="datasets" className="flex flex-col gap-3 overflow-auto">
       <Accordion type="single" collapsible defaultValue="1">
         <AccordionItem value={"1"} className="border-b-0">
           <AccordionTrigger>
