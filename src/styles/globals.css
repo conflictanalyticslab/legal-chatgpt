@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+nav, div {
+  scrollbar-width: thin;
+}
+
+h1 {
+  font-size: 3em;
+}
+
+@layer base {
+  html {
+    --inter-font: ${inter.style.fontFamily};
+  }
+}
+
+.shadow-1 {
+  box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;
+}
+
+.shadow-2 {
+  box-shadow: rgba(0, 0, 0, 0.1) 1px 1px 2px 0px;
+}
+
+.shadow-3 {
+
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+}
+
+label[data-details] {
+  color: #5b5b5b;
+}
+
+button:focus, input:focus, a:focus {
+  outline: initial;
+}
+
+body {
+  margin: 0px;
+}
+
+.video-shadow {
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px,
+    rgba(0, 0, 0, 0.22) 0px 15px 12px;
+}
+
+@layer base {
+  :root {
+    --heading:6rem;
+    --subheading:2.5rem;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --grey: #646464;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --success: 123, 43%, 39%;
+    --success-foreground: 123, 43%, 39%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0px;
+}
+
+.sui-layout-sidebar {
+  align-self: flex-start;
+  width: 100% !important;
+}
+
+.sui-result__details {
+  width: 100% !important;
+}
+.sui-result__title {
+  font-size: 1.2em !important;
+}
+.sui-layout-body__inner {
+  align-items: center !important;
+  flex-direction: column !important;
+}
+.sui-layout-main {
+  width: 90% !important;
+  padding: 32px 0 0 0 !important;
+}
+
+.slide-left{
+  animation: "scroll-left" 80s linear infinite;
+}
+
+.slide-right{
+  animation: "scroll-right" 80s linear reverse infinite;
+}
+
+/* Keyframes for continuous scroll */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(-4.2%);
+  }
+  100% {
+    transform: translateX(-54.5%); /* Move by the total width of 3 cards */
+  }
+}
+
+/* Keyframes for continuous scroll */
+@keyframes scroll-right {
+  0% {
+    transform: translateX(-4.2%);
+  }
+  100% {
+    transform: translateX(-55.5%); /* Move by the total width of 3 cards */
+  }
+}

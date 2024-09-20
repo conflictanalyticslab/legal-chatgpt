@@ -1,7 +1,7 @@
 import admin from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
-import { initBackendFirebaseApp } from "@/util/api/middleware/initBackendFirebaseApp";
+import { initBackendFirebaseApp } from "@/lib/api/middleware/initBackendFirebaseApp";
 import { doc, setDoc } from "firebase/firestore"; 
 
 export async function POST(req: Request) {
@@ -18,7 +18,6 @@ export async function POST(req: Request) {
         })
         return NextResponse.json({  }, { status: 201} )
     }  catch (error: any) {
-        console.log("Waitlist registration not successful")
         console.error(error.message);
         return NextResponse.json({ error: error.message }, { status: 400 });
     }

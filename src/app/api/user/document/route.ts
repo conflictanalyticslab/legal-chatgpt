@@ -1,13 +1,11 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
-import { authenticateApiUser } from "@/util/api/middleware/authenticateApiUser";
-import { ocr } from "@/util/api/ocr";
-import { newDocument } from "@/util/api/newDocument";
 import GPT4Tokenizer from 'gpt4-tokenizer';
+import { newDocument } from "@/lib/api/firebase_utils/newDocument";
+import { authenticateApiUser } from "@/lib/api/middleware/authenticateApiUser";
 
 // Get all documents owned by the user in the authentication header
 export async function GET(_: Request) {
-  // console.log("GET /api/user/document")
   const { earlyResponse, decodedToken } = await authenticateApiUser();
   if (earlyResponse) {
     return earlyResponse;
@@ -20,7 +18,6 @@ export async function GET(_: Request) {
     );
   }
 
-  // console.log("previous checks passed in GET /api/user/document, now sending query to firestore")
   const queryResults = await getFirestore()
     .collection("documents")
     .where("userUid", "==", decodedToken.user_id)
@@ -38,7 +35,6 @@ export async function GET(_: Request) {
 // This endpoint requires Node v20 or later
 // If this is failing locally, check your node version by running `node -v` in the terminal
 export async function POST(req: Request) {
-  // console.log("POST /api/user/document")
   const { earlyResponse, decodedToken } = await authenticateApiUser();
   if (earlyResponse) {
     return earlyResponse;
@@ -77,8 +73,6 @@ export async function POST(req: Request) {
   const rawFile = await file.arrayBuffer();
   const decoder = new TextDecoder("utf8");
   const docText = decoder.decode(rawFile);
-  // console.log(docText);
-  // const docText = await ocr(rawFile);
 
   const tokenizer = new GPT4Tokenizer({ type: 'gpt3' }); // or 'codex'
   const estimatedTokenCount = tokenizer.estimateTokenCount(docText);
@@ -95,7 +89,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // console.log("route.ts POST /api/user/document, now creating new document")
 
   const newDoc = await newDocument(docText, file.name, decodedToken.user_id);
 
