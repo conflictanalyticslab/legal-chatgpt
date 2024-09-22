@@ -15,6 +15,7 @@ import { NextRequest } from "next/server";
 import { getRetriever } from "@/lib/LLM/getRetriever";
 import { Conversation, ConversationalRetrievalQAChainInput } from "@/types/chat";
 import { createDocumentPrompt } from "@/app/(private)/chat/utils/pdfs/pdf_utils";
+import { initBackendFirebaseApp } from "@/lib/api/middleware/initBackendFirebaseApp";
 
 
 /**
@@ -54,8 +55,8 @@ async function* makeIterator({
 }) {
   try {
 
-    
     //TODO: Check if i need to implement firebase initialize app
+    initBackendFirebaseApp();
     admin.auth().verifyIdToken(token as string);
 
     // ********************************* LLM INITIALIZATION ********************************* //
