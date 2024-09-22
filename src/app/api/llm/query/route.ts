@@ -16,6 +16,8 @@ import { getRetriever } from "@/lib/LLM/getRetriever";
 import { Conversation, ConversationalRetrievalQAChainInput } from "@/types/chat";
 import { createDocumentPrompt } from "@/app/(private)/chat/utils/pdfs/pdf_utils";
 import { createGraphPrompt } from "@/app/(private)/chat/utils/graph/graph_utils";
+import { initBackendFirebaseApp } from "@/lib/api/middleware/initBackendFirebaseApp";
+
 
 /**
  * Converts the LLM response to a streamed response for the client 
@@ -56,8 +58,8 @@ async function* makeIterator({
 }) {
   try {
 
-    
     //TODO: Check if i need to implement firebase initialize app
+    initBackendFirebaseApp();
     admin.auth().verifyIdToken(token as string);
 
     // ********************************* LLM INITIALIZATION ********************************* //
