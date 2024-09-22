@@ -64,7 +64,7 @@ let id = 1;
 function getId() { return `${id++}`; }
 
 function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
-  const { setDialogFlow } = useChatContext();
+  const { setDialogFlow, setDialogFlowName } = useChatContext();
   // no need to trigger rerender
   const connectingNodeId = useRef<string>("");
   const chosenNodeId = useRef<string>("");
@@ -211,6 +211,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
       }
     });
     setDialogFlow(JSON.stringify(queryArray));
+    setDialogFlowName(graphName);
     setOpen(false);
   }
 

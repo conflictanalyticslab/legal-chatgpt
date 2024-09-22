@@ -10,7 +10,7 @@ import { FlowModal } from "./FlowGraph/FlowGraph";
 import useFetchQuery from "../../hooks/useFetchQuery";
 
 export function ConversationQuery() {
-  const { loading, userQuery, setUserQuery, num, stopQuery } = useChatContext();
+  const { loading, userQuery, setUserQuery, num, stopQuery, dialogFlowName } = useChatContext();
 
   const { fetchQuery } = useFetchQuery();
   /**
@@ -71,6 +71,11 @@ export function ConversationQuery() {
           {num === 0
             ? "No more prompts allowed. Please enter your final feedback."
             : `Prompts left: ${num}`}
+        </label>
+        <label className="text-[grey] text-sm absolute bottom-[-20px] right-[0px] italic ">
+          {dialogFlowName === ""
+            ? "Dialog Flow not in use"
+            : "Dialog Flow in use: " + dialogFlowName}
         </label>
       </div>
     </form>
