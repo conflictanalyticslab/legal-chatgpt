@@ -20,7 +20,7 @@ export function useFetchLLMResponse() {
     setInfoAlert,
     generateFlagRef,
     setLatestResponse,
-    setDocumentQuery,
+    setDocumentQuery
   } = useChatContext();
   const { pdfSearch } = usePdfSearch();
   // Utility function to introduce a delay
@@ -36,7 +36,8 @@ export function useFetchLLMResponse() {
   const fetchLLMResponse = async (
     fullConversation: any,
     queryInput: string,
-    includedDocuments: UploadedDocument
+    includedDocuments: UploadedDocument,
+    dialogFlow: string
   ) => {
     try {
       generateFlagRef.current = true;
@@ -56,6 +57,7 @@ export function useFetchLLMResponse() {
           indexName,
           fullConversation,
           includedDocuments,
+          dialogFlow
         }),
       });
       const relevantDocPromise =

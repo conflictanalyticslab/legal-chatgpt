@@ -8,6 +8,7 @@ export function createGraphPrompt(graph: string) {
     // TODO
     if (graph === "") return "";
     else {
+        console.log("graph: " + graph)
         const graphjson = JSON.parse(graph);
         return (
             graphjson.map(([question, answer, followup]: [string, string, string]) => 

@@ -15,7 +15,7 @@ import { NextRequest } from "next/server";
 import { getRetriever } from "@/lib/LLM/getRetriever";
 import { Conversation, ConversationalRetrievalQAChainInput } from "@/types/chat";
 import { createDocumentPrompt } from "@/app/(private)/chat/utils/pdfs/pdf_utils";
-
+import { createGraphPrompt } from "@/app/(private)/chat/utils/graph/graph_utils";
 
 /**
  * Converts the LLM response to a streamed response for the client 
@@ -44,6 +44,7 @@ async function* makeIterator({
   indexName = PineconeIndexes.staticDocuments,
   fullConversation = [],
   includedDocuments,
+  dialogFlow,
 }: {
   token: string;
   query: string;
@@ -51,6 +52,7 @@ async function* makeIterator({
   indexName: string;
   fullConversation: Conversation[];
   includedDocuments: string[]
+  dialogFlow: string;
 }) {
   try {
 
@@ -96,9 +98,10 @@ async function* makeIterator({
           const semanticDocsResponse = retriever.invoke(input);
           const uploadedDocResponse = createDocumentPrompt(includedDocuments);
           const [semanticDocs, uploadedDocs] = await Promise.all([semanticDocsResponse, uploadedDocResponse])
+          const graphPrompt = createGraphPrompt(dialogFlow);
 
           // Combines both the semantic searched docs with the uploaded document content
-          const docData = formatDocumentsAsString(semanticDocs as LangchainDocType[]) + "\n\n" + uploadedDocs;
+          const docData = formatDocumentsAsString(semanticDocs as LangchainDocType[]) + "\n\n" + uploadedDocs + "\n\n" + graphPrompt;
           return docData;
         },
         question: new RunnablePassthrough(),
