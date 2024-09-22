@@ -58,7 +58,7 @@ const SearchDocuments = () => {
   return (
     <div
       id="search-documents"
-      className="py-8 grid grid-rows-[auto_1fr] h-full gap-0 overflow-hidden"
+      className="py-8 flex flex-col h-full gap-0 overflow-hidden"
     >
       <DatasetSelection />
 
