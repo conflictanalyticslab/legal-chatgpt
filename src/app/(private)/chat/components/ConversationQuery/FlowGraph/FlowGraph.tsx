@@ -269,6 +269,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
     // retrieve the graph from the backend
     if (!auth.currentUser) throw new Error("User is not authenticated");
     auth.currentUser.getIdToken().then(token => {
+      setEditOpen(false); // close the edit dialog
       fetch(new URL(`retrieve/id/${graphId}`, DBURL), {
         method: 'GET',
         mode: 'cors',
