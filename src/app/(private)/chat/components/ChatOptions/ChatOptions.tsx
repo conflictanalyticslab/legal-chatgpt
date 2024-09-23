@@ -83,7 +83,7 @@ function ChatOptions() {
       >
         <Button
           variant={"ghost"}
-          className={cn("w-auto h-auto p-0 top-4 right-4 absolute transition-all opacity-1", {
+          className={cn("w-auto h-auto p-0 top-4 right-4 absolute transition-all opacity-1 z-20", {
             "opacity-0": !chatPanelOption,
           })}
           onClick={() => setChatPanelOption(null)}
