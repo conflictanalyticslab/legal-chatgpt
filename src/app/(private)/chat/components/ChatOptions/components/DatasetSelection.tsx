@@ -22,7 +22,7 @@ export function DatasetSelection() {
   };
 
   return (
-    <Accordion type="single" collapsible defaultValue="1" className="">
+    <Accordion type="single" collapsible defaultValue="" className="">
       <AccordionItem value={"1"} className="border-b-0">
         <AccordionTrigger>
           <Label className="font-bold">Datasets</Label>

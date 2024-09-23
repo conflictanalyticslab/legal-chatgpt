@@ -20,7 +20,8 @@ code {
   font-size: 3rem;
 }
 
-html {
+html,
+body {
   overflow-y: hidden;
 }
 
