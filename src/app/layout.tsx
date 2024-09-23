@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import "@/styles/index.css";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";

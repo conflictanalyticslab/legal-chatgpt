@@ -31,9 +31,10 @@ import {
 import Link from "next/link";
 import InputFormField from "@/components/Auth/InputFormField";
 import { Label } from "@/components/ui/label";
-import { auth, db } from "@/lib/firebase/firebase";
+import { auth } from "@/lib/firebase/firebase";
 import Image from "next/image";
-import { setDoc } from "firebase/firestore";
+import Container from "@/components/ui/container";
+import PageTitle from "@/components/ui/page-title";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -81,16 +82,12 @@ export default function Login() {
         password,
       });
 
-      // Read white list emails
-      // const whiteListEmails: string[] =
-      //   (await readWhitelistEmails()) as string[];
-
-      // if (!whiteListEmails.includes(email)) {
-      //   throw new Error("Account not on the white list emails");
-      // }
-
       // Sign In With Firebase
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       router.push("/chat");
     } catch (error: unknown) {
       form.setError("email", {
@@ -107,112 +104,116 @@ export default function Login() {
   };
 
   return (
-    <Form {...form}>
-      <form
-        noValidate
-        onSubmit={form.handleSubmit(handleLogin)}
-        className="h-full flex justify-center"
-      >
-        <div className="min-w-[300px] w-full max-w-[460px] flex flex-col justify-start mt-[100px] gap-5">
-          <div>
-            <Image
-              src={"/assets/icons/oj-icon.svg"}
-              height={50}
-              width={50}
-              alt="Open Justice"
-              className="mx-auto mb-[50px]"
+    <Container className="w-full">
+      <Form {...form}>
+        <form
+          noValidate
+          onSubmit={form.handleSubmit(handleLogin)}
+          className="h-full flex justify-center"
+        >
+          <div className="w-full max-w-[460px] flex flex-col justify-start mt-[100px] gap-5">
+            <div>
+              <PageTitle className="text-center font-bold text-[3rem]">
+                Welcome Back
+              </PageTitle>
+            </div>
+
+            {/* Email */}
+            <InputFormField
+              form={form}
+              label="Email"
+              name="email"
+              type="email"
             />
-            <h1 className="text-center font-bold text-[3rem]">Welcome Back</h1>
-          </div>
 
-          {/* Email */}
-          <InputFormField form={form} label="Email" name="email" type="email" />
-
-          <div className="flex flex-col gap-1">
-            {/* Password */}
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Password</FormLabel>
-                  <div>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          className="ring-0 focus:ring-0 pr-[2.5rem] h-[50px]"
-                          placeholder="Password"
-                          type={showPassword ? "text" : "password"}
-                          {...field}
-                        />
-                        {showPassword ? (
-                          <button
-                            type="button"
-                            className="absolute right-[1rem] top-[50%] translate-y-[-50%]"
-                            onClick={() => setShowPassword(false)}
-                          >
-                            <EyeOff className="w-4" />
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className="absolute right-[1rem] top-[50%] translate-y-[-50%]"
-                            onClick={() => setShowPassword(true)}
-                          >
-                            <Eye className="w-4" />
-                          </button>
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </div>
-                </FormItem>
-              )}
-            />
-            <Link
-              href="/reset-password"
-              className="text-xs ml-auto hover:underline"
-            >
-              Forgot Password?
-            </Link>
-          </div>
-
-          <Button
-            className="bg-primaryOJ hover:bg-primaryOJ/90 disabled:opacity-[0.6]"
-            disabled={isLoading}
-          >
-            Log In
-          </Button>
-
-          <Label className="text-center">
-            Don't have an account?{" "}
-            <Link
-              href={"/signup"}
-              className="underline font-bold hover:opacity-[0.8]"
-            >
-              Sign Up
-            </Link>
-          </Label>
-        </div>
-
-        {/* Info Alert */}
-        <AlertDialog open={!!alert}>
-          <AlertDialogTitle className="hidden"></AlertDialogTitle>
-          <AlertDialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
-            <AlertDialogDescription className="text-md text-[black]">
-              {alert}
-            </AlertDialogDescription>
-            <AlertDialogFooter>
-              <AlertDialogAction
-                onClick={() => setAlert("")}
-                className="bg-primaryOJ hover:bg-primaryOJ/90"
+            <div className="flex flex-col gap-1">
+              {/* Password */}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Password</FormLabel>
+                    <div>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            className="ring-0 focus:ring-0 pr-[2.5rem] h-[50px]"
+                            placeholder="Password"
+                            type={showPassword ? "text" : "password"}
+                            {...field}
+                          />
+                          {showPassword ? (
+                            <button
+                              type="button"
+                              className="absolute right-[1rem] top-[50%] translate-y-[-50%]"
+                              onClick={() => setShowPassword(false)}
+                            >
+                              <EyeOff className="w-4" />
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="absolute right-[1rem] top-[50%] translate-y-[-50%]"
+                              onClick={() => setShowPassword(true)}
+                            >
+                              <Eye className="w-4" />
+                            </button>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <Link
+                href="/reset-password"
+                className="text-xs ml-auto hover:underline"
               >
-                Okay
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </form>
-    </Form>
+                Forgot Password?
+              </Link>
+            </div>
+
+            <Button
+              className="bg-primaryHue hover:bg-primaryHue/90 disabled:opacity-[0.6]"
+              disabled={isLoading}
+            >
+              Log In
+            </Button>
+
+            <Label className="text-center">
+              Don't have an account?{" "}
+              <Link
+                href={"/signup"}
+                className="underline font-bold hover:opacity-[0.8]"
+              >
+                Sign Up
+              </Link>
+            </Label>
+          </div>
+
+          {/* Info Alert */}
+          <AlertDialog open={!!alert}>
+            <AlertDialogTitle className="hidden"></AlertDialogTitle>
+            <AlertDialogContent
+              onOpenAutoFocus={(e: any) => e.preventDefault()}
+            >
+              <AlertDialogDescription className="text-base text-[black]">
+                {alert}
+              </AlertDialogDescription>
+              <AlertDialogFooter>
+                <AlertDialogAction
+                  onClick={() => setAlert("")}
+                  className="bg-primaryHue hover:bg-primaryHue/90"
+                >
+                  Okay
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </form>
+      </Form>
+    </Container>
   );
 }

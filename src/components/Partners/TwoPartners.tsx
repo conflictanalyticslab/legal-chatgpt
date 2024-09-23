@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Card } from "../ui/card";
 import { cn } from "@/utils/utils";
-import Container from "../ui/Container";
+import Container from "../ui/container";
 
 export function TwoPartners({ title, description, partners, textLeft }: any) {
   return (
@@ -10,7 +10,7 @@ export function TwoPartners({ title, description, partners, textLeft }: any) {
         {partners.map((partner: any, key: string) => (
           <Card
             key={key}
-            className="relative w-[100%] sm:w-[170px] lg:w-[210px] xl:w-[260px] h-[150px] sm:h-[170px] lg:h-[210px] xl:h-[260px] p-[20px] rounded-[.8rem] flex items-center justify-center shadow-md"
+            className="relative w-[100%] sm:w-[170px] lg:w-[210px] xl:w-[260px] h-[150px] sm:h-[170px] lg:h-[210px] xl:h-[260px] p-[20px] rounded-[.8rem] flex items-center justify-center "
           >
             <div
               className={cn("relative m-auto", partner.width, partner.height)}
@@ -27,7 +27,7 @@ export function TwoPartners({ title, description, partners, textLeft }: any) {
       </div>
       <div className="flex flex-col justify-start w-[100%] max-w-[771px] order-1">
         <h2 className="text-[2rem] lg:text-[length:--subheading]">{title}</h2>
-        <p className="text-md md:text-xl text-[--grey] lg:leading-relaxed">{description}</p>
+        <p className="text-base md:text-xl text-[--grey] lg:leading-relaxed">{description}</p>
       </div>
     </Container>
   );

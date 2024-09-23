@@ -1,6 +1,14 @@
 import React from "react";
 import QATile from "./components/QATile";
-import { Scale } from "lucide-react";
+import {
+  Accessibility,
+  DatabaseZap,
+  GlobeLock,
+  HandCoins,
+  Headset,
+  MessageCircleQuestion,
+  Scale,
+} from "lucide-react";
 import "./faq.css";
 export default function page() {
   return (
@@ -17,7 +25,7 @@ export default function page() {
           <div className="grid">
             <h2>General Information</h2>
             <QATile
-              icon={<Scale />}
+              icon={<MessageCircleQuestion />}
               question="What exactly is OpenJustice and what does it aim to achieve?"
             >
               <div>
@@ -43,7 +51,7 @@ export default function page() {
               </div>
             </QATile>
             <QATile
-              icon={<Scale />}
+              icon={<MessageCircleQuestion />}
               question="Who is the intended user base for OpenJustice?"
             >
               <p>
@@ -55,7 +63,7 @@ export default function page() {
               </p>
             </QATile>
             <QATile
-              icon={<Scale />}
+              icon={<MessageCircleQuestion />}
               question="How can individuals and law firms contribute to or become a part of the OpenJustice community?"
             >
               <div>
@@ -107,7 +115,9 @@ export default function page() {
               To inquire about research collaborations or creating a customized
               platform for your organization, please email our Program Manager,
               David Liang at{" "}
-              <a href={"mailto:david.liang@queensu.ca"}>david.liang@queensu.ca</a>
+              <a href={"mailto:david.liang@queensu.ca"}>
+                david.liang@queensu.ca
+              </a>
             </label>
           </div>
 
@@ -115,7 +125,7 @@ export default function page() {
           <div className="grid ">
             <h2>Usage and Accessibility</h2>
             <QATile
-              icon={<Scale />}
+              icon={<Accessibility />}
               question="How does OpenJustice process and respond to legal queries?"
             >
               <p className="font-normal">
@@ -127,7 +137,7 @@ export default function page() {
               </p>
             </QATile>
             <QATile
-              icon={<Scale />}
+              icon={<Accessibility />}
               question="What categories of legal questions is OpenJustice equipped to handle?"
             >
               <p>
@@ -138,7 +148,7 @@ export default function page() {
               </p>
             </QATile>
             <QATile
-              icon={<Scale />}
+              icon={<Accessibility />}
               question="What are the steps to get started and make the most out of OpenJustice?"
             >
               <div>
@@ -207,7 +217,7 @@ export default function page() {
               </div>
             </QATile>
             <QATile
-              icon={<Scale />}
+              icon={<Accessibility />}
               question="Can OpenJustice be utilised for academic and research purposes?"
             >
               <p>
@@ -216,7 +226,7 @@ export default function page() {
               </p>
             </QATile>
             <QATile
-              icon={<Scale />}
+              icon={<Accessibility />}
               question="Is OpenJustice accessible on mobile devices?"
             >
               <p>
@@ -279,7 +289,7 @@ export default function page() {
           <div className="grid">
             <h2>Technical and Language Support</h2>
             <QATile
-              icon={<Scale />}
+              icon={<Headset />}
               question="Which languages are supported by OpenJustice?"
             >
               <p className="font-normal">
@@ -292,7 +302,7 @@ export default function page() {
               </p>
             </QATile>
             <QATile
-              icon={<Scale />}
+              icon={<Headset />}
               question="Is the information provided by OpenJustice regularly updated?"
             >
               <p>
@@ -309,7 +319,7 @@ export default function page() {
           <div className="grid">
             <h2>Data Privacy and Governance</h2>
             <QATile
-              icon={<Scale />}
+              icon={<GlobeLock />}
               question="What privacy considerations should students be mindful of when interacting with OpenJustice?"
             >
               <p className="font-normal">
@@ -321,7 +331,7 @@ export default function page() {
               </p>
             </QATile>
             <QATile
-              icon={<Scale />}
+              icon={<GlobeLock />}
               question="What kind of data is collected as users interact with OpenJustice, and how is it used?"
             >
               <p>
@@ -331,7 +341,7 @@ export default function page() {
               </p>
             </QATile>
             <QATile
-              icon={<Scale />}
+              icon={<GlobeLock />}
               question="How does OpenJustice vet and ensure the integrity and quality of its dataset?"
             >
               <p>
@@ -341,7 +351,7 @@ export default function page() {
               </p>
             </QATile>
             <QATile
-              icon={<Scale />}
+              icon={<GlobeLock />}
               question="What protocols are followed to secure the data and protect it from unauthorised access?"
             >
               <p>
@@ -356,7 +366,7 @@ export default function page() {
           <div className="grid">
             <h2>Feedback and Support</h2>
             <QATile
-              icon={<Scale />}
+              icon={<GlobeLock />}
               question="How can users provide their feedback or report any issues they encounter with OpenJustice?"
             >
               <div>
@@ -374,7 +384,7 @@ export default function page() {
           <div className="grid">
             <h2>Financial Aspects</h2>
             <QATile
-              icon={<Scale />}
+              icon={<HandCoins />}
               question="Is there any cost associated with using OpenJustice?"
             >
               <div>
@@ -396,7 +406,7 @@ export default function page() {
           <div className="grid">
             <h2>Financial Aspects</h2>
             <QATile
-              icon={<Scale />}
+              icon={<DatabaseZap />}
               question="Does OpenJustice’s dataset cover a wide range of jurisdictions or is it limited?"
             >
               <p>
@@ -405,13 +415,13 @@ export default function page() {
               </p>
             </QATile>
             <QATile
-              icon={<Scale />}
+              icon={<DatabaseZap />}
               question="Is OpenJustice designed to expand its dataset by accepting document uploads?"
             >
               <p>Yes.</p>
             </QATile>
             <QATile
-              icon={<Scale />}
+              icon={<DatabaseZap />}
               question="How does OpenJustice handle outdated or incorrect information in its dataset?"
             >
               <p>

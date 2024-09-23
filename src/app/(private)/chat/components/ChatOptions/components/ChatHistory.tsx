@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
 import { useChatContext } from "../../../store/ChatContext";
 import { Label } from "@/components/ui/label";
-import {
-  conversationTitleData,
-} from "@/models/ConversationTitleSchema";
+import { conversationTitleData } from "@/models/ConversationTitleSchema";
 
 export default function ChatHistory() {
-  const { setConversationId, conversationTitles, setShowStartupImage } =
-    useChatContext();
+  const {
+    setConversationId,
+    conversationTitles,
+    setShowStartupImage,
+    setIsNavOpen,
+  } = useChatContext();
 
   const handleChangeConversation = (conversationId: string) => {
     setConversationId(conversationId);
     setShowStartupImage(false);
+    if (window.innerWidth <= 1024) setIsNavOpen(false);
   };
 
   const [todayConvos, setTodayConvos] = useState<conversationTitleData[]>([]);

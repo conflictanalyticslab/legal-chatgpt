@@ -17,7 +17,7 @@ export default function InfoAlert() {
     <Dialog open={!!infoAlert}>
       <DialogTitle className="hidden"></DialogTitle>
       <DialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
-        <DialogDescription className="text-md text-[black]">
+        <DialogDescription className="text-base text-[black]">
           {infoAlert}
         </DialogDescription>
         <DialogFooter>

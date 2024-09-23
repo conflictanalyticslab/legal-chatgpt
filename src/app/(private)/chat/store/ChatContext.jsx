@@ -1,11 +1,16 @@
 "use client";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { chatPanelOption, ChatPanelOptions, PineconeIndexes, PineconeNamespaces } from "../enum/enums";
+import {
+  chatPanelOption,
+  ChatPanelOptions,
+  PineconeIndexes,
+  PineconeNamespaces,
+} from "../enum/enums";
 
 // Create a context
 const ChatContext = createContext();
 
-export const ChatContextProvider = ({ children }) => {
+export const GloblaContextProvider = ({ children }) => {
   const [relevantDocs, setRelevantDocs] = useState([]);
   const [documentQuery, setDocumentQuery] = useState("");
   const [namespace, setNamespace] = useState(PineconeNamespaces.canadian_law);
@@ -29,8 +34,9 @@ export const ChatContextProvider = ({ children }) => {
   const [latestResponse, setLatestResponse] = useState("");
   const [documentContent, setDocumentContent] = useState("");
   const [num, setNum] = useState(-1);
-  const [chatPanelOption, setChatPanelOption] = useState(ChatPanelOptions.searchDocuments);
+  const [chatPanelOption, setChatPanelOption] = useState(null);
   const [user, setUser] = useState(null);
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   const scrollIntoViewRef = useRef(null);
 
@@ -79,7 +85,9 @@ export const ChatContextProvider = ({ children }) => {
   }, []);
 
   if (ChatContext === null) {
-    throw new Error("useChatContext must be used within a ChatContextProvider");
+    throw new Error(
+      "useChatContext must be used within a GloblaContextProvider"
+    );
   }
   return (
     <ChatContext.Provider
@@ -139,6 +147,8 @@ export const ChatContextProvider = ({ children }) => {
         setDialogFlow,
         dialogFlowName,
         setDialogFlowName,
+        isNavOpen,
+        setIsNavOpen,
       }}
     >
       {children}

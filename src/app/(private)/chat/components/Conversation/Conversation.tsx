@@ -18,17 +18,17 @@ export function Conversation() {
     <div
       id="conversation"
       className={cn(
-        `bg-[transparent] w-full bg-inherit hidden overflow-auto`,
+        `w-full bg-inherit hidden overflow-auto`,
         { "flex": conversation }
       )}
     >
 
-      <div className="w-chat mx-auto flex flex-col gap-[3.25rem] items-end">
+      <div className="w-screen md:w-chat mx-auto flex flex-col gap-[3.25rem] items-end px-4 overflow-x-hidden">
         {conversation && conversation.map((convoObj: any, i: number) => (
           <Card
             key={i}
             className={cn(
-              `bg-inherit max-w w-fit px-3`,
+              `bg-inherit w-fit`,
               {
                 "shadow-none border-0 self-start":
                   convoObj.role === "assistant",

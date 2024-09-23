@@ -12,7 +12,7 @@ export function PublicShell({
   return (
     <>
       <PublicHeader />
-      <div className="grid grid-rows-[auto_1fr_auto] min-h-screen">
+      <div className="grid grid-rows-[auto_1fr_auto] min-h-screen overflow-x-hidden">
         {children}
       </div>
       {showFooter && <PublicFooter />}
