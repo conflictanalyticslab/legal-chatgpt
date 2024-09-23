@@ -1,12 +1,17 @@
 import Image from "next/image";
 import { Card } from "../ui/card";
 import { cn } from "@/utils/utils";
-import Container from "../ui/container";
+import Container from "../ui/Container";
 
 export function TwoPartners({ title, description, partners, textLeft }: any) {
   return (
     <Container className="flex flex-col lg:flex-row items-center justify-center lg:justify-between w-full min-h-[635px] gap-[30px] lg:gap-[60px] xl:gap-[80px] py-[50px]">
-      <div className={cn("flex gap-[30px] justify-start flex-wrap sm:flex-nowrap xl:gap-[40px] order-2 w-[100%] max-w-[771px] lg:w-auto", { "lg:order-1": textLeft })}>
+      <div
+        className={cn(
+          "flex gap-[30px] justify-start flex-wrap sm:flex-nowrap xl:gap-[40px] order-2 w-[100%] max-w-[771px] lg:w-auto",
+          { "lg:order-1": textLeft }
+        )}
+      >
         {partners.map((partner: any, key: string) => (
           <Card
             key={key}
@@ -27,7 +32,9 @@ export function TwoPartners({ title, description, partners, textLeft }: any) {
       </div>
       <div className="flex flex-col justify-start w-[100%] max-w-[771px] order-1">
         <h2 className="text-[2rem] lg:text-[length:--subheading]">{title}</h2>
-        <p className="text-base md:text-xl text-[--grey] lg:leading-relaxed">{description}</p>
+        <p className="text-base md:text-xl text-[--grey] lg:leading-relaxed">
+          {description}
+        </p>
       </div>
     </Container>
   );

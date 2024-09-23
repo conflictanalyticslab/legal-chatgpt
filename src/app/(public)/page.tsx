@@ -1,7 +1,6 @@
 import React from "react";
 import Image from "next/image";
 import { PublicShell } from "@/components/PublicShell/PublicShell";
-import Container from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TwoPartners } from "@/components/Partners/TwoPartners";
@@ -11,6 +10,7 @@ import PageHeaderDescription from "@/components/ui/page-description";
 import DemoVideo from "@/components/DemoVideo/DemoVideo";
 import PageTitle from "@/components/ui/page-title";
 import PageSubtitle from "@/components/ui/page-subtitle";
+import Container from "@/components/ui/Container";
 
 export default function Home() {
   return (

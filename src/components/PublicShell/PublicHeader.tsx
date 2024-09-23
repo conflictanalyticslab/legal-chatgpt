@@ -1,12 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import Container from "../ui/container";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { cn } from "@/utils/utils";
 import { Menu, X } from "lucide-react";
 import oj_logo from "@/assets/oj_logo.png";
+import Container from "@/components/ui/Container";
 export function PublicHeader() {
   const links = [
     {
@@ -56,7 +56,7 @@ export function PublicHeader() {
         >
           {navOpen && (
             <>
-            {/* Close Icon */}
+              {/* Close Icon */}
               <Button
                 onClick={() => setNavOpen(false)}
                 variant={"ghost"}
@@ -94,7 +94,7 @@ export function PublicHeader() {
             <Link href={"/login"}>Login</Link>
           </Button>
         </div>
-        
+
         <Button
           asChild
           variant={"ghost"}
