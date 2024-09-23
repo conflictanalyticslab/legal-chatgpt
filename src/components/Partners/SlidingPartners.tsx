@@ -1,7 +1,7 @@
 import React from "react";
 import Carousel from "./Carousel";
-import Container from "../ui/container";
 import { cn } from "@/utils/utils";
+import Container from "../ui/Container";
 
 function SlidingPartners({ title, description, className }: any) {
   return (

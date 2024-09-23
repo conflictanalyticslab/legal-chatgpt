@@ -37,7 +37,7 @@ import { z } from "zod";
 import Image from "next/image";
 import { userSchema } from "@/models/UserSchema";
 import { doc, setDoc } from "firebase/firestore";
-import Container from "@/components/ui/container";
+import Container from "@/components/ui/Container";
 import PageTitle from "@/components/ui/page-title";
 
 export default function Signup() {

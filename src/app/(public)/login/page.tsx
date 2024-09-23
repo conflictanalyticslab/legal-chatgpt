@@ -33,7 +33,7 @@ import InputFormField from "@/components/Auth/InputFormField";
 import { Label } from "@/components/ui/label";
 import { auth } from "@/lib/firebase/firebase";
 import Image from "next/image";
-import Container from "@/components/ui/container";
+import Container from "@/components/ui/Container";
 import PageTitle from "@/components/ui/page-title";
 
 export default function Login() {

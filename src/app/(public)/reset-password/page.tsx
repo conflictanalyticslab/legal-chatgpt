@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useChatContext } from "@/app/(private)/chat/store/ChatContext";
 import { resetPassword } from "@/lib/api/firebase_utils/auth";
 import Image from "next/image";
-import Container from "@/components/ui/container";
+import Container from "@/components/ui/Container";
 import PageTitle from "@/components/ui/page-title";
 
 function page() {
