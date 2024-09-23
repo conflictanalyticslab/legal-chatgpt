@@ -55,7 +55,6 @@ async function* makeIterator({
 }) {
   try {
 
-    //TODO: Check if i need to implement firebase initialize app
     initBackendFirebaseApp();
     admin.auth().verifyIdToken(token as string);
 

@@ -1,7 +1,6 @@
 import { useChatContext } from "../../store/ChatContext";
 
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 
@@ -25,46 +24,40 @@ export function ConversationQuery() {
 
   return (
     <form
-      className="shadow-none bg-[#f5f5f7] w-chat mx-auto h-[100px]"
+      className="shadow-none bg-[#f5f5f7] w-full ml-auto md:mx-auto h-[80px] flex items-start justify-center"
       onSubmit={handleSubmit}
     >
-      <div className="relative">
+      <div className="relative flex h-[45px] md:h-[56px] w-full md:w-chat mx-2">
         <UploadDocument />
 
         <Input
-          className="w-full flex bg-[#F8F8F8] min-h-[56px] pr-[60px] focus-visible:ring-[none] "
+          className="w-full flex bg-[#F8F8F8] pr-[60px] h-full focus-visible:ring-[none] text-base self-center"
           placeholder="Ask OpenJustice"
           value={userQuery}
           onChange={(e) => setUserQuery(e.target.value)}
         />
         {loading ? (
           <Button
-            className="absolute right-2 top-[50%] translate-y-[-50%]"
+            className="absolute right-2 top-[50%] translate-y-[-50%] h-auto"
             variant={"ghost"}
             onClick={stopQuery}
           >
-            <Image
-              src="/assets/icons/pause.svg"
-              alt="pause"
-              width={20}
-              height={20}
-            />
+            <div className="aspect-square w-[15px] md:w-[20px] h-auto relative">
+              <Image src="/assets/icons/pause.svg" alt="pause" fill />
+            </div>
           </Button>
         ) : (
           <Button
-            className="absolute right-[0.5rem] top-[50%] translate-y-[-50%]"
+            className="absolute right-2 top-[50%] translate-y-[-50%] h-auto"
             variant={"ghost"}
             type="submit"
           >
-            <Image
-              src="/assets/icons/send-horizontal.svg"
-              alt="send"
-              width={20}
-              height={20}
-            />
+            <div className="aspect-square w-[15px] md:w-[20px] h-auto relative">
+              <Image src="/assets/icons/send-horizontal.svg" alt="send" fill />
+            </div>
           </Button>
         )}
-        <label className="text-[grey] text-sm absolute bottom-[-20px] italic ">
+        <label className="text-[grey] text-sm absolute left-[45px] md:left-auto bottom-[-20px] italic ">
           {num === 0
             ? "No more prompts allowed. Please enter your final feedback."
             : `Prompts left: ${num}`}

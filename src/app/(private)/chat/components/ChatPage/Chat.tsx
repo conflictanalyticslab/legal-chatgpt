@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { useChatContext } from "../../store/ChatContext";
-import { useRouter } from "next/navigation";
 
 import {
   AlertDialog,
@@ -35,7 +34,7 @@ import { getConversation } from "@/lib/requests/getConversation";
 import { useGetAuthenticatedUser } from "@/lib/requests/getAuthenticatedUser";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/lib/firebase/firebase";
-import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
+import logo_png from "@/assets/oj_logo.png";
 
 export function Chat() {
   const {
@@ -94,7 +93,6 @@ export function Chat() {
     getSelectedConversation();
   }, [conversationId]);
 
-  
   /**
    * Authenticating User and getting user documents and setting conversation titles
    */
@@ -102,9 +100,9 @@ export function Chat() {
     setAlert("Authenticating user...");
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
-        if(user)
-        // await deleteDocumentsWithEmail();
-        setDocuments(await getDocumentsOwnedByUser());
+        if (user)
+          // await deleteDocumentsWithEmail();
+          setDocuments(await getDocumentsOwnedByUser());
         setConversationTitles(await getConversationTitles());
       } catch (error: unknown) {
         setInfoAlert(errorResponse(error));
@@ -126,29 +124,31 @@ export function Chat() {
   return (
     <>
       <Toaster />
-      <div className="flex justify-center relative w-full overflow-auto max-h-[100vh] min-h-[100vh] items-start">
+      <div className="flex justify-center relative w-full overflow-hidden h-[100vh] items-start">
         {/* Main Content */}
         <div
           className={cn(
-            "w-full h-[100%] grid grid-rows-[1fr_auto] pt-[30px] relative"
+            "w-full h-[100%] grid grid-rows-[1fr_auto] pt-[60px] lg:pt-[30px] relative"
           )}
         >
           {/* Open Justice Background Information */}
           {showStartupImage && (
-            <div className="relative self-center w-chat mx-auto">
+            <div className="relative self-center w-full md:w-chat mx-auto">
               <div className="flex flex-col gap-[10px] items-center max-w-[708px] mx-[auto]">
                 <div className="p-3 flex flex-col gap-2">
-                  <Image
-                    src={"/assets/icons/logo.svg"}
-                    alt="Open Justice Powered by the Conflict Analytics Lab"
-                    width={400}
-                    height={120}
-                  />
-                  <Label className="text-center text-md w-full text-[#838383]">
+                  <div className="w-[150px] md:w-[400px] h-auto aspect-[1096/192] relative">
+                    <Image
+                      src={logo_png}
+                      alt="Open Justice Powered by the Conflict Analytics Lab"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                  <Label className="text-center text-base w-full text-[#838383]">
                     Ask any legal questions.
                   </Label>
                 </div>
-                <div className="flex gap-3 flex-wrap justify-center">
+                <div className="flex gap-2 sm:gap-3 flex-wrap justify-center">
                   {[
                     "Data Privacy",
                     "Service Terms",
@@ -180,7 +180,7 @@ export function Chat() {
         <AlertDialog open={!!alert}>
           <AlertDialogTitle className="hidden"></AlertDialogTitle>
           <AlertDialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
-            <AlertDialogDescription className="text-md text-[black]">
+            <AlertDialogDescription className="text-base text-[black]">
               {alert}
             </AlertDialogDescription>
           </AlertDialogContent>
@@ -190,7 +190,7 @@ export function Chat() {
         <Dialog open={!!infoAlert}>
           <DialogTitle className="hidden"></DialogTitle>
           <DialogContent onOpenAutoFocus={(e: any) => e.preventDefault()}>
-            <DialogDescription className="text-md text-[black]">
+            <DialogDescription className="text-base text-[black]">
               {infoAlert}
             </DialogDescription>
             <DialogFooter>
