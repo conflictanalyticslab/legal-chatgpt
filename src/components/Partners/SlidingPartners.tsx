@@ -1,16 +1,18 @@
 import React from "react";
 import Carousel from "./Carousel";
-import Container from "../ui/Container";
 import { cn } from "@/utils/utils";
+import Container from "../ui/Container";
 
-function SlidingPartners({ title, description, className}: any) {
+function SlidingPartners({ title, description, className }: any) {
   return (
     <div className={cn("bg-white py-[50px]", className)}>
-      <Container className="min-h-[700px] sm:min-h-[700px] lg:min-h-[700px] ">
-        <h2 className="text-[2rem] lg:text-[length:--subheading]">{title}</h2>
-        <p className="text-md md:text-xl text-[--grey] lg:leading-relaxed w-[100%] md:w-[85%] max-w-[1350px]">
-          {description}
-        </p>
+      <Container className="min-h-[700px] sm:min-h-[700px] lg:min-h-[700px]">
+        <div>
+          <h2 className="text-[2rem] lg:text-[length:--subheading]">{title}</h2>
+          <p className="text-base md:text-xl text-[--grey] lg:leading-relaxed w-[100%] md:w-[85%] max-w-[1350px]">
+            {description}
+          </p>
+        </div>
         <div className="relative">
           <Carousel slideRight={true} />
           <Carousel

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/PublicShell/PublicShell";
-import { ChatContextProvider } from "@/app/(private)/chat/store/ChatContext";
+import { GloblaContextProvider } from "@/app/(private)/chat/store/ChatContext";
 
 export const metadata: Metadata = {
   title: "OpenJustice Signup",
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <PublicShell>
-      <ChatContextProvider>{children}</ChatContextProvider>
+      <GloblaContextProvider>{children}</GloblaContextProvider>
     </PublicShell>
   );
 }

@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation";
 import { useChatContext } from "../../store/ChatContext";
 
 export default function SideNav() {
-  const [isNavOpen, setIsNavOpen] = useState(false);
   const {
     setConversation,
     setConversationId,
@@ -18,6 +17,8 @@ export default function SideNav() {
     setShowStartupImage,
     loading,
     pdfLoading,
+    isNavOpen,
+    setIsNavOpen,
   } = useChatContext();
   const router = useRouter();
 
@@ -31,38 +32,44 @@ export default function SideNav() {
     setShowStartupImage(true);
     setDocumentQuery("");
     setConversationId("");
+
+    if (window.innerWidth <= 1024) setIsNavOpen(false);
   };
 
   return (
     <nav
       className={cn(
-        "relative transition-all flex flex-col w-[60px] border-r-[#e2e8f0] duration-300 ease-in-out h-screen overflow-auto scrollbar-thin",
+        "bg-[#f5f5f7] fixed lg:relative transition-all flex flex-col w-0 lg:w-[60px] border-r-[#e2e8f0] duration-300 ease-in-out h-screen overflow-visible scrollbar-thin z-10",
         {
-          "w-[350px] shadow-3": isNavOpen,
+          "w-[100vw] lg:w-[350px] shadow-3": isNavOpen,
         }
       )}
     >
+      {/* Side Nav Menu Icon */}
       <Button
         variant={"ghost"}
-        className="absolute top-3 right-3 p-2"
+        className={cn(
+          "absolute top-3 right-[-50px] lg:right-3 p-2 transition-all duration-500",
+          isNavOpen && "right-3"
+        )}
         onClick={() => setIsNavOpen(!isNavOpen)}
       >
         <PanelRightClose className="w-[20px] h-[20px]" />
       </Button>
       {isNavOpen && (
-        <div className="grid grid-rows-[auto_1fr_auto] mx-2 h-screen overflow-hidden pt-[60px]">
+        <div className="grid grid-rows-[auto_1fr_auto] mx-2 h-screen overflow-hidden pt-[55px]">
           <Button
             disabled={loading || pdfLoading}
             variant={"ghost"}
             onClick={handleNewConversation}
-            className="my-5 mx-5 flex justify-start gap-3 cursor-pointer border-[1px] border-transparent border-border border-[1px] px-2"
+            className="mb-5 mx-5 flex justify-start gap-3 cursor-pointer border-border border-[1px] px-2"
           >
             <MessageSquare className="h-5 w-5" />
             New Conversation
           </Button>
           <ChatHistory />
           <Button
-            className="my-5 mx-5 flex justify-start gap-3 cursor-pointer border-[1px] border-transparent border-border border-[1px] px-2"
+            className="my-5 mx-5 flex justify-start gap-3 cursor-pointer border-border border-[1px] px-2"
             variant={"ghost"}
             onClick={() => handleLogout()}
           >

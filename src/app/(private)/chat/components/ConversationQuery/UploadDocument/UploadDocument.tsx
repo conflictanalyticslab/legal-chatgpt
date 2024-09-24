@@ -1,6 +1,5 @@
 import { useChatContext } from "@/app/(private)/chat/store/ChatContext";
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import {
   Tooltip,
   TooltipContent,
@@ -18,6 +17,7 @@ import GPT4Tokenizer from "gpt4-tokenizer";
 import { cn } from "@/utils/utils";
 import { postPDF } from "@/lib/requests/postPDF";
 import { uploadPdfDocument } from "@/lib/requests/uploadPdfDocument";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function UploadDocument() {
   const {
@@ -123,8 +123,10 @@ export default function UploadDocument() {
           <Button
             variant="ghost"
             className={cn(
-              "hover:bg-[#E2E8F0] bg-[transparent] h-[56px] w-[56px] absolute left-[-70px]",
-              { "opacity-[0.5] cursor-not-allowed": loadingPDF }
+              "hover:bg-transparent bg-[transparent] md:px-4 md:absolute left-[-70px] transition-all self-center",
+              {
+                "opacity-[0.5] cursor-not-allowed": loadingPDF,
+              }
             )}
             type="button"
             aria-label="Attach PDF"
@@ -133,7 +135,7 @@ export default function UploadDocument() {
             {loadingPDF ? (
               <LoadingSpinner />
             ) : (
-              <Paperclip className="w-5 h-5 rotate-[-45deg]" />
+              <Paperclip className="w-3 md:w-5 h-3 md:h-5 rotate-[-45deg]" />
             )}
           </Button>
         </TooltipTrigger>

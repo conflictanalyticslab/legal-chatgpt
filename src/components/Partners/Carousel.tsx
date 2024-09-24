@@ -21,7 +21,7 @@ function Carousel({ slideRight, className, orderOpposite }: any) {
       {displayPartners.map((img, key) => (
         <Card
           key={key}
-          className="relative w-[150px] sm:w-[170px] lg:w-[180px] xl:w-[200px] h-[150px] sm:h-[170px] lg:h-[180px] xl:h-[200px] p-[20px] rounded-[.8rem] flex items-center justify-center shadow-md"
+          className="relative w-[150px] sm:w-[170px] lg:w-[180px] xl:w-[200px] h-[150px] sm:h-[170px] lg:h-[180px] xl:h-[200px] p-[20px] rounded-[.8rem] flex items-center justify-center"
         >
           <div className={cn("relative m-auto", img.width, img.height)}>
             <Image src={img.url} fill alt="img" className="object-contain" />

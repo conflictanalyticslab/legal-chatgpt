@@ -1,12 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import Container from "../ui/Container";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { cn } from "@/utils/utils";
 import { Menu, X } from "lucide-react";
-
+import oj_logo from "@/assets/oj_logo.png";
+import Container from "@/components/ui/Container";
 export function PublicHeader() {
   const links = [
     {
@@ -21,26 +21,22 @@ export function PublicHeader() {
     },
     { id: 3, route: "Blogs", url: "https://myopencourt.org/blog/" },
     { id: 4, route: "FAQs", url: "/faq" },
-    { id: 5, route: "Waitlist", url: "/waitlist" },
-    { id: 6, route: "Login", url: "/login" },
   ];
 
   const [navOpen, setNavOpen] = useState(false);
   return (
     <nav className="bg-greyBg py-[10px] sm:py-[15px] border-b-[1px] border-border">
-      <Container className="flex justify-between items-center">
+      <Container className="grid grid-cols-[auto_1fr_auto] justify-between items-center">
         <Link href="/">
-          <Image
-            src={"/assets/icons/logo.svg"}
-            width={200}
-            height={40}
-            alt="Logo"
-          />
+          <Image src={oj_logo} width={150} height={150} alt="Logo" />
         </Link>
 
+        {/* Menu Button */}
         <Button
           variant={"ghost"}
-          className={cn("bg-greyBg h-auto px-[5px] lg:hidden flex")}
+          className={cn(
+            "bg-greyBg h-auto px-[5px] lg:hidden flex col-start-3 col-end-4"
+          )}
           onClick={() => setNavOpen(true)}
         >
           {!navOpen && <Menu className="h-[30px] w-[30px]" />}
@@ -48,9 +44,9 @@ export function PublicHeader() {
 
         <div
           className={cn(
-            `lg:flex gap-[20px] text-[1.2rem] items-center z-[2]`,
+            `flex justify-center items-center gap-8 text-[1.2rem] z-[2]`,
             {
-              'hidden': !navOpen,
+              "hidden lg:flex ": !navOpen,
             },
             {
               "flex-col fixed top-[0] pt-[90px] left-0 right-0 bottom-0 bg-greyBg":
@@ -59,33 +55,53 @@ export function PublicHeader() {
           )}
         >
           {navOpen && (
-            <Button onClick={() => setNavOpen(false)} variant={"ghost"} className="fixed top-3   right-3">
-              <X className="h-[25px] w-[25px]" />
-            </Button>
-          )}
-          {links
-            .filter((item) => item.id != 6)
-            .map((link) => (
-              <Link
-                className="text-black no-underline hover:text-primaryOJ text-nowrap"
-                href={link.url}
-                target="_blank"
-                key={link.url}
+            <>
+              {/* Close Icon */}
+              <Button
+                onClick={() => setNavOpen(false)}
+                variant={"ghost"}
+                className="fixed top-3 right-3"
               >
-                {link.route}
+                <X className="h-[25px] w-[25px]" />
+              </Button>
+              {/* Home Link */}
+              <Link
+                className="block lg:hidden text-black no-underline hover:text-primaryHue text-nowrap"
+                href={"/"}
+              >
+                Home
               </Link>
-            ))}
+            </>
+          )}
+          {/* Links */}
+          {links.map((link) => (
+            <Link
+              className="text-black no-underline hover:text-primaryHue text-nowrap"
+              href={link.url}
+              target="_blank"
+              key={link.url}
+            >
+              {link.route}
+            </Link>
+          ))}
+
+          {/* Login Button on Mobile Screen */}
           <Button
             asChild
-            variant={'ghost'}
-            className="bg-primaryOJ hover:bg-primaryOJ/90 px-[20px] border-primaryOJ border-[2px] text-md text-white hover:text-white"
+            variant={"ghost"}
+            className="flex lg:hidden bg-transparent px-[20px] hover:bg-primaryHue border-primaryHue border-[2px] text-base text-primaryHue hover:text-white duration-200 ease-in-out h-auto"
           >
-            <Link href={links[links.length - 1].url}>
-            {links[links.length - 1].route}
-
-            </Link>
+            <Link href={"/login"}>Login</Link>
           </Button>
         </div>
+
+        <Button
+          asChild
+          variant={"ghost"}
+          className="hidden lg:block bg-transparent px-[20px] hover:bg-primaryHue border-primaryHue border-[2px] text-base text-primaryHue hover:text-white duration-200 ease-in-out h-auto col-start-3 col-end-4"
+        >
+          <Link href={"/login"}>Login</Link>
+        </Button>
       </Container>
     </nav>
   );

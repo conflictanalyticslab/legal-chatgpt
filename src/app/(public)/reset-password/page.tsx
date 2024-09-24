@@ -10,6 +10,8 @@ import Link from "next/link";
 import { useChatContext } from "@/app/(private)/chat/store/ChatContext";
 import { resetPassword } from "@/lib/api/firebase_utils/auth";
 import Image from "next/image";
+import Container from "@/components/ui/Container";
+import PageTitle from "@/components/ui/page-title";
 
 function page() {
   const [loading, setLoading] = useState(false);
@@ -35,58 +37,53 @@ function page() {
 
   if (!loading)
     return (
-      <Form {...form}>
-        <form
-          noValidate
-          onSubmit={form.handleSubmit(handleResetPassword)}
-          className="h-full flex justify-center"
-        >
-          <div className="min-w-[300px] w-full max-w-[460px] flex flex-col justify-start mt-[100px] gap-5">
-            <div>
-              <Image
-                src={"/assets/icons/oj-icon.svg"}
-                height={50}
-                width={50}
-                alt="Open Justice"
-                className="mx-auto mb-[50px]"
-              />
-              <h1 className="text-center font-bold text-[3rem]">
-                Reset Password
-              </h1>
-              <p className="text-center text-[#00000099]">
-                Enter your email and we'll send you a link to reset your
-                password.
-              </p>
-            </div>
-            <div className="flex flex-col gap-1">
-              {/* Email Input */}
-              <InputFormField
-                form={form}
-                label=""
-                type="email"
-                name="email"
-                placeholder="Email"
-              />
-              <Link href="/login" className="text-xs ml-auto hover:underline">
-                Log in?
-              </Link>
-            </div>
+      <Container className="w-full">
+        <Form {...form}>
+          <form
+            noValidate
+            onSubmit={form.handleSubmit(handleResetPassword)}
+            className="h-full flex justify-center"
+          >
+            <div className="w-full max-w-[460px] flex flex-col justify-start mt-[100px] gap-5">
+              <div>
+                <PageTitle className="text-center font-bold text-[3rem]">
+                  Reset Password
+                </PageTitle>
+                <p className="text-center text-[#00000099]">
+                  Enter your email and we'll send you a link to reset your
+                  password.
+                </p>
+              </div>
+              <div className="flex flex-col gap-1">
+                {/* Email Input */}
+                <InputFormField
+                  form={form}
+                  label=""
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                />
+                <Link href="/login" className="text-xs ml-auto hover:underline">
+                  Log in?
+                </Link>
+              </div>
 
-            {/* Reset Password Button */}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-primaryOJ hover:bg-primaryOJ/90 disabled:opacity-[0.6]"
-            >
-              Reset Password
-            </Button>
-          </div>
-        </form>
-      </Form>
+              {/* Reset Password Button */}
+              <Button
+                type="submit"
+                disabled={loading}
+                className="bg-primaryHue hover:bg-primaryHue/90 disabled:opacity-[0.6]"
+              >
+                Reset Password
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </Container>
     );
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <Container className="flex flex-col items-center gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-center font-bold text-[3rem]">Check Your Email</h1>
         <p className="text-center text-[#00000099]">
@@ -94,12 +91,12 @@ function page() {
           your password.
         </p>
       </div>
-      <Button asChild className="bg-primaryOJ hover:bg-primaryOJ/90">
+      <Button asChild className="bg-primaryHue hover:bg-primaryHue/90">
         <Link href="/login" className="w-full">
           Log In
         </Link>
       </Button>
-    </div>
+    </Container>
   );
 }
 

@@ -70,11 +70,11 @@ export default function UploadedDocuments() {
   };
 
   return (
-    <div className="grid grid-rows-[auto_1fr] items-center gap-4 py-8">
+    <div className="px-4 grid grid-rows-[auto_1fr] items-start gap-4 py-8 overflow-hidden h-full">
       <Label className="font-bold pt-[1rem]">Uploaded Documents</Label>
 
       {/* Uploaded Documents */}
-      <div className="grid grid-cols-1 gap-2">
+      <div className="grid grid-cols-1 gap-2 overflow-y-auto h-full">
         {documents.length > 0 ? (
           documents.map((document: any, i: number) => (
             <div key={i}>
