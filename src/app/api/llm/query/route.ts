@@ -99,6 +99,8 @@ async function* makeIterator({
 
           // Combines both the semantic searched docs with the uploaded document content
           const docData = formatDocumentsAsString(semanticDocs as LangchainDocType[]) + "\n\n" + uploadedDocs;
+          
+          console.log("here are the semantic docs", semanticDocs)
           return docData;
         },
         question: new RunnablePassthrough(),

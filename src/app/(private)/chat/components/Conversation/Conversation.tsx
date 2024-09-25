@@ -23,7 +23,7 @@ export function Conversation() {
       )}
     >
 
-      <div className="w-screen md:w-chat mx-auto flex flex-col gap-[3.25rem] items-end px-4">
+      <div className="pt-[33px] w-screen md:w-chat mx-auto flex flex-col gap-[3.25rem] items-end px-4">
         {conversation && conversation.map((convoObj: any, i: number) => (
           <Card
             key={i}

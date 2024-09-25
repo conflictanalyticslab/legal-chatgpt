@@ -11,7 +11,7 @@ export default function DemoVideo({ className }: DemoVideo) {
       playsInline
       preload="none"
       src="/assets/landing_page/landing-page-video.mp4"
-      className={cn("shadow-lg rounded-lg max-w-[1000px] w-full md:w-[min(100%, 44vw)] h-fit", className)}
+      className={cn("shadow-lg rounded-lg lg:max-w-[min(1000px,45vw)] w-full md:w-[min(100%, 44vw)] mx-auto", className)}
     ></video>
   );
 }
