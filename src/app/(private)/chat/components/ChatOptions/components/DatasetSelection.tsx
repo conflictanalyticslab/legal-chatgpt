@@ -91,7 +91,7 @@ export function DatasetSelection() {
                 Australian Scrutiny
               </Label>
             </span>
-            <span className="flex justify-start items-center gap-2">
+            {/* <span className="flex justify-start items-center gap-2">
               <RadioGroupItem
                 id={PineconeNamespaces.minimum_standards_termination}
                 value={PineconeNamespaces.minimum_standards_termination}
@@ -175,7 +175,7 @@ export function DatasetSelection() {
               >
                 Procedure on Dismissal
               </Label>
-            </span>
+            </span> */}
           </RadioGroup>
         </AccordionContent>
       </AccordionItem>
