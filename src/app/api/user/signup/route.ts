@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   const { email, password } = await req.json();
 
-  if (!validEmailRegex.test(email) && publicEmailRegex.test(email)) {
+  if (publicEmailRegex.test(email)) {
     return NextResponse.json({}, { status: 403 });
   }
 
