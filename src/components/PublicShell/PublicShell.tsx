@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import PublicFooter from "./PublicFooter";
 import PublicHeader from "./PublicHeader";
+import { Toaster } from "../ui/toaster";
 
 export function PublicShell({
   children,
@@ -11,10 +12,9 @@ export function PublicShell({
 }) {
   return (
     <>
+      <Toaster />
       <PublicHeader />
-      <div className="grid grid-rows-[auto_1fr_auto] min-h-screen overflow-x-hidden">
-        {children}
-      </div>
+      {children}
       {showFooter && <PublicFooter />}
     </>
   );

@@ -35,6 +35,7 @@ import { useGetAuthenticatedUser } from "@/lib/requests/getAuthenticatedUser";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/lib/firebase/firebase";
 import logo_png from "@/assets/oj_logo.png";
+import { useRouter } from "next/navigation";
 
 export function Chat() {
   const {
@@ -53,7 +54,7 @@ export function Chat() {
     conversationId,
   } = useChatContext();
   useGetAuthenticatedUser();
-
+  const router = useRouter();
   const { fetchQuery } = useFetchQuery();
 
   /**
@@ -100,10 +101,15 @@ export function Chat() {
     setAlert("Authenticating user...");
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
-        if (user)
-          // await deleteDocumentsWithEmail();
-          setDocuments(await getDocumentsOwnedByUser());
-        setConversationTitles(await getConversationTitles());
+        if (user && !user.emailVerified) {
+          toast({
+            title: "Email has not been verified.",
+            variant: "destructive",
+          });
+          router.push("/login");
+        }
+        setDocuments(await getDocumentsOwnedByUser()); // Retrieves uploaded documents by user
+        setConversationTitles(await getConversationTitles()); // Retrieves past conversations
       } catch (error: unknown) {
         setInfoAlert(errorResponse(error));
       }

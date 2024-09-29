@@ -37,7 +37,7 @@ function page() {
 
   if (!loading)
     return (
-      <Container className="w-full">
+      <Container className="w-full h-[calc(100%-50px-75px)]">
         <Form {...form}>
           <form
             noValidate
@@ -46,7 +46,7 @@ function page() {
           >
             <div className="w-full max-w-[460px] flex flex-col justify-start mt-[100px] gap-5">
               <div>
-                <PageTitle className="text-center font-bold text-[3rem]">
+                <PageTitle className="text-center font-bold heading">
                   Reset Password
                 </PageTitle>
                 <p className="text-center text-[#00000099]">
