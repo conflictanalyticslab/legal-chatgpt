@@ -2,7 +2,10 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -25,7 +28,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import InputFormField from "@/components/Auth/InputFormField";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, MailPlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/models/schema";
@@ -39,11 +42,19 @@ import { userSchema } from "@/models/UserSchema";
 import { doc, setDoc } from "firebase/firestore";
 import Container from "@/components/ui/Container";
 import PageTitle from "@/components/ui/page-title";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const { setUser, isLoading } = useChatContext();
+  const { user, setUser, isLoading } = useChatContext();
   const [alert, setAlert] = useState("");
+  const [showVerifyEmail, setShowVerifyEmail] = useState(false);
   const router = useRouter();
   const form = useForm<Zod.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -83,6 +94,8 @@ export default function Signup() {
         password
       );
 
+      await sendEmailVerification(userCredential.user);
+      console.log(userCredential);
       // Adding user to list of valid users
       const validData = userSchema.parse({
         email,
@@ -95,16 +108,42 @@ export default function Signup() {
 
       const user = userCredential.user;
       setUser(user);
-      router.push("/chat");
 
-      // You can perform additional actions here, like saving user data to your database
+      setShowVerifyEmail(true);
     } catch (error: unknown) {
       setAlert(errorResponse(error));
     }
   };
 
+  if (showVerifyEmail)
+    return (
+      <Container className="w-full h-[calc(100%-50px-75px)] flex justify-center items-start">
+        <Card className="bg-inherit shadow-none border-0 mt-[100px]">
+          <CardHeader className="text-center flex flex-col items-center">
+            <MailPlus className="w-10 h-10" />
+            <CardTitle className="text-[2rem]">Check your email</CardTitle>
+            <CardDescription>
+              A verification link has been sent to <b>{user?.email ?? ""}.</b>{" "}
+              Verify your email before logging in.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center">
+            <Button
+              variant={"default"}
+              className="bg-primaryHue hover:bg-primaryHue/90 text-lg px-10 py-5"
+              onClick={() => {
+                router.push("/login");
+              }}
+            >
+              Login
+            </Button>
+          </CardContent>
+        </Card>
+      </Container>
+    );
+
   return (
-    <Container className="w-full">
+    <Container className="w-full h-[calc(100%-50px-75px)]">
       <Form {...form}>
         <form
           noValidate
@@ -112,12 +151,18 @@ export default function Signup() {
           className="h-full flex justify-center"
         >
           <div className="w-full max-w-[460px] flex flex-col justify-start mt-[100px] gap-5">
-            <PageTitle className="text-center font-bold text-[3rem]">
+            <PageTitle className="text-center font-bold heading">
               Sign Up
             </PageTitle>
 
             {/* Email */}
-            <InputFormField form={form} name="email" type="email" placeholder="Email" label="Email" />
+            <InputFormField
+              form={form}
+              name="email"
+              type="email"
+              placeholder="Email"
+              label="Email"
+            />
 
             {/* Password */}
             <FormField

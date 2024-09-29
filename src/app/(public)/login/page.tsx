@@ -35,6 +35,7 @@ import { auth } from "@/lib/firebase/firebase";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
 import PageTitle from "@/components/ui/page-title";
+import { toast } from "@/components/ui/use-toast";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -88,6 +89,14 @@ export default function Login() {
         email,
         password
       );
+
+      if (!userCredential.user.emailVerified) {
+        toast({
+          title: "Email has not been verified.",
+          variant: "destructive",
+        });
+        return;
+      }
       router.push("/chat");
     } catch (error: unknown) {
       form.setError("email", {
@@ -104,7 +113,7 @@ export default function Login() {
   };
 
   return (
-    <Container className="w-full">
+    <Container className="w-full h-[calc(100%-50px-75px)]">
       <Form {...form}>
         <form
           noValidate
@@ -113,7 +122,7 @@ export default function Login() {
         >
           <div className="w-full max-w-[460px] flex flex-col justify-start mt-[100px] gap-5">
             <div>
-              <PageTitle className="text-center font-bold text-[3rem]">
+              <PageTitle className="text-center font-bold heading">
                 Welcome Back
               </PageTitle>
             </div>
