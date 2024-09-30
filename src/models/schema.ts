@@ -1,5 +1,6 @@
 import { metadata } from "@/app/layout";
 import { validEmailRegex } from "@/lib/signup/validEmailRegex";
+import { publicEmailRegex } from "@/utils/publicEmailRegex";
 import { z, ZodType } from "zod";
 
 export const loginSchema = z.object({
@@ -16,7 +17,7 @@ export const signupSchema = z
     email: z
       .string()
       .email("Invalid email address")
-      .refine((email) => validEmailRegex.test(email), {
+      .refine((email) => !publicEmailRegex.test(email), {
         message: "Email must be an institution email",
       }),
     password: z

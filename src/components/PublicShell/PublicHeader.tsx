@@ -97,8 +97,8 @@ export function PublicHeader() {
 
         <Button
           asChild
-          variant={"ghost"}
-          className="hidden lg:block bg-transparent px-[20px] hover:bg-primaryHue border-primaryHue border-[2px] text-base text-primaryHue hover:text-white duration-200 ease-in-out h-auto col-start-3 col-end-4"
+          variant={"outline"}
+          className="hidden lg:block bg-inherit px-[20px] hover:bg-primaryHue/10 border-primaryHue border-[2px] text-base text-primaryHue duration-200 ease-in-out h-auto col-start-3 col-end-4"
         >
           <Link href={"/login"}>Login</Link>
         </Button>
