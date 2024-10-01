@@ -6,9 +6,9 @@ import PageTitle from "@/components/ui/page-title";
 import PageSubtitle from "@/components/ui/page-subtitle";
 import Container from "@/components/ui/Container";
 import DemoVideo from "@/components/demo-video/demo-video";
+import PublicFooter from "@/components/publicShell/public-footer";
 import { TwoPartners } from "@/components/partners/two-partners";
 import SlidingPartners from "@/components/partners/sliding-partners";
-import PublicFooter from "@/components/publicShell/public-footer";
 
 export default function Page() {
   return (

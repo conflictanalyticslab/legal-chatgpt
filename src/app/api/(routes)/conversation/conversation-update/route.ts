@@ -20,6 +20,7 @@ export async function POST(req: Request) {
     // Authenticates user
     const decodedToken = await getAuthenticatedUser();
     if (decodedToken instanceof NextResponse) return decodedToken;
+    if (!decodedToken) throw "Decoded token undefined";
 
     const { fullConversation, includedDocuments, title } = await req.json();
 
