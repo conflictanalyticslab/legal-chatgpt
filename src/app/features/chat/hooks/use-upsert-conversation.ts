@@ -11,9 +11,9 @@ import { useGlobalContext } from "../../../store/global-context";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/firebase-admin/firebase";
 import { conversationTitleSchema } from "@/app/features/chat/models/schema";
-import { putConversationSave } from "@/app/api/(api-service-layer)/putConversationSave";
-import { postConversationSave } from "@/app/api/(api-service-layer)/postConversationSave";
-import { postConversationTitle } from "@/app/api/(api-service-layer)/postConversationTitle";
+import { postConversationTitle } from "@/app/api/(api-service-layer)/post-conversation-title";
+import { putConversationSave } from "@/app/api/(api-service-layer)/put-conversationSave";
+import { postConversationSave } from "@/app/api/(api-service-layer)/post-conversationSave";
 
 const useUpsertConversation = () => {
   const {

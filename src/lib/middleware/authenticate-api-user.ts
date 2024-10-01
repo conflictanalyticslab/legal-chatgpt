@@ -6,14 +6,14 @@ import { headers } from "next/headers";
 import { initBackendFirebaseApp } from "./init-backend-firebase-app";
 
 export async function authenticateApiUser(): Promise<{
-  earlyResponse?: NextResponse<{ error: string }>;
+  errorResponse?: NextResponse<{ error: string }>;
   decodedToken?: DecodedIdToken;
 }> {
   const headersList = headers();
 
   if (!headersList.get("authorization")?.startsWith("Bearer ")) {
     return {
-      earlyResponse: NextResponse.json(
+      errorResponse: NextResponse.json(
         { error: "Expected authorization header to start with 'Bearer '" },
         { status: 401 }
       ),
@@ -23,7 +23,7 @@ export async function authenticateApiUser(): Promise<{
   const token = headersList.get("authorization")?.split("Bearer ")[1];
   if (!token) {
     return {
-      earlyResponse: NextResponse.json(
+      errorResponse: NextResponse.json(
         { error: "Missing bearer token" },
         { status: 401 }
       ),
@@ -38,7 +38,7 @@ export async function authenticateApiUser(): Promise<{
   } catch (error) {
     console.log(error);
     return {
-      earlyResponse: NextResponse.json(
+      errorResponse: NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       ),

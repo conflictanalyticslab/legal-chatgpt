@@ -95,7 +95,7 @@ export default function Page() {
       );
 
       await sendEmailVerification(userCredential.user);
-      console.log(userCredential);
+
       // Adding user to list of valid users
       const validData = userSchema.parse({
         email,
