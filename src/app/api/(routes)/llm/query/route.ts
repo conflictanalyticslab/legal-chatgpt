@@ -112,7 +112,6 @@ async function* makeIterator({
             formatDocumentsAsString(semanticDocs as LangchainDocType[]) +
             "\n\n" +
             uploadedDocs;
-
           return docData;
         },
         question: new RunnablePassthrough(),
@@ -139,6 +138,7 @@ async function* makeIterator({
 }
 
 export async function POST(req: NextRequest, res: NextRequest) {
+
   const iterator = makeIterator(await req.json());
   const stream = iteratorToStream(iterator);
 

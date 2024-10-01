@@ -156,6 +156,7 @@ export default function UploadedDocuments() {
                       onChange={(e) => setInputValue(e.target.value)}
                       ref={textFieldRef}
                       rows={10}
+                      className="focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
                     <Button
                       variant="default"

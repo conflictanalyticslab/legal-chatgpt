@@ -3,7 +3,10 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  sendEmailVerification,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 import { useForm, SubmitHandler } from "react-hook-form";
 import { getDatabase, ref, child, get } from "firebase/database";
@@ -72,9 +75,11 @@ export default function Login() {
 
       if (!userCredential.user.emailVerified) {
         toast({
-          title: "Email has not been verified.",
+          title: "Email has not been verified. A verification link has been sent.",
           variant: "destructive",
         });
+
+        await sendEmailVerification(userCredential.user);
         return;
       }
       router.push("/chat");
@@ -178,16 +183,6 @@ export default function Login() {
                 className="underline font-bold hover:opacity-[0.8]"
               >
                 Sign Up
-              </Link>
-            </Label>
-
-            <Label className="text-center">
-              Email not verified?{" "}
-              <Link
-                href={"/verify-email"}
-                className="underline font-bold hover:opacity-[0.8]"
-              >
-                Resend Email
               </Link>
             </Label>
           </div>

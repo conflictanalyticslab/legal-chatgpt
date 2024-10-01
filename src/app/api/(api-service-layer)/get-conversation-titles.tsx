@@ -4,7 +4,7 @@ export async function getConversationTitles(): Promise<string[]> {
   if (!auth.currentUser) 
     return [];
   
-  const res = await fetch(`/api/conversation/conversationTitle`, {
+  const res = await fetch(`/api/conversation/conversation-title`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,

@@ -37,7 +37,7 @@ import { Conversation } from "@/app/features/chat/components/conversation/conver
 import useFetchQuery from "@/app/features/chat/hooks/use-fetch-query";
 import { ConversationQuery } from "@/app/features/chat/components/conversation-query/conversation-query";
 
-export function Chat() {
+export default function Chat() {
   const {
     alert,
     setAlert,

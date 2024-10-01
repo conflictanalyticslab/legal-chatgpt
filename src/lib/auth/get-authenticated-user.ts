@@ -7,13 +7,7 @@ import { authenticateApiUser } from "@/lib/middleware/authenticate-api-user";
  * @returns
  */
 export async function getAuthenticatedUser() {
-  const { earlyResponse, decodedToken } = await authenticateApiUser();
-  if (earlyResponse) return earlyResponse;
-  if (!decodedToken) {
-    return NextResponse.json(
-      { error: "decodedToken is missing but there was no earlyResponse" },
-      { status: 500 }
-    );
-  }
+  const { errorResponse, decodedToken } = await authenticateApiUser();
+  if (!decodedToken) return errorResponse;
   return decodedToken;
 }

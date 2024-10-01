@@ -3,6 +3,7 @@ import { errorResponse } from "@/lib/utils";
 import { PineconeNamespaces } from "@/app/(private)/chat/enum/enums";
 import { UploadedDocument } from "@/app/features/chat/models/types";
 import { usePdfSearch } from "@/app/features/chat/hooks/use-pdf-search";
+import { auth } from "@/lib/firebase/firebase-admin/firebase";
 
 /**
  * Custom hook to fetch data with RAG
@@ -47,9 +48,12 @@ export function useFetchLLM() {
       // Assign the LLM Response and pdf search promises to variables to be called concurrently
       const llmPromise = fetch("/api/llm/query", {
         method: "POST", // Specify the request method as POST
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
+        },
+
         body: JSON.stringify({
-          // token: userToken,
           query: queryInput,
           namespace,
           indexName,
@@ -57,7 +61,7 @@ export function useFetchLLM() {
           includedDocuments,
         }),
       });
-      
+
       const relevantDocPromise =
         namespace === PineconeNamespaces.no_dataset
           ? new Promise((resolve, reject) => resolve(true))
@@ -99,7 +103,8 @@ export function useFetchLLM() {
 
         // Display each word with a delay
         for (let i = 0; i < words.length; i++) {
-          if (i < words.length - 1) latestText += words[i] === "" ? " " : words[i] + " ";
+          if (i < words.length - 1)
+            latestText += words[i] === "" ? " " : words[i] + " ";
           else latestText += words[i];
 
           setLatestResponse(latestText);
@@ -125,7 +130,7 @@ export function useFetchLLM() {
         throw new Error(
           "Something went wrong. LLM failed to generate response. Please try again."
         );
-        
+
       // Add in the content for the LLM's response
       fullConversation[fullConversation.length - 1].content = latestText;
 
