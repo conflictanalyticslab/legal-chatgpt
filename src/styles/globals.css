@@ -38,9 +38,6 @@ label[data-details] {
   color: #5b5b5b;
 }
 
-button:focus, input:focus, a:focus {
-  outline: initial;
-}
 
 body {
   margin: 0px;

@@ -26,19 +26,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import InputFormField from "@/components/Auth/InputFormField";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, Mail, MailPlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signupSchema } from "@/models/schema";
-import { auth, db } from "@/lib/firebase/firebase";
-import { errorResponse } from "@/utils/utils";
-import { useChatContext } from "@/app/(private)/chat/store/ChatContext";
+import { auth, db } from "@/lib/firebase/firebase-admin/firebase";
+import { errorResponse } from "@/lib/utils";
+import { useGlobalContext } from "@/app/store/global-context";
 import { getDatabase, ref, child, get } from "firebase/database";
 import { z } from "zod";
 import Image from "next/image";
-import { userSchema } from "@/models/UserSchema";
 import { doc, setDoc } from "firebase/firestore";
 import Container from "@/components/ui/Container";
 import PageTitle from "@/components/ui/page-title";
@@ -49,10 +46,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { signupSchema } from "@/app/features/sign-up/models/schema";
+import { userSchema } from "@/app/features/chat/models/schema";
+import InputFormField from "@/components/auth/input-form-field";
 
-export default function Signup() {
+export default function Page() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const { user, setUser, isLoading } = useChatContext();
+  const { user, setUser, isLoading } = useGlobalContext();
   const [alert, setAlert] = useState("");
   const [showVerifyEmail, setShowVerifyEmail] = useState(false);
   const router = useRouter();
