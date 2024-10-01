@@ -1,5 +1,6 @@
+import { PublicShell } from "@/components/publicShell/public-shell";
 import type { Metadata } from "next";
-import { PublicShell } from "@/components/PublicShell/PublicShell";
+import { GlobalContextProvider } from "../../store/global-context";
 
 export const metadata: Metadata = {
   title: "OpenJustice Approved Institutions List",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <PublicShell>{children}</PublicShell>;
+  return (
+    <PublicShell>
+      <GlobalContextProvider>{children}</GlobalContextProvider>
+    </PublicShell>
+  );
 }

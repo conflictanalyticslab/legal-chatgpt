@@ -1,4 +1,4 @@
-import { cn } from "@/utils/utils";
+import { cn } from "@/lib/utils";
 import { HTMLAttributes, ReactNode } from "react";
 
 interface pageHeaderDescription extends HTMLAttributes<HTMLParagraphElement> {

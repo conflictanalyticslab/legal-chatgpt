@@ -1,4 +1,4 @@
-import { cn } from "@/utils/utils";
+import { cn } from "@/lib/utils";
 import React from "react";
 
 function Container({ children, className, id }: any) {

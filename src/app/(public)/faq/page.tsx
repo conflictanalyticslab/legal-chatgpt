@@ -1,5 +1,5 @@
 import React from "react";
-import QATile from "./components/QATile";
+import QATile from "../../features/faq/components/qa-tile";
 import {
   Accessibility,
   DatabaseZap,
@@ -9,7 +9,7 @@ import {
   MessageCircleQuestion,
   Scale,
 } from "lucide-react";
-import "./faq.css";
+import "@/app/features/faq/faq.css";
 export default function page() {
   return (
     <div id="faq" className="flex flex-col items-center mx-auto mt-[100px]">

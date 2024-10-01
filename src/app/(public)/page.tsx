@@ -1,26 +1,16 @@
 import React from "react";
-import Image from "next/image";
-import { PublicShell } from "@/components/PublicShell/PublicShell";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { TwoPartners } from "@/components/Partners/TwoPartners";
-import SlidingPartners from "@/components/Partners/SlidingPartners";
-import PublicFooter from "@/components/PublicShell/PublicFooter";
 import PageHeaderDescription from "@/components/ui/page-description";
-import DemoVideo from "@/components/DemoVideo/DemoVideo";
 import PageTitle from "@/components/ui/page-title";
 import PageSubtitle from "@/components/ui/page-subtitle";
 import Container from "@/components/ui/Container";
+import DemoVideo from "@/components/demo-video/demo-video";
+import { TwoPartners } from "@/components/partners/two-partners";
+import SlidingPartners from "@/components/partners/sliding-partners";
+import PublicFooter from "@/components/publicShell/public-footer";
 
-export default function Home() {
-  return (
-    <PublicShell showFooter={false}>
-      <Hero />
-    </PublicShell>
-  );
-}
-
-function Hero() {
+export default function Page() {
   return (
     <main id="main-id" className="pt-10">
       <Container
