@@ -26,6 +26,7 @@ export async function GET(_: Request) {
     // Authenticates user
     const decodedToken = await getAuthenticatedUser();
     if (decodedToken instanceof NextResponse) return decodedToken;
+    if (!decodedToken) throw "decoded token undefined";
 
     const queryResults = await getFirestore()
       .collection("conversations")
@@ -62,7 +63,8 @@ export async function POST(req: Request) {
   const decodedToken = await getAuthenticatedUser();
 
   if (decodedToken instanceof NextResponse) return decodedToken;
-
+  if (!decodedToken) throw "Decoded token undefined";
+  
   // Load user from firestore database
   const { user, userRef } = await loadUser(decodedToken);
 
