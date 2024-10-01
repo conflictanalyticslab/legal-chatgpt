@@ -6,10 +6,7 @@ import { authenticateApiUser } from "@/lib/middleware/authenticate-api-user";
 
 // Get all documents owned by the user in the authentication header
 export async function GET(_: Request) {
-  const { earlyResponse, decodedToken } = await authenticateApiUser();
-  if (earlyResponse) {
-    return earlyResponse;
-  }
+  const { decodedToken } = await authenticateApiUser();
 
   if (!decodedToken) {
     return NextResponse.json(
@@ -35,10 +32,7 @@ export async function GET(_: Request) {
 // This endpoint requires Node v20 or later
 // If this is failing locally, check your node version by running `node -v` in the terminal
 export async function POST(req: Request) {
-  const { earlyResponse, decodedToken } = await authenticateApiUser();
-  if (earlyResponse) {
-    return earlyResponse;
-  }
+  const { decodedToken } = await authenticateApiUser();
 
   if (!decodedToken) {
     return NextResponse.json(

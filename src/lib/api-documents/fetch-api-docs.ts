@@ -6,7 +6,7 @@
  */
 
 import { PineconeNamespaces } from "@/app/(private)/chat/enum/enums";
-import { RelevantDocument } from "@/app/(private)/chat/types/RelevantDocument";
+import { RelevantDocument } from "@/app/features/chat/models/types";
 
 /**
  * Fetches documents from Court Listener and Canlii

@@ -7,8 +7,8 @@ import PageSubtitle from "@/components/ui/page-subtitle";
 import Container from "@/components/ui/Container";
 import DemoVideo from "@/components/demo-video/demo-video";
 import PublicFooter from "@/components/publicShell/public-footer";
-import SlidingPartners from "@/components/partners/sliding-partnerss";
-import { TwoPartners } from "@/components/partners/two-partnerss";
+import SlidingPartners from "@/components/partners/sliding-partners";
+import { TwoPartners } from "@/components/partners/two-partners";
 
 export default function Page() {
   return (
