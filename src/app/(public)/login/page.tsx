@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  sendEmailVerification,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 import { useForm, SubmitHandler } from "react-hook-form";
 import { getDatabase, ref, child, get } from "firebase/database";
-import { loginSchema } from "@/models/schema";
 import {
   Form,
   FormControl,
@@ -19,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
-import { useChatContext } from "@/app/(private)/chat/store/ChatContext";
+import { useGlobalContext } from "@/app/store/global-context";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,18 +31,18 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import Link from "next/link";
-import InputFormField from "@/components/Auth/InputFormField";
 import { Label } from "@/components/ui/label";
-import { auth } from "@/lib/firebase/firebase";
-import Image from "next/image";
+import { auth } from "@/lib/firebase/firebase-admin/firebase";
 import Container from "@/components/ui/Container";
 import PageTitle from "@/components/ui/page-title";
 import { toast } from "@/components/ui/use-toast";
+import { loginSchema } from "@/app/features/login/models/schema";
+import InputFormField from "@/components/auth/input-form-field";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { setAlert, alert } = useChatContext();
+  const { setAlert, alert } = useGlobalContext();
   const router = useRouter();
 
   const form = useForm<Zod.infer<typeof loginSchema>>({
@@ -51,25 +53,6 @@ export default function Login() {
     },
     reValidateMode: "onSubmit",
   });
-
-  const readWhitelistEmails = async () => {
-    return new Promise((resolve) => {
-      const dbRef = ref(getDatabase());
-
-      get(child(dbRef, `whitelist-emails`))
-        .then((snapshot: { exists: () => any; val: () => unknown }) => {
-          if (snapshot.exists()) {
-            resolve(snapshot.val());
-          } else {
-            resolve("No white list email available");
-          }
-        })
-        .catch((error: any) => {
-          console.error(error);
-          resolve(error);
-        });
-    });
-  };
 
   const handleLogin: SubmitHandler<Zod.infer<typeof loginSchema>> = async ({
     email,
@@ -92,9 +75,11 @@ export default function Login() {
 
       if (!userCredential.user.emailVerified) {
         toast({
-          title: "Email has not been verified.",
+          title: "Email has not been verified. A verification link has been sent.",
           variant: "destructive",
         });
+
+        await sendEmailVerification(userCredential.user);
         return;
       }
       router.push("/chat");
@@ -177,7 +162,7 @@ export default function Login() {
                 )}
               />
               <Link
-                href="/reset-password"
+                href="/forgot-password"
                 className="text-xs ml-auto hover:underline"
               >
                 Forgot Password?
