@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 
 import UploadDocument from "../upload-document/upload-document";
+import { FlowModal } from "../dialog-flows/flow-graph";
 import useFetchQuery from "@/app/features/chat/hooks/use-fetch-query";
 
 export function ConversationQuery() {
-  const { loading, userQuery, setUserQuery, num, stopQuery } = useGlobalContext();
+  const { loading, userQuery, setUserQuery, num, stopQuery, dialogFlowName } = useGlobalContext();
 
   const { fetchQuery } = useFetchQuery();
   /**
@@ -29,6 +30,8 @@ export function ConversationQuery() {
     >
       <div className="relative flex h-[45px] md:h-[56px] w-full md:w-chat mx-2">
         <UploadDocument />
+
+        <FlowModal />
 
         <Input
           className="w-full flex bg-[#F8F8F8] pr-[60px] h-full focus-visible:ring-[none] text-base self-center"
@@ -61,6 +64,11 @@ export function ConversationQuery() {
           {num === 0
             ? "No more prompts allowed. Please enter your final feedback."
             : `Prompts left: ${num}`}
+        </label>
+        <label className="text-[grey] text-sm absolute bottom-[-20px] right-[0px] italic ">
+          {dialogFlowName === ""
+            ? "Dialog Flow not in use"
+            : "Dialog Flow in use: " + dialogFlowName}
         </label>
       </div>
     </form>
