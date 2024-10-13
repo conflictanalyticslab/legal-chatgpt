@@ -10,8 +10,8 @@ export function createGraphPrompt(graph: string) {
     else {
         const graphjson = JSON.parse(graph);
         return (
-            graphjson.map(([question, answer, followup]: [string, string, string]) => 
-                `If the user answers your question "${question}" with "${answer}", ask "${followup}".`
+            graphjson.map(([head, relation, tail]: [string, string, string]) => 
+                `When performing "${head}", "${relation}" leads to "${tail}".`
             ).join("\n\n")
         );
     }
