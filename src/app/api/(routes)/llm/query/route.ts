@@ -24,7 +24,7 @@ import {
 } from "@/app/features/chat/lib/prompt-utils";
 import { getAuthenticatedUser } from "@/lib/auth/get-authenticated-user";
 import { createDocumentPrompt } from "@/app/(private)/chat/lib/pdfs/pdf-utils";
-import { createGraphPrompt } from "@/app/(private)/chat/utils/graph/graph_utils";
+import { createGraphPrompt } from "@/app/(private)/chat/lib/graph/graph_utils";
 
 /**
  * Converts the LLM response to a streamed response for the client
