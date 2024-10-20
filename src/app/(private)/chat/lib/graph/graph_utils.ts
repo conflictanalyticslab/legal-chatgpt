@@ -10,6 +10,7 @@ export function createGraphPrompt(graph: string) {
     else {
         const graphjson = JSON.parse(graph);
         return (
+            "Here are some relationships you can reference:\n\n" +
             graphjson.map(([head, relation, tail]: [string, string, string]) => 
                 `When performing "${head}", "${relation}" leads to "${tail}".`
             ).join("\n\n")
