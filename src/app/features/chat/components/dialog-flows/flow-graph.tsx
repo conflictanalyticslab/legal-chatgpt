@@ -41,13 +41,30 @@ const DBURL = "https://graph-module.openjustice.ai";
 
 const lastGraphKey = 'OJLatestGraphId';
 
+function genUniqueId(): string {
+  /**
+   * Generates a unique id based on the current date and a random number.
+   * Ensures all id are unique.
+   */
+  const dateStr = Date
+    .now()
+    .toString(36); // convert num to base 36 and stringify
+
+  const randomStr = Math
+    .random()
+    .toString(36)
+    .substring(2, 8); // start at index 2 to skip decimal point
+
+  return `${dateStr}-${randomStr}`;
+}
+
 const nodeTypes = {
   default: NodeTooltip,
 };
 
 const initialNodes = [
   {
-    id: '0',
+    id: genUniqueId(),
     type: 'default',
     data: { 
         label: 'node 0',
@@ -59,9 +76,6 @@ const initialNodes = [
     }
   }
 ];
-
-let id = 1;
-function getId() { return `${id++}`; }
 
 function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   const { setDialogFlow, setDialogFlowName } = useGlobalContext();
@@ -131,7 +145,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
 
       if (targetIsPane && event instanceof MouseEvent) { // touch does not work
         // we need to remove the wrapper bounds, in order to get the correct position
-        const nodeId = getId();
+        const nodeId = genUniqueId();
         const newNode: Node = {
           id: nodeId,
           position: screenToFlowPosition({
@@ -147,7 +161,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
 
         setNodes((nds) => nds.concat(newNode));
         const edgeParams = { 
-          id: nodeId,
+          id: genUniqueId() + '-edge', // just in case
           source: connectingNodeId.current, 
           target: nodeId, 
           style: {
@@ -219,7 +233,6 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
     setGraphId(null);
     setGraphName("Default Name");
     setNodes(initialNodes);
-    id = 1;
     setEdges([]);
     setViewport({ zoom: 2, x: 500, y: 500 });
     setGraphLoading(false);
@@ -288,7 +301,6 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
       }) => {
         setGraphName(body.name);
         setNodes(body.data.nodes);
-        id = body.data.nodes.length;
         setEdges(body.data.edges);
         setViewport(body.data.viewport);
         setGraphLoading(false); // preferablly, this would use a proper trigger
@@ -297,11 +309,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
         handleNewGraph();
       })
     })
-  }, [graphId])
-
-  // nodes and edges are detected as changed on movement and edit 
-  
-  // }, [nodes, edges]);
+  }, [graphId]);
 
   useEffect(() => {
     if (chosenIsNode.current) { // chosenNodeId would be defined
