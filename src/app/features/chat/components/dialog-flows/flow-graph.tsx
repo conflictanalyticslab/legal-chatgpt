@@ -67,7 +67,7 @@ const initialNodes = [
     id: genUniqueId(),
     type: 'default',
     data: { 
-        label: 'node 0',
+        label: 'root node',
         body: 'default body'
     },
     position: {
