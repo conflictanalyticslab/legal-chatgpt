@@ -515,7 +515,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex flex-row space-x-2 py-4">
-                      <Switch onCheckedChange={(checked: boolean) => setUseCustomLabel(checked)}/>
+                      <Switch checked={useCustomLabel} onCheckedChange={(checked: boolean) => setUseCustomLabel(checked)}/>
                       <Label className="py-2">Use Custom Label</Label>
                     </div>
                   </TooltipTrigger>
