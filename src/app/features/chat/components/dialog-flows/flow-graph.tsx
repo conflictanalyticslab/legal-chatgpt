@@ -23,7 +23,7 @@ import { auth } from "@/lib/firebase/firebase-admin/firebase";
 import '@xyflow/react/dist/style.css';
 
 import { cn } from "@/lib/utils";
-import { NodeTooltip } from './node-tooltip';
+import { DFNode } from './df-nodes';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; 
@@ -35,6 +35,7 @@ import { PlusSquare } from "lucide-react";
 
 import Image from "next/image";
 import { Switch } from "@/components/ui/switch";
+import { set } from 'firebase/database';
 
 const DBURL = "https://graph-module.openjustice.ai"; 
 // const DBURL = "http://localhost:8080";
@@ -59,7 +60,7 @@ function genUniqueId(): string {
 }
 
 const nodeTypes = {
-  default: NodeTooltip,
+  default: DFNode, // modify the names to change styling
 };
 
 const initialNodes = [
@@ -89,6 +90,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [chosenLabel, setChosenLabel] = useState<string>("");
   const [chosenBody, setChosenBody] = useState<string>("");
+  const [chosenColor, setChosenColor] = useState<string>("");
   const [editOpen, setEditOpen] = useState<boolean>(false);
   const [rfInstance, setRfInstance] = useState<any>(null);
   const [graphId, setGraphId] = useState<string|null>(null);
@@ -97,6 +99,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   const [universalGraphList, setUniversalGraphList] = useState<{name:string, id:string}[]>([]);
   const [graphLoading, setGraphLoading] = useState<boolean>(false);
   const [useCustomLabel, setUseCustomLabel] = useState<boolean>(false);
+  const [useCustomColor, setUseCustomColor] = useState<boolean>(false);
 
   const { screenToFlowPosition } = useReactFlow();
   const { setViewport } = useReactFlow();
@@ -109,6 +112,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
       chosenIsNode.current = true;
       setChosenLabel(node.data.label as string);
       setChosenBody(node.data.body as string);
+      setChosenColor(node.style?.backgroundColor as string ?? '#FFFFFF');
       setEditOpen(prevEditOpen => !prevEditOpen || !prevChosenIsNode || node.id != prevChosenNodeId); // only closes if a node is clicked again
     }, []
   );
@@ -121,20 +125,42 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
       chosenIsNode.current = false;
       setChosenLabel(edge.label as string);
       setChosenBody(edge.data?.body as string);
+      setChosenColor(edge.style?.stroke as string ?? '#FFFFFF');
       setEditOpen(prevEditOpen => !prevEditOpen || prevChosenIsNode || edge.id != prevChosenEdgeId); // only closes if an edge is clicked again
     }, []
   );
 
   const onConnect = useCallback(
-    (params: Edge | Connection) => {
+    (params: Connection) => {
       connectingNodeId.current = ""; // reset connecting node
-      setEdges((eds) => addEdge(params, eds));
+      const edgeParams = { 
+        id: genUniqueId() + '-edge', // just in case
+        source: params.source, 
+        target: params.target, 
+        style: {
+          strokeWidth: 1,
+          stroke: 'gray',
+        },
+        label: 'edge',
+        data: { body: 'default body' }
+      }
+      setEdges((eds) =>
+        addEdge({
+          ...edgeParams,
+          markerEnd: { // workaround, forces typescript to acknowledge the type
+            type: MarkerType.ArrowClosed,
+            width: 10,
+            height: 10,
+            color: 'gray',
+          },
+        }, eds)
+      );
     }, []
   );
 
   const onConnectStart: OnConnectStart = useCallback(
-      (_, { nodeId }) => connectingNodeId.current = nodeId ?? '', // record start node
-      []
+    (_, { nodeId }) => connectingNodeId.current = nodeId ?? '', // record start node
+    []
   );
 
   const onConnectEnd: OnConnectEnd = useCallback(
@@ -148,6 +174,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
         const nodeId = genUniqueId();
         const newNode: Node = {
           id: nodeId,
+          type: 'default',
           position: screenToFlowPosition({
             x: event.clientX,
             y: event.clientY,
@@ -380,6 +407,43 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
     }
   }, [chosenBody, setNodes]);
 
+  useEffect(() => {
+    if (chosenIsNode.current) {
+      setNodes((nds) =>
+        nds.map((node) => {
+          if (node.id === chosenNodeId.current) {
+            return {
+              ...node,
+              style: {
+                ...node.style,
+                backgroundColor: chosenColor,
+              },
+            };
+          }
+  
+          return node;
+        }),
+      );
+    } else {
+      if (!chosenEdgeId) return;
+      setEdges((eds) =>
+        eds.map((edge) => {
+          if (edge.id === chosenEdgeId.current) {
+            return {
+              ...edge,
+              style: { 
+                ...edge.style,
+                stroke: chosenColor 
+              },
+            };
+          }
+  
+          return edge;
+        }),
+      );
+    }
+  }, [chosenColor, setNodes]);
+
   return (
     <TooltipProvider delayDuration={0}>
       <Input
@@ -514,14 +578,24 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex flex-row space-x-2 py-4">
-                      <Switch checked={useCustomLabel} onCheckedChange={(checked: boolean) => setUseCustomLabel(checked)}/>
-                      <Label className="py-2">Use Custom Label</Label>
+                    <div className="flex flex-col py-4 space-y-4">
+                      <div className="flex flex-row space-x-2">
+                        <Switch checked={useCustomLabel} onCheckedChange={(checked: boolean) => setUseCustomLabel(checked)}/>
+                        <Label className="py-2">Use Custom Label</Label>
+                      </div>
+
+                      <div className="flex flex-row space-x-2">
+                        <Switch checked={useCustomColor} onCheckedChange={(checked: boolean) => setUseCustomColor(checked)}/>
+                        <Label className="py-2">Use Custom Color</Label>
+                      </div>
+                      
                     </div>
                   </TooltipTrigger>
+
                   <TooltipContent side="left">
                     Customize how your graph is displayed. OpenJustice will NOT use this to generate a response.
                   </TooltipContent>
+
                 </Tooltip>
                 
                 <div className="py-4">
@@ -541,6 +615,27 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                       </TooltipContent>
                     </Tooltip>
                   )}
+
+                  {useCustomColor && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex flex-col">
+                          <Label className="py-2">Color:</Label>
+                          <Input
+                            className="nodrag"
+                            type="color"
+                            defaultValue='#FFFFFF'
+                            value={chosenColor}
+                            onChange={(event) => setChosenColor(event.target.value)} 
+                          />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="left">
+                          Edit the color of the node or edge in the Dialog Flow window. OpenJustice will NOT use this to generate a response.
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="flex flex-col">

@@ -3,9 +3,9 @@ import { Handle, Position, Node, NodeProps } from '@xyflow/react';
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; 
 
-type NodeTooltip = Node<{label: string, body: string}, string>
+type DFNode = Node<{label: string, body: string}, string>
  
-export function NodeTooltip({ data }: NodeProps<NodeTooltip>) {
+export function DFNode({ data }: NodeProps<DFNode>) {
   // split a string to lines of 50 characters
   const lines: string[] = [];
   
