@@ -9,6 +9,7 @@ export const OJ_PROMPT = ChatPromptTemplate.fromTemplate(
   Your answers will be used in serious court-based and legal situations, so it is essential that the information is correct.
   Also, use the following context to answer the user prompt. Follow the relationship provided in the context to provide the answer, then support them with the corresponding document.
   ALWAYS provide reference links to the information you provide if possible. If the relevant relationship provides a citation, provide a direct link to the source provided in the context.
+  Provide as many relevant legal precedents, statutes, and case law as possible to support your answer if they are available in the context.
   Also ALWAYS give your answer in ENGLISH, unless specified otherwise.
   If the context is irrelevant just provide an answer with your current knowledge base to answer the question and don't provide a 'Reference:' label in the output if there is none.
   DON'T ADD URL REFERENCES THAT AREN'T INCLUDED IN THE BELOW CONTEXT.
