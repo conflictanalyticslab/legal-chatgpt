@@ -100,6 +100,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   const [graphLoading, setGraphLoading] = useState<boolean>(false);
   const [useCustomLabel, setUseCustomLabel] = useState<boolean>(false);
   const [useCustomColor, setUseCustomColor] = useState<boolean>(false);
+  const [usePublicDF, setUsePublicDF] = useState<boolean>(false);
 
   const { screenToFlowPosition } = useReactFlow();
   const { setViewport } = useReactFlow();
@@ -230,7 +231,8 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           body: JSON.stringify({
             id: graphId, // if this is empty, it will create a new graph
             name: graphName,
-            data: rfInstance.toObject()
+            data: rfInstance.toObject(),
+            public: usePublicDF,
           }) // create a json object of the graph
         }).then(response =>{ 
           if (!response.ok) throw new Error("Failed to save graph");
@@ -575,6 +577,21 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                     <Label  className="text-[grey]">Editing Edge</Label>
                   )}
                 </div>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex flex-col py-4 space-y-4">
+                      <div className="flex flex-row space-x-2">
+                        <Switch checked={usePublicDF} onCheckedChange={(checked: boolean) => setUsePublicDF(checked)}/>
+                        <Label className="py-2">Make the DF Public</Label>
+                      </div>
+                    </div>
+                  </TooltipTrigger>
+
+                  <TooltipContent side="left">
+                    Make your DF public. This change will not be reflected until you hit save. 
+                  </TooltipContent>
+                </Tooltip>
                 
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -588,14 +605,12 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                         <Switch checked={useCustomColor} onCheckedChange={(checked: boolean) => setUseCustomColor(checked)}/>
                         <Label className="py-2">Use Custom Color</Label>
                       </div>
-                      
                     </div>
                   </TooltipTrigger>
 
                   <TooltipContent side="left">
                     Customize how your graph is displayed. OpenJustice will NOT use this to generate a response.
                   </TooltipContent>
-
                 </Tooltip>
                 
                 <div className="py-4">
@@ -643,6 +658,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                         <Textarea
                           wrap="soft" 
                           value={chosenBody} 
+                          rows={10}
                           onChange={(event) => setChosenBody(event.target.value)} 
                         /> 
                       </div>
@@ -653,9 +669,9 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                   </Tooltip>
                 </div>
               </div>
-              <Label className="text-[grey] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] text-nowrap border-top-width-0">
+              {/* <Label className="text-[grey] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] text-wrap border-top-width-0">
                 Use this dialog to edit the selected node or edge. 
-              </Label>
+              </Label> */}
             </>
           )}
         </nav>
