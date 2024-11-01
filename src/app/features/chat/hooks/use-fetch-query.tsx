@@ -19,10 +19,10 @@ const useFetchQuery = () => {
     handleBeforeUnload,
     includedDocuments,
     num,
+    userScrolling,
   } = useGlobalContext();
 
   const fetchQuery = async (queryInput: string) => {
-
     // Checks if the user used up their available number of prompts
     if (num <= 0) {
       setInfoAlert("No more prompts available...");
@@ -36,6 +36,7 @@ const useFetchQuery = () => {
       return;
     }
 
+    userScrolling.current = false;
     setShowStartupImage(false);
     setLoading(true);
     setPdfLoading(true);

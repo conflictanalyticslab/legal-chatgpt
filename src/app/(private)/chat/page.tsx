@@ -36,6 +36,7 @@ import { getConversation } from "@/app/api/(api-service-layer)/get-conversation"
 import { Conversation } from "@/app/features/chat/components/conversation/conversation";
 import useFetchQuery from "@/app/features/chat/hooks/use-fetch-query";
 import { ConversationQuery } from "@/app/features/chat/components/conversation-query/conversation-query";
+import { useDebouncedCallback } from "use-debounce";
 
 export default function Chat() {
   const {
@@ -52,6 +53,7 @@ export default function Chat() {
     latestResponse,
     scrollIntoViewRef,
     conversationId,
+    userScrolling,
   } = useGlobalContext();
   useGetAuthenticatedUser();
   const router = useRouter();
@@ -61,7 +63,7 @@ export default function Chat() {
    * Scrolls the conversation downwards while the LLM is generating output
    */
   useEffect(() => {
-    if (scrollIntoViewRef?.current) {
+    if (scrollIntoViewRef?.current && !userScrolling.current) {
       scrollIntoViewRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [latestResponse, conversation]);
@@ -86,6 +88,11 @@ export default function Chat() {
       });
     }
   }
+
+  // Allows user to scroll away from the generating text
+  const detectUserScroll = useDebouncedCallback(() => {
+    userScrolling.current = true; // Flag that user has scrolled
+  }, 10);
 
   /**
    *  Changes the conversation based on the selected conversation title
@@ -115,11 +122,15 @@ export default function Chat() {
       }
     });
 
+    // Listen for user scroll start (e.g., mouse wheel or touch events)
+    window.addEventListener("wheel", detectUserScroll, { passive: true });
+    window.addEventListener("touchmove", detectUserScroll, { passive: true });
+
     return () => {
+      window.removeEventListener("wheel", detectUserScroll);
+      window.removeEventListener("touchmove", detectUserScroll);
       setInfoAlert(""); // Clearing alerts if needed
-      if (unsubscribe) {
-        unsubscribe(); // Ensures unsubscribe is called only if it's defined
-      }
+      if (unsubscribe) unsubscribe(); // Ensures unsubscribe is called only if it's defined
     };
   }, []);
 
