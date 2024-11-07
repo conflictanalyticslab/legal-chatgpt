@@ -35,7 +35,6 @@ import { PlusSquare } from "lucide-react";
 
 import Image from "next/image";
 import { Switch } from "@/components/ui/switch";
-import { set } from 'firebase/database';
 
 const DBURL = "https://graph-module.openjustice.ai"; 
 // const DBURL = "http://localhost:8080";
@@ -69,7 +68,7 @@ const initialNodes = [
     type: 'default',
     data: { 
         label: 'root node',
-        body: 'default body'
+        body: 'This is the root node'
     },
     position: {
       x: 0,
@@ -142,8 +141,8 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           strokeWidth: 1,
           stroke: 'gray',
         },
-        label: 'edge',
-        data: { body: 'default body' }
+        label: '',
+        data: { body: '' }
       }
       setEdges((eds) =>
         addEdge({
@@ -181,8 +180,8 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
             y: event.clientY,
           }),
           data: { 
-            label: `node ${nodeId}`,
-            body: 'default body'
+            label: `${nodeId}`,
+            body: ''
           },
           origin: [0.5, 0.0],
         };
@@ -196,8 +195,8 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
             strokeWidth: 1,
             stroke: 'gray',
           },
-          label: 'edge',
-          data: { body: 'default body' }
+          label: '',
+          data: { body: '' }
         }
         setEdges((eds) =>
           addEdge({
@@ -656,6 +655,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                       <div className="flex flex-col">
                         <Label className="py-2">Body:</Label>
                         <Textarea
+                          placeholder="You can leave this empty"
                           wrap="soft" 
                           value={chosenBody} 
                           rows={10}
