@@ -23,18 +23,21 @@ import { auth } from "@/lib/firebase/firebase-admin/firebase";
 import '@xyflow/react/dist/style.css';
 
 import { cn } from "@/lib/utils";
-import { DFNode } from './df-nodes';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; 
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { PlusSquare } from "lucide-react";
 
 import Image from "next/image";
 import { Switch } from "@/components/ui/switch";
+import GraphList from './graph-list';
+import { ContextNode } from './context-node';
+import { InstructionNode } from './instruction-node';
+import { ExampleNode } from './example_node';
 
 const DBURL = "https://graph-module.openjustice.ai"; 
 // const DBURL = "http://localhost:8080";
@@ -59,7 +62,9 @@ function genUniqueId(): string {
 }
 
 const nodeTypes = {
-  default: DFNode, // modify the names to change styling
+  default: ContextNode, // modify the names to change styling
+  instruction: InstructionNode,
+  example: ExampleNode
 };
 
 const initialNodes = [
@@ -89,13 +94,12 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [chosenLabel, setChosenLabel] = useState<string>("");
   const [chosenBody, setChosenBody] = useState<string>("");
+  const [chosenType, setChosenType] = useState<string | undefined>("default");
   const [chosenColor, setChosenColor] = useState<string>("");
   const [editOpen, setEditOpen] = useState<boolean>(false);
   const [rfInstance, setRfInstance] = useState<any>(null);
   const [graphId, setGraphId] = useState<string|null>(null);
   const [graphName, setGraphName] = useState<string>("Default Name"); 
-  const [graphList, setGraphList] = useState<{name:string, id:string}[]>([]);
-  const [universalGraphList, setUniversalGraphList] = useState<{name:string, id:string}[]>([]);
   const [graphLoading, setGraphLoading] = useState<boolean>(false);
   const [useCustomLabel, setUseCustomLabel] = useState<boolean>(false);
   const [useCustomColor, setUseCustomColor] = useState<boolean>(false);
@@ -112,6 +116,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
       chosenIsNode.current = true;
       setChosenLabel(node.data.label as string);
       setChosenBody(node.data.body as string);
+      setChosenType(node.type? node.type : "default");
       setChosenColor(node.style?.backgroundColor as string ?? '#FFFFFF');
       setEditOpen(prevEditOpen => !prevEditOpen || !prevChosenIsNode || node.id != prevChosenNodeId); // only closes if a node is clicked again
     }, []
@@ -174,7 +179,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
         const nodeId = genUniqueId();
         const newNode: Node = {
           id: nodeId,
-          type: 'default',
+          type: chosenType,
           position: screenToFlowPosition({
             x: event.clientX,
             y: event.clientY,
@@ -269,33 +274,6 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   useEffect(() => {
     if (!auth.currentUser) throw new Error("User is not authenticated");
     auth.currentUser.getIdToken().then(token => { // get user token for auth
-      // load all user graphs
-      fetch(new URL('retrieve/all', DBURL), {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      }).then(response => {
-        return response.json();
-      }).then(data => {
-        setGraphList(data);
-      })
-
-      // load universal graphs
-      fetch(new URL('retrieve/universal', DBURL), {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      }).then(response => {
-        return response.json();
-      }).then(data => {
-        setUniversalGraphList(data);
-      })
       const latestGraphData = localStorage.getItem(lastGraphKey);
 
       // load the last used graph
@@ -415,6 +393,23 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           if (node.id === chosenNodeId.current) {
             return {
               ...node,
+              type: chosenType,
+            };
+          }
+  
+          return node;
+        }),
+      );
+    }
+  }, [chosenType, setNodes]);
+
+  useEffect(() => {
+    if (chosenIsNode.current) {
+      setNodes((nds) =>
+        nds.map((node) => {
+          if (node.id === chosenNodeId.current) {
+            return {
+              ...node,
               style: {
                 ...node.style,
                 backgroundColor: chosenColor,
@@ -447,53 +442,37 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <Input
-        className="w-[30vw] flex min-h-[56px] pr-[60px] self-center focus-visible:ring-[none]"
-        placeholder="Graph Name"
-        value={graphName}
-        onChange={(e) => setGraphName(e.target.value)}
-      />
+      <div className="flex flex-row space-x-10 justify-center">
+        <Input
+          className="w-[30vw] flex min-h-[56px] pr-[60px] text-center focus-visible:ring-[none]"
+          placeholder="Graph Name"
+          value={graphName}
+          onChange={(e) => setGraphName(e.target.value)}
+        />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex flex-col py-4 space-y-4">
+              <div className="flex flex-row space-x-2">
+                <Switch checked={usePublicDF} onCheckedChange={(checked: boolean) => setUsePublicDF(checked)}/>
+                <Label className="py-2">Make the DF Public</Label>
+              </div>
+            </div>
+          </TooltipTrigger>
+
+          <TooltipContent side="left">
+            Make your DF public. This change will not be reflected until you hit save. 
+          </TooltipContent>
+        </Tooltip>
+      </div>
+      
       <div className="flex flex-row min-h-[550px] min-w-[320px] h-full max-h-[85vh]">
-        <div className="flex flex-col px-4 mt-[60px] min-w-[180px] w-1/5">
-          <Label className="text-[#838383] mb-2">
-            User Created Graphs
-          </Label>
-          {graphList.map((item: {name: string, id: string}, key: number) => (
-            <button key={key} type="button" onClick={()=>{
-              if (graphId !== item.id) {
-                setGraphLoading(true)
-                setGraphId(item.id)
-              }
-            }} className="w-full text-left text-ellipsis text-nowrap px-3 py-2 overflow-hidden hover:bg-[#F1F1F1] rounded-md">
-              {item.name}
-            </button>
-          ))}
-
-          <Button
-            className="flex justify-start gap-3 cursor-pointer border-[1px] border-transparent hover:border-border hover:border-[1px] px-2"
-            variant={"ghost"}
-            onClick={() => handleNewGraph()}
-          >
-            <>
-              <PlusSquare className="h-5 w-5" />
-              New Graph
-            </>
-          </Button>
-
-          <Label className="text-[#838383] mb-2">
-            Provided Graphs
-          </Label>
-          {universalGraphList.map((item: {name: string, id: string}, key: number) => (
-            <button key={key} type="button" onClick={()=>{
-              if (graphId !== item.id) {
-                setGraphLoading(true)
-                setGraphId(item.id)
-              }
-            }} className="w-full text-left text-ellipsis text-nowrap px-3 py-2 overflow-hidden hover:bg-[#F1F1F1] rounded-md">
-              {item.name}
-            </button>
-          ))}
-        </div>
+        <GraphList 
+          DBURL={DBURL}
+          graphId={graphId}
+          setGraphId={setGraphId} 
+          setGraphLoading={setGraphLoading}
+          handleNewGraph={handleNewGraph}
+        />
         {graphLoading ? (
           <Label className="text-[grey] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex items-center gap-3 flex-col text-nowrap">
             Loading Graph
@@ -566,7 +545,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
             }
           )}
         >
-          {editOpen && (
+          {editOpen && !graphLoading && (
             <>
               <div className="px-4 flex flex-col divide-y">
                 <div className="py-4">
@@ -577,20 +556,55 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                   )}
                 </div>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex flex-col py-4 space-y-4">
-                      <div className="flex flex-row space-x-2">
-                        <Switch checked={usePublicDF} onCheckedChange={(checked: boolean) => setUsePublicDF(checked)}/>
-                        <Label className="py-2">Make the DF Public</Label>
-                      </div>
-                    </div>
-                  </TooltipTrigger>
+                {chosenIsNode.current && (
+                  <RadioGroup 
+                    onValueChange={value=>setChosenType(value)} 
+                    defaultChecked
+                    value={chosenType}
+                    className="py-4"
+                  >
 
-                  <TooltipContent side="left">
-                    Make your DF public. This change will not be reflected until you hit save. 
-                  </TooltipContent>
-                </Tooltip>
+                    <span className="flex justify-start items-center gap-2">
+                      <RadioGroupItem
+                        id="default"
+                        value="default"
+                      />
+                      <Label
+                        className="cursor-pointer"
+                        htmlFor="default"
+                      >
+                        Context (default)
+                      </Label>
+                    </span>
+
+                    <span className="flex justify-start items-center gap-2">
+                      <RadioGroupItem
+                        id="instruction"
+                        value="instruction"
+                      />
+                      <Label
+                        className="cursor-pointer"
+                        htmlFor="instruction"
+                      >
+                        Instruction
+                      </Label>
+                    </span>
+
+                    <span className="flex justify-start items-center gap-2">
+                      <RadioGroupItem
+                        id="example"
+                        value="example"
+                      />
+                      <Label
+                        className="cursor-pointer"
+                        htmlFor="example"
+                      >
+                        Example
+                      </Label>
+                    </span>
+
+                  </RadioGroup>
+                )}    
                 
                 <Tooltip>
                   <TooltipTrigger asChild>
