@@ -22,7 +22,11 @@ export function ExampleNode({ data }: NodeProps<DFNode>) {
     <TooltipProvider delayDuration={0}>
       <Tooltip>
         <TooltipTrigger>
-          {data.label}
+          <div className="flex w-[100px] h-[100px] rounded-full bg-white border-[1px] border-[#1a192b] justify-center">
+            <div className="text-[12px] self-center">
+              {data.label}
+            </div>
+          </div>
         </TooltipTrigger>
         <TooltipContent sideOffset={10} side="right">
           <div className="flex text-[8px] content-center justify-center">
