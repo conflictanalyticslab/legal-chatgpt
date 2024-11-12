@@ -249,12 +249,17 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
     }
     
     // make the query. 
-    let queryArray: [string, string, string][] = [];
+    let queryArray: [{ data: string, type: string }, { data: string, type: string }, { data: string, type: string }][] = [];
     edges.forEach((edge) => {
       let source: Node | undefined = nodes.find((node) => node.id === edge.source);
       let target: Node | undefined = nodes.find((node) => node.id === edge.target);
+
       if (source && target) { // should always pass
-        queryArray.push([source.data.body, edge.data?.body, target.data.body] as [string, string, string]);
+        queryArray.push([
+          {data: source.data.body, type: source.type},
+          {data: edge.data?.body, type: "edge"}, // in case we want to do edge types later
+          {data: target.data.body, type: source.type}
+        ] as [{data: string, type: string}, {data: string, type: string}, {data: string, type: string}]);
       }
     });
     setDialogFlow(JSON.stringify(queryArray));
