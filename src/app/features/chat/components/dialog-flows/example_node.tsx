@@ -19,47 +19,17 @@ export function ExampleNode({ data }: NodeProps<DFNode>) {
   }
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger>
-          <div className="flex w-[100px] h-[100px] rounded-full bg-white border-[1px] border-[#1a192b] justify-center">
-            <div className="text-[12px] self-center">
-              {data.label}
-            </div>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent sideOffset={10} side="right">
-          <div className="flex text-[8px] content-center justify-center">
-            {lines.map((line, i) => (
-              <div key={i} className="h-[20px]">{line}</div> // insert line break
-            ))}
-          </div>
-        </TooltipContent>
-      </Tooltip>
-      
-      <Tooltip>
-        <TooltipTrigger>
-          <Handle type="target" position={Position.Top} />
-        </TooltipTrigger>
-        <TooltipContent sideOffset={30} side="top">
-          <div className="flex text-[8px] content-center justify-center">
-            Drag and drop this handle to create a new node. <br />
-            The newly connected edge can also be edited just like a node.
-          </div>
-        </TooltipContent>
-      </Tooltip>
-      
-      <Tooltip>
-        <TooltipTrigger>
-          <Handle type="source" position={Position.Bottom} />
-        </TooltipTrigger>
-        <TooltipContent sideOffset={20} side="bottom">
-          <div className="flex text-[8px] content-center justify-center">
-            Drag and drop this handle to create a new node. <br />
-            The newly connected edge can also be edited just like a node.
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <>
+      <div className="flex w-[100px] h-[100px] rounded-full bg-white border-[1px] border-[#1a192b] justify-center">
+        <div className="text-[12px] self-center text-center">
+          {data.label}
+        </div>
+      </div>
+  
+      <Handle type="target" position={Position.Top} />
+
+  
+      <Handle type="source" position={Position.Bottom} />
+    </>
   );
 };
