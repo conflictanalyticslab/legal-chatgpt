@@ -104,6 +104,8 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
   const [useCustomLabel, setUseCustomLabel] = useState<boolean>(false);
   const [useCustomColor, setUseCustomColor] = useState<boolean>(false);
   const [usePublicDF, setUsePublicDF] = useState<boolean>(false);
+  const [saveCountingDown, setSaveCountingDown] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
 
   const { screenToFlowPosition } = useReactFlow();
   const { setViewport } = useReactFlow();
@@ -160,6 +162,8 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           },
         }, eds)
       );
+
+      !saveCountingDown && setSaveCountingDown(true); // start the countdown
     }, []
   );
 
@@ -215,12 +219,19 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           }, eds)
         );
       }
+
+      !saveCountingDown && setSaveCountingDown(true); // start the countdown 
     },
     [screenToFlowPosition],
   );
 
-  const handleSubmit = () => { // only saves on submission for now
-    if (edges.length === 0 || nodes.length === 1) return; // no changes have been made
+  const handleSave = () => {
+    if (edges.length === 0 || nodes.length === 1) {
+      console.log("No change")
+      setSaving(false);
+      return; // no changes have been made
+    }
+      
     // saves the graph to the database
     if (rfInstance) {
       if (!auth.currentUser) throw new Error("User is not authenticated");
@@ -240,14 +251,20 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           }) // create a json object of the graph
         }).then(response =>{ 
           if (!response.ok) throw new Error("Failed to save graph");
-          else return response.json()
+          else {
+            setSaving(false);
+            return response.json()
+          }
         }).then(body => {
           localStorage.setItem(lastGraphKey, JSON.stringify(body.id));
           setGraphId(body.id)
         }) // will waste an api call, but it's the simplest solution for now
       })
     }
-    
+  }
+
+  const handleSubmit = () => { // only saves on submission for now
+    handleSave();
     // make the query. 
     let queryArray: [{ data: string, type: string }, { data: string, type: string }, { data: string, type: string }][] = [];
     edges.forEach((edge) => {
@@ -354,7 +371,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
         }),
       );
     }
-    
+    !saveCountingDown && setSaveCountingDown(true);
   }, [chosenLabel, setNodes]);
 
   useEffect(() => {
@@ -389,6 +406,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
         }),
       );
     }
+    !saveCountingDown && setSaveCountingDown(true);
   }, [chosenBody, setNodes]);
 
   useEffect(() => {
@@ -405,7 +423,8 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           return node;
         }),
       );
-    }
+    };
+    !saveCountingDown && setSaveCountingDown(true);
   }, [chosenType, setNodes]);
 
   useEffect(() => {
@@ -442,8 +461,20 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
           return edge;
         }),
       );
-    }
+    };
+    !saveCountingDown && setSaveCountingDown(true);
   }, [chosenColor, setNodes]);
+
+  useEffect(() => {
+    if (saveCountingDown) {
+      const timeout = setTimeout(() => {
+        setSaving(true);
+        handleSave();
+        setSaveCountingDown(false);
+      }, 300000); // 5 seconds
+      return () => clearTimeout(timeout);
+    }
+  }, [saveCountingDown]);
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -520,19 +551,23 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
                     zIndex: 4, // ensure it is above the graph
                   }}
                 >
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    aria-label="Save Graph"
-                    onClick={handleSubmit}
-                  >
-                    <Image
-                      src="/assets/icons/send-horizontal.svg"
-                      alt="send"
-                      width={30}
-                      height={30}
-                    />
-                  </Button>
+                  { saving ? 
+                    <LoadingSpinner />
+                    : 
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      aria-label="Save Graph"
+                      onClick={handleSubmit}
+                    >
+                      <Image
+                        src="/assets/icons/send-horizontal.svg"
+                        alt="send"
+                        width={30}
+                        height={30}
+                      />
+                    </Button>
+                  }
                 </div>
               </TooltipTrigger>
               <TooltipContent side="left" sideOffset={5}>
