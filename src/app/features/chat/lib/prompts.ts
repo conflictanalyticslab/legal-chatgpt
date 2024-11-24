@@ -39,6 +39,7 @@ export const OJ_PROMPT = ChatPromptTemplate.fromTemplate(
   Use a sentence or two that concisely state the outcome of the issue, based on the Application of the Rule to the facts of the case.
   ## *References*
   It is ESSENTIAL to provide the direct link to 'url' using the 'file name' as the hyperlink label (list them as bullet points in the References section) value from the context. 
+  Ensure every reference is included in the References section.
 
 
   # Example
