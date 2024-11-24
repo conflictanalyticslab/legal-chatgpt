@@ -1,7 +1,5 @@
 import React from "react";
-import { Handle, Position, Node, NodeProps } from '@xyflow/react';
-
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; 
+import { Handle, Position, NodeProps } from '@xyflow/react';
 import { DFNode } from "./df-node";
  
 export function ContextNode({ data }: NodeProps<DFNode>) {

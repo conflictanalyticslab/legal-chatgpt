@@ -38,6 +38,7 @@ export const GlobalContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isNavOpen, setIsNavOpen] = useState(false);
 
+  const userScrolling = useRef(false);
   const scrollIntoViewRef = useRef(null);
 
   // handle delete documents from UploadedDocuments
@@ -149,6 +150,7 @@ export const GlobalContextProvider = ({ children }) => {
         setDialogFlowName,
         isNavOpen,
         setIsNavOpen,
+        userScrolling,
       }}
     >
       {children}

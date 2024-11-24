@@ -1,7 +1,5 @@
 import React from "react";
 import { Handle, Position, Node, NodeProps } from '@xyflow/react';
-
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; 
 import { DFNode } from "./df-node";
  
 export function InstructionNode({ data }: NodeProps<DFNode>) {
