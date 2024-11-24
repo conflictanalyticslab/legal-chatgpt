@@ -15,7 +15,7 @@ export function createGraphPrompt(graph: string) {
         if (tail.type == "example") {
           return `An example of "${head.data}", "${relation.data}" is ${tail.data}`;
         } if (tail.type == "instruction") {
-          return `When performing "${head.data}", and "${relation.data}", please perform "${tail.data}".`;
+          return `When "${head.data}", and "${relation.data}", you must "${tail.data}".`;
         } else {
           return `When performing "${head.data}", "${relation.data}" leads to "${tail.data}".`;
         }
