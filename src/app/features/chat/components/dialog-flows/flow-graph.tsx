@@ -14,8 +14,8 @@ import {
   type Edge,
   type ReactFlowJsonObject,
   type OnConnectStart,
-  Connection,
-  OnConnectEnd,
+  type Connection,
+  type OnConnectEnd,
 } from '@xyflow/react';
 
 import { auth } from "@/lib/firebase/firebase-admin/firebase";
@@ -526,6 +526,7 @@ function FlowGraph({setOpen}: {setOpen: (open: boolean) => void}) {
             onConnect={onConnect}
             onConnectStart={onConnectStart}
             onConnectEnd={onConnectEnd}
+            connectOnClick={true}
             onInit={setRfInstance}
             fitView
             minZoom={0.2}
