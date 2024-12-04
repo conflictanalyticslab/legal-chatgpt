@@ -116,6 +116,7 @@ export default function Page() {
             url: "/assets/partners/non-profit/legal-clinic.png",
             width: "w-[100%]",
             height: "h-[120px]",
+
           },
         ]}
       />

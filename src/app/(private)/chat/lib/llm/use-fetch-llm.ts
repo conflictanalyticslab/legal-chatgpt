@@ -19,7 +19,7 @@ export function useFetchLLM() {
     setInfoAlert,
     generateFlagRef,
     setLatestResponse,
-    setDocumentQuery,
+    setDocumentQuery
   } = useGlobalContext();
   const { pdfSearch } = usePdfSearch();
 
@@ -36,7 +36,8 @@ export function useFetchLLM() {
   const fetchLLMResponse = async (
     fullConversation: any,
     queryInput: string,
-    includedDocuments: UploadedDocument
+    includedDocuments: UploadedDocument,
+    dialogFlow: boolean
   ) => {
     try {
       generateFlagRef.current = true;
@@ -59,6 +60,7 @@ export function useFetchLLM() {
           indexName,
           fullConversation,
           includedDocuments,
+          dialogFlow
         }),
       });
 
