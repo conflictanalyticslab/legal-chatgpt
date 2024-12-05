@@ -9,7 +9,7 @@ export function createGraphPrompt(graph: string) {
   if (graph === "") return "";
   else {
     const graphjson = JSON.parse(graph);
-    return (
+    const prompt = (
       "Here are some relationships you can reference:\n\n" +
       graphjson.map(([head, relation, tail]: [{data: string, type: string}, {data: string, type: string}, {data: string, type: string}]) => {
         if (tail.type == "example") {
@@ -21,5 +21,8 @@ export function createGraphPrompt(graph: string) {
         }
       }).join("\n\n")
     );
+
+    console.log(prompt);
+    return prompt;
   }
 }
