@@ -4,12 +4,6 @@ import { useShallow } from "zustand/react/shallow";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipPortal,
-} from "@radix-ui/react-tooltip";
 import { useDialogFlowStore, usePropertiesStore } from "./store";
 import {
   ContextNode,
@@ -17,6 +11,7 @@ import {
   GraphFlowEdge,
   GraphFlowNode,
   InstructionNode,
+  RelevantNode,
   SwitchNode,
 } from "./nodes";
 
@@ -24,6 +19,66 @@ import invariant from "tiny-invariant";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { ulid } from "ulid";
+import { Slider } from "@/components/ui/slider";
+
+interface RelevantNodePropertiesPanelProps {
+  node: RelevantNode;
+  updateNode: (id: string, fn: (node: RelevantNode) => RelevantNode) => void;
+}
+
+function RelevantNodePropertiesPanel({
+  node,
+  updateNode,
+}: RelevantNodePropertiesPanelProps) {
+  const [label, setLabel] = useState(node.data.label);
+  const [threshold, setThreshold] = useState(node.data.threshold);
+
+  const onLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLabel(event.target.value);
+    updateNode(node.id, (thatNode) => {
+      return {
+        ...thatNode,
+        data: { ...thatNode.data, label: event.target.value },
+      };
+    });
+  };
+
+  const onThresholdChange = (value: number[]) => {
+    setThreshold(value[0]);
+    updateNode(node.id, (thatNode) => {
+      return { ...thatNode, data: { ...thatNode.data, threshold: value[0] } };
+    });
+  };
+
+  useEffect(() => {
+    setLabel(node.data.label);
+    setThreshold(node.data.threshold);
+  }, [node]);
+
+  return (
+    <div className="px-4 flex flex-col divide-y">
+      <div className="py-4">
+        <Label className="text-[grey]">Editing Relevant Node</Label>
+      </div>
+
+      <div className="py-4">
+        <div className="flex flex-col">
+          <Label className="py-2">Label:</Label>
+          <Input value={label} onChange={onLabelChange} />
+        </div>
+        <div className="flex flex-col">
+          <Label className="py-2">Threshold:</Label>
+          <Slider
+            value={[threshold]}
+            onValueChange={onThresholdChange}
+            max={100}
+            step={1}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface EdgePropertiesPanelProps {
   edge: GraphFlowEdge;
@@ -466,6 +521,15 @@ export default function PropertiesPanel() {
         case "switch":
           return (
             <SwitchNodePropertiesPanel
+              node={node}
+              updateNode={(id, fn) =>
+                updateNode(id, fn as (node: GraphFlowNode) => GraphFlowNode)
+              }
+            />
+          );
+        case "relevant":
+          return (
+            <RelevantNodePropertiesPanel
               node={node}
               updateNode={(id, fn) =>
                 updateNode(id, fn as (node: GraphFlowNode) => GraphFlowNode)

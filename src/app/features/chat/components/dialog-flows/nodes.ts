@@ -13,8 +13,14 @@ type SwitchData = {
 
 export type SwitchNode = Node<SwitchData, 'switch'>
 
+type RelevantData = {
+    label: string;
+    threshold: number;
+}
 
-export type GraphFlowNode = ExampleNode | InstructionNode | ContextNode | SwitchNode;
+export type RelevantNode = Node<RelevantData, 'relevant'>
+
+export type GraphFlowNode = ExampleNode | InstructionNode | ContextNode | SwitchNode | RelevantNode;
 export type GraphFlowNodeTypes = Exclude<GraphFlowNode['type'], undefined>;
 export type GraphFlowEdge = Edge<{body: string}>;
 
@@ -55,6 +61,16 @@ export function createEmptyNode(type: GraphFlowNodeTypes, position: XYPosition):
                         label: 'Otherwise...',
                         body: ''
                     }
+                }
+            }
+        case 'relevant':
+            return {
+                id: ulid(),
+                type,
+                position,
+                data: {
+                    label: 'Relevant',
+                    threshold: 50
                 }
             }
     }
