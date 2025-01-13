@@ -20,7 +20,13 @@ type RelevantData = {
 
 export type RelevantNode = Node<RelevantData, 'relevant'>
 
-export type GraphFlowNode = ExampleNode | InstructionNode | ContextNode | SwitchNode | RelevantNode;
+type KeywordExtractorData = {
+    label: string;
+}
+
+export type KeywordExtractorNode = Node<KeywordExtractorData, 'keyword-extractor'>
+
+export type GraphFlowNode = ExampleNode | InstructionNode | ContextNode | SwitchNode | RelevantNode | KeywordExtractorNode;
 export type GraphFlowNodeTypes = Exclude<GraphFlowNode['type'], undefined>;
 export type GraphFlowEdge = Edge<{body: string}>;
 
@@ -71,6 +77,15 @@ export function createEmptyNode(type: GraphFlowNodeTypes, position: XYPosition):
                 data: {
                     label: 'Relevant',
                     threshold: 50
+                }
+            }
+        case 'keyword-extractor':
+            return {
+                id: ulid(),
+                type,
+                position,
+                data: {
+                    label: 'Keyword Extractor',
                 }
             }
     }

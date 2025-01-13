@@ -39,6 +39,7 @@ import {
 import Properties from "./properties";
 import SwitchNode from "./nodes/switch-node";
 import RelevantNode from "./nodes/relevant-node";
+import KeywordExtractorNode from "./nodes/keyword-extractor-node";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -96,6 +97,16 @@ function Toolbar() {
       >
         <div className="text-[12px] self-center text-center">Relevant Node</div>
       </div>
+
+      <div
+        className="flex w-[100px] h-[100px] bg-white border-[1px] border-[#1a192b] justify-center"
+        onDragStart={(e) => onDragStart(e, "keyword-extractor")}
+        draggable
+      >
+        <div className="text-[12px] self-center text-center">
+          Keyword Extractor Node
+        </div>
+      </div>
     </div>
   );
 }
@@ -110,6 +121,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       context: ContextNode,
       switch: SwitchNode,
       relevant: RelevantNode,
+      "keyword-extractor": KeywordExtractorNode,
     }),
     []
   );

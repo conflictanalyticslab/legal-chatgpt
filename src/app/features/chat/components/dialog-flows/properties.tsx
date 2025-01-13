@@ -11,6 +11,7 @@ import {
   GraphFlowEdge,
   GraphFlowNode,
   InstructionNode,
+  KeywordExtractorNode,
   RelevantNode,
   SwitchNode,
 } from "./nodes";
@@ -20,65 +21,6 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { ulid } from "ulid";
 import { Slider } from "@/components/ui/slider";
-
-interface RelevantNodePropertiesPanelProps {
-  node: RelevantNode;
-  updateNode: (id: string, fn: (node: RelevantNode) => RelevantNode) => void;
-}
-
-function RelevantNodePropertiesPanel({
-  node,
-  updateNode,
-}: RelevantNodePropertiesPanelProps) {
-  const [label, setLabel] = useState(node.data.label);
-  const [threshold, setThreshold] = useState(node.data.threshold);
-
-  const onLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setLabel(event.target.value);
-    updateNode(node.id, (thatNode) => {
-      return {
-        ...thatNode,
-        data: { ...thatNode.data, label: event.target.value },
-      };
-    });
-  };
-
-  const onThresholdChange = (value: number[]) => {
-    setThreshold(value[0]);
-    updateNode(node.id, (thatNode) => {
-      return { ...thatNode, data: { ...thatNode.data, threshold: value[0] } };
-    });
-  };
-
-  useEffect(() => {
-    setLabel(node.data.label);
-    setThreshold(node.data.threshold);
-  }, [node]);
-
-  return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
-        <Label className="text-[grey]">Editing Relevant Node</Label>
-      </div>
-
-      <div className="py-4">
-        <div className="flex flex-col">
-          <Label className="py-2">Label:</Label>
-          <Input value={label} onChange={onLabelChange} />
-        </div>
-        <div className="flex flex-col">
-          <Label className="py-2">Threshold:</Label>
-          <Slider
-            value={[threshold]}
-            onValueChange={onThresholdChange}
-            max={100}
-            step={1}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 interface EdgePropertiesPanelProps {
   edge: GraphFlowEdge;
@@ -137,17 +79,105 @@ function EdgePropertiesPanel({ edge, updateEdge }: EdgePropertiesPanelProps) {
   );
 }
 
-interface GenericNodePropertiesPanelProps<
-  T = InstructionNode | ContextNode | ExampleNode
-> {
+interface NodePropertiesPanelProps<T extends GraphFlowNode> {
   node: T;
   updateNode: (id: string, fn: (node: T) => T) => void;
+}
+
+function KeywordExtractorNodePropertiesPanel({
+  node,
+  updateNode,
+}: NodePropertiesPanelProps<KeywordExtractorNode>) {
+  const [label, setLabel] = useState(node.data.label);
+
+  const onLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLabel(event.target.value);
+    updateNode(node.id, (thatNode) => {
+      return {
+        ...thatNode,
+        data: { ...thatNode.data, label: event.target.value },
+      };
+    });
+  };
+
+  useEffect(() => {
+    setLabel(node.data.label);
+  }, [node]);
+
+  return (
+    <div className="px-4 flex flex-col divide-y">
+      <div className="py-4">
+        <Label className="text-[grey]">Editing Keyword Extractor Node</Label>
+      </div>
+
+      <div className="py-4">
+        <div className="flex flex-col">
+          <Label className="py-2">Label:</Label>
+          <Input value={label} onChange={onLabelChange} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RelevantNodePropertiesPanel({
+  node,
+  updateNode,
+}: NodePropertiesPanelProps<RelevantNode>) {
+  const [label, setLabel] = useState(node.data.label);
+  const [threshold, setThreshold] = useState(node.data.threshold);
+
+  const onLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLabel(event.target.value);
+    updateNode(node.id, (thatNode) => {
+      return {
+        ...thatNode,
+        data: { ...thatNode.data, label: event.target.value },
+      };
+    });
+  };
+
+  const onThresholdChange = (value: number[]) => {
+    setThreshold(value[0]);
+    updateNode(node.id, (thatNode) => {
+      return { ...thatNode, data: { ...thatNode.data, threshold: value[0] } };
+    });
+  };
+
+  useEffect(() => {
+    setLabel(node.data.label);
+    setThreshold(node.data.threshold);
+  }, [node]);
+
+  return (
+    <div className="px-4 flex flex-col divide-y">
+      <div className="py-4">
+        <Label className="text-[grey]">Editing Relevant Node</Label>
+      </div>
+
+      <div className="py-4">
+        <div className="flex flex-col">
+          <Label className="py-2">Label:</Label>
+          <Input value={label} onChange={onLabelChange} />
+        </div>
+        <div className="flex flex-col">
+          <Label className="py-2">Threshold:</Label>
+          <Slider
+            value={[threshold]}
+            onValueChange={onThresholdChange}
+            max={100}
+            step={1}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function GenericNodePropertiesPanel({
   node,
   updateNode,
-}: GenericNodePropertiesPanelProps) {
+}: NodePropertiesPanelProps<InstructionNode | ContextNode | ExampleNode>) {
   const [label, setLabel] = useState(node.data.label);
   const [body, setBody] = useState(node.data.body);
 
@@ -325,15 +355,10 @@ function ConditionPropertiesPanel({
   );
 }
 
-interface SwitchNodePropertiesPanelProps {
-  node: SwitchNode;
-  updateNode: (id: string, fn: (node: SwitchNode) => SwitchNode) => void;
-}
-
 function SwitchNodePropertiesPanel({
   node,
   updateNode,
-}: SwitchNodePropertiesPanelProps) {
+}: NodePropertiesPanelProps<SwitchNode>) {
   const [label, setLabel] = useState(node.data.label);
   const [otherwiseEnabled, setOtherwiseEnabled] = useState<boolean>(
     !!node.data.otherwise
@@ -530,6 +555,15 @@ export default function PropertiesPanel() {
         case "relevant":
           return (
             <RelevantNodePropertiesPanel
+              node={node}
+              updateNode={(id, fn) =>
+                updateNode(id, fn as (node: GraphFlowNode) => GraphFlowNode)
+              }
+            />
+          );
+        case "keyword-extractor":
+          return (
+            <KeywordExtractorNodePropertiesPanel
               node={node}
               updateNode={(id, fn) =>
                 updateNode(id, fn as (node: GraphFlowNode) => GraphFlowNode)
