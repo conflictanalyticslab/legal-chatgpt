@@ -4,8 +4,7 @@ import type { RelevantNode } from "../nodes";
 export default function RelevantNode({ data }: NodeProps<RelevantNode>) {
   return (
     <div className="flex flex-col gap-2">
-      {data.label}
-
+      🤔 {data.label}
       <div className="flex flex-col gap-2">
         <div className="bg-[#eee] rounded-sm p-1">
           Query
@@ -34,7 +33,6 @@ export default function RelevantNode({ data }: NodeProps<RelevantNode>) {
           />
         </div>
       </div>
-
       <div className="flex flex-col gap-2 mt-2">
         <div className="bg-[#eee] rounded-sm p-1">
           Relevant

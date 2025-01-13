@@ -5,10 +5,8 @@ import type { SwitchNode } from "../nodes";
 export default function SwitchNode({ data }: NodeProps<SwitchNode>) {
   return (
     <div className="flex flex-col gap-2">
-      {data.label}
-
+      🚦 {data.label}
       <Handle type="target" position={Position.Top} />
-
       <div className="flex flex-col gap-2">
         {data.conditions.map((condition, index) => (
           <div className="bg-[#eee] rounded-sm p-1" key={condition.id}>
@@ -27,7 +25,6 @@ export default function SwitchNode({ data }: NodeProps<SwitchNode>) {
           </div>
         ))}
       </div>
-
       {data.otherwise && (
         <div className="bg-[#eee] rounded-sm p-1">
           {data.otherwise.label}

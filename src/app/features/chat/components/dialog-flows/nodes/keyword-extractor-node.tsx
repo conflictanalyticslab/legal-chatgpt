@@ -6,10 +6,8 @@ export default function KeywordExtractorNode({
 }: NodeProps<KeywordExtractorNode>) {
   return (
     <>
-      {data.label}
-
+      🔍 {data.label}
       <Handle type="target" id="source" position={Position.Left} />
-
       <Handle type="source" id="result" position={Position.Right} />
     </>
   );
