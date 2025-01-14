@@ -1,5 +1,11 @@
 import { useGlobalContext } from "@/app/store/global-context";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -40,6 +46,7 @@ import Properties from "./properties";
 import SwitchNode from "./nodes/switch-node";
 import RelevantNode from "./nodes/relevant-node";
 import KeywordExtractorNode from "./nodes/keyword-extractor-node";
+import { compileGraph } from "./compiler";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -161,6 +168,11 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const onEdgeClick = (event: React.MouseEvent, edge: GraphFlowEdge) => {
     setSelectedItem({ id: edge.id, type: "edge" });
   };
+
+  useEffect(() => {
+    const prompt = compileGraph(nodes, edges);
+    console.log(prompt);
+  }, [nodes, edges]);
 
   return (
     <div className="flex flex-row min-h-[550px] min-w-[320px] h-full max-h-[85vh] grow">

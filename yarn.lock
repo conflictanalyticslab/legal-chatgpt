@@ -408,6 +408,11 @@
     "@babel/helper-validator-identifier" "^7.25.7"
     to-fast-properties "^2.0.0"
 
+"@baileyherbert/dependency-graph@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@baileyherbert/dependency-graph/-/dependency-graph-1.0.0.tgz#f4e8d66266956bfaa6ae99014bcf9822d4d0f0b2"
+  integrity sha512-98vGiu3Wo8Ca0Uxo6k/U6R7l9jw86BXZNeSsTg2ndHD0jxd1HPWjfnPpJ8E8MnPDa+bKpdVtSSvJixpk4vROfA==
+
 "@bugsnag/browser@^7.25.0":
   version "7.25.0"
   resolved "https://registry.yarnpkg.com/@bugsnag/browser/-/browser-7.25.0.tgz#aa56a8e138dfff268ac29c5fe374cfc3c9b42a76"
