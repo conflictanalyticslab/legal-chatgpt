@@ -7,8 +7,14 @@ const initialNodes: GraphFlowNode[] = [];
 const initialEdges: GraphFlowEdge[] = [];
 
 interface DialogFlowStore {
+  graphId: string | null;
+  name: string;
+  publicGraph: boolean;
   nodes: GraphFlowNode[];
   edges: GraphFlowEdge[];
+  setGraphId: (graphId: string | null) => void;
+  setName: (name: string) => void;
+  setPublicGraph: (publicGraph: boolean) => void;
   onNodesChange: (changes: NodeChange<GraphFlowNode>[]) => void;
   onEdgesChange: (changes: EdgeChange<GraphFlowEdge>[]) => void;
   onConnect: (connection: Connection) => void;
@@ -20,8 +26,20 @@ interface DialogFlowStore {
 }
 
 export const useDialogFlowStore = create<DialogFlowStore>((set, get) => ({
+  graphId: null,
+  name: 'Untitled',
+  publicGraph: false,
   nodes: initialNodes,
   edges: initialEdges,
+  setGraphId: (graphId) => {
+    set({ graphId })
+  },
+  setName: (name) => {
+    set({ name })
+  },
+  setPublicGraph: (publicGraph) => {
+    set({ publicGraph })
+  },
   onNodesChange: (changes) => {
     set({
         nodes: applyNodeChanges(changes, get().nodes)

@@ -1,11 +1,4 @@
-import { useGlobalContext } from "@/app/store/global-context";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -48,6 +41,7 @@ import RelevantNode from "./nodes/relevant-node";
 import KeywordExtractorNode from "./nodes/keyword-extractor-node";
 import { compileGraph } from "./compiler";
 import { useShallow } from "zustand/react/shallow";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -228,6 +222,8 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   );
 }
 
+const queryClient = new QueryClient();
+
 export function FlowModal() {
   const [open, setOpen] = useState(false);
   const { selectedItem: selectedItemId } = usePropertiesStore();
@@ -263,52 +259,54 @@ export function FlowModal() {
   }, [nodes, edges, selectedItemId]);
 
   return (
-    <ReactFlowProvider>
-      <TooltipProvider delayDuration={0}>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <Tooltip>
-            <DialogTrigger asChild>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "hover:bg-[#E2E8F0] bg-[transparent] h-[56px] w-[56px] absolute left-[-115px]"
-                  )}
-                  type="button"
-                  aria-label="Flow Graph"
-                >
-                  <Image
-                    src="/assets/icons/route.svg"
-                    alt="send"
-                    width={30}
-                    height={30}
-                  />
-                </Button>
-              </TooltipTrigger>
-            </DialogTrigger>
-            <TooltipContent>Open Dialog Flows</TooltipContent>
-          </Tooltip>
-          <DialogContent
-            onOpenAutoFocus={(e) => e.preventDefault()}
-            className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[85vw] flex flex-col gap-5 overflow-auto box-border"
-          >
-            <div className="flex flex-row min-h-[550px] min-w-[320px] h-full max-h-[85vh]">
-              <FlowGraph setOpen={setOpen} />
+    <QueryClientProvider client={queryClient}>
+      <ReactFlowProvider>
+        <TooltipProvider delayDuration={0}>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <Tooltip>
+              <DialogTrigger asChild>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "hover:bg-[#E2E8F0] bg-[transparent] h-[56px] w-[56px] absolute left-[-115px]"
+                    )}
+                    type="button"
+                    aria-label="Flow Graph"
+                  >
+                    <Image
+                      src="/assets/icons/route.svg"
+                      alt="send"
+                      width={30}
+                      height={30}
+                    />
+                  </Button>
+                </TooltipTrigger>
+              </DialogTrigger>
+              <TooltipContent>Open Dialog Flows</TooltipContent>
+            </Tooltip>
+            <DialogContent
+              onOpenAutoFocus={(e) => e.preventDefault()}
+              className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[85vw] flex flex-col gap-5 overflow-auto box-border"
+            >
+              <div className="flex flex-row min-h-[550px] min-w-[320px] h-full max-h-[85vh]">
+                <FlowGraph setOpen={setOpen} />
 
-              <nav
-                className={cn(
-                  "relative transition-all flex flex-col w-[0px] border-l-[#e2e8f0] duration-300 ease-in-out h-screen overflow-auto scrollbar-thin",
-                  {
-                    "w-1/3": !!selectedItem,
-                  }
-                )}
-              >
-                {selectedItem && <Properties selectedItem={selectedItem} />}
-              </nav>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </TooltipProvider>
-    </ReactFlowProvider>
+                <nav
+                  className={cn(
+                    "relative transition-all flex flex-col w-[0px] border-l-[#e2e8f0] duration-300 ease-in-out h-screen overflow-auto scrollbar-thin",
+                    {
+                      "w-1/3": !!selectedItem,
+                    }
+                  )}
+                >
+                  {selectedItem && <Properties selectedItem={selectedItem} />}
+                </nav>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </TooltipProvider>
+      </ReactFlowProvider>
+    </QueryClientProvider>
   );
 }
