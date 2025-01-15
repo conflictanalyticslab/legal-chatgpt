@@ -42,11 +42,12 @@ import {
   GraphFlowNode,
   GraphFlowNodeTypes,
 } from "./nodes";
-import Properties from "./properties";
+import Properties, { SelectedItem } from "./properties";
 import SwitchNode from "./nodes/switch-node";
 import RelevantNode from "./nodes/relevant-node";
 import KeywordExtractorNode from "./nodes/keyword-extractor-node";
 import { compileGraph } from "./compiler";
+import { useShallow } from "zustand/react/shallow";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -121,17 +122,14 @@ function Toolbar() {
 function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const { screenToFlowPosition } = useReactFlow();
 
-  const nodeTypes = useMemo(
-    () => ({
-      example: ExampleNode,
-      instruction: InstructionNode,
-      context: ContextNode,
-      switch: SwitchNode,
-      relevant: RelevantNode,
-      "keyword-extractor": KeywordExtractorNode,
-    }),
-    []
-  );
+  const nodeTypes = {
+    example: ExampleNode,
+    instruction: InstructionNode,
+    context: ContextNode,
+    switch: SwitchNode,
+    relevant: RelevantNode,
+    "keyword-extractor": KeywordExtractorNode,
+  };
 
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode } =
     useDialogFlowStore();
@@ -232,7 +230,37 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
 
 export function FlowModal() {
   const [open, setOpen] = useState(false);
-  const { selectedItem } = usePropertiesStore();
+  const { selectedItem: selectedItemId } = usePropertiesStore();
+
+  const { nodes, edges } = useDialogFlowStore(
+    useShallow((state) => ({
+      nodes: state.nodes,
+      edges: state.edges,
+    }))
+  );
+
+  const selectedItem = useMemo<SelectedItem | null>(() => {
+    if (!selectedItemId) return null;
+
+    switch (selectedItemId.type) {
+      case "node":
+        const node = nodes.find((n) => n.id === selectedItemId.id);
+        return node
+          ? {
+              type: "node",
+              node,
+            }
+          : null;
+      case "edge":
+        const edge = edges.find((e) => e.id === selectedItemId.id);
+        return edge
+          ? {
+              type: "edge",
+              edge,
+            }
+          : null;
+    }
+  }, [nodes, edges, selectedItemId]);
 
   return (
     <ReactFlowProvider>
@@ -275,7 +303,7 @@ export function FlowModal() {
                   }
                 )}
               >
-                <Properties />
+                {selectedItem && <Properties selectedItem={selectedItem} />}
               </nav>
             </div>
           </DialogContent>

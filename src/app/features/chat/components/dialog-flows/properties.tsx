@@ -515,22 +515,27 @@ function SwitchNodePropertiesPanel({
   );
 }
 
-export default function PropertiesPanel() {
-  const { selectedItem } = usePropertiesStore();
+export type SelectedItem =
+  | { type: "node"; node: GraphFlowNode }
+  | { type: "edge"; edge: GraphFlowEdge };
 
-  const { nodes, edges, updateNode, updateEdge } = useDialogFlowStore(
+interface PropertiesPanelProps {
+  selectedItem: SelectedItem;
+}
+
+export default function PropertiesPanel({
+  selectedItem,
+}: PropertiesPanelProps) {
+  const { updateNode, updateEdge } = useDialogFlowStore(
     useShallow((state) => ({
-      nodes: state.nodes,
-      edges: state.edges,
       updateNode: state.updateNode,
       updateEdge: state.updateEdge,
     }))
   );
 
-  switch (selectedItem?.type) {
-    case "node":
-      const node = nodes.find((node) => node.id === selectedItem.id);
-      invariant(node, "Node not found");
+  switch (selectedItem.type) {
+    case "node": {
+      const node = selectedItem.node;
       switch (node.type) {
         case "instruction":
         case "context":
@@ -570,11 +575,14 @@ export default function PropertiesPanel() {
               }
             />
           );
+        default:
+          return null;
       }
+    }
     case "edge":
-      const edge = edges.find((edge) => edge.id === selectedItem.id);
-      invariant(edge, "Edge not found");
-      return <EdgePropertiesPanel edge={edge} updateEdge={updateEdge} />;
+      return (
+        <EdgePropertiesPanel edge={selectedItem.edge} updateEdge={updateEdge} />
+      );
     default:
       return null;
   }
