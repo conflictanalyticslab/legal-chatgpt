@@ -45,6 +45,7 @@ import { useShallow } from "zustand/react/shallow";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CircularDependencyError } from "@baileyherbert/dependency-graph";
 import { toast } from "@/components/ui/use-toast";
+import GraphList from "./graph-list";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -279,10 +280,11 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   );
 }
 
-const queryClient = new QueryClient();
+interface FlowEditorProps {
+  setOpen: (open: boolean) => void;
+}
 
-export function FlowModal() {
-  const [open, setOpen] = useState(false);
+function FlowEditor({ setOpen }: FlowEditorProps) {
   const { selectedItem: selectedItemId } = usePropertiesStore();
 
   const { nodes, edges } = useDialogFlowStore(
@@ -314,6 +316,28 @@ export function FlowModal() {
           : null;
     }
   }, [nodes, edges, selectedItemId]);
+  return (
+    <>
+      <FlowGraph setOpen={setOpen} />
+
+      <nav
+        className={cn(
+          "relative transition-all flex flex-col w-[0px] border-l-[#e2e8f0] duration-300 ease-in-out overflow-auto scrollbar-thin",
+          {
+            "w-1/6": !!selectedItem,
+          }
+        )}
+      >
+        {selectedItem && <Properties selectedItem={selectedItem} />}
+      </nav>
+    </>
+  );
+}
+
+const queryClient = new QueryClient();
+
+export function FlowModal() {
+  const [open, setOpen] = useState(false);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -347,18 +371,8 @@ export function FlowModal() {
               className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[85vw] flex flex-col gap-5 overflow-auto box-border"
             >
               <div className="flex flex-row min-h-[550px] min-w-[320px] h-full max-h-[85vh]">
-                <FlowGraph setOpen={setOpen} />
-
-                <nav
-                  className={cn(
-                    "relative transition-all flex flex-col w-[0px] border-l-[#e2e8f0] duration-300 ease-in-out h-screen overflow-auto scrollbar-thin",
-                    {
-                      "w-1/3": !!selectedItem,
-                    }
-                  )}
-                >
-                  {selectedItem && <Properties selectedItem={selectedItem} />}
-                </nav>
+                <GraphList />
+                <FlowEditor setOpen={setOpen} />
               </div>
             </DialogContent>
           </Dialog>
