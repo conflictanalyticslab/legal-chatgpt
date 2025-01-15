@@ -1,14 +1,16 @@
-import { CircularDependencyError, DependencyGraph } from "@baileyherbert/dependency-graph";
+import { DependencyGraph } from "@baileyherbert/dependency-graph";
 
 import { GraphFlowEdge, GraphFlowNode } from "./nodes";
 
 /**
- * Calculates the dependency graph for the given nodes and edges.
- * @param nodes The nodes to calculate the dependency graph for.
- * @param edges The edges to calculate the dependency graph for.
- * @returns The dependency graph.
+ * Validates the given graph and returns the order of the nodes.
+ * 
+ * @param nodes The nodes to validate.
+ * @param edges The edges to validate.
+ * @returns The order of the nodes.
+ * @throws CircularDependencyError if the graph has circular dependencies.
  */
-function calculateDependencyGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
+export function validateGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
   // TODO: We could implement our own dependency graph here, but we'll use the library for now.
   const dependencyGraph = new DependencyGraph<string>();
 
@@ -20,28 +22,18 @@ function calculateDependencyGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]
     dependencyGraph.addDependency(edge.source, edge.target);
   }
 
-  return dependencyGraph;
+  return dependencyGraph.getOverallOrder();
 }
 
 /**
- * Validates the given graph.
- * @param nodes The nodes to validate.
- * @param edges The edges to validate.
- * @returns The order of the nodes.
- * @throws CircularDependencyError if the graph has circular dependencies.
+ * Compiles the given graph and returns the prompts for the conversation query.
+ * 
+ * @param nodes The nodes to compile.
+ * @param edges The edges to compile.
+ * @returns The prompts for the conversation query.
  */
-export function validateGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
-  const dependencyGraph = calculateDependencyGraph(nodes, edges);
-
-  const order = dependencyGraph.getOverallOrder();
-
-  return order;
-}
-
 export function compileGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
-  const dependencyGraph = calculateDependencyGraph(nodes, edges);
-
-  const order = dependencyGraph.getOverallOrder();
+  const order = validateGraph(nodes, edges);
 
   const prompts: string[] = [];
 

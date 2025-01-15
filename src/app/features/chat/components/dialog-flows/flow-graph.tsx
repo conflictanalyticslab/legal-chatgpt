@@ -23,6 +23,7 @@ import {
 import Image from "next/image";
 import {
   useDialogFlowStore,
+  useGlobalDialogFlowStore,
   usePropertiesStore,
   useToolbarStore,
 } from "./store";
@@ -42,6 +43,8 @@ import KeywordExtractorNode from "./nodes/keyword-extractor-node";
 import { compileGraph } from "./compiler";
 import { useShallow } from "zustand/react/shallow";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { CircularDependencyError } from "@baileyherbert/dependency-graph";
+import { toast } from "@/components/ui/use-toast";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -55,7 +58,7 @@ function Toolbar() {
   };
 
   return (
-    <div className="flex flex-row gap-2 z-10 bg-white absolute bottom-0 left-[50%] translate-x-[-50%] border-[1px] border-[#1a192b] p-4 rounded-lg gap-8">
+    <div className="flex flex-row gap-2 z-10 bg-white absolute top-0 left-[50%] translate-x-[-50%] border-[1px] border-[#1a192b] p-4 rounded-lg gap-8">
       <div
         className="flex w-[100px] h-[100px] rounded-full bg-white border-[1px] border-[#1a192b] justify-center"
         onDragStart={(e) => onDragStart(e, "example")}
@@ -125,10 +128,19 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     "keyword-extractor": KeywordExtractorNode,
   };
 
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode } =
-    useDialogFlowStore();
+  const {
+    name,
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    addNode,
+  } = useDialogFlowStore();
 
   const { type } = useToolbarStore();
+
+  const { setCompiledDialogFlow } = useGlobalDialogFlowStore();
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -161,10 +173,50 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     setSelectedItem({ id: edge.id, type: "edge" });
   };
 
-  useEffect(() => {
-    const prompt = compileGraph(nodes, edges);
-    console.log(prompt);
-  }, [nodes, edges]);
+  const handleSave = () => {
+    try {
+      const prompt = compileGraph(nodes, edges);
+
+      setCompiledDialogFlow({
+        prompt,
+        name,
+      });
+
+      setOpen(false);
+
+      toast({
+        title: `Dialog Flow activated: ${name}`,
+        description: "The dialog flow has been activated in the conversation.",
+      });
+    } catch (error) {
+      if (error instanceof CircularDependencyError) {
+        const node = nodes.find((n) => n.id === error.node);
+        const path = error.path
+          .map((n) => nodes.find((x) => x.id === n)?.data.label)
+          .join(" -> ");
+        toast({
+          title: "Uh oh! Circular dependency detected.",
+          description: `${node?.data.label} is causing a circular dependency. The path is: ${path}.`,
+          variant: "destructive",
+        });
+      } else if (error instanceof Error) {
+        toast({
+          title: "Uh oh! Something went wrong.",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Uh oh! Something went wrong.",
+          description:
+            "Unknown error has occurred. Contact support if this persists.",
+          variant: "destructive",
+        });
+      }
+
+      console.error(error);
+    }
+  };
 
   return (
     <div className="flex flex-row min-h-[550px] min-w-[320px] h-full max-h-[85vh] grow">
@@ -201,7 +253,12 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
                 zIndex: 4, // ensure it is above the graph
               }}
             >
-              <Button variant="ghost" type="button" aria-label="Save Graph">
+              <Button
+                variant="ghost"
+                type="button"
+                aria-label="Save Graph"
+                onClick={handleSave}
+              >
                 <Image
                   src="/assets/icons/send-horizontal.svg"
                   alt="send"

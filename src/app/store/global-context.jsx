@@ -27,8 +27,6 @@ export const GlobalContextProvider = ({ children }) => {
   const [documents, setDocuments] = useState([]);
   const [showStartupImage, setShowStartupImage] = useState(true);
   const [includedDocuments, setIncludedDocuments] = useState([]);
-  const [dialogFlow, setDialogFlow] = useState("");
-  const [dialogFlowName, setDialogFlowName] = useState("");
   const [conversation, setConversation] = useState([]);
   const [conversationId, setConversationId] = useState("");
   const [latestResponse, setLatestResponse] = useState("");
@@ -144,10 +142,6 @@ export const GlobalContextProvider = ({ children }) => {
         setChatPanelOption,
         setUser,
         user,
-        dialogFlow,
-        setDialogFlow,
-        dialogFlowName,
-        setDialogFlowName,
         isNavOpen,
         setIsNavOpen,
         userScrolling,

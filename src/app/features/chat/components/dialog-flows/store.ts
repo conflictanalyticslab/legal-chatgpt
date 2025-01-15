@@ -25,6 +25,13 @@ interface DialogFlowStore {
   updateEdge: (edgeId: string, mutateFn: (edge: GraphFlowEdge) => GraphFlowEdge) => void;
 }
 
+/**
+ * Store for the dialog flow graph
+ * 
+ * This is only used by the dialog flow editor and not the conversation query.
+ * 
+ * @see {@link useGlobalDialogFlowStore} for the compiled dialog flow to be used in the conversation query.
+ */
 export const useDialogFlowStore = create<DialogFlowStore>((set, get) => ({
   graphId: null,
   name: 'Untitled',
@@ -108,6 +115,9 @@ interface PropertiesStore {
   setSelectedItem: (item: SelectedItem | null) => void;
 }
 
+/**
+ * Store for the selected item in the dialog flow editor
+ */
 export const usePropertiesStore = create<PropertiesStore>((set, get) => ({
   selectedItem: null,
   setSelectedItem: (item) => {
@@ -115,4 +125,21 @@ export const usePropertiesStore = create<PropertiesStore>((set, get) => ({
   }
 }));
 
+interface CompiledDialogFlow {
+  name: string;
+  prompt: string;
+}
+interface GlobalDialogFlowStore {
+  compiledDialogFlow: CompiledDialogFlow | null;
+  setCompiledDialogFlow: (compiledDialogFlow: CompiledDialogFlow | null) => void;
+}
 
+/**
+ * Store for the compiled dialog flow to be used in the conversation query
+ */
+export const useGlobalDialogFlowStore = create<GlobalDialogFlowStore>((set) => ({
+  compiledDialogFlow: null,
+  setCompiledDialogFlow: (compiledDialogFlow) => {
+    set({ compiledDialogFlow })
+  }
+}));

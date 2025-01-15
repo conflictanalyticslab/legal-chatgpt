@@ -3,6 +3,7 @@ import { useGlobalContext } from "../../../store/global-context";
 import useUpsertConversation from "./use-upsert-conversation";
 import { errorResponse } from "@/lib/utils";
 import { useFetchLLM } from "@/app/(private)/chat/lib/llm/use-fetch-llm";
+import { useGlobalDialogFlowStore } from "../components/dialog-flows/store";
 
 const useFetchQuery = () => {
   const { fetchLLMResponse } = useFetchLLM();
@@ -19,9 +20,9 @@ const useFetchQuery = () => {
     handleBeforeUnload,
     includedDocuments,
     num,
-    dialogFlow,
     userScrolling,
   } = useGlobalContext();
+  const { compiledDialogFlow } = useGlobalDialogFlowStore();
 
   const fetchQuery = async (queryInput: string) => {
     // Checks if the user used up their available number of prompts
@@ -63,7 +64,12 @@ const useFetchQuery = () => {
       setConversation(fullConversation);
 
       // Calls LLM to generate response to query
-      await fetchLLMResponse(fullConversation, queryInput, includedDocuments, dialogFlow);
+      await fetchLLMResponse(
+        fullConversation,
+        queryInput,
+        includedDocuments,
+        compiledDialogFlow?.prompt ?? null
+      );
       // Save or update the conversation after calling
       upsertConversation(fullConversation);
     } catch (error: any) {
