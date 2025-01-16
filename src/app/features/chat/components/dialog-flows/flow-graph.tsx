@@ -300,6 +300,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
     edges,
     lastSaved,
     setLastSaved,
+    saveBlocked,
   } = useDialogFlowStore(
     useShallow((state) => ({
       name: state.name,
@@ -310,6 +311,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
       edges: state.edges,
       lastSaved: state.lastSaved,
       setLastSaved: state.setLastSaved,
+      saveBlocked: state.saveBlocked,
     }))
   );
 
@@ -345,6 +347,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
 
   useEffect(() => {
     if (nodes.length === 0 || edges.length === 0) return;
+    if (saveBlocked) return;
     debouncedSaveGraph();
   }, [debouncedSaveGraph, nodes, edges, name, publicGraph]);
 

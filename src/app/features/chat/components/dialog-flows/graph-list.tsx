@@ -16,29 +16,41 @@ import { useShallow } from "zustand/react/shallow";
 import { toast } from "@/components/ui/use-toast";
 
 export default function GraphList() {
-  const { graphId, setGraphId, setName, setNodes, setEdges, setLastSaved } =
-    useDialogFlowStore(
-      useShallow((state) => ({
-        graphId: state.graphId,
-        setGraphId: state.setGraphId,
-        setName: state.setName,
-        setNodes: state.setNodes,
-        setEdges: state.setEdges,
-        setLastSaved: state.setLastSaved,
-      }))
-    );
+  const {
+    graphId,
+    setGraphId,
+    setName,
+    setNodes,
+    setEdges,
+    setLastSaved,
+    setSaveBlocked,
+    setPublicGraph,
+  } = useDialogFlowStore(
+    useShallow((state) => ({
+      graphId: state.graphId,
+      setGraphId: state.setGraphId,
+      setName: state.setName,
+      setNodes: state.setNodes,
+      setEdges: state.setEdges,
+      setLastSaved: state.setLastSaved,
+      setSaveBlocked: state.setSaveBlocked,
+      setPublicGraph: state.setPublicGraph,
+    }))
+  );
 
   const { data: graphList } = useFetchUserDialogFlows();
   const { data: universalGraphList } = useFetchUniversalDialogFlows();
 
-  async function loadGraph(id: string) {
+  async function loadGraph(id: string, saveBlocked: boolean) {
     if (graphId === id) return;
     const graph = await fetchDialogFlow(id);
+    setSaveBlocked(saveBlocked);
     setGraphId(id);
     setName(graph.name);
     setNodes(graph.data.nodes);
     setEdges(graph.data.edges);
     setLastSaved(new Date());
+    setPublicGraph(false);
     toast({
       title: `Dialog Flow '${graph.name}' loaded`,
     });
@@ -63,7 +75,7 @@ export default function GraphList() {
         {graphList?.map((item) => (
           <Button
             key={item.id}
-            onClick={() => loadGraph(item.id)}
+            onClick={() => loadGraph(item.id, false)}
             className="flex justify-start gap-3 cursor-pointer border-[1px] border-transparent hover:border-border hover:border-[1px] px-2"
             variant={graphId === item.id ? "default" : "ghost"}
           >
@@ -88,7 +100,7 @@ export default function GraphList() {
         {universalGraphList?.map((item) => (
           <Button
             key={item.id}
-            onClick={() => loadGraph(item.id)}
+            onClick={() => loadGraph(item.id, true)}
             className="flex justify-start gap-3 cursor-pointer border-[1px] border-transparent hover:border-border hover:border-[1px] px-2"
             variant={graphId === item.id ? "default" : "ghost"}
           >
