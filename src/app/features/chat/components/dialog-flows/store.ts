@@ -12,6 +12,7 @@ interface DialogFlowStore {
   publicGraph: boolean;
   nodes: GraphFlowNode[];
   edges: GraphFlowEdge[];
+  lastSaved: Date | null;
   setGraphId: (graphId: string | null) => void;
   setName: (name: string) => void;
   setPublicGraph: (publicGraph: boolean) => void;
@@ -23,6 +24,7 @@ interface DialogFlowStore {
   addNode: (node: GraphFlowNode) => void;
   updateNode: (nodeId: string, mutateFn: (node: GraphFlowNode) => GraphFlowNode) => void;
   updateEdge: (edgeId: string, mutateFn: (edge: GraphFlowEdge) => GraphFlowEdge) => void;
+  setLastSaved: (lastSaved: Date | null) => void;
 }
 
 /**
@@ -38,6 +40,7 @@ export const useDialogFlowStore = create<DialogFlowStore>((set, get) => ({
   publicGraph: false,
   nodes: initialNodes,
   edges: initialEdges,
+  lastSaved: null,
   setGraphId: (graphId) => {
     set({ graphId })
   },
@@ -88,6 +91,9 @@ export const useDialogFlowStore = create<DialogFlowStore>((set, get) => ({
       e.id === edgeId ? mutateFn(e) : e
     );
     set({ edges: updatedEdges })
+  },
+  setLastSaved: (lastSaved) => {
+    set({ lastSaved })
   }
 }));
 

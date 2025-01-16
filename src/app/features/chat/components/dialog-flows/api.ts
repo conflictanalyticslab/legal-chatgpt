@@ -1,16 +1,18 @@
 import { auth } from "@/lib/firebase/firebase-admin/firebase";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, UseMutationOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useShallow } from "zustand/react/shallow";
 import { useDialogFlowStore } from "./store";
 import invariant from "tiny-invariant";
 import { GraphFlowEdge, GraphFlowNode } from "./nodes";
+import { toast } from "@/components/ui/use-toast";
 
 const DBURL = "https://graph-module.openjustice.ai";
 
-export function useSaveDialogFlow() {
-  const { graphId, name, publicGraph, nodes, edges } = useDialogFlowStore(
+export function useSaveDialogFlow(options: UseMutationOptions = {}) {
+  const { graphId, setGraphId, name, publicGraph, nodes, edges } = useDialogFlowStore(
     useShallow((state) => ({
       graphId: state.graphId,
+      setGraphId: state.setGraphId,
       name: state.name,
       publicGraph: state.publicGraph,
       nodes: state.nodes,
@@ -18,7 +20,10 @@ export function useSaveDialogFlow() {
     }))
   );
 
+  const queryClient = useQueryClient();
+
   return useMutation({
+    ...options,
     mutationFn: async () => {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
@@ -40,6 +45,18 @@ export function useSaveDialogFlow() {
         }),
       });
       return response.json();
+    },
+    onSuccess: (data, variables, context) => {
+      options.onSuccess?.(data, variables, context);
+      setGraphId(data.id);
+      queryClient.invalidateQueries({ queryKey: ["dialog-flows"] });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error occurred while saving graph",
+        description: error.message,
+      });
     },
   });
 }

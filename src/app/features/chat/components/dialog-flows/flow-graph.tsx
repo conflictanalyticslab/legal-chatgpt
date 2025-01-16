@@ -46,6 +46,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CircularDependencyError } from "@baileyherbert/dependency-graph";
 import { toast } from "@/components/ui/use-toast";
 import GraphList from "./graph-list";
+import { useSaveDialogFlow } from "./api";
+import { useDebouncedCallback } from "use-debounce";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { GlobeIcon, LockIcon } from "lucide-react";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -174,7 +180,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     setSelectedItem({ id: edge.id, type: "edge" });
   };
 
-  const handleSave = () => {
+  function injectGraph() {
     try {
       const prompt = compileGraph(nodes, edges);
 
@@ -217,66 +223,64 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
 
       console.error(error);
     }
-  };
+  }
 
   return (
-    <div className="flex flex-row min-h-[550px] min-w-[320px] h-full max-h-[85vh] grow">
-      <ReactFlow
-        nodeTypes={nodeTypes}
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
-        onNodeClick={onNodeClick}
-        onEdgeClick={onEdgeClick}
-      >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Controls />
-          </TooltipTrigger>
-          <TooltipContent side="right">
-            Controls for the flow graph.
-          </TooltipContent>
-        </Tooltip>
+    <ReactFlow
+      nodeTypes={nodeTypes}
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onNodeClick={onNodeClick}
+      onEdgeClick={onEdgeClick}
+    >
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Controls />
+        </TooltipTrigger>
+        <TooltipContent side="right">
+          Controls for the flow graph.
+        </TooltipContent>
+      </Tooltip>
 
-        <Background />
+      <Background />
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div
-              style={{
-                position: "absolute",
-                right: "5px",
-                bottom: "20px",
-                zIndex: 4, // ensure it is above the graph
-              }}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div
+            style={{
+              position: "absolute",
+              right: "5px",
+              bottom: "20px",
+              zIndex: 4, // ensure it is above the graph
+            }}
+          >
+            <Button
+              variant="ghost"
+              type="button"
+              aria-label="Save Graph"
+              onClick={injectGraph}
             >
-              <Button
-                variant="ghost"
-                type="button"
-                aria-label="Save Graph"
-                onClick={handleSave}
-              >
-                <Image
-                  src="/assets/icons/send-horizontal.svg"
-                  alt="send"
-                  width={30}
-                  height={30}
-                />
-              </Button>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="left" sideOffset={5}>
-            Save the current graph to a query.
-          </TooltipContent>
-        </Tooltip>
+              <Image
+                src="/assets/icons/send-horizontal.svg"
+                alt="send"
+                width={30}
+                height={30}
+              />
+            </Button>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="left" sideOffset={5}>
+          Save the current graph to a query.
+        </TooltipContent>
+      </Tooltip>
 
-        <Toolbar />
-      </ReactFlow>
-    </div>
+      <Toolbar />
+    </ReactFlow>
   );
 }
 
@@ -287,10 +291,25 @@ interface FlowEditorProps {
 function FlowEditor({ setOpen }: FlowEditorProps) {
   const { selectedItem: selectedItemId } = usePropertiesStore();
 
-  const { nodes, edges } = useDialogFlowStore(
+  const {
+    name,
+    setName,
+    publicGraph,
+    setPublicGraph,
+    nodes,
+    edges,
+    lastSaved,
+    setLastSaved,
+  } = useDialogFlowStore(
     useShallow((state) => ({
+      name: state.name,
+      setName: state.setName,
+      publicGraph: state.publicGraph,
+      setPublicGraph: state.setPublicGraph,
       nodes: state.nodes,
       edges: state.edges,
+      lastSaved: state.lastSaved,
+      setLastSaved: state.setLastSaved,
     }))
   );
 
@@ -316,9 +335,62 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
           : null;
     }
   }, [nodes, edges, selectedItemId]);
+
+  const { mutate: saveGraph, isPending } = useSaveDialogFlow({
+    onSuccess: () => {
+      setLastSaved(new Date());
+    },
+  });
+  const debouncedSaveGraph = useDebouncedCallback(saveGraph, 1500);
+
+  useEffect(() => {
+    if (nodes.length === 0 || edges.length === 0) return;
+    debouncedSaveGraph();
+  }, [debouncedSaveGraph, nodes, edges, name, publicGraph]);
+
   return (
     <>
-      <FlowGraph setOpen={setOpen} />
+      <div className="flex flex-col min-h-[550px] min-w-[320px] h-full max-h-[85vh] grow">
+        <nav className="flex flex-row justify-between items-center m-4 gap-4">
+          <div className="flex flex-row gap-2 justify-center w-[300px]">
+            <Switch
+              checked={publicGraph}
+              onCheckedChange={(checked) => setPublicGraph(checked)}
+            />
+            <Badge
+              variant={publicGraph ? "default" : "secondary"}
+              className="flex flex-row gap-2"
+            >
+              {publicGraph ? (
+                <GlobeIcon className="h-4 w-4" />
+              ) : (
+                <LockIcon className="h-4 w-4" />
+              )}
+
+              {publicGraph ? "Public" : "Private"}
+            </Badge>
+          </div>
+
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name your dialog flow"
+          />
+
+          <div className="w-[300px] flex flex-row justify-center">
+            <Badge variant={isPending ? "default" : "secondary"}>
+              {isPending ? "Saving: " : "Last saved: "}
+              {lastSaved
+                ? lastSaved.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "Never"}
+            </Badge>
+          </div>
+        </nav>
+        <FlowGraph setOpen={setOpen} />
+      </div>
 
       <nav
         className={cn(
