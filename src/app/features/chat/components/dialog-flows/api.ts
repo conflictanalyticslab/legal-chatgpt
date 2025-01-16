@@ -44,7 +44,8 @@ export function useSaveDialogFlow(options: UseMutationOptions = {}) {
           },
         }),
       });
-      return response.json();
+      const res: { id: string } = await response.json();
+      return res;
     },
     onSuccess: (data, variables, context) => {
       options.onSuccess?.(data, variables, context);
