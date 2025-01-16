@@ -343,7 +343,9 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
       setLastSaved(new Date());
     },
   });
-  const debouncedSaveGraph = useDebouncedCallback(saveGraph, 1500);
+  const debouncedSaveGraph = useDebouncedCallback(saveGraph, 1500, {
+    maxWait: 5000,
+  });
 
   useEffect(() => {
     if (nodes.length === 0 || edges.length === 0) return;
