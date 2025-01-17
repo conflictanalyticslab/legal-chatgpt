@@ -27,19 +27,14 @@ import {
   usePropertiesStore,
   useToolbarStore,
 } from "./store";
-import ExampleNode from "./nodes/example-node";
-import InstructionNode from "./nodes/instruction-node";
-import ContextNode from "./nodes/context-node";
 import {
   createEmptyNode,
   GraphFlowEdge,
   GraphFlowNode,
   GraphFlowNodeTypes,
+  nodeTypes,
 } from "./nodes";
 import Properties, { SelectedItem } from "./properties";
-import SwitchNode from "./nodes/switch-node";
-import RelevantNode from "./nodes/relevant-node";
-import KeywordExtractorNode from "./nodes/keyword-extractor-node";
 import { compileGraph } from "./compiler";
 import { useShallow } from "zustand/react/shallow";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -125,15 +120,6 @@ function Toolbar() {
 
 function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const { screenToFlowPosition } = useReactFlow();
-
-  const nodeTypes = {
-    example: ExampleNode,
-    instruction: InstructionNode,
-    context: ContextNode,
-    switch: SwitchNode,
-    relevant: RelevantNode,
-    "keyword-extractor": KeywordExtractorNode,
-  };
 
   const {
     name,

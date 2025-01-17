@@ -1,5 +1,5 @@
 import { DependencyGraph } from "@baileyherbert/dependency-graph";
-
+import invariant from "tiny-invariant";
 import { GraphFlowEdge, GraphFlowNode } from "./nodes";
 
 /**
@@ -52,6 +52,8 @@ export function compileGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
 
     if (!node) continue;
     const describeRelationships = (edges: GraphFlowEdge[]) => edges.map((e) => e.data?.body ? `Node ${e.source} (${e.data.body})` : `Node ${e.source}`).join(", ");
+
+    invariant(node.type, "Node type is undefined");
 
     switch (node.type) {
       case "example": {
@@ -112,6 +114,11 @@ export function compileGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
         ];
         prompts.push(prompt.join("\n"));
         break;
+      }
+      default: {
+        // This is an exhaustive check to ensure that all node types are handled.
+        const exhaustiveCheck: never = node.type;
+        throw new Error(`Unhandled node type: ${exhaustiveCheck}`);
       }
     }
   }

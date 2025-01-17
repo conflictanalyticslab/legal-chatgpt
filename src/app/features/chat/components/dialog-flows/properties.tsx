@@ -536,6 +536,7 @@ export default function PropertiesPanel({
   switch (selectedItem.type) {
     case "node": {
       const node = selectedItem.node;
+      invariant(node.type, "Node type is undefined");
       switch (node.type) {
         case "instruction":
         case "context":
@@ -575,8 +576,10 @@ export default function PropertiesPanel({
               }
             />
           );
-        default:
-          return null;
+        default: {
+          const exhaustiveCheck: never = node.type;
+          throw new Error(`Unhandled node type: ${exhaustiveCheck}`);
+        }
       }
     }
     case "edge":
