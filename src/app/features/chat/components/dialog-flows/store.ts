@@ -10,6 +10,7 @@ interface DialogFlowStore {
   graphId: string | null;
   name: string;
   publicGraph: boolean;
+  model: 'GPT-4' | 'Claude';
   nodes: GraphFlowNode[];
   edges: GraphFlowEdge[];
   lastSaved: Date | null;
@@ -27,6 +28,7 @@ interface DialogFlowStore {
   updateEdge: (edgeId: string, mutateFn: (edge: GraphFlowEdge) => GraphFlowEdge) => void;
   setLastSaved: (lastSaved: Date | null) => void;
   setSaveBlocked: (saveBlocked: boolean) => void;
+  setModel: (model: 'GPT-4' | 'Claude') => void;
 }
 
 /**
@@ -40,6 +42,7 @@ export const useDialogFlowStore = create<DialogFlowStore>((set, get) => ({
   graphId: null,
   name: 'Untitled',
   publicGraph: false,
+  model: 'GPT-4',
   nodes: initialNodes,
   edges: initialEdges,
   lastSaved: null,
@@ -100,6 +103,9 @@ export const useDialogFlowStore = create<DialogFlowStore>((set, get) => ({
   },
   setSaveBlocked: (saveBlocked) => {
     set({ saveBlocked })
+  },
+  setModel: (model) => {
+    set({ model })
   }
 }));
 

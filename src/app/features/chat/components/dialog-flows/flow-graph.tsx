@@ -301,6 +301,8 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
     lastSaved,
     setLastSaved,
     saveBlocked,
+    model,
+    setModel,
   } = useDialogFlowStore(
     useShallow((state) => ({
       name: state.name,
@@ -312,6 +314,8 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
       lastSaved: state.lastSaved,
       setLastSaved: state.setLastSaved,
       saveBlocked: state.saveBlocked,
+      model: state.model,
+      setModel: state.setModel,
     }))
   );
 
@@ -357,7 +361,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
     <>
       <div className="flex flex-col min-h-[550px] min-w-[320px] h-full max-h-[85vh] grow">
         <nav className="flex flex-row justify-between items-center m-4 gap-4">
-          <div className="flex flex-row gap-2 justify-center w-[300px]">
+          <div className="flex flex-row gap-2 justify-center w-[180px]">
             <Switch
               checked={publicGraph}
               onCheckedChange={(checked) => setPublicGraph(checked)}
@@ -373,6 +377,21 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
               )}
 
               {publicGraph ? "Public" : "Private"}
+            </Badge>
+          </div>
+
+          <div className="flex flex-row gap-2 justify-center w-[180px]">
+            <Switch
+              checked={model === "GPT-4"}
+              onCheckedChange={(checked) =>
+                setModel(checked ? "GPT-4" : "Claude")
+              }
+            />
+            <Badge
+              variant={model === "GPT-4" ? "default" : "secondary"}
+              className="flex flex-row gap-2"
+            >
+              {model === "GPT-4" ? "GPT-4" : "Claude"}
             </Badge>
           </div>
 
