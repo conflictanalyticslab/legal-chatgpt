@@ -8,10 +8,13 @@ import { SquareMinus } from "lucide-react";
 import UploadDocument from "../upload-document/upload-document";
 import { FlowModal } from "../dialog-flows/flow-graph";
 import useFetchQuery from "@/app/features/chat/hooks/use-fetch-query";
+import { useGlobalDialogFlowStore } from "../dialog-flows/store";
 
 export function ConversationQuery() {
-  const { loading, userQuery, setUserQuery, num, stopQuery, dialogFlowName, setDialogFlowName, setDialogFlow } = useGlobalContext();
-
+  const { loading, userQuery, setUserQuery, num, stopQuery } =
+    useGlobalContext();
+  const { compiledDialogFlow, setCompiledDialogFlow } =
+    useGlobalDialogFlowStore();
   const { fetchQuery } = useFetchQuery();
   /**
    * Submits the user's query
@@ -67,25 +70,22 @@ export function ConversationQuery() {
             : `Prompts left: ${num}`}
         </label>
         <label className="text-[grey] text-sm absolute bottom-[-20px] right-[30px] italic ">
-          {dialogFlowName === ""
-            ? "Dialog Flow not in use"
-            : "Dialog Flow in use: " + dialogFlowName}
+          {compiledDialogFlow
+            ? "Dialog Flow in use: " + compiledDialogFlow.name
+            : "Dialog Flow not in use"}
         </label>
-        
-        {dialogFlowName !== "" && (
-          <Button 
+
+        {compiledDialogFlow && (
+          <Button
             variant={"ghost"}
             className="bg-transparent absolute bottom-[-30px] right-[-20px] italic"
-            disabled={dialogFlowName === ""}
             onClick={() => {
-              setDialogFlow("")
-              setDialogFlowName("")
+              setCompiledDialogFlow(null);
             }}
           >
             <SquareMinus />
           </Button>
         )}
-        
       </div>
     </form>
   );

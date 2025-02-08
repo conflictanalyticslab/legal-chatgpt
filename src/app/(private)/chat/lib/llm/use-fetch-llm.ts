@@ -37,7 +37,7 @@ export function useFetchLLM() {
     fullConversation: any,
     queryInput: string,
     includedDocuments: UploadedDocument,
-    dialogFlow: boolean
+    dialogFlow: string | null
   ) => {
     try {
       generateFlagRef.current = true;
