@@ -113,7 +113,20 @@ export function Conversation() {
                               className="hover:bg-transparent bg-[transparent] md:px-4 transition-all self-center"
                               type="button"
                               aria-label="Regenerate Response"
-                              onClick={() => fetchQuery(conversation[conversation.length - 1]?.content)}
+                              // for regenerating the response using the last response
+                             // onClick={() => fetchQuery(conversation[conversation.length - 1]?.content)}
+                             // for regenerating the response using the last user message
+                             onClick={() => {
+                              const lastUserMessage = conversation
+                                .slice()
+                                .reverse()
+                                .find((msg: { role: string; content: string }) => msg.role === "user")
+                                ?.content;
+                          
+                              if (typeof lastUserMessage === "string" && lastUserMessage.trim() !== "") {
+                                fetchQuery(lastUserMessage);
+                              }
+                            }}
                             >
                               <RefreshCcw className="w-4 h-4" />
                             </Button>
