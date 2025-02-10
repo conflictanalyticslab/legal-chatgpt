@@ -2,6 +2,18 @@ import { Card } from "@/components/ui/card";
 import { useGlobalContext } from "@/app/store/global-context";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { RefreshCcw } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"; 
+
 
 function LinkRenderer(props: any) {
   return (
@@ -14,6 +26,9 @@ function LinkRenderer(props: any) {
 export function Conversation() {
   const { conversation, latestResponse, loading, scrollIntoViewRef } =
     useGlobalContext();
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState<"good" | "bad" | null>(null);
+
   return (
     <div
       id="conversation"
@@ -47,13 +62,72 @@ export function Conversation() {
 
             {/* Final Buffered Content */}
             {convoObj.content !== "" && (
-              <ReactMarkdown 
-                className="flex flex-col items-start gap-[10px] llm-markdown"
-                components={{ a: LinkRenderer }}
-              >
-                {convoObj?.content}
-              </ReactMarkdown>
-            )}
+                <>
+                  <ReactMarkdown 
+                    className="flex flex-col items-start gap-[10px] llm-markdown"
+                    components={{ a: LinkRenderer }}
+                  >
+                    {convoObj?.content}
+                  </ReactMarkdown>
+
+                 {/* Feedback Buttons (Only for Assistant Responses) */}
+                  {convoObj.role === "assistant" && (
+                    <TooltipProvider delayDuration={0}>
+                      <div className="flex gap-0.5 mt-4">
+                        {/* Thumbs Up */}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="hover:bg-transparent bg-[transparent] transition-all"
+                              type="button"
+                              aria-label="Good response"
+                            >
+                              <ThumbsUp className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Good response</TooltipContent>
+                        </Tooltip>
+
+                        {/* Thumbs Down */}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="hover:bg-transparent bg-[transparent] transition-all"
+                              type="button"
+                              onClick={() => setShowPopup(true)}
+                              aria-label="Bad response"
+                            >
+                              <ThumbsDown className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Bad response</TooltipContent>
+                        </Tooltip>
+
+                        {/* Regenerate Response Button */}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="hover:bg-transparent bg-[transparent] md:px-4 transition-all self-center"
+                              type="button"
+                              aria-label="Regenerate Response"
+                              
+                            >
+                              <RefreshCcw className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Regenerate response</TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </TooltipProvider>
+                    
+                    )}
+                  </>
+                  )}
+
+            
 
             {/*  Buffered LLM Content */}
             {convoObj.role === "assistant" && i === conversation.length - 1 && (
@@ -74,6 +148,33 @@ export function Conversation() {
         ))}
         {/* Scroll Into View Ref */}
         <span ref={scrollIntoViewRef}></span>
+        {/* Pop-up Dialog */}
+        <Dialog open={showPopup} onOpenChange={setShowPopup}>
+        <DialogContent className="sm:max-w-md">
+        <div className="flex flex-col items-center space-y-4">
+          <p className="text-gray-800">Would you like to regenerate an improved response?</p>
+          
+          <div className="flex items-center justify-center gap-4 w-full mt-6">
+            <Button 
+              variant="outline" 
+              className="border border-gray-600 text-gray-600 bg-transparent hover:bg-gray-100 transition min-w-[80px]"
+              onClick={() => setShowPopup(false)}
+            >
+              No
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border border-gray-600 text-gray-600 bg-transparent hover:bg-gray-100 transition min-w-[80px]"
+              onClick={() => setShowPopup(false)}
+            >
+              Yes
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+        </Dialog>
+
+
       </div>
     </div>
   );
