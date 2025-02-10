@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"; 
+import useFetchQuery from "@/app/features/chat/hooks/use-fetch-query";
 
 
 function LinkRenderer(props: any) {
@@ -27,8 +28,7 @@ export function Conversation() {
   const { conversation, latestResponse, loading, scrollIntoViewRef } =
     useGlobalContext();
   const [showPopup, setShowPopup] = useState(false);
-  const [selectedFeedback, setSelectedFeedback] = useState<"good" | "bad" | null>(null);
-
+  const { fetchQuery } = useFetchQuery();
   return (
     <div
       id="conversation"
@@ -113,7 +113,7 @@ export function Conversation() {
                               className="hover:bg-transparent bg-[transparent] md:px-4 transition-all self-center"
                               type="button"
                               aria-label="Regenerate Response"
-                              
+                              onClick={() => fetchQuery(conversation[conversation.length - 1]?.content)}
                             >
                               <RefreshCcw className="w-4 h-4" />
                             </Button>

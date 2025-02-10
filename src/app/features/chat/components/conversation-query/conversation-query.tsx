@@ -25,6 +25,7 @@ export function ConversationQuery() {
   const handleSubmit = async (event: React.MouseEvent<HTMLFormElement>) => {
     event.preventDefault();
     fetchQuery(userQuery);
+    
   };
 
   return (
