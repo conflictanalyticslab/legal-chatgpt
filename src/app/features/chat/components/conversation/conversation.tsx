@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/tooltip"; 
 import useFetchQuery from "@/app/features/chat/hooks/use-fetch-query";
 
-
 function LinkRenderer(props: any) {
   return (
     <a href={props.href} className="underline" target="_blank" rel="noreferrer">
@@ -29,6 +28,11 @@ export function Conversation() {
     useGlobalContext();
   const [showPopup, setShowPopup] = useState(false);
   const { fetchQuery } = useFetchQuery();
+  const [feedback, setFeedback] = useState<{ [key: number]: "up" | "down" | null }>({});
+
+   // State to track clicked buttons
+   const [thumbsUpClicked, setThumbsUpClicked] = useState(false);
+   const [thumbsDownClicked, setThumbsDownClicked] = useState(false);
   return (
     <div
       id="conversation"
@@ -80,10 +84,20 @@ export function Conversation() {
                             <Button
                               variant="ghost"
                               className="hover:bg-transparent bg-[transparent] transition-all"
-                              type="button"
-                              aria-label="Good response"
+                            type="button"
+                            aria-label="Good response"
+                            onClick={() => {
+                              setThumbsUpClicked(!thumbsUpClicked);
+                              setThumbsDownClicked(false); // Reset thumbs-down if clicked
+                            }}
                             >
-                              <ThumbsUp className="w-4 h-4" />
+                              <ThumbsUp
+                              className="w-4 h-4"
+                              style={{
+                                fill: thumbsUpClicked ? "rgba(128, 128, 128, 0.5)" : "none",
+                                stroke: "currentColor",
+                              }}
+                            />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>Good response</TooltipContent>
@@ -95,11 +109,23 @@ export function Conversation() {
                             <Button
                               variant="ghost"
                               className="hover:bg-transparent bg-[transparent] transition-all"
-                              type="button"
-                              onClick={() => setShowPopup(true)}
+                            type="button"
+                            onClick={() => {
+                              if (!thumbsDownClicked) {
+                                setShowPopup(true); // popup if thumb is not pressed
+                              }
+                              setThumbsDownClicked(!thumbsDownClicked);
+                              setThumbsUpClicked(false); // reset
+                            }}
                               aria-label="Bad response"
                             >
-                              <ThumbsDown className="w-4 h-4" />
+                              <ThumbsDown
+                              className="w-4 h-4"
+                              style={{
+                                fill: thumbsDownClicked ? "rgba(128, 128, 128, 0.5)" : "none",
+                                stroke: "currentColor",
+                              }}
+                            />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>Bad response</TooltipContent>
