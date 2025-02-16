@@ -28,8 +28,34 @@ st.set_page_config(page_title="Lawyer-Off!", page_icon="⚖️", layout="wide")
 #     st.title("Ace Attorney, A2J")
 # with elem2: 
 #     st.image("./pheonix.png", width=50)
-st.title("Ace Attorney, A2J")
-st.markdown("""*not actual certified legal advice""")    
+
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    
+    .pixelated-title {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 36px;
+        color: #ffffff;
+        text-align: center;
+    }
+    .pixelated-text {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 12px;
+        color: #ffffff;
+        text-align: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Add the title with the pixelated font
+st.markdown('<div class="pixelated-title">Ace Attorney, A2J</div>', unsafe_allow_html=True)
+st.markdown("""<div class="pixelated-text">*not actual certified legal advice</div>""", unsafe_allow_html=True)    
+
+st.write("#")
 
 if "cur_section" not in st.session_state:
     st.session_state.cur_section = 0 # 0 - Opener, 1 - Debate, 2 - Closer, 3 - Judgement & Feedback
