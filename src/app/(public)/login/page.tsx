@@ -108,7 +108,7 @@ export default function Login() {
           <div className="w-full max-w-[460px] flex flex-col justify-start mt-[100px] gap-5">
             <div>
               <PageTitle className="text-center font-bold heading">
-                Welcome Back
+                Welcome Back bro
               </PageTitle>
             </div>
 
