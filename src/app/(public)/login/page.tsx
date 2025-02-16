@@ -3,21 +3,10 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  sendEmailVerification,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
-
+import { signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { getDatabase, ref, child, get } from "firebase/database";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { z as Zod } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
@@ -37,7 +26,6 @@ import Container from "@/components/ui/Container";
 import PageTitle from "@/components/ui/page-title";
 import { toast } from "@/components/ui/use-toast";
 import { loginSchema } from "@/app/features/login/models/schema";
-import InputFormField from "@/components/auth/input-form-field";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -54,34 +42,22 @@ export default function Login() {
     reValidateMode: "onSubmit",
   });
 
-  const handleLogin: SubmitHandler<Zod.infer<typeof loginSchema>> = async ({
-    email,
-    password,
-  }: Zod.infer<typeof loginSchema>) => {
+  const handleLogin: SubmitHandler<Zod.infer<typeof loginSchema>> = async ({ email, password }) => {
     try {
       setIsLoading(true);
-      // Form validation
-      loginSchema.parse({
-        email,
-        password,
-      });
+      loginSchema.parse({ email, password });
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-      // Sign In With Firebase
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      // If email verification is required, uncomment:
+      // if (!userCredential.user.emailVerified) {
+      //   toast({
+      //     title: "Please verify your email. A verification link has been sent.",
+      //     variant: "destructive",
+      //   });
+      //   await sendEmailVerification(userCredential.user);
+      //   return;
+      // }
 
-      if (!userCredential.user.emailVerified) {
-        toast({
-          title: "Email has not been verified. A verification link has been sent.",
-          variant: "destructive",
-        });
-
-        await sendEmailVerification(userCredential.user);
-        return;
-      }
       router.push("/chat");
     } catch (error: unknown) {
       form.setError("email", {
@@ -98,7 +74,7 @@ export default function Login() {
   };
 
   return (
-    <Container className="w-full h-[calc(100%-50px-75px)]">
+    <Container className="w-full h-[calc(100%-50px-75px)] bg-blue-900">
       <Form {...form}>
         <form
           noValidate
@@ -107,21 +83,35 @@ export default function Login() {
         >
           <div className="w-full max-w-[460px] flex flex-col justify-start mt-[100px] gap-5">
             <div>
-              <PageTitle className="text-center font-bold heading">
-                Welcome Back
+              <PageTitle className="text-center font-bold heading text-white">
+                Welcome to RefugeeReview
               </PageTitle>
             </div>
 
-            {/* Email */}
-            <InputFormField
-              form={form}
-              label="Email"
-              name="email"
-              type="email"
-            />
+            {/* Email Field */}
+            <div className="text-white">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        className="!text-black ring-0 focus:ring-0 pr-[2.5rem] h-[50px]"
+                        placeholder="Email"
+                        type="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-            <div className="flex flex-col gap-1">
-              {/* Password */}
+            {/* Password Field */}
+            <div className="flex flex-col gap-1 text-white">
               <FormField
                 control={form.control}
                 name="password"
@@ -132,7 +122,7 @@ export default function Login() {
                       <FormControl>
                         <div className="relative">
                           <Input
-                            className="ring-0 focus:ring-0 pr-[2.5rem] h-[50px]"
+                            className="!text-black ring-0 focus:ring-0 pr-[2.5rem] h-[50px]"
                             placeholder="Password"
                             type={showPassword ? "text" : "password"}
                             {...field}
@@ -169,17 +159,18 @@ export default function Login() {
               </Link>
             </div>
 
+            {/* Submit Button (Dark Blue) */}
             <Button
-              className="bg-primaryHue hover:bg-primaryHue/90 disabled:opacity-[0.6]"
+              className="bg-[#00008B] hover:bg-[#0000b4] disabled:opacity-60"
               disabled={isLoading}
             >
               Log In
             </Button>
 
             <Label className="text-center">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
-                href={"/signup"}
+                href="/signup"
                 className="underline font-bold hover:opacity-[0.8]"
               >
                 Sign Up
@@ -189,11 +180,9 @@ export default function Login() {
 
           {/* Info Alert */}
           <AlertDialog open={!!alert}>
-            <AlertDialogTitle className="hidden"></AlertDialogTitle>
-            <AlertDialogContent
-              onOpenAutoFocus={(e: any) => e.preventDefault()}
-            >
-              <AlertDialogDescription className="text-base text-[black]">
+            <AlertDialogTitle className="hidden" />
+            <AlertDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+              <AlertDialogDescription className="text-base text-black">
                 {alert}
               </AlertDialogDescription>
               <AlertDialogFooter>

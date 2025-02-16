@@ -1,147 +1,99 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import PageHeaderDescription from "@/components/ui/page-description";
-import PageTitle from "@/components/ui/page-title";
-import PageSubtitle from "@/components/ui/page-subtitle";
-import Container from "@/components/ui/Container";
-import DemoVideo from "@/components/demo-video/demo-video";
-import PublicFooter from "@/components/publicShell/public-footer";
-import SlidingPartners from "@/components/partners/sliding-partners";
-import { TwoPartners } from "@/components/partners/two-partners";
+import React from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { ArrowRight, Shield, Users, Globe } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+
+type FeatureCardProps = {
+  icon: React.ReactNode
+  title: string
+  description: string
+}
+
+function FeatureCard({ icon, title, description }: FeatureCardProps) {
+  return (
+    <div className="bg-slate-700 p-6 rounded-xl shadow-lg">
+      <div className="mb-4">{icon}</div>
+      <h3 className="text-xl font-semibold mb-2">{title}</h3>
+      <p className="text-slate-300">{description}</p>
+    </div>
+  )
+}
 
 export default function Page() {
   return (
-    <main id="main-id" className="pt-10">
-      <Container
-        id="landing-page"
-        className="min-h-[100vh] sm:min-h-[100vh] pb-[70px] flex items-center gap-5 justify-center"
-      >
-        <div className="flex flex-col lg:flex-row justify-between gap-10 relative mb-[10vh]">
-          {/* Info */}
-          <section className="flex flex-col items-start justify-start w-full sm:max-w-[85%] lg:max-w-[55%] relative gap-6 xl:gap-8">
-            {/* Title Heading */}
-            <PageTitle>
-              Generative AI <br /> Designed for Law
-            </PageTitle>
-
-            {/* Description */}
-            <div className="flex flex-col gap-2 text-[--grey] text-left">
-              <PageHeaderDescription>
-                We aim to deliver reliable legal AI. OpenJustice uses advanced
-                language models to process legal queries and documents,
-                providing accurate answers and tools for students and lawyers.
-                Your feedback helps us improve its dependability.
-              </PageHeaderDescription>
-              <PageHeaderDescription className="font-bold text-primaryHue">
-                OpenJustice is open to all lawyers and legal professionals with
-                an institutional email.
-              </PageHeaderDescription>
-            </div>
-
-            <Button
-              variant="default"
-              className="self-start w-[150px] bg-primaryHue hover:bg-primaryHue/90 text-white"
-              asChild
-            >
-              <Link href="/login">Get Started</Link>
-            </Button>
-          </section>
-          {/* Chat Page Video */}
-          <DemoVideo />
-        </div>
-      </Container>
-
-      <div className="w-full bg-[#193a63] text-white border-solid border-[1px] py-4 shadow-lg">
-        <Container className="flex flex-col items-center gap-3">
-          <p className="text-center">
-            OpenJustice is currently trained on legal data for the US and Canada
-            (with limited coverage). We are working on expanding our coverage to
-            include legal data from the EU, France, and select Australian
-            jurisdictions. Additionally, we are working on integrating
-            International Law, particularly for civil service matters.
+    <main className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white">
+      {/* Hero Section */}
+      <section className="pt-20 pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-6">RefugeeReview</h1>
+          <p className="text-2xl sm:text-2xl lg:text-2xl font-bold italic mb-6">
+  Powered by OpenJustice
+</p>
+          <p className="text-xl sm:text-2xl text-slate-300 mb-10 max-w-3xl mx-auto">
+            Empowering adjudicators with intelligent questioning for fair refugee assessments
           </p>
-        </Container>
-      </div>
-
-      {/* Partners Page */}
-      <div className="bg-white py-[50px] md:py-0 md:min-h-[446px] flex items-center ">
-        <Container>
-          <PageSubtitle className="text-[#11335D] text-center font-bold leading-tight">
-            So far, the Conflict Analytics Lab has partnered up with 15+
-            organizations across the Americas, Europe, and Asia-Pacific to
-            create an open-access solution for the legal profession.
-          </PageSubtitle>
-        </Container>
-      </div>
-
-      <TwoPartners
-        title="Industry Partners"
-        description="The Conflict Analytics Lab partners with private sector leaders,
-        harnessing the power of AI research to transform the practice of law.
-        By advancing AI capabilities, the lab aims to revolutionize how legal
-        tasks are conducted and enhance dispute resolution processes."
-        textLeft={false}
-        partners={[
-          {
-            url: "/assets/partners/industry/odr.png",
-            width: "w-[100%]",
-            height: "h-[63px]",
-          },
-          {
-            url: "/assets/partners/industry/legal_by_design.png",
-            width: "w-[100%]",
-            height: "h-[80px] lg:h-[105px]",
-          },
-        ]}
-      />
-
-      <SlidingPartners
-        className="overflow-x-hidden"
-        title="Academic Partners"
-        description="We work alongside top academic institutions worldwide, conducting cutting-edge research on the mechanization of legal reasoning and ethical design of legal AIs. Through our collaborative research, we aim to set new standards for  transparency and fairness in legal technology development."
-      />
-
-      <TwoPartners
-        title="Non-Profit Partners"
-        description="Partnering with non-profit legal  organizations, the Conflict Analytics Lab advances AI research for social impact and economic benefits for the broader public."
-        textLeft={true}
-        partners={[
-          {
-            url: "/assets/partners/non-profit/pro-bono.png",
-            width: "w-[100%]",
-            height: "h-[92px]",
-          },
-          {
-            url: "/assets/partners/non-profit/legal-clinic.png",
-            width: "w-[100%]",
-            height: "h-[120px]",
-
-          },
-        ]}
-      />
-
-      {/* Video  */}
-      <div
-        id="video-page"
-        className="bg-[white] w-[100%] min-h-[100vh] flex flex-col gap-[30px] items-center justify-center relative "
-      >
-        <Container className="text-center flex flex-col items-center gap-[15px] pt-[100px] my-0">
-          <h1 className="text-5xl font-bold">OpenJustice Demo</h1>
-          <p className="text-xl text-[#646464]">
-            Watch our demo and learn more about OpenJustice.
-          </p>
-        </Container>
-        <div className=" flex min-h-[300px] sm:min-h-[400px] md:min-h-[400px] lg:min-h-[600px] mx-auto mb-[150px]">
-          <iframe
-            src="https://www.youtube.com/embed/pmF9FYCWT5A?rel=0"
-            className=" max-w-[1000px] w-[90vw] sm:w-[80vw] lg:w-[70vw] rounded-lg shadow-lg"
-            scrolling="no"
-            title="Conflict Analytics OpenJustice Demo FINAL.mp4"
-          ></iframe>
+          <Button asChild className="bg-blue-600 hover:bg-blue-700 text-lg py-6 px-8 rounded-full">
+            <Link href="/login">
+              Get Started <ArrowRight className="ml-2" />
+            </Link>
+          </Button>
         </div>
-      </div>
+      </section>
 
+      {/* Features Section */}
+      <section className="py-20 bg-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">Key Features</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <FeatureCard
+              icon={<Shield className="w-12 h-12 text-blue-500" />}
+              title="AI-Powered Questions"
+              description="Generate tailored, context-aware questions to guide your interviews effectively."
+            />
+            <FeatureCard
+              icon={<Users className="w-12 h-12 text-green-500" />}
+              title="Fair Assessment"
+              description="Ensure consistency and fairness in the refugee adjudication process."
+            />
+            <FeatureCard
+              icon={<Globe className="w-12 h-12 text-purple-500" />}
+              title="Global Insights"
+              description="Access up-to-date information on global conflicts and refugee situations."
+            />
+          </div>
+        </div>
+      </section>
+
+    
+
+      {/* Testimonial Section */}
+      <section className="py-20 bg-slate-800">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <blockquote className="text-2xl sm:text-3xl font-light italic mb-8">
+            "RefugeeLine has revolutionized our adjudication process. It provides insightful questions that help us make
+            fair and informed decisions."
+          </blockquote>
+          <p className="text-lg font-semibold">- Sarah Johnson, Senior Refugee Adjudicator</p>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-blue-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-6">Ready to Transform Your Adjudication Process?</h2>
+          <p className="text-xl mb-10 max-w-3xl mx-auto">
+            Join RefugeeLine today and access a powerful tool designed to support fair and efficient refugee
+            assessments.
+          </p>
+          <Button asChild className="bg-white text-blue-600 hover:bg-slate-100 text-lg py-6 px-8 rounded-full">
+            <Link href="/signup">
+              Sign Up Now <ArrowRight className="ml-2" />
+            </Link>
+          </Button>
+        </div>
+      </section>
     </main>
-  );
+  )
 }

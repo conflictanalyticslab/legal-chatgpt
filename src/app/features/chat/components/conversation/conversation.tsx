@@ -1,80 +1,101 @@
-import { Card } from "@/components/ui/card";
-import { useGlobalContext } from "@/app/store/global-context";
-import { cn } from "@/lib/utils";
-import ReactMarkdown from "react-markdown";
+"use client"
+
+import { useEffect, useRef } from "react"
+import { useGlobalContext } from "@/app/store/global-context"
+import { Card } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
+import ReactMarkdown from "react-markdown"
 
 function LinkRenderer(props: any) {
   return (
-    <a href={props.href} className="underline" target="_blank" rel="noreferrer">
+    <a
+      href={props.href}
+      className="underline text-white hover:text-gray-200 transition-colors"
+      target="_blank"
+      rel="noreferrer"
+    >
       {props.children}
     </a>
-  );
+  )
 }
 
 export function Conversation() {
-  const { conversation, latestResponse, loading, scrollIntoViewRef } =
-    useGlobalContext();
+  const { conversation, latestResponse, loading, scrollIntoViewRef } = useGlobalContext()
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight
+    }
+  }, [conversation])
+
   return (
     <div
       id="conversation"
-      className={cn(
-        `w-full bg-inherit hidden overflow-auto`,
-        { "flex": conversation }
-      )}
+      ref={containerRef}
+      className="w-full flex-1 overflow-auto pb-24 bg-gradient-to-br from-blue-900 to-gray-900 text-white"
     >
-
-      <div className="pt-[33px] w-screen md:w-chat mx-auto flex flex-col gap-[3.25rem] items-end px-4">
-        {conversation && conversation.map((convoObj: any, i: number) => (
+      <div className="max-w-3xl mx-auto flex flex-col gap-8 p-4">
+        {conversation?.map((convoObj: any, i: number) => (
           <Card
             key={i}
             className={cn(
-              `bg-inherit w-fit`,
+              "border rounded-xl shadow-md p-4",
               {
-                "shadow-none border-0 self-start":
-                  convoObj.role === "assistant",
-              },
-              {
-                "px-5 py-3 rounded-[15px]": convoObj.role === "user",
+                "border-blue-500/30 bg-blue-800/60": convoObj.role === "assistant",
+                "border-green-500/30 bg-blue-800/50": convoObj.role === "user",
               }
             )}
           >
-            {/* Conversation Title */}
-            <p
-              className={cn(`mb-2 ${i % 2 == 0 ? "text-right" : "text-left"}`)}
-            >
-              <b>{convoObj?.role === "user" ? "You" : "OpenJustice"}</b>
-            </p>
+            <div>
+              {/* Speaker name explicitly in white */}
+              <p className="font-bold mb-2 text-white">
+                {convoObj.role === "user" ? "You" : "RefugeeReview"}
+              </p>
 
-            {/* Final Buffered Content */}
-            {convoObj.content !== "" && (
-              <ReactMarkdown 
-                className="flex flex-col items-start gap-[10px] llm-markdown"
-                components={{ a: LinkRenderer }}
-              >
-                {convoObj?.content}
-              </ReactMarkdown>
-            )}
-
-            {/*  Buffered LLM Content */}
-            {convoObj.role === "assistant" && i === conversation.length - 1 && (
-              <div className="relative flex-col gap-2 flex justify-between break-normal pb-[50px]">
-                <ReactMarkdown 
-                  className="flex flex-col items-start gap-[10px] llm-markdown"
+              {/* Markdown Content - ensure white text */}
+              {convoObj.content && (
+                <ReactMarkdown
+                  className="prose prose-sm max-w-none text-white"
                   components={{ a: LinkRenderer }}
                 >
-                  {latestResponse}
+                  {convoObj.content}
                 </ReactMarkdown>
-                {/* Loading Animation Dot */}
-                {loading && latestResponse === "" && (
-                  <div className="w-[10px] h-[10px] bg-[black] rounded-[50%] animate-pulse self-start"></div>
-                )}
-              </div>
-            )}
+              )}
+
+              {/* Latest assistant response (streaming) */}
+              {convoObj.role === "assistant" && i === conversation.length - 1 && (
+                <div className="relative mt-2">
+                  <ReactMarkdown
+                    className="prose prose-sm max-w-none text-white"
+                    components={{ a: LinkRenderer }}
+                  >
+                    {latestResponse}
+                  </ReactMarkdown>
+
+                  {loading && latestResponse === "" && (
+                    <div className="flex space-x-2 mt-2">
+                      <div
+                        className="w-2 h-2 bg-white rounded-full animate-bounce"
+                        style={{ animationDelay: "0s" }}
+                      />
+                      <div
+                        className="w-2 h-2 bg-white rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      />
+                      <div
+                        className="w-2 h-2 bg-white rounded-full animate-bounce"
+                        style={{ animationDelay: "0.4s" }}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </Card>
         ))}
-        {/* Scroll Into View Ref */}
         <span ref={scrollIntoViewRef}></span>
       </div>
     </div>
-  );
+  )
 }
