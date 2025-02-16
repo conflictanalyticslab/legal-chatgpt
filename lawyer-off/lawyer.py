@@ -128,7 +128,7 @@ class Lawyer:
     
 
 if __name__ == "__main__":
-    from trials import test_trial
+    from data.trials import test_trial
     
     print("CASE:", test_trial["description"])
     print("\nEVIDENCE:")

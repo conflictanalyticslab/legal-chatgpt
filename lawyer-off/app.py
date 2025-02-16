@@ -1,7 +1,11 @@
 import streamlit as st
-from trials import test_trial
 from lawyer import Lawyer
 from judge import Judge
+
+# Trial data
+from data.emp import test_trial
+from data.immi import trial1
+from data.l_and_t import trial2
 
 # streamlit run app.py
 # To stop, open a tab and press CTRL + C
@@ -21,6 +25,7 @@ class JudgeMessage:
 st.set_page_config(page_title="Lawyer-Off!", page_icon="⚖️")
 st.title("Lawyer-Off!")
 st.markdown("""### How it works:
+- Pick a legal area
 - Face-off against a CPU lawyer and prosecute an imaginary client
 - Build your debate skills via mock trials
 - Enjoy yourself and have fun!""")
@@ -38,135 +43,242 @@ if "chat_history" in st.session_state:
     else:
         cur_section = 3 # Judgement & Feedback
 
+# Selection component
+option = st.selectbox(
+    "Choose your law area",
+    ("", "Employment", "Landlord & Tenant", "Immigration"),
+)
+print("User chose area:", option)
 
-with st.expander("Case Info", expanded=True):
-    # Indexing matters a lot in markdown.
-    popup_string = f"""### {test_trial["case"]}
+
+
+# Focus on employment law, Landlord & Tenant law, or Immigration Law
+match option:
+    case "Employment":
+        with st.expander("Case Info", expanded=True):
+            # Indexing matters a lot in markdown.
+            popup_string = f"""### {test_trial["case"]}
 
 {test_trial["description"]}   
-                
+                        
 ### EVIDENCE:
 """
-    for category, description in test_trial['evidence']:
-        popup_string += f"- {category} evidence: {description}\n"
-    st.markdown(popup_string)
-    
-    
-lawyer, judge = Lawyer(defending=True), Judge()
+            for category, description in test_trial['evidence']:
+                popup_string += f"- {category} evidence: {description}\n"
+            st.markdown(popup_string)
 
-# session state
-if "chat_history" not in st.session_state:
-    lawyer.study_case(case=test_trial['description'], evidence=test_trial['evidence'])
-    print("Studied!")
-    
-    st.session_state.chat_history = []
+if option:
+    lawyer, judge = Lawyer(defending=True), Judge()
 
-# Using "with" notation
-from court_process import court_process
-with st.sidebar:
-    st.markdown("💡 **Tip:** You can collapse this sidebar by clicking the arrow in the top-right corner of the sidebar.")
-    st.markdown(court_process)
-    
-# Custom CSS for the faded separator
-st.markdown("""
-<style>
-.faded-separator {
-    color: #888; /* Light gray color for faded text */
-    font-style: italic;
-    text-align: center;
-    margin: 10px 0;
-    opacity: 0.7; /* Faded effect */
-}
-</style>
-""", unsafe_allow_html=True)
+    # session state
+    if "chat_history" not in st.session_state:
+        lawyer.study_case(case=test_trial['description'], evidence=test_trial['evidence'])
+        print("Studied!")
+        
+        st.session_state.chat_history = []
 
-# conversation
-st.markdown(f'<div class="faded-separator">--- Opening Statements ---</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="faded-separator"> Hint: Prosecution Goes First! </div>', unsafe_allow_html=True)
-for message in st.session_state.chat_history[:2]: # All openers
-    if isinstance(message, AIMessage):
-        with st.chat_message("AI"):
-            st.write(message.content)
-    elif isinstance(message, HumanMessage):
-        with st.chat_message("Human"):
-            st.write(message.content)
+    # Using "with" notation
+    from court_process import court_process
+    # with st.sidebar:
+    #     st.markdown("💡 **Tip:** You can collapse this sidebar by clicking the arrow in the top-right corner of the sidebar.")
+    #     st.markdown(court_process)
+        
+    # Custom CSS for the faded separator
+    st.markdown("""
+    <style>
+    .faded-separator {
+        color: #888; /* Light gray color for faded text */
+        font-style: italic;
+        text-align: center;
+        margin: 10px 0;
+        opacity: 0.7; /* Faded effect */
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-if cur_section > 0: 
-    st.markdown(f'<div class="faded-separator">--- Presentation of Evidence and Testimony ---</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="faded-separator"> You each will have {num_args} chances to state your points. </div>', unsafe_allow_html=True)
-    for message in st.session_state.chat_history[2:2+num_args*2]: # All arguments
-        if isinstance(message, AIMessage):
-            with st.chat_message("AI"):
-                st.write(message.content)
-        elif isinstance(message, HumanMessage):
+    # conversation
+
+    # Custom CSS to adjust the layout
+    st.markdown(
+        """
+        <style>
+        .stChatBox {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .stSelectbox {
+            margin-bottom: 10px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(f'<div class="faded-separator">--- Opening Statements ---</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="faded-separator"> Hint: Prosecution Goes First! </div>', unsafe_allow_html=True)
+
+    # Create two columns for the chat windows
+    col1, col2 = st.columns(2)
+    # session state
+    if "human_history" not in st.session_state:
+        st.session_state.human_history = [HumanMessage(content="Click on one of the options on the right to get started!")]
+    if "cpu_history" not in st.session_state:
+        st.session_state.cpu_history = []
+
+    # First Chat Window (Left)
+    with col1:
+        for message in st.session_state.human_history:    
             with st.chat_message("Human"):
                 st.write(message.content)
 
-if cur_section > 1:
-    st.markdown(f'<div class="faded-separator">--- Closing Statements ---</div>', unsafe_allow_html=True)
-    for message in st.session_state.chat_history[2+num_args*2:2+num_args*2+2]: # All closers
-        if isinstance(message, AIMessage):
-            with st.chat_message("AI"):
-                st.write(message.content)
-        elif isinstance(message, HumanMessage):
-            with st.chat_message("Human"):
-                st.write(message.content)
+    # Second Chat Window (Right)
+    options = [
+        "Appeal to Emotion.",
+        "Use Facts and Logic.",
+        "Get Confrontational.",
+        "Tell a Story."
+    ]
 
-if cur_section > 2:
-    st.markdown(f'<div class="faded-separator">--- Judgement & Reflection ---</div>', unsafe_allow_html=True)
-    for message in st.session_state.chat_history[2+num_args*2+2:]: # Feedback
-        if isinstance(message, AIMessage):
-            with st.chat_message("AI"):
-                st.write(message.content)
-        elif isinstance(message, HumanMessage):
-            with st.chat_message("Human"):
-                st.write(message.content)
-        else: # Judge message
-            with st.chat_message("Human", avatar="👨‍⚖️"):
-                st.write(message.content)
+    with col2:
+        st.markdown("### Choose your path.")
 
-# user input
-match cur_section:
-    case 0:
-        message = "Enter your opening statement here..."
-    case 1:
-        message = "Enter your argument here..."
-    case 2:
-        message = "Enter your closing statement here..."
-    case 3:
-        message = "Ask for feedback here..."
+        for choice in options:
+            # Assume users will only pick one
+            if st.button(choice):
+                st.session_state.selected_option = choice
 
-user_query = st.chat_input(message)
-if user_query is not None and user_query != "":
-    st.session_state.chat_history.append(HumanMessage(content=user_query))
 
-    with st.chat_message("Human"):
-        st.markdown(user_query)
 
-    with st.chat_message("AI"):
-        match cur_section:
-            case 0:
-                response = lawyer.respond(typ="opener", response=user_query)
-            case 1:
-                response = lawyer.respond(typ="response", response=user_query)
-            case 2:
-                response = lawyer.respond(typ="closer", response=user_query)
-            case 3:
-                response = judge.respond(convo=st.session_state.chat_history, query=user_query)
-        st.write(response)
 
-    st.session_state.chat_history.append(AIMessage(content=response) if cur_section < 2 else JudgeMessage(content=response))
-    print(len(st.session_state.chat_history), cur_section)
+    if cur_section > 0: 
+        st.markdown(f'<div class="faded-separator">--- Presentation of Evidence and Testimony ---</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="faded-separator"> You each will have {num_args} chances to state your points. </div>', unsafe_allow_html=True)
+
+        # Create two columns for the chat windows
+        col1, col2 = st.columns(2)
+        # session state
+        if "human_history" not in st.session_state:
+            st.session_state.human_history = [HumanMessage(content="Hello! This is the first chat window.")]
+        if "cpu_history" not in st.session_state:
+            st.session_state.cpu_history = [AIMessage(content="I love Langchain bro")]
+
+        # First Chat Window (Left)
+        with col1:
+            st.markdown("### HUMAN")
+            for message in st.session_state.human_history:    
+                with st.chat_message("Human"):
+                    st.write(message.content)
+
+        # Second Chat Window (Right)
+        options = [
+            "Point out flaw 1",
+            "Yell louder",
+            "Say a funny joke",
+            "WIN THIS HACKATHON!!!"
+        ]
+
+        with col2:
+            # Selection Window on Top of the Second Chat Box
+            st.markdown("### CPU")
+            
+            for message in st.session_state.cpu_history:    
+                with st.chat_message("AI"):
+                    st.write(message.content)
+
+            st.session_state.selected_option = "Option 1"
+
+            for choice in options:
+                if st.button(choice):
+                    st.session_state.selected_option = choice
+
+
+
+# for message in st.session_state.chat_history[:2]: # All openers
+#     if isinstance(message, AIMessage):
+#         with st.chat_message("AI"):
+#             st.write(message.content)
+#     elif isinstance(message, HumanMessage):
+#         with st.chat_message("Human"):
+#             st.write(message.content)
+
+# if cur_section > 0: 
+#     st.markdown(f'<div class="faded-separator">--- Presentation of Evidence and Testimony ---</div>', unsafe_allow_html=True)
+#     st.markdown(f'<div class="faded-separator"> You each will have {num_args} chances to state your points. </div>', unsafe_allow_html=True)
+#     for message in st.session_state.chat_history[2:2+num_args*2]: # All arguments
+#         if isinstance(message, AIMessage):
+#             with st.chat_message("AI"):
+#                 st.write(message.content)
+#         elif isinstance(message, HumanMessage):
+#             with st.chat_message("Human"):
+#                 st.write(message.content)
+
+# if cur_section > 1:
+#     st.markdown(f'<div class="faded-separator">--- Closing Statements ---</div>', unsafe_allow_html=True)
+#     for message in st.session_state.chat_history[2+num_args*2:2+num_args*2+2]: # All closers
+#         if isinstance(message, AIMessage):
+#             with st.chat_message("AI"):
+#                 st.write(message.content)
+#         elif isinstance(message, HumanMessage):
+#             with st.chat_message("Human"):
+#                 st.write(message.content)
+
+# if cur_section > 2:
+#     st.markdown(f'<div class="faded-separator">--- Judgement & Reflection ---</div>', unsafe_allow_html=True)
+#     for message in st.session_state.chat_history[2+num_args*2+2:]: # Feedback
+#         if isinstance(message, AIMessage):
+#             with st.chat_message("AI"):
+#                 st.write(message.content)
+#         elif isinstance(message, HumanMessage):
+#             with st.chat_message("Human"):
+#                 st.write(message.content)
+#         else: # Judge message
+#             with st.chat_message("Human", avatar="👨‍⚖️"):
+#                 st.write(message.content)
+
+# # user input
+# match cur_section:
+#     case 0:
+#         message = "Enter your opening statement here..."
+#     case 1:
+#         message = "Enter your argument here..."
+#     case 2:
+#         message = "Enter your closing statement here..."
+#     case 3:
+#         message = "Ask for feedback here..."
+
+# user_query = st.chat_input(message)
+# if user_query is not None and user_query != "":
+#     st.session_state.chat_history.append(HumanMessage(content=user_query))
+
+#     with st.chat_message("Human"):
+#         st.markdown(user_query)
+
+#     with st.chat_message("AI"):
+#         match cur_section:
+#             case 0:
+#                 response = lawyer.respond(typ="opener", response=user_query)
+#             case 1:
+#                 response = lawyer.respond(typ="response", response=user_query)
+#             case 2:
+#                 response = lawyer.respond(typ="closer", response=user_query)
+#             case 3:
+#                 response = judge.respond(convo=st.session_state.chat_history, query=user_query)
+#         st.write(response)
+
+#     st.session_state.chat_history.append(AIMessage(content=response) if cur_section < 2 else JudgeMessage(content=response))
+#     print(len(st.session_state.chat_history), cur_section)
     
-    if len(st.session_state.chat_history) == 2 + 2*num_args + 2:
-        # Now swap to judge.
-        print("Now judging the court.")
-        response = judge.judge_conversation(convo=st.session_state.chat_history)
-        st.session_state.chat_history.append(JudgeMessage(content=response))
+#     if len(st.session_state.chat_history) == 2 + 2*num_args + 2:
+#         # Now swap to judge.
+#         print("Now judging the court.")
+#         response = judge.judge_conversation(convo=st.session_state.chat_history)
+#         st.session_state.chat_history.append(JudgeMessage(content=response))
     
-        # TODO: Also determine the winner
+#         # TODO: Also determine the winner
     
-    st.rerun()
+#     st.rerun()
     
     # if len(st.session_state.chat_history) >= 2:
     #     cur_section = 1
