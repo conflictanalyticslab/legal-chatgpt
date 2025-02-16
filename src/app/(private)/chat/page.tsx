@@ -162,26 +162,10 @@ export default function Chat() {
                     />
                   </div>
                   <Label className="text-center text-base w-full text-[#838383]">
-                    Ask any legal questions.
+                    Tell us about the refugee you need to interview.
                   </Label>
                 </div>
-                <div className="flex gap-2 sm:gap-3 flex-wrap justify-center">
-                  {[
-                    "Data Privacy",
-                    "Service Terms",
-                    "GDPR Rules",
-                    "Copyright Laws",
-                  ].map((prompt, key) => (
-                    <Button
-                      key={key}
-                      variant="outline"
-                      className="bg-transparent flex rounded-[3rem] hover:bg-[#F1F1F1] cursor-pointer h-auto py-1 px-4 text-nowrap"
-                      onClick={() => handleQueryPrompt(prompt)}
-                    >
-                      {prompt}
-                    </Button>
-                  ))}
-                </div>
+                
               </div>
             </div>
           )}

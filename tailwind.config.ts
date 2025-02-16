@@ -1,13 +1,13 @@
-import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss"
 
 const config = {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx,jsx,js}",
-    "./components/**/*.{ts,tsx,jsx,js}",
-    "./app/**/*.{ts,tsx,jsx,js}",
-    "./src/**/*.{ts,tsx,jsx,js}",
-  ],
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+	],
   prefix: "",
   theme: {
     container: {
@@ -15,31 +15,18 @@ const config = {
       padding: "2rem",
       screens: {
         "2xl": "1400px",
-        "3xl": "1800px",
       },
     },
     extend: {
-      fontFamily: {
-      },
-      width: {
-        chat: '50%',
-        'chat-options': '20%'
-      },
       colors: {
-        greyBg: "#f5f5f7",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        primaryHue: "#193a63",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-        },
-        success: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -80,11 +67,6 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "pulse-bounce": {
-          from: {
-            
-          }
-        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -92,7 +74,7 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
-} satisfies Config;
+  plugins: [require("tailwindcss-animate")],
+} satisfies Config
 
-export default config;
+export default config

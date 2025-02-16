@@ -28,6 +28,9 @@ export default function Page() {
       <section className="pt-20 pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-6">RefugeeReview</h1>
+          <p className="text-2xl sm:text-2xl lg:text-2xl font-bold italic mb-6">
+  Powered by OpenJustice
+</p>
           <p className="text-xl sm:text-2xl text-slate-300 mb-10 max-w-3xl mx-auto">
             Empowering adjudicators with intelligent questioning for fair refugee assessments
           </p>
@@ -63,26 +66,7 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Demo Section */}
-      <section className="py-20 bg-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">See RefugeeLine in Action</h2>
-          <div className="aspect-w-16 aspect-h-9 rounded-xl overflow-hidden shadow-xl">
-            <Image
-              src="/placeholder.svg?height=720&width=1280"
-              alt="RefugeeLine Demo"
-              width={1280}
-              height={720}
-              className="object-cover"
-            />
-          </div>
-          <div className="mt-8 text-center">
-            <Button asChild className="bg-white text-slate-900 hover:bg-slate-100 text-lg py-4 px-8 rounded-full">
-              <Link href="#watch-demo">Watch Full Demo</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+    
 
       {/* Testimonial Section */}
       <section className="py-20 bg-slate-800">

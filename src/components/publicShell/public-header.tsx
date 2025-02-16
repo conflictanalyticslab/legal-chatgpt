@@ -11,16 +11,16 @@ export function PublicHeader() {
   const links = [
     {
       id: 1,
-      route: "About Us",
+      route: "About RefugeeReview",
       url: "https://conflictanalytics.queenslaw.ca/",
     },
     {
       id: 2,
-      route: "Publications",
+      route: "Immigration Law Updates",
       url: "https://conflictanalytics.queenslaw.ca/publications",
     },
-    { id: 3, route: "Blogs", url: "https://myopencourt.org/blog/" },
-    { id: 4, route: "FAQs", url: "/faq" },
+    { id: 3, route: "Our Mission", url: "https://myopencourt.org/blog/" },
+    { id: 4, route: "Easy Adjudication", url: "/faq" },
   ];
 
   const [navOpen, setNavOpen] = useState(false);
