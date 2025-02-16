@@ -26,15 +26,8 @@ class JudgeMessage:
 # app config
 st.set_page_config(page_title="Lawyer-Off!", page_icon="⚖️", layout="wide")
 
-st.title("Ace Attorney")
+st.title("Ace Attorney, A2J")
 st.markdown("""*not actual certified legal advice""")
-
-num_args = 1 # default number of arguments both sides get to take
-
-# from court_process import court_process
-# with st.sidebar:
-#     st.markdown("💡 **Tip:** You can collapse this sidebar by clicking the arrow in the top-right corner of the sidebar.")
-#     st.markdown(court_process)
 
 if "cur_section" not in st.session_state:
     st.session_state.cur_section = 0 # 0 - Opener, 1 - Debate, 2 - Closer, 3 - Judgement & Feedback
@@ -48,15 +41,24 @@ with col1:
     )
     print("User chose area:", option)
 
+if 'case_info' not in st.session_state:
+    st.session_state.case_info = ""
+
 with col2:
     # Focus on employment law, Landlord & Tenant law, or Immigration Law
     if option:
-        with st.expander("Case Info", expanded=True):
+        with st.expander("Case Info", expanded=False):
             # Indexing matters a lot in markdown.
-            st.markdown("Case info goes here")
+            case=st.session_state.case_info
+            st.markdown(case)
+            st.download_button(
+                label="Download insights",
+                data=case,
+                file_name="case_info.txt",
+            )
 
 if option:
-    lawyer = Lawyer(defending=True)
+    lawyer = PlayerGenerator()
     
     # Custom CSS for the faded separator
     st.markdown("""
@@ -91,15 +93,15 @@ if option:
         unsafe_allow_html=True,
     )
     # Create two columns for the chat windows
-    col1, middle, col2 = st.columns([1, 1, 1])
     
     # session state
     if "human_history" not in st.session_state:
         st.session_state.human_history = []
     if "cpu_history" not in st.session_state:
-        st.session_state.cpu_history = [AIMessage(content="Beep Boop. Ready for action.")]
+        st.session_state.cpu_history = []
 
     for i in range(len(st.session_state.human_history)):
+        col1, middle, col2 = st.columns([1, 1, 1])
         hm, cm = st.session_state.human_history[i], st.session_state.cpu_history[i]
         with col1:
             with st.chat_message("Human"):
@@ -109,34 +111,32 @@ if option:
             with st.chat_message("AI"):
                 st.write(cm.content)
 
+    col1, middle, col2 = st.columns([1, 1, 1])
     with middle:                
-        st.markdown(f'<div class="faded-separator">--- How to use Ace Attorney: ---</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="faded-separator"> Try your best </div>', unsafe_allow_html=True)
+        st.markdown(f"""<div class="faded-separator">Explore legal hypotheticals by entering them in the chat window below.</div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="faded-separator">General tips for using Ace Attorney:</div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="faded-separator">- Be specific! Every detail helps.</div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="faded-separator">- Be nice! Speak to it as you would a real legal consultant.</div>""", unsafe_allow_html=True)
 
-        
-        user_query = st.chat_input(message)
+        st.write("##")
+        user_query = st.chat_input("Type your questions here...")
         if user_query is not None and user_query != "":
-            st.session_state.chat_history.append(HumanMessage(content=user_query))
+            st.session_state.human_history.append(HumanMessage(content=user_query))
+            
+            response = lawyer.respond(query=user_query)
+            st.session_state.cpu_history.append(AIMessage(content=response))
 
-        with st.chat_message("Human"):
-            st.markdown(user_query)
+            convo = []
+            for i in range(len(st.session_state.human_history)):
+                convo.append(st.session_state.human_history[i])
+                convo.append(st.session_state.cpu_history[i])
 
-        with st.chat_message("AI"):
-            response = lawyer.respond(typ="opener", response=user_query)
-            st.write(response)
+            summarization = lawyer.summarize(hist=convo)
+            st.session_state.case_info = summarization
 
-        st.session_state.chat_history.append(AIMessage(content=response) if cur_section < 2 else JudgeMessage(content=response))
-        print(len(st.session_state.chat_history), cur_section)
-        
-        if len(st.session_state.chat_history) == 2 + 2*num_args + 2:
-            # Now swap to judge.
-            print("Now judging the court.")
-            response = judge.judge_conversation(convo=st.session_state.chat_history)
-            st.session_state.chat_history.append(JudgeMessage(content=response))
-        
-            # TODO: Also determine the winner
-        
-        st.rerun()
+            print(len(st.session_state.human_history), len(st.session_state.cpu_history))
+            
+            st.rerun()
 
                 
                 
