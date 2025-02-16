@@ -4,20 +4,17 @@ from judge import Judge
 from player_filler import PlayerGenerator
 from stylable_container import stylable_container
 
-# Trial data
-from data.emp import test_trial
-from data.immi import trial1
-from data.l_and_t import trial2
 
 # streamlit run app.py
 # To stop, open a tab and press CTRL + C
 
-# BoilerPlate - Replace below with lawyer conversation
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
+
+
 
 class JudgeMessage:
     def __init__(self, content):
@@ -26,8 +23,13 @@ class JudgeMessage:
 # app config
 st.set_page_config(page_title="Lawyer-Off!", page_icon="⚖️", layout="wide")
 
+# elem1, elem2, space = st.columns([1,1,1])
+# with elem1:
+#     st.title("Ace Attorney, A2J")
+# with elem2: 
+#     st.image("./pheonix.png", width=50)
 st.title("Ace Attorney, A2J")
-st.markdown("""*not actual certified legal advice""")
+st.markdown("""*not actual certified legal advice""")    
 
 if "cur_section" not in st.session_state:
     st.session_state.cur_section = 0 # 0 - Opener, 1 - Debate, 2 - Closer, 3 - Judgement & Feedback
@@ -123,7 +125,7 @@ if option:
         if user_query is not None and user_query != "":
             st.session_state.human_history.append(HumanMessage(content=user_query))
             
-            response = lawyer.respond(query=user_query)
+            response = lawyer.respond(query=user_query, history=st.session_state.human_history)
             st.session_state.cpu_history.append(AIMessage(content=response))
 
             convo = []
