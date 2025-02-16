@@ -57,11 +57,11 @@
     "lucide": "^0.394.0",
     "lucide-react": "^0.445.0",
     "netlify-cli": "^17.23.2",
-    "next": "^14.1.0",
+    "next": "^14.2.15",
     "npm": "^10.8.2",
     "npx": "^10.2.2",
-    "react": "^18.2.0",
-    "react-dom": "18.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.51.5",
     "react-markdown": "^9.0.1",
@@ -83,5 +83,18 @@
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "description": "- Pull down the `master` branch from this repo. - Ask the developer of this repo for an `.env` file. Add this file in the root directory. - Run `yarn` and `yarn dev`. This should spin up the app in http://localhost:3000.",
+  "main": "ecosystem.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SinehaManivannan/legal-chatgpt.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SinehaManivannan/legal-chatgpt/issues"
+  },
+  "homepage": "https://github.com/SinehaManivannan/legal-chatgpt#readme"
 }
