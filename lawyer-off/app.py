@@ -1,6 +1,8 @@
 import streamlit as st
 from lawyer import Lawyer
 from judge import Judge
+from player_filler import PlayerGenerator
+from stylable_container import stylable_container
 
 # Trial data
 from data.emp import test_trial
@@ -22,67 +24,49 @@ class JudgeMessage:
         self.content = content
 
 # app config
-st.set_page_config(page_title="Lawyer-Off!", page_icon="⚖️")
-st.title("Lawyer-Off!")
-st.markdown("""### How it works:
-- Pick a legal area
-- Face-off against a CPU lawyer and prosecute an imaginary client
-- Build your debate skills via mock trials
-- Enjoy yourself and have fun!""")
+st.set_page_config(page_title="Lawyer-Off!", page_icon="⚖️", layout="wide")
+
+st.title("Ace Attorney")
+st.markdown("""Not actual certified legal advice""")
 
 num_args = 1 # default number of arguments both sides get to take
 
-cur_section = 0 # 0 - Opener, 1 - Debate, 2 - Closer, 3 - Judgement & Feedback
-if "chat_history" in st.session_state:
-    if len(st.session_state.chat_history) < 2:
-        cur_section = 0
-    elif len(st.session_state.chat_history) < 2 + 2*num_args:
-        cur_section = 1
-    elif len(st.session_state.chat_history) < 2 + 2*num_args + 2:
-        cur_section = 2
-    else:
-        cur_section = 3 # Judgement & Feedback
+# from court_process import court_process
+# with st.sidebar:
+#     st.markdown("💡 **Tip:** You can collapse this sidebar by clicking the arrow in the top-right corner of the sidebar.")
+#     st.markdown(court_process)
 
-# Selection component
-option = st.selectbox(
-    "Choose your law area",
-    ("", "Employment", "Landlord & Tenant", "Immigration"),
-)
-print("User chose area:", option)
+if "cur_section" not in st.session_state:
+    st.session_state.cur_section = 0 # 0 - Opener, 1 - Debate, 2 - Closer, 3 - Judgement & Feedback
 
+col1, col2 = st.columns([0.5,1])
 
+with col1:
+    # Selection component
+    option = st.selectbox("",
+        ("Employment", "Landlord & Tenant", "Immigration")
+    )
+    print("User chose area:", option)
 
-# Focus on employment law, Landlord & Tenant law, or Immigration Law
-match option:
-    case "Employment":
-        with st.expander("Case Info", expanded=True):
-            # Indexing matters a lot in markdown.
-            popup_string = f"""### {test_trial["case"]}
+with col2:
+    # Focus on employment law, Landlord & Tenant law, or Immigration Law
+    match option:
+        case "Employment":
+            with st.expander("Case Info", expanded=True):
+                # Indexing matters a lot in markdown.
+                popup_string = f"""### {test_trial["case"]}
 
 {test_trial["description"]}   
-                        
+                            
 ### EVIDENCE:
 """
-            for category, description in test_trial['evidence']:
-                popup_string += f"- {category} evidence: {description}\n"
-            st.markdown(popup_string)
+                for category, description in test_trial['evidence']:
+                    popup_string += f"- {category} evidence: {description}\n"
+                st.markdown(popup_string)
 
 if option:
-    lawyer, judge = Lawyer(defending=True), Judge()
-
-    # session state
-    if "chat_history" not in st.session_state:
-        lawyer.study_case(case=test_trial['description'], evidence=test_trial['evidence'])
-        print("Studied!")
-        
-        st.session_state.chat_history = []
-
-    # Using "with" notation
-    from court_process import court_process
-    # with st.sidebar:
-    #     st.markdown("💡 **Tip:** You can collapse this sidebar by clicking the arrow in the top-right corner of the sidebar.")
-    #     st.markdown(court_process)
-        
+    lawyer, judge, player = Lawyer(defending=True), Judge(), PlayerGenerator(evidence=test_trial["evidence"])
+    
     # Custom CSS for the faded separator
     st.markdown("""
     <style>
@@ -120,79 +104,171 @@ if option:
     st.markdown(f'<div class="faded-separator"> Hint: Prosecution Goes First! </div>', unsafe_allow_html=True)
 
     # Create two columns for the chat windows
-    col1, col2 = st.columns(2)
+    col1, middle, col2 = st.columns([1, 1, 1])
+    
     # session state
     if "human_history" not in st.session_state:
         st.session_state.human_history = [HumanMessage(content="Click on one of the options on the right to get started!")]
     if "cpu_history" not in st.session_state:
-        st.session_state.cpu_history = []
+        st.session_state.cpu_history = [AIMessage(content="Beep Boop. Ready to Law Out.")]
 
     # First Chat Window (Left)
     with col1:
-        for message in st.session_state.human_history:    
+        st.markdown("### HUMAN")
+        for message in st.session_state.human_history[:1]:    
             with st.chat_message("Human"):
                 st.write(message.content)
+                
+    if "selected_option" not in st.session_state:
+        st.session_state.selected_option = ""
 
-    # Second Chat Window (Right)
-    options = [
-        "Appeal to Emotion.",
-        "Use Facts and Logic.",
-        "Get Confrontational.",
-        "Tell a Story."
-    ]
-
-    with col2:
-        st.markdown("### Choose your path.")
-
+    with middle:
+        options = [
+            "Appeal to Emotion.",
+            "Use Facts and Logic.",
+            "Get Confrontational.",
+            "Tell a Story."
+        ]
         for choice in options:
             # Assume users will only pick one
-            if st.button(choice):
+            if st.button(label=choice, key=choice):
+                print(st.session_state.selected_option)
                 st.session_state.selected_option = choice
 
+                yap = player.respond(strategy=st.session_state.selected_option, typ="opener")
+                print(yap)
+                st.session_state.human_history[0] = HumanMessage(content=yap)
+                
+                response = lawyer.respond(typ="opener")
+                st.session_state.cpu_history[0]=(AIMessage(content=response))
+                
+                if len(st.session_state.human_history) >= 1:
+                    st.session_state.cur_section = 1
+                elif len(st.session_state.human_history) >= 1 + num_args:
+                    st.session_state.cur_section = 2
+                elif len(st.session_state.human_history) >= 1 + num_args + 1:
+                    st.session_state.cur_section = 3 # Judgement & Feedback
+                
+                print(len(st.session_state.human_history), st.session_state.cur_section)
+                st.rerun()
+                
+                
+                
+                
 
+    # Second Chat Window (Right)
+    
 
-
-    if cur_section > 0: 
+    with col2:
+        # Selection Window on Top of the Second Chat Box
+        st.markdown("### CPU")
+        
+        for message in st.session_state.cpu_history[:1]:    
+            with st.chat_message("AI"):
+                st.write(message.content)
+                
+    if st.session_state.cur_section > 0: 
         st.markdown(f'<div class="faded-separator">--- Presentation of Evidence and Testimony ---</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="faded-separator"> You each will have {num_args} chances to state your points. </div>', unsafe_allow_html=True)
 
-        # Create two columns for the chat windows
-        col1, col2 = st.columns(2)
-        # session state
-        if "human_history" not in st.session_state:
-            st.session_state.human_history = [HumanMessage(content="Hello! This is the first chat window.")]
-        if "cpu_history" not in st.session_state:
-            st.session_state.cpu_history = [AIMessage(content="I love Langchain bro")]
 
-        # First Chat Window (Left)
-        with col1:
-            st.markdown("### HUMAN")
-            for message in st.session_state.human_history:    
+        if len(st.session_state.human_history[1:2+num_args]) < 2:
+            col1, middle, col2 = st.columns([1, 2, 1])
+            # session state
+            with col1:
+                st.markdown("### HUMAN")
                 with st.chat_message("Human"):
-                    st.write(message.content)
-
-        # Second Chat Window (Right)
-        options = [
-            "Point out flaw 1",
-            "Yell louder",
-            "Say a funny joke",
-            "WIN THIS HACKATHON!!!"
-        ]
-
-        with col2:
-            # Selection Window on Top of the Second Chat Box
-            st.markdown("### CPU")
+                        st.write("Choose an argument strategy.")
             
-            for message in st.session_state.cpu_history:    
+            with middle:
+                options = [
+                    "Appeal to Emotion.",
+                    "Use Facts and Logic.",
+                    "Get Confrontational.",
+                    "Tell a Story."
+                ]
+                for choice in options:
+                    # Assume users will only pick one
+                    if st.button(label=choice, key=choice + "1"):
+                        print(st.session_state.selected_option)
+                        st.session_state.selected_option = choice
+
+                        yap = player.respond(strategy=st.session_state.selected_option, typ="response")
+                        print(yap)
+                        st.session_state.human_history.append(HumanMessage(content=yap))
+                        
+                        response = lawyer.respond(typ="response")
+                        st.session_state.cpu_history.append(AIMessage(content=response))
+                        
+                        if len(st.session_state.human_history) >= 1:
+                            st.session_state.cur_section = 1
+                        elif len(st.session_state.human_history) >= 1 + num_args:
+                            st.session_state.cur_section = 2
+                        elif len(st.session_state.human_history) >= 1 + num_args + 1:
+                            st.session_state.cur_section = 3 # Judgement & Feedback
+                        
+                        print(len(st.session_state.human_history), len(st.session_state.cpu_history), st.session_state.cur_section)
+                        st.rerun()
+                        
+
+            # Second Chat Window (Right)
+            with col2:
+                # Selection Window on Top of the Second Chat Box
+                st.markdown("### CPU")
+
                 with st.chat_message("AI"):
-                    st.write(message.content)
+                        st.write("Beep Boop. Prepare yourself.")
+        else:
+            for i in range(len(st.session_state.human_history[1:2+num_args])):
+                hm, cm = st.session_state.human_history[i], st.session_state.cpu_history[i] 
+                col1, middle, col2 = st.columns([1, 2, 1])
 
-            st.session_state.selected_option = "Option 1"
+                # session state
+                with col1:
+                    st.markdown("### HUMAN")
+                    with st.chat_message("Human"):
+                        st.write(hm.content)
+                                
+                        
+            st.session_state.selected_option = ""
 
-            for choice in options:
-                if st.button(choice):
-                    st.session_state.selected_option = choice
+            with middle:
+                options = [
+                    "Appeal to Emotion.",
+                    "Use Facts and Logic.",
+                    "Get Confrontational.",
+                    "Tell a Story."
+                ]
+                for choice in options:
+                    # Assume users will only pick one
+                    if st.button(label=choice, key=choice + "1"):
+                        print(st.session_state.selected_option)
+                        st.session_state.selected_option = choice
 
+                        yap = player.respond(strategy=st.session_state.selected_option, typ="response")
+                        print(yap)
+                        st.session_state.human_history.append(HumanMessage(content=yap))
+                        
+                        response = lawyer.respond(typ="response")
+                        st.session_state.cpu_history.append(AIMessage(content=response))
+                        
+                        if len(st.session_state.human_history) >= 1:
+                            st.session_state.cur_section = 1
+                        elif len(st.session_state.human_history) >= 1 + num_args:
+                            st.session_state.cur_section = 2
+                        elif len(st.session_state.human_history) >= 1 + num_args + 1:
+                            st.session_state.cur_section = 3 # Judgement & Feedback
+                        
+                        print(len(st.session_state.human_history), len(st.session_state.cpu_history), st.session_state.cur_section)
+                        st.rerun()
+                        
+
+            # Second Chat Window (Right)
+            with col2:
+                # Selection Window on Top of the Second Chat Box
+                st.markdown("### CPU")               
+                with st.chat_message("AI"):
+                    st.write(cm.content)
 
 
 # for message in st.session_state.chat_history[:2]: # All openers
