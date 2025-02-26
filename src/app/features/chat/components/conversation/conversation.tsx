@@ -139,20 +139,20 @@ export function Conversation() {
                               className="hover:bg-transparent bg-[transparent] md:px-4 transition-all self-center"
                               type="button"
                               aria-label="Regenerate Response"
-                              // for regenerating the response using the last response
-                             // onClick={() => fetchQuery(conversation[conversation.length - 1]?.content)}
-                             // for regenerating the response using the last user message
-                             onClick={() => {
-                              const lastUserMessage = conversation
-                                .slice()
-                                .reverse()
-                                .find((msg: { role: string; content: string }) => msg.role === "user")
-                                ?.content;
-                          
-                              if (typeof lastUserMessage === "string" && lastUserMessage.trim() !== "") {
-                                fetchQuery(lastUserMessage);
-                              }
-                            }}
+                              onClick={() => {
+                                // get last user message before the OpenJustice response of the button click
+                                const currentIndex = conversation.findIndex((msg: any) => msg === convoObj);
+                                if (currentIndex > 0) {
+                                  const lastUserMessage = [...conversation]
+                                    .slice(0, currentIndex) //look at messages only before this response
+                                    .reverse() // & start from the most recent
+                                    .find((msg: { role: string; content: string }) => msg.role === "user")?.content;
+
+                                  if (typeof lastUserMessage === "string" && lastUserMessage.trim() !== "") {
+                                    fetchQuery(lastUserMessage);
+                                  }
+                                }
+                              }}
                             >
                               <RefreshCcw className="w-4 h-4" />
                             </Button>
