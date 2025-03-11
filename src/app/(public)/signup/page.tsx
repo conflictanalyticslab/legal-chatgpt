@@ -60,6 +60,7 @@ export default function Page() {
     resolver: zodResolver(signupSchema),
     defaultValues: {
       email: "",
+      phone: "",
       password: "",
       confirmPassword: "",
     },
@@ -75,7 +76,7 @@ export default function Page() {
       const validData = signupSchema.parse(data);
       // const response = await readWhitelistEmails();
 
-      createUser(validData.email, validData.password);
+      createUser(validData.email, validData.password, validData.phone);
     } catch (error: unknown) {
       setAlert(errorResponse(error));
     }
@@ -85,8 +86,9 @@ export default function Page() {
    *
    * @param email
    * @param password
+   * @param phone
    */
-  const createUser = async (email: string, password: string) => {
+  const createUser = async (email: string, password: string, phone: string) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -99,6 +101,7 @@ export default function Page() {
       // Adding user to list of valid users
       const validData = userSchema.parse({
         email,
+        phone,
         prompts_allowed: 100,
         prompts_left: 100,
         role: "default",
@@ -162,6 +165,15 @@ export default function Page() {
               type="email"
               placeholder="Email"
               label="Email"
+            />
+
+            {/* Phone */}
+            <InputFormField
+              form={form}
+              name="phone"
+              type="tel"
+              placeholder="Phone"
+              label="Phone"
             />
 
             {/* Password */}
