@@ -9,6 +9,7 @@ import ContextNode from "./nodes/context-node";
 import SwitchNode from "./nodes/switch-node";
 import RelevantNode from "./nodes/relevant-node";
 import KeywordExtractorNode from "./nodes/keyword-extractor-node";
+import PDFNode from "./nodes/pdf-node";
 
 export type ExampleNode = Node<{label: string, body: string}, 'example'>
 export type InstructionNode = Node<{label: string, body: string}, 'instruction'>
@@ -35,8 +36,15 @@ type KeywordExtractorData = {
 
 export type KeywordExtractorNode = Node<KeywordExtractorData, 'keyword-extractor'>
 
+type PDFData = {
+  label: string;
+  content: string;
+};
+
+export type PDFNode = Node<PDFData, 'pdf'>;
+
 /** The types of all nodes in the graph. */
-export type GraphFlowNode = ExampleNode | InstructionNode | ContextNode | SwitchNode | RelevantNode | KeywordExtractorNode;
+export type GraphFlowNode = ExampleNode | InstructionNode | ContextNode | SwitchNode | RelevantNode | KeywordExtractorNode | PDFNode;
 
 /** Shorthand to get the type values of all node types without the undefined type. */
 export type GraphFlowNodeTypes = Exclude<GraphFlowNode['type'], undefined>;
@@ -58,6 +66,7 @@ export const nodeTypes: NodeTypesRecord = {
     switch: SwitchNode,
     relevant: RelevantNode,
     "keyword-extractor": KeywordExtractorNode,
+    pdf: PDFNode,
 };
 
 /**
@@ -124,5 +133,15 @@ export function createEmptyNode(type: GraphFlowNodeTypes, position: XYPosition):
                     label: 'Keyword Extractor',
                 }
             }
+        case 'pdf':
+          return {
+              id: ulid(),
+              type,
+              position,
+              data: {
+                  label: 'PDF',
+                  content: ''
+              }
+          }
     }
 }

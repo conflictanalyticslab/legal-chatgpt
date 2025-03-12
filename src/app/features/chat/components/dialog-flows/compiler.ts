@@ -4,7 +4,7 @@ import { GraphFlowEdge, GraphFlowNode } from "./nodes";
 
 /**
  * Validates the given graph and returns the order of the nodes.
- * 
+ *
  * @param nodes The nodes to validate.
  * @param edges The edges to validate.
  * @returns The order of the nodes.
@@ -27,7 +27,7 @@ export function validateGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
 
 /**
  * Compiles the given graph and returns the prompts for the conversation query.
- * 
+ *
  * @param nodes The nodes to compile.
  * @param edges The edges to compile.
  * @returns The prompts for the conversation query.
@@ -111,6 +111,14 @@ export function compileGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
         const prompt = [
           `Node ${nodeId} is a keyword extractor node.`,
           `It extracts keywords from ${describeRelationships(dependencies)}`,
+        ];
+        prompts.push(prompt.join("\n"));
+        break;
+      }
+      case "pdf": {
+        const prompt = [
+          `Node ${nodeId} is a pdf node.`,
+          `It contains "${node.data.content}" from a PDF file named "${node.data.label}"`,
         ];
         prompts.push(prompt.join("\n"));
         break;
