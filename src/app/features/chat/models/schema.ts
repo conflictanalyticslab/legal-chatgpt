@@ -33,6 +33,7 @@ export type conversationTitleData = z.infer<typeof conversationTitleSchema>;
 // #region User
 export const userSchema = z.object({
   email: z.string(),
+  phone: z.string(),
   prompts_allowed: z.number(),
   prompts_left: z.number(),
   role: z.string(),
