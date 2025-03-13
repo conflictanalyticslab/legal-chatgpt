@@ -39,7 +39,7 @@
 .react-flow__node {
     box-shadow: var(--xy-node-boxshadow-default);
     border-radius: var(--xy-node-border-radius-default);
-    background-color: var(--xy-node-background-color-default);
+    background-color: rgba(255,255,255,0.9) !important;
     display: flex;
     justify-content: center;
     align-items: center;
