@@ -109,3 +109,9 @@
     width: 5px;
     height: 5px;
 }
+
+.react-flow__edge-textbg {
+    fill: white;
+    stroke-width: 1;
+    stroke: oklch(0.87 0 0); /* neutral.300 */
+}
