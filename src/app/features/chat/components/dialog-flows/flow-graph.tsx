@@ -269,7 +269,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
               <WandSparklesIcon className="size-[30px]" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="left" sideOffset={5}>
+          <TooltipContent side="top" sideOffset={5}>
             Auto-align the current graph.
           </TooltipContent>
         </Tooltip>
@@ -290,7 +290,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
               />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="left" sideOffset={5}>
+          <TooltipContent side="top" align="end" sideOffset={5}>
             Save the current graph to a query.
           </TooltipContent>
         </Tooltip>
