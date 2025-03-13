@@ -128,52 +128,37 @@ function PDFNodePropertiesPanel({
     setContent(node.data.content);
   }, [node]);
 
-  // from src/app/features/chat/components/upload-document/upload-document.tsx:60
-  async function filesSuccessfullyUploaded(plainFiles: any) {
-    // this callback is called when there were no validation errors
-    let estimatedTokenCount = -1;
-    let pdfFileSize = -1;
+  type UploadFileResult =
+    | { type: "success"; label: string; content: string }
+    | { type: "error"; message: string };
 
-    try {
-      const pdfContent = await postPDF(plainFiles[0]); // Call the PDF processor api-end point to parse the pdf content
+  async function uploadFile(file: File): Promise<UploadFileResult> {
+    const pdfContent = await postPDF(file); // Call the PDF processor api-end point to parse the pdf content
 
-      // PDF file size check
-      pdfFileSize = plainFiles[0].size;
-      if (pdfFileSize > 5 * 1024 * 1024) {
-        throw new Error("PDF File uploaded too large");
-      }
-
-      // PDF token count check
-      const tokenizer = new GPT4Tokenizer({ type: "gpt3" });
-      estimatedTokenCount = tokenizer.estimateTokenCount(pdfContent.content);
-      if (estimatedTokenCount > 16384) {
-        throw new Error("PDF token limit exceeded");
-      }
-
-      toast({
-        title: "PDF uploaded successfully!",
-      });
-
-      onLabelChange(plainFiles[0].name);
-      onContentChange(pdfContent.content);
-    } catch (err: Error | any) {
-      if (err.message === "PDF File uploaded too large") {
-        toast({
-          title:
-            "The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ' + pdfFileSize/(1024*1024) + ' bytes!",
-          variant: "destructive",
-        });
-      } else if (
-        err.message === "PDF token limit exceeded" &&
-        estimatedTokenCount !== -1
-      ) {
-        toast({
-          title:
-            "The PDF file uploaded exceeds limit, maximum of 8192 token in each PDF uploaded, your pdf contains ' + estimatedTokenCount + ' tokens",
-          variant: "destructive",
-        });
-      }
+    // PDF file size check
+    const pdfFileSize = file.size;
+    if (pdfFileSize > 5 * 1024 * 1024) {
+      return {
+        type: "error",
+        message: `The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ${
+          pdfFileSize / (1024 * 1024)
+        } bytes!`,
+      };
     }
+
+    // PDF token count check
+    const tokenizer = new GPT4Tokenizer({ type: "gpt3" });
+    const estimatedTokenCount = tokenizer.estimateTokenCount(
+      pdfContent.content
+    );
+    if (estimatedTokenCount > 16384) {
+      return {
+        type: "error",
+        message: `The PDF file uploaded exceeds limit, maximum of 8192 token in each PDF uploaded, your pdf contains ${estimatedTokenCount} tokens`,
+      };
+    }
+
+    return { type: "success", label: file.name, content: pdfContent.content };
   }
 
   return (
@@ -210,7 +195,14 @@ function PDFNodePropertiesPanel({
               maxSize={5 * 1024 * 1024 /* 5 megabytes */}
               onDropAccepted={async (files) => {
                 setIsUploading(true);
-                await filesSuccessfullyUploaded(files);
+                const res = await uploadFile(files[0]);
+                if (res.type === "success") {
+                  toast({ title: "PDF uploaded successfully!" });
+                  onLabelChange(res.label);
+                  onContentChange(res.content);
+                } else {
+                  toast({ title: res.message, variant: "destructive" });
+                }
                 setIsUploading(false);
               }}
               onDropRejected={() =>
