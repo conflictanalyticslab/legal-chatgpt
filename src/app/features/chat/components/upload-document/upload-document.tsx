@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useGlobalContext } from "@/app/store/global-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +19,13 @@ import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { uploadPdfDocument } from "@/app/api/(api-service-layer)/upload-pdf-document";
 import { postPDF } from "@/app/api/(api-service-layer)/post-pdf";
+import Dropzone from "react-dropzone";
+
+const ACCEPT = ["application/pdf", ".pdf"];
+const MAX_FILES = 1;
+const MAX_SIZE = 5 * 1024 * 1024; /* 5 megabytes */
+
+const REJECTED_MESSAGE = "File is too big. We have a 5 Mb limit.";
 
 export default function UploadDocument() {
   const {
@@ -32,19 +40,19 @@ export default function UploadDocument() {
   } = useGlobalContext();
 
   const { openFilePicker } = useFilePicker({
-    accept: ".pdf",
+    accept: ACCEPT[1],
     readAs: "ArrayBuffer", // ArrayBuffer takes exactly as much space as the original file. DataURL, the default, would make it bigger.
     validators: [
-      new FileAmountLimitValidator({ max: 1 }),
+      new FileAmountLimitValidator({ max: MAX_FILES }),
       new FileSizeValidator({
-        maxFileSize: 5 * 1024 * 1024 /* 5 megabytes */,
+        maxFileSize: MAX_SIZE,
       }),
     ],
     onFilesSelected: () => {
       setLoadingPDF(true);
     },
     onFilesRejected: ({ errors }) => {
-      setInfoAlert("File is too big. We have a 5 Mb limit.");
+      setInfoAlert(REJECTED_MESSAGE);
       setLoadingPDF(false);
     },
     onFilesSuccessfullySelected: async ({ plainFiles }: any) => {
@@ -116,31 +124,105 @@ export default function UploadDocument() {
     }
   }
 
+  const [isDropzoneVisible, setIsDropzoneVisible] = useState(false);
+  const [isUploadingFileFromDropzone, setIsUploadingFileFromDropzone] =
+    useState(false);
+
+  // this effect makes the dropzone visible when the user drags a file onto the page
+  useEffect(() => {
+    const handleDragEnter = (event: DragEvent) => {
+      if (event.dataTransfer?.types.includes("Files")) {
+        setIsDropzoneVisible(true);
+      }
+    };
+
+    const handleDragLeave = (event: DragEvent) => {
+      if (event.relatedTarget === null) {
+        setIsDropzoneVisible(false);
+      }
+    };
+
+    const handleDrop = () => {
+      setIsDropzoneVisible(false);
+    };
+
+    window.addEventListener("dragenter", handleDragEnter);
+    window.addEventListener("dragleave", handleDragLeave);
+    window.addEventListener("drop", handleDrop);
+
+    return () => {
+      window.removeEventListener("dragenter", handleDragEnter);
+      window.removeEventListener("dragleave", handleDragLeave);
+      window.removeEventListener("drop", handleDrop);
+    };
+  }, []);
+
   return (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            className={cn(
-              "hover:bg-transparent bg-[transparent] md:px-4 md:absolute left-[-70px] transition-all self-center",
-              {
-                "opacity-[0.5] cursor-not-allowed": loadingPDF,
-              }
-            )}
-            type="button"
-            aria-label="Attach PDF"
-            onClick={handleUploadFile}
-          >
-            {loadingPDF ? (
-              <LoadingSpinner />
-            ) : (
-              <Paperclip className="w-3 md:w-5 h-3 md:h-5 rotate-[-45deg]" />
-            )}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Upload document for the LLM to use</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <>
+      {/**
+       * the dropzone will be visible when:
+       * - the user is dragging a file onto the page
+       * - after dropping the file and it's accepted
+       */}
+      {isDropzoneVisible || isUploadingFileFromDropzone ? (
+        <Dropzone
+          accept={{ [ACCEPT[0]]: [ACCEPT[1]] }}
+          maxFiles={MAX_FILES}
+          maxSize={MAX_SIZE}
+          onDropAccepted={async (files) => {
+            setIsUploadingFileFromDropzone(true);
+            setLoadingPDF(true);
+            await filesSuccessfullyUploaded(files);
+            setIsUploadingFileFromDropzone(false);
+          }}
+          onDropRejected={() => setInfoAlert(REJECTED_MESSAGE)}
+        >
+          {({ getRootProps, getInputProps, isDragActive }) => (
+            <div
+              className={cn(
+                "absolute bottom-[calc(100%+1rem)] left-0 right-0 border-2 rounded-md border-dashed h-[250px] flex items-center justify-center ",
+                isDragActive || isUploadingFileFromDropzone
+                  ? "text-sky-500 border-sky-400/50 bg-sky-50/50"
+                  : "border-neutral-300 text-neutral-500"
+              )}
+              {...getRootProps()}
+            >
+              <input {...getInputProps()} />
+              <p>
+                {isUploadingFileFromDropzone
+                  ? "Uploading..."
+                  : "Drop the file here for the LLM to use"}
+              </p>
+            </div>
+          )}
+        </Dropzone>
+      ) : null}
+
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              className={cn(
+                "hover:bg-transparent bg-[transparent] md:px-4 md:absolute left-[-70px] transition-all self-center",
+                {
+                  "opacity-[0.5] cursor-not-allowed": loadingPDF,
+                }
+              )}
+              type="button"
+              aria-label="Attach PDF"
+              onClick={handleUploadFile}
+            >
+              {loadingPDF ? (
+                <LoadingSpinner />
+              ) : (
+                <Paperclip className="w-3 md:w-5 h-3 md:h-5 rotate-[-45deg]" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Upload document for the LLM to use</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </>
   );
 }
