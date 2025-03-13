@@ -46,7 +46,8 @@ import { useDebouncedCallback } from "use-debounce";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { GlobeIcon, LockIcon } from "lucide-react";
+import { GlobeIcon, LockIcon, WandSparklesIcon } from "lucide-react";
+import autoAlign from './auto-align';
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -245,16 +246,36 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
 
       <Background />
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div
-            style={{
-              position: "absolute",
-              right: "5px",
-              bottom: "20px",
-              zIndex: 4, // ensure it is above the graph
-            }}
-          >
+      <div
+        className="flex gap-4"
+        style={{
+          position: "absolute",
+          right: "5px",
+          bottom: "20px",
+          zIndex: 4, // ensure it is above the graph
+        }}
+      >
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              type="button"
+              aria-label="Auto-align Graph"
+              onClick={async () => {
+                const changes = await autoAlign(nodes, edges);
+                onNodesChange(changes);
+              }}
+            >
+              <WandSparklesIcon className="size-[30px]" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="left" sideOffset={5}>
+            Auto-align the current graph.
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
             <Button
               variant="ghost"
               type="button"
@@ -268,12 +289,12 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
                 height={30}
               />
             </Button>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="left" sideOffset={5}>
-          Save the current graph to a query.
-        </TooltipContent>
-      </Tooltip>
+          </TooltipTrigger>
+          <TooltipContent side="left" sideOffset={5}>
+            Save the current graph to a query.
+          </TooltipContent>
+        </Tooltip>
+      </div>
 
       <Toolbar />
     </ReactFlow>
