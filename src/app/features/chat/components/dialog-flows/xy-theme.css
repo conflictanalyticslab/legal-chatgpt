@@ -39,6 +39,7 @@
 .react-flow__node {
     box-shadow: var(--xy-node-boxshadow-default);
     border-radius: var(--xy-node-border-radius-default);
+    /* slightly transparent, to make it easier to see when it's on top of something */
     background-color: rgba(255,255,255,0.9) !important;
     display: flex;
     justify-content: center;
@@ -110,8 +111,11 @@
     height: 5px;
 }
 
+
 .react-flow__edge-textbg {
-    fill: white;
+    /* slightly transparent, to make it easier to see when it's on top of something */
+    fill: rgba(255,255,255,0.9) !important;
+    /* border, to make it easier to see when it is behind or on top of something else */
     stroke-width: 1;
     stroke: oklch(0.87 0 0); /* neutral.300 */
 }
