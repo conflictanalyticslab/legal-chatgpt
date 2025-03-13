@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
+import Dropzone from "react-dropzone";
+import GPT4Tokenizer from "gpt4-tokenizer";
 
 import { useShallow } from "zustand/react/shallow";
 import { Label } from "@/components/ui/label";
@@ -14,6 +16,7 @@ import {
   KeywordExtractorNode,
   RelevantNode,
   SwitchNode,
+  PDFNode,
 } from "./nodes";
 
 import invariant from "tiny-invariant";
@@ -21,6 +24,11 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { ulid } from "ulid";
 import { Slider } from "@/components/ui/slider";
+import { useGlobalContext } from "@/app/store/global-context";
+import { cn } from "@/lib/utils";
+import { postPDF } from "@/app/api/(api-service-layer)/post-pdf";
+import { uploadPdfDocument } from "@/app/api/(api-service-layer)/upload-pdf-document";
+import { toast } from "@/components/ui/use-toast";
 
 interface EdgePropertiesPanelProps {
   edge: GraphFlowEdge;
@@ -82,6 +90,145 @@ function EdgePropertiesPanel({ edge, updateEdge }: EdgePropertiesPanelProps) {
 interface NodePropertiesPanelProps<T extends GraphFlowNode> {
   node: T;
   updateNode: (id: string, fn: (node: T) => T) => void;
+}
+
+function PDFNodePropertiesPanel({
+  node,
+  updateNode,
+}: NodePropertiesPanelProps<PDFNode>) {
+  const { setInfoAlert } = useGlobalContext();
+
+  const [label, setLabel] = useState(node.data.label);
+  const [content, setContent] = useState(node.data.content);
+
+  const [isUploading, setIsUploading] = useState(false);
+
+  const onLabelChange = (value: string) => {
+    setLabel(value);
+    updateNode(node.id, (thatNode) => {
+      return {
+        ...thatNode,
+        data: { ...thatNode.data, label: value },
+      };
+    });
+  };
+
+  const onContentChange = (value: string) => {
+    setContent(value);
+    updateNode(node.id, (thatNode) => {
+      return {
+        ...thatNode,
+        data: { ...thatNode.data, content: value },
+      };
+    });
+  };
+
+  useEffect(() => {
+    setLabel(node.data.label);
+    setContent(node.data.content);
+  }, [node]);
+
+  type UploadFileResult =
+    | { type: "success"; label: string; content: string }
+    | { type: "error"; message: string };
+
+  async function uploadFile(file: File): Promise<UploadFileResult> {
+    const pdfContent = await postPDF(file); // Call the PDF processor api-end point to parse the pdf content
+
+    // PDF file size check
+    const pdfFileSize = file.size;
+    if (pdfFileSize > 5 * 1024 * 1024) {
+      return {
+        type: "error",
+        message: `The PDF file uploaded is too large, maximum of 5MB expected, your pdf is ${
+          pdfFileSize / (1024 * 1024)
+        } bytes!`,
+      };
+    }
+
+    // PDF token count check
+    const tokenizer = new GPT4Tokenizer({ type: "gpt3" });
+    const estimatedTokenCount = tokenizer.estimateTokenCount(
+      pdfContent.content
+    );
+    if (estimatedTokenCount > 16384) {
+      return {
+        type: "error",
+        message: `The PDF file uploaded exceeds limit, maximum of 8192 token in each PDF uploaded, your pdf contains ${estimatedTokenCount} tokens`,
+      };
+    }
+
+    return { type: "success", label: file.name, content: pdfContent.content };
+  }
+
+  return (
+    <div className="px-4 flex flex-col divide-y">
+      <div className="py-4">
+        <Label className="text-[grey]">Editing PDF Node</Label>
+      </div>
+
+      <div className="py-4">
+        <div className="flex flex-col">
+          <Label className="py-2">Label:</Label>
+          <Input
+            value={label}
+            onChange={(e) => onLabelChange(e.target.value)}
+          />
+        </div>
+
+        {content.length ? (
+          <div className="flex flex-col">
+            <Label className="py-2">Content:</Label>
+            <Textarea
+              value={content}
+              onChange={(e) => onContentChange(e.target.value)}
+              rows={10}
+              className="focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            <Label className="py-2">File:</Label>
+            <Dropzone
+              accept={{ "application/pdf": [".pdf"] }}
+              maxFiles={1}
+              maxSize={5 * 1024 * 1024 /* 5 megabytes */}
+              onDropAccepted={async (files) => {
+                setIsUploading(true);
+                const res = await uploadFile(files[0]);
+                if (res.type === "success") {
+                  toast({ title: "PDF uploaded successfully!" });
+                  onLabelChange(res.label);
+                  onContentChange(res.content);
+                } else {
+                  toast({ title: res.message, variant: "destructive" });
+                }
+                setIsUploading(false);
+              }}
+              onDropRejected={() =>
+                setInfoAlert("File is too big. We have a 5 Mb limit.")
+              }
+            >
+              {({ getRootProps, getInputProps, isDragActive }) => (
+                <div
+                  className={cn(
+                    "border-2 rounded-md border-dashed h-[250px] flex items-center justify-center ",
+                    isDragActive || isUploading
+                      ? "text-sky-500 border-sky-400/50 bg-sky-50/50"
+                      : "border-neutral-300 text-neutral-500"
+                  )}
+                  {...getRootProps()}
+                >
+                  <input {...getInputProps()} />
+                  <p>{isUploading ? "Uploading..." : "Drop the file here"}</p>
+                </div>
+              )}
+            </Dropzone>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function KeywordExtractorNodePropertiesPanel({
@@ -570,6 +717,15 @@ export default function PropertiesPanel({
         case "keyword-extractor":
           return (
             <KeywordExtractorNodePropertiesPanel
+              node={node}
+              updateNode={(id, fn) =>
+                updateNode(id, fn as (node: GraphFlowNode) => GraphFlowNode)
+              }
+            />
+          );
+        case "pdf":
+          return (
+            <PDFNodePropertiesPanel
               node={node}
               updateNode={(id, fn) =>
                 updateNode(id, fn as (node: GraphFlowNode) => GraphFlowNode)

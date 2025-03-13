@@ -114,6 +114,16 @@ function Toolbar() {
           Keyword Extractor Node
         </div>
       </div>
+
+      <div
+        className="flex w-[100px] h-[100px] bg-white border-[1px] border-[#1a192b] justify-center"
+        onDragStart={(e) => onDragStart(e, "pdf")}
+        draggable
+      >
+        <div className="text-[12px] self-center text-center">
+          PDF Node
+        </div>
+      </div>
     </div>
   );
 }
