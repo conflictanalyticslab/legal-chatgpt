@@ -47,8 +47,8 @@ export default function GraphList() {
     setSaveBlocked(saveBlocked);
     setGraphId(id);
     setName(graph.name);
-    setNodes(graph.data.nodes);
-    setEdges(graph.data.edges);
+    setNodes(graph.nodes);
+    setEdges(graph.edges);
     setLastSaved(new Date());
     setPublicGraph(false);
     toast({

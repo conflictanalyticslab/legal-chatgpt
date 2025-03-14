@@ -6,8 +6,6 @@ import invariant from "tiny-invariant";
 import { GraphFlowEdge, GraphFlowNode } from "./nodes";
 import { toast } from "@/components/ui/use-toast";
 
-const DBURL = "https://dialog-flows-api-h8dnfrgngfbrewc7.canadacentral-01.azurewebsites.net";
-
 export function useSaveDialogFlow(options: UseMutationOptions = {}) {
   const { graphId, setGraphId, name, publicGraph, nodes, edges } = useDialogFlowStore(
     useShallow((state) => ({
@@ -27,9 +25,8 @@ export function useSaveDialogFlow(options: UseMutationOptions = {}) {
     mutationFn: async () => {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
-      const response = await fetch(new URL("update", DBURL), {
+      const response = await fetch("/api/graphs/update", {
         method: "POST",
-        mode: "cors",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -38,18 +35,15 @@ export function useSaveDialogFlow(options: UseMutationOptions = {}) {
           id: graphId,
           name: name,
           public: publicGraph,
-          data: {
-            nodes: nodes,
-            edges: edges,
-          },
+          nodes: nodes,
+          edges: edges,
         }),
       });
-      const res: { id: string } = await response.json();
-      return res;
+      return (await response.json()).data as string;
     },
-    onSuccess: (data, variables, context) => {
-      options.onSuccess?.(data, variables, context);
-      setGraphId(data.id);
+    onSuccess: (id, variables, context) => {
+      options.onSuccess?.(id, variables, context);
+      setGraphId(id);
       queryClient.invalidateQueries({ queryKey: ["dialog-flows"] });
     },
     onError: (error) => {
@@ -73,15 +67,14 @@ export function useFetchUserDialogFlows() {
     queryFn: async () => {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
-      const response = await fetch(new URL("retrieve/all", DBURL), {
+      const response = await fetch("/api/graphs/retrieve/all", {
         method: "GET",
-        mode: "cors",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.json();
+      return (await response.json()).data;
     },
   });
 }
@@ -92,49 +85,34 @@ export function useFetchUniversalDialogFlows() {
     queryFn: async () => {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
-      const response = await fetch(new URL("retrieve/universal", DBURL), {
+      const response = await fetch("/api/graphs/retrieve/universal", {
         method: "GET",
-        mode: "cors",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.json();
+      return (await response.json()).data;
     },
   });
 }
 
 interface DialogFlow {
-  data: {
-    nodes: GraphFlowNode[];
-    edges: GraphFlowEdge[];
-  };
   id: string;
   name: string;
+  nodes: GraphFlowNode[];
+  edges: GraphFlowEdge[];
 }
 
 export async function fetchDialogFlow(graphId: string): Promise<DialogFlow> {
   invariant(auth.currentUser, "User is not authenticated");
   const token = await auth.currentUser.getIdToken();
-  const response = await fetch(new URL(`retrieve/id/${graphId}`, DBURL), {
+  const response = await fetch(`/api/graphs/retrieve/id/${graphId}`, {
     method: "GET",
-    mode: "cors",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
   });
-  const res = await response.json();
-
-  // HACK: This is for legacy graphs that don't have a type.
-  return {
-    ...res,
-    data: {
-      ...res.data,
-      nodes: res.data.nodes.map((node: { type?: string }) =>
-        node.type !== undefined && node.type !== "default" ? node : { ...node, type: "context" }
-      ),
-    },
-  };
+  return (await response.json()).data;
 }
