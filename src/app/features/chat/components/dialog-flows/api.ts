@@ -73,15 +73,14 @@ export function useFetchUserDialogFlows() {
     queryFn: async () => {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
-      const response = await fetch(new URL("retrieve/all", DBURL), {
+      const response = await fetch("/api/graphs/retrieve/all", {
         method: "GET",
-        mode: "cors",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.json();
+      return (await response.json()).data;
     },
   });
 }
@@ -92,49 +91,34 @@ export function useFetchUniversalDialogFlows() {
     queryFn: async () => {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
-      const response = await fetch(new URL("retrieve/universal", DBURL), {
+      const response = await fetch("/api/graphs/retrieve/universal", {
         method: "GET",
-        mode: "cors",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.json();
+      return (await response.json()).data;
     },
   });
 }
 
 interface DialogFlow {
-  data: {
-    nodes: GraphFlowNode[];
-    edges: GraphFlowEdge[];
-  };
   id: string;
   name: string;
+  nodes: GraphFlowNode[];
+  edges: GraphFlowEdge[];
 }
 
 export async function fetchDialogFlow(graphId: string): Promise<DialogFlow> {
   invariant(auth.currentUser, "User is not authenticated");
   const token = await auth.currentUser.getIdToken();
-  const response = await fetch(new URL(`retrieve/id/${graphId}`, DBURL), {
+  const response = await fetch(`/api/graphs/retrieve/id/${graphId}`, {
     method: "GET",
-    mode: "cors",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
   });
-  const res = await response.json();
-
-  // HACK: This is for legacy graphs that don't have a type.
-  return {
-    ...res,
-    data: {
-      ...res.data,
-      nodes: res.data.nodes.map((node: { type?: string }) =>
-        node.type !== undefined && node.type !== "default" ? node : { ...node, type: "context" }
-      ),
-    },
-  };
+  return (await response.json()).data;
 }
