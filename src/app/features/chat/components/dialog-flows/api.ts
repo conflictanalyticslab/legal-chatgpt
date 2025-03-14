@@ -6,8 +6,6 @@ import invariant from "tiny-invariant";
 import { GraphFlowEdge, GraphFlowNode } from "./nodes";
 import { toast } from "@/components/ui/use-toast";
 
-const DBURL = "https://dialog-flows-api-h8dnfrgngfbrewc7.canadacentral-01.azurewebsites.net";
-
 export function useSaveDialogFlow(options: UseMutationOptions = {}) {
   const { graphId, setGraphId, name, publicGraph, nodes, edges } = useDialogFlowStore(
     useShallow((state) => ({
@@ -27,9 +25,8 @@ export function useSaveDialogFlow(options: UseMutationOptions = {}) {
     mutationFn: async () => {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
-      const response = await fetch(new URL("update", DBURL), {
+      const response = await fetch("/api/graphs/update", {
         method: "POST",
-        mode: "cors",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -38,18 +35,15 @@ export function useSaveDialogFlow(options: UseMutationOptions = {}) {
           id: graphId,
           name: name,
           public: publicGraph,
-          data: {
-            nodes: nodes,
-            edges: edges,
-          },
+          nodes: nodes,
+          edges: edges,
         }),
       });
-      const res: { id: string } = await response.json();
-      return res;
+      return (await response.json()).data as string;
     },
-    onSuccess: (data, variables, context) => {
-      options.onSuccess?.(data, variables, context);
-      setGraphId(data.id);
+    onSuccess: (id, variables, context) => {
+      options.onSuccess?.(id, variables, context);
+      setGraphId(id);
       queryClient.invalidateQueries({ queryKey: ["dialog-flows"] });
     },
     onError: (error) => {
