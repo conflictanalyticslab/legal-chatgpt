@@ -22,20 +22,49 @@ export default function Page() {
           <section className="flex flex-col items-start justify-start w-full sm:max-w-[85%] lg:max-w-[55%] relative gap-6 xl:gap-8">
             {/* Title Heading */}
             <PageTitle>
-              Generative AI <br /> Designed for Law
+            OpenJustice: <br/> No-Code Legal AI Creation Platform
             </PageTitle>
 
             {/* Description */}
             <div className="flex flex-col gap-2 text-[--grey] text-left">
               <PageHeaderDescription>
-                We aim to deliver reliable legal AI. OpenJustice uses advanced
-                language models to process legal queries and documents,
-                providing accurate answers and tools for students and lawyers.
-                Your feedback helps us improve its dependability.
+              OpenJustice is an open-source platform designed to enable 
+              legal professionals to effortlessly create and deploy customized 
+              AI models using plain language. Our mission aims to democratize 
+              access to artificial intelligence for the legal profession, 
+              enhancing accessibility, transparency and reliability of AI 
+              for legal applications.
+ 
+              Key Features
+              No-Code AI Development: Build and refine AI models to tackle 
+              real-world legal tasks without requiring coding expertise.
+              Community-Driven Data: Access a collaborative database of 
+              crowd-sourced legal resources, contributed and validated by 
+              subject matter experts across the globe.
+              Designed for Legal and Compliance Professionals
+                
+              OpenJustice is tailored for legal professionals, researchers, 
+              academic institutions, and legal educators, providing an intuitive, 
+              no code platform to embed legal knowledge into AI models and create 
+              AI solutions for legal research, education, and practice.
+                
+              Collaboration and Partnership
+                
+              The platform supports collaboration among a global network of 
+              legal experts and institutions, including partnerships with 
+              academic institutions and legal industry leaders engaged in 
+              advancing AI research and its practical application within the legal field.
+                
+              Get Started
+                
+              Legal professionals and academics are invited to join and contribute 
+              to the OpenJustice community, facilitating the growth of and access 
+              to AI resources within the legal field.
               </PageHeaderDescription>
               <PageHeaderDescription className="font-bold text-primaryHue">
-                OpenJustice is open to all lawyers and legal professionals with
-                an institutional email.
+              OpenJustice is open to all lawyers and legal professionals with 
+              an institutional email. Sign up now to be part of shaping the 
+              future of legal technology.
               </PageHeaderDescription>
             </div>
 
