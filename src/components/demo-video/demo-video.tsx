@@ -7,7 +7,6 @@ export default function DemoVideo({ className }: DemoVideo) {
     <div className="flex items-center justify-center">
       <video
       autoPlay
-      muted
       loop
       playsInline
       preload="none"
