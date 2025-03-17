@@ -28,7 +28,6 @@ const NODE_TYPES = [
   { id: "switch", label: "Switch" },
   { id: "relevant", label: "Relevant" },
   { id: "keyword-extractor", label: "Keyword Extractor" },
-  { id: "ghost", label: "Ghost" },
 ] as const;
 
 export default function NodeSelectionMenu({
