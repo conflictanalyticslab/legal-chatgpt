@@ -10,7 +10,7 @@ export default function KeywordExtractorNode({
 }: NodeProps<KeywordExtractorNode>) {
   return (
     <CircularNode
-      icon={<TextSearch className="size-8 text-primary/70" />}
+      icon={<TextSearch className="size-8 text-neutral-700" />}
       label={data.label}
     >
       <Handle type="target" position={Position.Left} />

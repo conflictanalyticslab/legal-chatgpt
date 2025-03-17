@@ -8,7 +8,7 @@ import type { PDFNode } from "../nodes";
 export default function PDFNode({ data }: NodeProps<PDFNode>) {
   return (
     <CircularNode
-      icon={<FileText className="size-8 text-primary/70" />}
+      icon={<FileText className="size-8 text-neutral-700" />}
       label={data.label}
     >
       <Handle

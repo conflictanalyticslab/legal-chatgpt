@@ -9,7 +9,7 @@ import type { ExampleNode } from "../nodes";
 export default function ExampleNode({ data }: NodeProps<ExampleNode>) {
   return (
     <CircularNode
-      icon={<StickyNote className="size-8 text-primary/70" />}
+      icon={<StickyNote className="size-8 text-neutral-700" />}
       label={data.label}
     >
       <Handle type="target" position={Position.Left} />
