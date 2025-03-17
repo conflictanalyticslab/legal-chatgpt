@@ -533,7 +533,7 @@ function SwitchNodePropertiesPanel({
           ...node.data,
           conditions: [
             ...node.data.conditions,
-            { id: ulid(), label: "If...", body: "" },
+            { id: ulid(), label: "If...", body: "", color: "#e5e5e5" /* neutral.200 */ },
           ],
         },
       };
@@ -606,7 +606,7 @@ function SwitchNodePropertiesPanel({
         ...node,
         data: {
           ...node.data,
-          otherwise: checked ? { label: "Otherwise...", body: "" } : undefined,
+          otherwise: checked ? { label: "Otherwise...", body: "", color: "#e0f2fe" /* sky.100 */ } : undefined,
         },
       };
     });
@@ -732,6 +732,8 @@ export default function PropertiesPanel({
               }
             />
           );
+        case "ghost":
+          return null;
         default: {
           const exhaustiveCheck: never = node.type;
           throw new Error(`Unhandled node type: ${exhaustiveCheck}`);

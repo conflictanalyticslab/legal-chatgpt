@@ -123,6 +123,8 @@ export function compileGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
         prompts.push(prompt.join("\n"));
         break;
       }
+      case "ghost":
+        break;
       default: {
         // This is an exhaustive check to ensure that all node types are handled.
         const exhaustiveCheck: never = node.type;
