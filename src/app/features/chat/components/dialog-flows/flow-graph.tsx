@@ -228,6 +228,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         className: cn("group", node.className),
       }))}
       edges={edges}
+      defaultEdgeOptions={{ labelBgPadding: [4, 2] }}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}

@@ -19,3 +19,11 @@
   border: 0;
   border-radius: 100%;
 }
+
+.react-flow__edge-textbg {
+  /* slightly transparent, to make it easier to see when it's on top of something */
+  fill: rgba(255,255,255,0.9) !important;
+  /* border, to make it easier to see when it is behind or on top of something else */
+  stroke-width: 1;
+  stroke: oklch(0.87 0 0); /* neutral.300 */
+}
