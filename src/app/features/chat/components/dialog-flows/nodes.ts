@@ -85,7 +85,7 @@ export function createEmptyNode(type: GraphFlowNodeTypes, position: XYPosition):
                 type,
                 position,
                 data: {
-                    label: type,
+                    label: type.charAt(0).toUpperCase() + type.substring(1).toLowerCase(),
                     body: ''
                 }
             }
