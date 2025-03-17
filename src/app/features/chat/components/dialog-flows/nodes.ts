@@ -10,6 +10,7 @@ import SwitchNode from "./nodes/switch-node";
 import RelevantNode from "./nodes/relevant-node";
 import KeywordExtractorNode from "./nodes/keyword-extractor-node";
 import PDFNode from "./nodes/pdf-node";
+import GhostNode from "./nodes/ghost-node";
 
 export type ExampleNode = Node<{label: string, body: string}, 'example'>
 export type InstructionNode = Node<{label: string, body: string}, 'instruction'>
@@ -43,8 +44,11 @@ type PDFData = {
 
 export type PDFNode = Node<PDFData, 'pdf'>;
 
+
+export type GhostNode = Node<Record<string, unknown>, 'ghost'>;
+
 /** The types of all nodes in the graph. */
-export type GraphFlowNode = ExampleNode | InstructionNode | ContextNode | SwitchNode | RelevantNode | KeywordExtractorNode | PDFNode;
+export type GraphFlowNode = ExampleNode | InstructionNode | ContextNode | SwitchNode | RelevantNode | KeywordExtractorNode | PDFNode | GhostNode;
 
 /** Shorthand to get the type values of all node types without the undefined type. */
 export type GraphFlowNodeTypes = Exclude<GraphFlowNode['type'], undefined>;
@@ -67,6 +71,7 @@ export const nodeTypes: NodeTypesRecord = {
     relevant: RelevantNode,
     "keyword-extractor": KeywordExtractorNode,
     pdf: PDFNode,
+    ghost: GhostNode,
 };
 
 /**
@@ -134,14 +139,21 @@ export function createEmptyNode(type: GraphFlowNodeTypes, position: XYPosition):
                 }
             }
         case 'pdf':
-          return {
-              id: ulid(),
-              type,
-              position,
-              data: {
-                  label: 'PDF',
-                  content: ''
-              }
-          }
+            return {
+                id: ulid(),
+                type,
+                position,
+                data: {
+                    label: 'PDF',
+                    content: ''
+                }
+            }
+        case 'ghost':
+            return {
+                id: ulid(),
+                type,
+                position,
+                data: {}
+            }
     }
 }

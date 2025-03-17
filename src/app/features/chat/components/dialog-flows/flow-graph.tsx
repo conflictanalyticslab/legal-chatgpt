@@ -48,6 +48,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { GlobeIcon, LockIcon, WandSparklesIcon } from "lucide-react";
 import autoAlign from "./auto-align";
+import { DIAMETER } from "./nodes/circular-node";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -138,6 +139,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     onEdgesChange,
     onConnect,
     addNode,
+    addEdge,
   } = useDialogFlowStore();
 
   const { type } = useToolbarStore();
@@ -167,8 +169,79 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     [type, screenToFlowPosition, addNode]
   );
 
-  const onNodeClick = (event: React.MouseEvent, node: GraphFlowNode) => {
-    setSelectedItem({ id: node.id, type: "node" });
+  const onNodeClick = (e: React.MouseEvent, node: GraphFlowNode) => {
+    if (node.type === "ghost") {
+      return;
+    }
+
+    const target = e.target as HTMLElement;
+    const isSourceHandle =
+      target.classList.contains("react-flow__handle") &&
+      target.classList.contains("source");
+    if (!isSourceHandle) {
+      return setSelectedItem({ id: node.id, type: "node" });
+    }
+
+    const handleId = target.dataset.handleid;
+
+    const hasGhostNode = edges.some((edge) => {
+      if (edge.source !== node.id) return false;
+      if (handleId && edge.sourceHandle !== handleId) return false;
+
+      const targetNode = nodes.find((n) => n.id === edge.target);
+      return targetNode?.type === "ghost";
+    });
+    if (hasGhostNode) return;
+
+    let y = node.position.y;
+    if (handleId && (node.type === "switch" || node.type === "relevant")) {
+      let index = 0;
+      let middleIndex = 0;
+
+      switch (node.type) {
+        case "switch":
+          const ids = [...node.data.conditions.map((c) => c.id), "else"];
+          index = ids.findIndex((id) => id === handleId);
+          middleIndex = (ids.length - 1) / 2;
+          break;
+        case "relevant":
+          switch (handleId) {
+            case "relevant":
+              index = 0;
+              break;
+            case "notRelevant":
+              index = 1;
+              break;
+            default:
+              return;
+          }
+          middleIndex = (2 - 1) / 2;
+          break;
+        default:
+          return;
+      }
+
+      const offset = Math.abs(index - middleIndex) * (DIAMETER + 10);
+      y = index < middleIndex ? y - offset : y + offset;
+    }
+
+    const ghostId = `ghost-${node.id}-${Date.now()}`;
+    addNode({
+      id: ghostId,
+      type: "ghost",
+      position: {
+        x: node.position.x + 200,
+        y,
+      },
+      data: {},
+    });
+
+    addEdge({
+      id: `e-${node.id}-${ghostId}`,
+      source: node.id,
+      sourceHandle: handleId,
+      target: ghostId,
+    });
   };
 
   const onEdgeClick = (event: React.MouseEvent, edge: GraphFlowEdge) => {
