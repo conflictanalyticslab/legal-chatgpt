@@ -1,10 +1,20 @@
-import { useEffect, useState } from "react";
+import { useRef } from "react";
+import {
+  FloatingArrow,
+  useFloating,
+  useClick,
+  useRole,
+  useInteractions,
+  offset,
+  flip,
+  shift,
+  arrow,
+  autoUpdate,
+} from "@floating-ui/react";
 import { X } from "lucide-react";
 
 import { useDialogFlowStore } from "./store";
 import { createEmptyNode } from "./nodes";
-
-// TODO: use floating ui
 
 interface NodeSelectionMenuProps {
   ghostRef: HTMLElement | null;
@@ -25,29 +35,35 @@ export default function NodeSelectionMenu({
   ghostRef,
   onClose,
 }: NodeSelectionMenuProps) {
+  const arrowRef = useRef<SVGSVGElement>(null);
+
   const { nodes, addNode, removeNode, edges, setEdges } = useDialogFlowStore();
 
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const { refs, floatingStyles, context } = useFloating({
+    open: !!ghostRef,
+    onOpenChange: (open) => {
+      if (!open) onClose();
+    },
+    middleware: [
+      offset(-1),
+      flip({ fallbackAxisSideDirection: "end" }),
+      shift(),
+      arrow({ element: arrowRef }),
+    ],
+    whileElementsMounted: autoUpdate,
+    elements: {
+      reference: ghostRef,
+    },
+  });
 
-  useEffect(() => {
-    if (!ghostRef) return;
-    const rect = ghostRef.getBoundingClientRect();
-    return setPosition({
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2,
-    });
-  }, [ghostRef]);
+  const click = useClick(context);
+  const role = useRole(context);
+  const { getFloatingProps } = useInteractions([click, role]);
 
   if (!ghostRef) return;
 
   return (
-    <div
-      className="fixed z-[100]"
-      style={{
-        left: position.x,
-        top: position.y,
-      }}
-    >
+    <div ref={refs.setFloating} style={floatingStyles} {...getFloatingProps()}>
       <div className="bg-white rounded-md shadow-lg border border-neutral-200 w-64 overflow-hidden">
         <div className="flex justify-between items-center bg-neutral-50 p-2 pl-3 border-b border-neutral-200">
           <h3 className="text-sm font-medium text-neutral-700">
@@ -80,17 +96,16 @@ export default function NodeSelectionMenu({
                 const node = createEmptyNode(type.id, ghost.position);
                 addNode(node);
 
-                const a = edges.map((edge) => {
-                  if (edge.target !== ghostId) return edge;
-                  return {
-                    ...edge,
-                    target: node.id,
-                    targetHandle: type.id === "relevant" ? "query" : null,
-                  };
-                });
-                console.log(a.find((edge) => edge.target === node.id));
-
-                setEdges(a);
+                setEdges(
+                  edges.map((edge) => {
+                    if (edge.target !== ghostId) return edge;
+                    return {
+                      ...edge,
+                      target: node.id,
+                      targetHandle: type.id === "relevant" ? "query" : null,
+                    };
+                  })
+                );
 
                 onClose();
               }}
@@ -100,6 +115,15 @@ export default function NodeSelectionMenu({
           ))}
         </div>
       </div>
+
+      <FloatingArrow
+        ref={arrowRef}
+        context={context}
+        tipRadius={1}
+        strokeWidth={1}
+        className="fill-neutral-50 [&>path:first-of-type]:stroke-neutral-200 [&>path:last-of-type]:stroke-neutral-50"
+        style={{ transform: "translateY(-1px)" }}
+      />
     </div>
   );
 }

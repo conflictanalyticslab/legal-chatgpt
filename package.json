@@ -14,6 +14,7 @@
     "@azure/identity": "^3.3.0",
     "@azure/msal-browser": "^3.11.1",
     "@baileyherbert/dependency-graph": "^1.0.0",
+    "@floating-ui/react": "^0.27.5",
     "@hookform/resolvers": "^3.4.2",
     "@langchain/openai": "^0.1.1",
     "@langchain/pinecone": "^0.0.7",
