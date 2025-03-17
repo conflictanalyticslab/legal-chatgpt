@@ -12,11 +12,27 @@ export default function RelevantNode({ data }: NodeProps<RelevantNode>) {
 
   return (
     <CircularNode icon="🤔" label={data.label}>
-      <Target id="query" angle={targetAngles[1]} />
-      <Target id="subject" angle={targetAngles[0]} />
+      <Target
+        id="query"
+        angle={targetAngles[1]}
+        color="#ecfccb" /* lime.100 */
+      />
+      <Target
+        id="subject"
+        angle={targetAngles[0]}
+        color="#e0f2fe" /* sky.100 */
+      />
 
-      <Source id="relevant" angle={sourceAngles[0]} />
-      <Source id="notRelevant" angle={sourceAngles[1]} />
+      <Source
+        id="relevant"
+        angle={sourceAngles[0]}
+        color="#fef3c7" /* amber.100 */
+      />
+      <Source
+        id="notRelevant"
+        angle={sourceAngles[1]}
+        color="#ffe4e6" /* rose.100 */
+      />
     </CircularNode>
   );
 }
@@ -24,9 +40,10 @@ export default function RelevantNode({ data }: NodeProps<RelevantNode>) {
 type HandleProps = {
   id: string;
   angle: number;
+  color: string;
 };
 
-function Target({ id, angle }: HandleProps) {
+function Target({ id, angle, color }: HandleProps) {
   const coords = angleToCoordinates(angle, RADIUS);
   return (
     <BaseHandle
@@ -34,15 +51,18 @@ function Target({ id, angle }: HandleProps) {
       type="target"
       position={Position.Left}
       className="flex items-center justify-center text-[var(--text)]"
-      style={{
-        left: RADIUS + coords.x,
-        top: RADIUS + coords.y,
-      }}
+      style={
+        {
+          left: RADIUS + coords.x,
+          top: RADIUS + coords.y,
+          "--bg": color,
+        } as React.CSSProperties
+      }
     />
   );
 }
 
-function Source({ id, angle }: HandleProps) {
+function Source({ id, angle, color }: HandleProps) {
   const coords = angleToCoordinates(angle, RADIUS);
   return (
     <div
@@ -53,6 +73,7 @@ function Source({ id, angle }: HandleProps) {
           "--hover-left": `${Math.cos((angle * Math.PI) / 180) * 12}px`,
           "--top": `${RADIUS + coords.y}px`,
           "--hover-top": `${Math.sin((angle * Math.PI) / 180) * 12}px`,
+          "--bg": color,
         } as React.CSSProperties
       }
     >

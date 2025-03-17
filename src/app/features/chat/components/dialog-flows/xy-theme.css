@@ -12,6 +12,10 @@
   border: 0 !important;
 }
 
+.react-flow__node.selected .icon-outer {
+  background-color: var(--border-selected) !important;
+}
+
 .react-flow__handle	{
   height: 1.5rem;
   width: 1.5rem;

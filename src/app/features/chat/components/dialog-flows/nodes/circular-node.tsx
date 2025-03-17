@@ -18,11 +18,11 @@ export default function CircularNode({
   return (
     <div
       className={cn(
-        "relative [--bg:theme(colors.neutral.200)] [--text:black]",
+        "relative [--bg:theme(colors.neutral.200)] [--border-selected:theme(colors.neutral.300)] [--text:black]",
         className
       )}
     >
-      <div className="p-1 rounded-full z-10 relative bg-white">
+      <div className="p-1 rounded-full z-10 relative bg-white icon-outer">
         <div className="size-20 rounded-full bg-[var(--bg)] text-[var(--text)] flex items-center justify-center">
           {icon}
         </div>
