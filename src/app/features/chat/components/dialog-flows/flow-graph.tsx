@@ -7,7 +7,7 @@ import {
   useReactFlow,
 } from "@xyflow/react";
 
-import "@xyflow/react/dist/style.css";
+import "@xyflow/react/dist/base.css";
 import "./xy-theme.css";
 
 import { cn } from "@/lib/utils";
@@ -47,7 +47,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { GlobeIcon, LockIcon, WandSparklesIcon } from "lucide-react";
-import autoAlign from './auto-align';
+import autoAlign from "./auto-align";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -121,9 +121,7 @@ function Toolbar() {
         onDragStart={(e) => onDragStart(e, "pdf")}
         draggable
       >
-        <div className="text-[12px] self-center text-center">
-          PDF Node
-        </div>
+        <div className="text-[12px] self-center text-center">PDF Node</div>
       </div>
     </div>
   );
@@ -225,7 +223,10 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   return (
     <ReactFlow
       nodeTypes={nodeTypes}
-      nodes={nodes}
+      nodes={nodes.map((node) => ({
+        ...node,
+        className: cn("group", node.className),
+      }))}
       edges={edges}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
