@@ -246,8 +246,6 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         </TooltipContent>
       </Tooltip>
 
-      <Background />
-
       <div
         className="flex gap-4"
         style={{

@@ -18,7 +18,7 @@ export default async function autoAlign(
       "elk.spacing.nodeNode": "150",
       "elk.spacing.edgeNode": "150",
       "elk.spacing.edgeEdge": "150",
-      "elk.layered.spacing.nodeNodeBetweenLayers": "200",
+      "elk.layered.spacing.nodeNodeBetweenLayers": "250",
       "elk.layered.spacing.edgeEdgeBetweenLayers": "100",
       "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
       "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",

@@ -6,6 +6,9 @@ type CircularNodeProps = React.PropsWithChildren<{
   label?: string;
 }>;
 
+export const DIAMETER = 80 /* size-20 */ + 8; /* white border */
+export const RADIUS = DIAMETER / 2;
+
 export default function CircularNode({
   className,
   icon,
