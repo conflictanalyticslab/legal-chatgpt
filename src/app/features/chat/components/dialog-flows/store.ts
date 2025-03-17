@@ -26,6 +26,7 @@ interface DialogFlowStore {
   addNode: (node: GraphFlowNode) => void;
   addEdge: (edge: GraphFlowEdge) => void;
   updateNode: (nodeId: string, mutateFn: (node: GraphFlowNode) => GraphFlowNode) => void;
+  removeNode: (nodeId: string) => void;
   updateEdge: (edgeId: string, mutateFn: (edge: GraphFlowEdge) => GraphFlowEdge) => void;
   setLastSaved: (lastSaved: Date | null) => void;
   setSaveBlocked: (saveBlocked: boolean) => void;
@@ -97,6 +98,9 @@ export const useDialogFlowStore = create<DialogFlowStore>((set, get) => ({
       n.id === nodeId ? mutateFn(n) : n
     );
     set({ nodes: updatedNodes })
+  },
+  removeNode: (nodeId) => {
+    set(({ nodes: get().nodes.filter((node) => node.id !== nodeId) }));
   },
   updateEdge: (edgeId, mutateFn) => {
     const updatedEdges = get().edges.map(e =>

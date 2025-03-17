@@ -49,6 +49,7 @@ import { Badge } from "@/components/ui/badge";
 import { GlobeIcon, LockIcon, WandSparklesIcon } from "lucide-react";
 import autoAlign from "./auto-align";
 import { DIAMETER } from "./nodes/circular-node";
+import NodeSelectionMenu from "./node-selection-menu";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -131,6 +132,8 @@ function Toolbar() {
 function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const { screenToFlowPosition } = useReactFlow();
 
+  const [activeGhost, setActiveGhost] = useState<HTMLElement | null>(null);
+
   const {
     name,
     nodes,
@@ -171,7 +174,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
 
   const onNodeClick = (e: React.MouseEvent, node: GraphFlowNode) => {
     if (node.type === "ghost") {
-      return;
+      return setActiveGhost(e.currentTarget as HTMLElement);
     }
 
     const target = e.target as HTMLElement;
@@ -294,83 +297,91 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   }
 
   return (
-    <ReactFlow
-      nodeTypes={nodeTypes}
-      nodes={nodes.map((node) => ({
-        ...node,
-        className: cn("group", node.className),
-      }))}
-      edges={edges}
-      defaultEdgeOptions={{ labelBgPadding: [4, 2] }}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      onNodeClick={onNodeClick}
-      onEdgeClick={onEdgeClick}
-    >
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Controls />
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          Controls for the flow graph.
-        </TooltipContent>
-      </Tooltip>
-
-      <div
-        className="flex gap-4"
-        style={{
-          position: "absolute",
-          right: "5px",
-          bottom: "20px",
-          zIndex: 4, // ensure it is above the graph
-        }}
+    <>
+      <ReactFlow
+        nodeTypes={nodeTypes}
+        nodes={nodes.map((node) => ({
+          ...node,
+          className: cn("group", node.className),
+        }))}
+        edges={edges}
+        defaultEdgeOptions={{ labelBgPadding: [4, 2] }}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        onNodeClick={onNodeClick}
+        onEdgeClick={onEdgeClick}
+        fitView
       >
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              type="button"
-              aria-label="Auto-align Graph"
-              onClick={async () => {
-                const changes = await autoAlign(nodes, edges);
-                onNodesChange(changes);
-              }}
-            >
-              <WandSparklesIcon className="size-[30px]" />
-            </Button>
+            <Controls />
           </TooltipTrigger>
-          <TooltipContent side="top" sideOffset={5}>
-            Auto-align the current graph.
+          <TooltipContent side="right">
+            Controls for the flow graph.
           </TooltipContent>
         </Tooltip>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              type="button"
-              aria-label="Save Graph"
-              onClick={injectGraph}
-            >
-              <Image
-                src="/assets/icons/send-horizontal.svg"
-                alt="send"
-                width={30}
-                height={30}
-              />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top" align="end" sideOffset={5}>
-            Save the current graph to a query.
-          </TooltipContent>
-        </Tooltip>
-      </div>
+        <div
+          className="flex gap-4"
+          style={{
+            position: "absolute",
+            right: "5px",
+            bottom: "20px",
+            zIndex: 4, // ensure it is above the graph
+          }}
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                type="button"
+                aria-label="Auto-align Graph"
+                onClick={async () => {
+                  const changes = await autoAlign(nodes, edges);
+                  onNodesChange(changes);
+                }}
+              >
+                <WandSparklesIcon className="size-[30px]" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={5}>
+              Auto-align the current graph.
+            </TooltipContent>
+          </Tooltip>
 
-      <Toolbar />
-    </ReactFlow>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                type="button"
+                aria-label="Save Graph"
+                onClick={injectGraph}
+              >
+                <Image
+                  src="/assets/icons/send-horizontal.svg"
+                  alt="send"
+                  width={30}
+                  height={30}
+                />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top" align="end" sideOffset={5}>
+              Save the current graph to a query.
+            </TooltipContent>
+          </Tooltip>
+        </div>
+
+        <Toolbar />
+      </ReactFlow>
+
+      <NodeSelectionMenu
+        ghostRef={activeGhost}
+        onClose={() => setActiveGhost(null)}
+      />
+    </>
   );
 }
 
@@ -449,7 +460,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
 
   return (
     <>
-      <div className="flex flex-col min-h-[550px] min-w-[320px] h-full max-h-[85vh] grow">
+      <div className="flex flex-col h-full grow">
         <nav className="flex flex-row justify-between items-center m-4 gap-4">
           <div className="flex flex-row gap-2 justify-center w-[180px]">
             <Switch
@@ -554,9 +565,9 @@ export function FlowModal() {
             </Tooltip>
             <DialogContent
               onOpenAutoFocus={(e) => e.preventDefault()}
-              className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[85vw] flex flex-col gap-5 overflow-auto box-border"
+              className="size-full !rounded-none flex flex-col gap-5 overflow-auto max-w-[unset]"
             >
-              <div className="flex flex-row min-h-[550px] min-w-[320px] h-full max-h-[85vh]">
+              <div className="flex flex-row h-full items-stretch">
                 <GraphList />
                 <FlowEditor setOpen={setOpen} />
               </div>

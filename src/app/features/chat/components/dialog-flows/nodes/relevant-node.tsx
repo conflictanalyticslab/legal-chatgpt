@@ -12,8 +12,8 @@ export default function RelevantNode({ data }: NodeProps<RelevantNode>) {
 
   return (
     <CircularNode icon="🤔" label={data.label}>
-      <Target id="query" angle={targetAngles[0]} />
-      <Target id="subject" angle={targetAngles[1]} />
+      <Target id="query" angle={targetAngles[1]} />
+      <Target id="subject" angle={targetAngles[0]} />
 
       <Source id="relevant" angle={sourceAngles[0]} />
       <Source id="notRelevant" angle={sourceAngles[1]} />
