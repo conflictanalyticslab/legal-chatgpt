@@ -76,7 +76,7 @@ export default function NodeSelectionMenu({
           </button>
         </div>
 
-        <div className="flex flex-col gap-1 p-2 text-sm text-neutral-700">
+        <div className="flex flex-col gap-1 p-1 text-sm text-neutral-700">
           {NODE_TYPES.map((type) => (
             <button
               key={type.id}

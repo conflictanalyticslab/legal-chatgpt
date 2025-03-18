@@ -3,8 +3,8 @@ import {
   ReactFlow,
   ReactFlowProvider,
   Controls,
-  Background,
   useReactFlow,
+  MiniMap,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/base.css";
@@ -29,6 +29,7 @@ import {
 } from "./store";
 import {
   createEmptyNode,
+  GhostNode,
   GraphFlowEdge,
   GraphFlowNode,
   GraphFlowNodeTypes,
@@ -49,6 +50,7 @@ import { Badge } from "@/components/ui/badge";
 import { GlobeIcon, LockIcon, WandSparklesIcon } from "lucide-react";
 import autoAlign from "./auto-align";
 import { DIAMETER } from "./nodes/circular-node";
+import NodeContextMenu from "./node-context-menu";
 import NodeSelectionMenu from "./node-selection-menu";
 
 function Toolbar() {
@@ -296,6 +298,24 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     }
   }
 
+  type ContextMenu = {
+    node: Exclude<GraphFlowNode, GhostNode>;
+    position: { x: number; y: number };
+  };
+  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  const onNodeContextMenu = (e: React.MouseEvent, node: GraphFlowNode) => {
+    if (node.type === "ghost") return;
+    e.preventDefault();
+
+    setContextMenu({
+      node: node as ContextMenu["node"],
+      position: {
+        x: e.clientX,
+        y: e.clientY,
+      },
+    });
+  };
+
   return (
     <>
       <ReactFlow
@@ -309,6 +329,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         onDragOver={onDragOver}
         onDrop={onDrop}
         onNodeClick={onNodeClick}
+        onNodeContextMenu={onNodeContextMenu}
         onEdgeClick={onEdgeClick}
         fitView
       >
@@ -373,6 +394,13 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         </div>
 
         <Toolbar />
+        <MiniMap position="top-right" />
+        {contextMenu && (
+          <NodeContextMenu
+            {...contextMenu}
+            onClose={() => setContextMenu(null)}
+          />
+        )}
       </ReactFlow>
 
       <NodeSelectionMenu
