@@ -100,7 +100,13 @@ export const useDialogFlowStore = create<DialogFlowStore>((set, get) => ({
     set({ nodes: updatedNodes })
   },
   removeNode: (nodeId) => {
-    set(({ nodes: get().nodes.filter((node) => node.id !== nodeId) }));
+    const { nodes, edges } = get();
+    set({
+      nodes: nodes.filter((node) => node.id !== nodeId),
+      edges: edges.filter((edge) => {
+        return edge.target !== nodeId && edge.source !== nodeId;
+      }),
+    });
   },
   updateEdge: (edgeId, mutateFn) => {
     const updatedEdges = get().edges.map(e =>
