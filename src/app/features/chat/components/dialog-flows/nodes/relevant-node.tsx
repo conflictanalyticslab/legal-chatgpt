@@ -1,14 +1,24 @@
-import { Handle as BaseHandle, Position, type NodeProps } from "@xyflow/react";
+import {
+  Handle as BaseHandle,
+  useEdges,
+  Position,
+  type NodeProps,
+} from "@xyflow/react";
 import { Plus } from "lucide-react";
 
 import CircularNode, { RADIUS } from "./circular-node";
 
 import type { RelevantNode } from "../nodes";
+import { cn } from "@/lib/utils";
 import { angleToCoordinates, calculateHandleAngles } from "./helpers";
 
-export default function RelevantNode({ data }: NodeProps<RelevantNode>) {
+export default function RelevantNode({ id, data }: NodeProps<RelevantNode>) {
   const targetAngles = calculateHandleAngles(2, 180);
   const sourceAngles = calculateHandleAngles(2, 0);
+  const connectedSources = useEdges().reduce((handleIds, edge) => {
+    if (edge.source !== id || !edge.sourceHandle) return handleIds;
+    return [...handleIds, edge.sourceHandle];
+  }, [] as string[]);
 
   return (
     <CircularNode icon="🤔" label={data.label}>
@@ -27,11 +37,13 @@ export default function RelevantNode({ data }: NodeProps<RelevantNode>) {
         id="relevant"
         angle={sourceAngles[0]}
         color="#fef3c7" /* amber.100 */
+        isConnected={connectedSources.includes("relevant")}
       />
       <Source
         id="notRelevant"
         angle={sourceAngles[1]}
         color="#ffe4e6" /* rose.100 */
+        isConnected={connectedSources.includes("notRelevant")}
       />
     </CircularNode>
   );
@@ -62,11 +74,20 @@ function Target({ id, angle, color }: HandleProps) {
   );
 }
 
-function Source({ id, angle, color }: HandleProps) {
+function Source({
+  id,
+  angle,
+  color,
+  isConnected,
+}: HandleProps & { isConnected: boolean }) {
   const coords = angleToCoordinates(angle, RADIUS);
   return (
     <div
-      className="group/handle absolute !left-[var(--left)] !top-[var(--top)] hover:!left-[calc(var(--left)+var(--hover-left))] hover:!top-[calc(var(--top)+var(--hover-top))] transition-[top,left] -translate-x-1/2 -translate-y-1/2 before:content-[''] before:size-6 before:-ml-6 flex"
+      className={cn(
+        "absolute !left-[var(--left)] !top-[var(--top)] -translate-x-1/2 -translate-y-1/2",
+        !isConnected &&
+          "group/handle hover:!left-[calc(var(--left)+var(--hover-left))] hover:!top-[calc(var(--top)+var(--hover-top))] transition-[top,left] before:content-[''] before:size-6 before:-ml-6 flex"
+      )}
       style={
         {
           "--left": `${RADIUS + coords.x}px`,
@@ -83,7 +104,9 @@ function Source({ id, angle, color }: HandleProps) {
         position={Position.Right}
         className="!static flex items-center justify-center text-[var(--text)] !transform-none"
       >
-        <Plus className="size-4 opacity-0 group-hover/handle:opacity-100 transition-opacity pointer-events-none" />
+        {!isConnected && (
+          <Plus className="size-4 opacity-0 group-hover/handle:opacity-100 transition-opacity pointer-events-none" />
+        )}
       </BaseHandle>
     </div>
   );

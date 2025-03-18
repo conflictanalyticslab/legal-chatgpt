@@ -300,10 +300,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     <>
       <ReactFlow
         nodeTypes={nodeTypes}
-        nodes={nodes.map((node) => ({
-          ...node,
-          className: cn("group", node.className),
-        }))}
+        nodes={nodes}
         edges={edges}
         defaultEdgeOptions={{ labelBgPadding: [4, 2] }}
         onNodesChange={onNodesChange}
