@@ -31,3 +31,18 @@
   stroke-width: 1;
   stroke: oklch(0.87 0 0); /* neutral.300 */
 }
+
+.react-flow__minimap {
+  border: 1px solid #e5e5e5 /* neutral.200 */;
+  border-radius: 4px;
+}
+
+.react-flow__controls {
+  border: 1px solid #e5e5e5 /* neutral.200 */;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.react-flow__controls-button:hover {
+  background: #f5f5f5 /* neutral.100 */;
+}

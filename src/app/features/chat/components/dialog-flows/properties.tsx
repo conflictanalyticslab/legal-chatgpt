@@ -7,7 +7,7 @@ import { useShallow } from "zustand/react/shallow";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useDialogFlowStore, usePropertiesStore } from "./store";
+import { useDialogFlowStore } from "./store";
 import {
   ContextNode,
   ExampleNode,
@@ -27,9 +27,8 @@ import { Button } from "@/components/ui/button";
 import { ulid } from "ulid";
 import { Slider } from "@/components/ui/slider";
 import { useGlobalContext } from "@/app/store/global-context";
-import { cn } from "@/lib/utils";
+import { cn, titleCase } from "@/lib/utils";
 import { postPDF } from "@/app/api/(api-service-layer)/post-pdf";
-import { uploadPdfDocument } from "@/app/api/(api-service-layer)/upload-pdf-document";
 import { toast } from "@/components/ui/use-toast";
 
 interface EdgePropertiesPanelProps {
@@ -63,8 +62,8 @@ function EdgePropertiesPanel({ edge, updateEdge }: EdgePropertiesPanelProps) {
   }, [edge]);
 
   return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
+    <div className="px-2 flex flex-col divide-y divide-neutral-200">
+      <div className="pt-2 pb-4 leading-none">
         <Label className="text-[grey]">Editing Edge</Label>
       </div>
 
@@ -164,8 +163,8 @@ function PDFNodePropertiesPanel({
   }
 
   return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
+    <div className="px-2 flex flex-col divide-y divide-neutral-200">
+      <div className="pt-2 pb-4 leading-none">
         <Label className="text-[grey]">Editing PDF Node</Label>
       </div>
 
@@ -254,8 +253,8 @@ function KeywordExtractorNodePropertiesPanel({
   }, [node]);
 
   return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
+    <div className="px-2 flex flex-col divide-y divide-neutral-200">
+      <div className="pt-2 pb-4 leading-none">
         <Label className="text-[grey]">Editing Keyword Extractor Node</Label>
       </div>
 
@@ -299,8 +298,8 @@ function RelevantNodePropertiesPanel({
   }, [node]);
 
   return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
+    <div className="px-2 flex flex-col divide-y divide-neutral-200">
+      <div className="pt-2 pb-4 leading-none">
         <Label className="text-[grey]">Editing Relevant Node</Label>
       </div>
 
@@ -356,9 +355,11 @@ function GenericNodePropertiesPanel({
   }, [node]);
 
   return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
-        <Label className="text-[grey]">Editing {node.type} Node</Label>
+    <div className="px-2 flex flex-col divide-y divide-neutral-200">
+      <div className="pt-2 pb-4 leading-none">
+        <Label className="text-[grey]">
+          Editing {titleCase(node.type || "")} Node
+        </Label>
       </div>
 
       <div className="py-4">
@@ -542,7 +543,11 @@ function SwitchNodePropertiesPanel({
               id: ulid(),
               label: "If...",
               body: "",
-              color: SWITCH_NODE_CONDITION_COLORS[node.data.conditions.length % SWITCH_NODE_CONDITION_COLORS.length],
+              color:
+                SWITCH_NODE_CONDITION_COLORS[
+                  node.data.conditions.length %
+                    SWITCH_NODE_CONDITION_COLORS.length
+                ],
             },
           ],
         },
@@ -649,8 +654,8 @@ function SwitchNodePropertiesPanel({
   };
 
   return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
+    <div className="px-2 flex flex-col divide-y divide-neutral-200">
+      <div className="pt-2 pb-4 leading-none">
         <Label className="text-[grey]">Editing Switch Node</Label>
       </div>
 

@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from "react";
-
-import { auth } from "@/lib/firebase/firebase-admin/firebase";
+import React from "react";
 
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -14,6 +12,7 @@ import {
 import { useDialogFlowStore } from "./store";
 import { useShallow } from "zustand/react/shallow";
 import { toast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
 
 export default function GraphList() {
   const {
@@ -69,22 +68,10 @@ export default function GraphList() {
   }
 
   return (
-    <div className="flex flex-col px-4 mt-[60px] min-w-[180px] w-1/5 gap-4">
-      <div className="flex flex-col gap-1">
-        <Label className="text-[#838383] mb-2">User Created Graphs</Label>
-        {graphList?.map((item) => (
-          <Button
-            key={item.id}
-            onClick={() => loadGraph(item.id, false)}
-            className="flex justify-start gap-3 cursor-pointer border-[1px] border-transparent hover:border-border hover:border-[1px] px-2"
-            variant={graphId === item.id ? "default" : "ghost"}
-          >
-            {item.name}
-          </Button>
-        ))}
-
+    <div className="px-2 max-w-xs w-full">
+      <div className="h-14 flex items-center justify-start w-full">
         <Button
-          className="flex justify-start gap-3 cursor-pointer border-[1px] border-transparent hover:border-border hover:border-[1px] px-2"
+          className="hover:bg-neutral-200 border border-neutral-200 hover:border-neutral-300 gap-3 bg-white px-3 w-full"
           variant={graphId === null ? "default" : "ghost"}
           onClick={() => newGraph()}
         >
@@ -95,18 +82,47 @@ export default function GraphList() {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 mt-2">
+        <Label className="text-[#838383] mb-2">User Created Graphs</Label>
+        {graphList?.map((item) => {
+          const isSelected = graphId === item.id;
+          return (
+            <Button
+              key={item.id}
+              onClick={() => loadGraph(item.id, false)}
+              className={cn(
+                "justify-start px-3",
+                !isSelected &&
+                  "hover:bg-neutral-200 border border-transparent hover:border-neutral-300"
+              )}
+              variant={isSelected ? "default" : "ghost"}
+            >
+              {item.name}
+            </Button>
+          );
+        })}
+      </div>
+
+      <div className="flex flex-col gap-1 mt-4">
         <Label className="text-[#838383] mb-2">Provided Graphs</Label>
-        {universalGraphList?.map((item) => (
-          <Button
-            key={item.id}
-            onClick={() => loadGraph(item.id, true)}
-            className="flex justify-start gap-3 cursor-pointer border-[1px] border-transparent hover:border-border hover:border-[1px] px-2"
-            variant={graphId === item.id ? "default" : "ghost"}
-          >
-            {item.name}
-          </Button>
-        ))}
+        {universalGraphList?.map((item) => {
+          const isSelected = graphId === item.id;
+
+          return (
+            <Button
+              key={item.id}
+              onClick={() => loadGraph(item.id, true)}
+              className={cn(
+                "justify-start px-3",
+                !isSelected &&
+                  "hover:bg-neutral-200 border border-transparent hover:border-neutral-300"
+              )}
+              variant={isSelected ? "default" : "ghost"}
+            >
+              {item.name}
+            </Button>
+          );
+        })}
       </div>
     </div>
   );
