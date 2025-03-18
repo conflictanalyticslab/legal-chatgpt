@@ -535,13 +535,16 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
           />
 
           <div className="flex gap-4 justify-end items-center">
-            <Select defaultValue="GPT-4">
+            <Select
+              value={model}
+              onValueChange={(value) => setModel(value as typeof model)}
+            >
               <SelectTrigger className="border-neutral-200 bg-white shadow-none w-[100px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="GPT-4">GPT-4</SelectItem>
-                <SelectItem value="claude">Claude</SelectItem>
+                <SelectItem value="Claude">Claude</SelectItem>
               </SelectContent>
             </Select>
 
