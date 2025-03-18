@@ -8,7 +8,7 @@ import {
 } from "@floating-ui/react";
 
 import type { GraphFlowNode } from "./nodes";
-import { useDialogFlowStore } from "./store";
+import { useDialogFlowStore, usePropertiesStore } from "./store";
 
 type ContextMenuProps = {
   node: GraphFlowNode;
@@ -56,6 +56,7 @@ export default function FlowContextMenu({
   }
 
   const { removeNode } = useDialogFlowStore();
+  const { setSelectedItem } = usePropertiesStore();
 
   return (
     <div
@@ -71,7 +72,19 @@ export default function FlowContextMenu({
           </h3>
         </div>
 
-        <div className="flex flex-col gap-1 p-1 text-neutral-700">
+        <div className="flex flex-col gap-1 p-1 text-neutral-700 text-sm">
+          {node.type !== "ghost" && (
+            <button
+              className="w-full text-left px-3 py-2 hover:bg-neutral-100/75 rounded-md transition-colors"
+              onClick={() => {
+                setSelectedItem({ id: node.id, type: "node" });
+                onClose();
+              }}
+            >
+              Edit Node
+            </button>
+          )}
+
           <button
             className="w-full text-left px-3 py-2 hover:bg-neutral-100/75 rounded-md transition-colors text-red-500"
             onClick={() => {
