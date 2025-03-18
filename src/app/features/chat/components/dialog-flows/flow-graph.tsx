@@ -130,7 +130,7 @@ function Toolbar() {
 }
 
 function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, fitView } = useReactFlow();
 
   const [activeGhost, setActiveGhost] = useState<HTMLElement | null>(null);
 
@@ -342,6 +342,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
                 onClick={async () => {
                   const changes = await autoAlign(nodes, edges);
                   onNodesChange(changes);
+                  window.requestAnimationFrame(() => fitView());
                 }}
               >
                 <WandSparklesIcon className="size-[30px]" />
