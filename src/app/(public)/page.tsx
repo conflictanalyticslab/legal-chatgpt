@@ -6,7 +6,6 @@ import PageTitle from "@/components/ui/page-title";
 import PageSubtitle from "@/components/ui/page-subtitle";
 import Container from "@/components/ui/Container";
 import DemoVideo from "@/components/demo-video/demo-video";
-// Removed unused PublicFooter import
 import SlidingPartners from "@/components/partners/sliding-partners";
 import { TwoPartners } from "@/components/partners/two-partners";
 
@@ -177,6 +176,7 @@ export default function Page() {
         </Container>
         <div className=" flex min-h-[300px] sm:min-h-[400px] md:min-h-[400px] lg:min-h-[600px] mx-auto mb-[150px]">
           <iframe
+            src="https://www.youtube.com/embed/pmF9FYCWT5A?rel=0"
             className=" max-w-[1000px] w-[90vw] sm:w-[80vw] lg:w-[70vw] rounded-lg shadow-lg"
             title="Conflict Analytics OpenJustice Demo FINAL.mp4"
           ></iframe>
