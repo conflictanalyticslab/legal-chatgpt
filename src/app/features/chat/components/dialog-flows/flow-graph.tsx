@@ -623,6 +623,7 @@ export function FlowModal() {
               onOpenAutoFocus={(e) => e.preventDefault()}
               className="size-full !rounded-none flex max-w-[unset] bg-neutral-100 p-0 outline-none border-0 gap-0"
               useDefaultClose={false}
+              onInteractOutside={(e) => e.preventDefault()}
             >
               <DialogClose className="fixed top-[11px] right-2 p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white">
                 <X className="size-4" />
