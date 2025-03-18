@@ -7,12 +7,12 @@ import {
   shift,
 } from "@floating-ui/react";
 
-import type { GhostNode, GraphFlowNode } from "./nodes";
+import type { GraphFlowNode } from "./nodes";
 import { useDialogFlowStore } from "./store";
 
 type ContextMenuProps = {
-  node: Exclude<GraphFlowNode, GhostNode> | null;
-  position: { x: number; y: number } | null;
+  node: GraphFlowNode;
+  position: { x: number; y: number };
   onClose: () => void;
 };
 
@@ -57,8 +57,6 @@ export default function FlowContextMenu({
 
   const { removeNode } = useDialogFlowStore();
 
-  if (!node || !position) return null;
-
   return (
     <div
       ref={refs.setFloating}
@@ -69,7 +67,7 @@ export default function FlowContextMenu({
       <div className="bg-white rounded-md shadow-lg border border-neutral-200 w-64 overflow-hidden">
         <div className="flex justify-between items-center bg-neutral-50 p-2 pl-3 border-b border-neutral-200">
           <h3 className="text-sm font-medium text-neutral-700">
-            {node.data.label}
+            {node.type === "ghost" ? "Add Node" : (node.data.label as string)}
           </h3>
         </div>
 

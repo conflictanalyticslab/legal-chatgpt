@@ -299,16 +299,15 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   }
 
   type ContextMenu = {
-    node: Exclude<GraphFlowNode, GhostNode>;
+    node: GraphFlowNode;
     position: { x: number; y: number };
   };
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const onNodeContextMenu = (e: React.MouseEvent, node: GraphFlowNode) => {
-    if (node.type === "ghost") return;
     e.preventDefault();
 
     setContextMenu({
-      node: node as ContextMenu["node"],
+      node,
       position: {
         x: e.clientX,
         y: e.clientY,
