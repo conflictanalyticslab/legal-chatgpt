@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import GPT4Tokenizer from "gpt4-tokenizer";
+import { useUpdateNodeInternals } from "@xyflow/react";
 
 import { useShallow } from "zustand/react/shallow";
 import { Label } from "@/components/ui/label";
@@ -506,6 +507,8 @@ function SwitchNodePropertiesPanel({
   node,
   updateNode,
 }: NodePropertiesPanelProps<SwitchNode>) {
+  const updateNodeInternals = useUpdateNodeInternals();
+
   const [label, setLabel] = useState(node.data.label);
   const [otherwiseEnabled, setOtherwiseEnabled] = useState<boolean>(
     !!node.data.otherwise
@@ -533,11 +536,17 @@ function SwitchNodePropertiesPanel({
           ...node.data,
           conditions: [
             ...node.data.conditions,
-            { id: ulid(), label: "If...", body: "", color: "#e5e5e5" /* neutral.200 */ },
+            {
+              id: ulid(),
+              label: "If...",
+              body: "",
+              color: "#e5e5e5" /* neutral.200 */,
+            },
           ],
         },
       };
     });
+    updateNodeInternals(node.id);
   }, [node]);
 
   const deleteCondition = useCallback(
@@ -553,6 +562,7 @@ function SwitchNodePropertiesPanel({
           },
         };
       });
+      updateNodeInternals(node.id);
     },
     [node]
   );
@@ -606,10 +616,17 @@ function SwitchNodePropertiesPanel({
         ...node,
         data: {
           ...node.data,
-          otherwise: checked ? { label: "Otherwise...", body: "", color: "#e0f2fe" /* sky.100 */ } : undefined,
+          otherwise: checked
+            ? {
+                label: "Otherwise...",
+                body: "",
+                color: "#e0f2fe" /* sky.100 */,
+              }
+            : undefined,
         },
       };
     });
+    updateNodeInternals(node.id);
   };
 
   return (
