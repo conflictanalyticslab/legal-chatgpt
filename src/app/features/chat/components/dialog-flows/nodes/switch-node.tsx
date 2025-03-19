@@ -13,7 +13,7 @@ import type { SwitchNode } from "../nodes";
 import { cn } from "@/lib/utils";
 import { angleToCoordinates, calculateHandleAngles } from "./helpers";
 
-const COLORS = [
+export const SWITCH_NODE_CONDITION_COLORS = [
   "#ffe4e6" /* rose.100 */,
   "#fef3c7" /* amber.100 */,
   "#ecfccb" /* lime.100 */,
@@ -34,7 +34,7 @@ export default function SwitchNode({ id, data }: NodeProps<SwitchNode>) {
           key={i}
           id={condition.id}
           angle={sourceAngles[i]}
-          color={condition.color || COLORS[i % COLORS.length]}
+          color={condition.color || SWITCH_NODE_CONDITION_COLORS[i % SWITCH_NODE_CONDITION_COLORS.length]}
           isConnected={connectedSources.includes(condition.id)}
         />
       ))}

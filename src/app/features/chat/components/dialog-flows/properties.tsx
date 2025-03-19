@@ -19,6 +19,7 @@ import {
   SwitchNode,
   PDFNode,
 } from "./nodes";
+import { SWITCH_NODE_CONDITION_COLORS } from "./nodes/switch-node";
 
 import invariant from "tiny-invariant";
 import { Switch } from "@/components/ui/switch";
@@ -541,7 +542,7 @@ function SwitchNodePropertiesPanel({
               id: ulid(),
               label: "If...",
               body: "",
-              color: "#e5e5e5" /* neutral.200 */,
+              color: SWITCH_NODE_CONDITION_COLORS[node.data.conditions.length % SWITCH_NODE_CONDITION_COLORS.length],
             },
           ],
         },
