@@ -18,8 +18,8 @@ export type ContextNode = Node<{label: string, body: string}, 'context'>
 
 type SwitchData = {
     label: string;
-    conditions: Array<{id: string, label: string, body: string, color: string}>;
-    otherwise?: {label: string, body: string, color: string};
+    conditions: Array<{id: string, label: string, body: string, color?: string}>;
+    otherwise?: {label: string, body: string, color?: string};
 }
 
 export type SwitchNode = Node<SwitchData, 'switch'>
@@ -105,20 +105,17 @@ export function createEmptyNode(type: GraphFlowNodeTypes, position: XYPosition):
                         {
                             id: ulid(),
                             label: 'If...',
-                            body: '',
-                            color: "#ffe4e6" /* rose.100 */
+                            body: ''
                         },
                         {
                             id: ulid(),
                             label: 'If else...',
-                            body: '',
-                            color: "#fef3c7" /* amber.100 */
+                            body: ''
                         }
                     ],
                     otherwise: {
                         label: 'Otherwise...',
-                        body: '',
-                        color: "#e0f2fe" /* sky.100 */
+                        body: ''
                     }
                 }
             }

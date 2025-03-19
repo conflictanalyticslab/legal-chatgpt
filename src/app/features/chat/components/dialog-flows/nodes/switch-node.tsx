@@ -34,7 +34,7 @@ export default function SwitchNode({ id, data }: NodeProps<SwitchNode>) {
           key={i}
           id={condition.id}
           angle={sourceAngles[i]}
-          color={condition.color || COLORS[i]}
+          color={condition.color || COLORS[i % COLORS.length]}
           isConnected={connectedSources.includes(condition.id)}
         />
       ))}
