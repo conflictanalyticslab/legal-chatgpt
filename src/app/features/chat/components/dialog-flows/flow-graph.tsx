@@ -628,7 +628,7 @@ export function FlowModal() {
               useDefaultClose={false}
               onInteractOutside={(e) => e.preventDefault()}
             >
-              <DialogClose className="fixed top-[11px] right-2 p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white">
+              <DialogClose className="fixed top-[11px] right-2 p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white z-10">
                 <X className="size-4" />
               </DialogClose>
               <GraphList />
