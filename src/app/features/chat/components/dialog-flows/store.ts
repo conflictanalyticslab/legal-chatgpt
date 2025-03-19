@@ -24,7 +24,9 @@ interface DialogFlowStore {
   setNodes: (nodes: GraphFlowNode[]) => void;
   setEdges: (edges: GraphFlowEdge[]) => void;
   addNode: (node: GraphFlowNode) => void;
+  addEdge: (edge: GraphFlowEdge) => void;
   updateNode: (nodeId: string, mutateFn: (node: GraphFlowNode) => GraphFlowNode) => void;
+  removeNode: (nodeId: string) => void;
   updateEdge: (edgeId: string, mutateFn: (edge: GraphFlowEdge) => GraphFlowEdge) => void;
   setLastSaved: (lastSaved: Date | null) => void;
   setSaveBlocked: (saveBlocked: boolean) => void;
@@ -33,9 +35,9 @@ interface DialogFlowStore {
 
 /**
  * Store for the dialog flow graph
- * 
+ *
  * This is only used by the dialog flow editor and not the conversation query.
- * 
+ *
  * @see {@link useGlobalDialogFlowStore} for the compiled dialog flow to be used in the conversation query.
  */
 export const useDialogFlowStore = create<DialogFlowStore>((set, get) => ({
@@ -86,14 +88,28 @@ export const useDialogFlowStore = create<DialogFlowStore>((set, get) => ({
       nodes: [...get().nodes, node]
     })
   },
+  addEdge: (edge) => {
+    set({
+      edges: [...get().edges, edge]
+    })
+  },
   updateNode: (nodeId, mutateFn) => {
-    const updatedNodes = get().nodes.map(n => 
+    const updatedNodes = get().nodes.map(n =>
       n.id === nodeId ? mutateFn(n) : n
     );
     set({ nodes: updatedNodes })
   },
+  removeNode: (nodeId) => {
+    const { nodes, edges } = get();
+    set({
+      nodes: nodes.filter((node) => node.id !== nodeId),
+      edges: edges.filter((edge) => {
+        return edge.target !== nodeId && edge.source !== nodeId;
+      }),
+    });
+  },
   updateEdge: (edgeId, mutateFn) => {
-    const updatedEdges = get().edges.map(e => 
+    const updatedEdges = get().edges.map(e =>
       e.id === edgeId ? mutateFn(e) : e
     );
     set({ edges: updatedEdges })

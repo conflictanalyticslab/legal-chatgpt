@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import GPT4Tokenizer from "gpt4-tokenizer";
+import { useUpdateNodeInternals } from "@xyflow/react";
 
 import { useShallow } from "zustand/react/shallow";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ import {
   SwitchNode,
   PDFNode,
 } from "./nodes";
+import { SWITCH_NODE_CONDITION_COLORS } from "./nodes/switch-node";
 
 import invariant from "tiny-invariant";
 import { Switch } from "@/components/ui/switch";
@@ -506,6 +508,9 @@ function SwitchNodePropertiesPanel({
   node,
   updateNode,
 }: NodePropertiesPanelProps<SwitchNode>) {
+  const updateNodeInternals = useUpdateNodeInternals();
+  const { nodes, edges, setEdges, removeNode } = useDialogFlowStore();
+
   const [label, setLabel] = useState(node.data.label);
   const [otherwiseEnabled, setOtherwiseEnabled] = useState<boolean>(
     !!node.data.otherwise
@@ -533,29 +538,51 @@ function SwitchNodePropertiesPanel({
           ...node.data,
           conditions: [
             ...node.data.conditions,
-            { id: ulid(), label: "If...", body: "" },
+            {
+              id: ulid(),
+              label: "If...",
+              body: "",
+              color: SWITCH_NODE_CONDITION_COLORS[node.data.conditions.length % SWITCH_NODE_CONDITION_COLORS.length],
+            },
           ],
         },
       };
     });
+    updateNodeInternals(node.id);
   }, [node]);
 
-  const deleteCondition = useCallback(
-    (id: string) => {
-      updateNode(node.id, (node) => {
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            conditions: node.data.conditions.filter(
-              (condition) => condition.id !== id
-            ),
-          },
-        };
+  const onSourceChange = (id: string) => {
+    const _edges = edges.filter((edge) => {
+      return edge.source === node.id && edge.sourceHandle === id;
+    });
+    if (_edges.length) {
+      const connectedNodeIds = _edges.map((edge) => edge.target);
+      const ghost = nodes.find((node) => {
+        return connectedNodeIds.includes(node.id) && node.type === "ghost";
       });
-    },
-    [node]
-  );
+      if (ghost) removeNode(ghost.id);
+
+      const edgeIds = _edges.map((edge) => edge.id);
+      setEdges(edges.filter((edge) => !edgeIds.includes(edge.id)));
+    }
+  };
+
+  const deleteCondition = (id: string) => {
+    onSourceChange(id);
+
+    updateNode(node.id, (node) => {
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          conditions: node.data.conditions.filter(
+            (condition) => condition.id !== id
+          ),
+        },
+      };
+    });
+    updateNodeInternals(node.id);
+  };
 
   const updateCondition = useCallback(
     (
@@ -600,16 +627,25 @@ function SwitchNodePropertiesPanel({
   );
 
   const onOtherwiseChange = (checked: boolean) => {
+    onSourceChange("else");
+
     setOtherwiseEnabled(checked);
     updateNode(node.id, (node) => {
       return {
         ...node,
         data: {
           ...node.data,
-          otherwise: checked ? { label: "Otherwise...", body: "" } : undefined,
+          otherwise: checked
+            ? {
+                label: "Otherwise...",
+                body: "",
+                color: "#e0f2fe" /* sky.100 */,
+              }
+            : undefined,
         },
       };
     });
+    updateNodeInternals(node.id);
   };
 
   return (
@@ -732,6 +768,8 @@ export default function PropertiesPanel({
               }
             />
           );
+        case "ghost":
+          return null;
         default: {
           const exhaustiveCheck: never = node.type;
           throw new Error(`Unhandled node type: ${exhaustiveCheck}`);

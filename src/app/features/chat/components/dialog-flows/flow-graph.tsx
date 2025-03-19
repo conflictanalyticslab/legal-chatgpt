@@ -3,11 +3,11 @@ import {
   ReactFlow,
   ReactFlowProvider,
   Controls,
-  Background,
   useReactFlow,
+  MiniMap,
 } from "@xyflow/react";
 
-import "@xyflow/react/dist/style.css";
+import "@xyflow/react/dist/base.css";
 import "./xy-theme.css";
 
 import { cn } from "@/lib/utils";
@@ -29,6 +29,7 @@ import {
 } from "./store";
 import {
   createEmptyNode,
+  GhostNode,
   GraphFlowEdge,
   GraphFlowNode,
   GraphFlowNodeTypes,
@@ -47,7 +48,10 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { GlobeIcon, LockIcon, WandSparklesIcon } from "lucide-react";
-import autoAlign from './auto-align';
+import autoAlign from "./auto-align";
+import { DIAMETER } from "./nodes/circular-node";
+import NodeContextMenu from "./node-context-menu";
+import NodeSelectionMenu from "./node-selection-menu";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -121,16 +125,16 @@ function Toolbar() {
         onDragStart={(e) => onDragStart(e, "pdf")}
         draggable
       >
-        <div className="text-[12px] self-center text-center">
-          PDF Node
-        </div>
+        <div className="text-[12px] self-center text-center">PDF Node</div>
       </div>
     </div>
   );
 }
 
 function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, fitView } = useReactFlow();
+
+  const [activeGhost, setActiveGhost] = useState<HTMLElement | null>(null);
 
   const {
     name,
@@ -140,6 +144,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     onEdgesChange,
     onConnect,
     addNode,
+    addEdge,
   } = useDialogFlowStore();
 
   const { type } = useToolbarStore();
@@ -169,8 +174,79 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     [type, screenToFlowPosition, addNode]
   );
 
-  const onNodeClick = (event: React.MouseEvent, node: GraphFlowNode) => {
-    setSelectedItem({ id: node.id, type: "node" });
+  const onNodeClick = (e: React.MouseEvent, node: GraphFlowNode) => {
+    if (node.type === "ghost") {
+      return setActiveGhost(e.currentTarget as HTMLElement);
+    }
+
+    const target = e.target as HTMLElement;
+    const isSourceHandle =
+      target.classList.contains("react-flow__handle") &&
+      target.classList.contains("source");
+    if (!isSourceHandle) {
+      return setSelectedItem({ id: node.id, type: "node" });
+    }
+
+    const handleId = target.dataset.handleid;
+
+    const hasGhostNode = edges.some((edge) => {
+      if (edge.source !== node.id) return false;
+      if (handleId && edge.sourceHandle !== handleId) return false;
+
+      const targetNode = nodes.find((n) => n.id === edge.target);
+      return targetNode?.type === "ghost";
+    });
+    if (hasGhostNode) return;
+
+    let y = node.position.y;
+    if (handleId && (node.type === "switch" || node.type === "relevant")) {
+      let index = 0;
+      let middleIndex = 0;
+
+      switch (node.type) {
+        case "switch":
+          const ids = [...node.data.conditions.map((c) => c.id), "else"];
+          index = ids.findIndex((id) => id === handleId);
+          middleIndex = (ids.length - 1) / 2;
+          break;
+        case "relevant":
+          switch (handleId) {
+            case "relevant":
+              index = 0;
+              break;
+            case "notRelevant":
+              index = 1;
+              break;
+            default:
+              return;
+          }
+          middleIndex = (2 - 1) / 2;
+          break;
+        default:
+          return;
+      }
+
+      const offset = Math.abs(index - middleIndex) * (DIAMETER + 10);
+      y = index < middleIndex ? y - offset : y + offset;
+    }
+
+    const ghostId = `ghost-${node.id}-${Date.now()}`;
+    addNode({
+      id: ghostId,
+      type: "ghost",
+      position: {
+        x: node.position.x + 200,
+        y,
+      },
+      data: {},
+    });
+
+    addEdge({
+      id: `e-${node.id}-${ghostId}`,
+      source: node.id,
+      sourceHandle: handleId,
+      target: ghostId,
+    });
   };
 
   const onEdgeClick = (event: React.MouseEvent, edge: GraphFlowEdge) => {
@@ -222,82 +298,115 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     }
   }
 
+  type ContextMenu = {
+    node: GraphFlowNode;
+    position: { x: number; y: number };
+  };
+  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  const onNodeContextMenu = (e: React.MouseEvent, node: GraphFlowNode) => {
+    e.preventDefault();
+
+    setContextMenu({
+      node,
+      position: {
+        x: e.clientX,
+        y: e.clientY,
+      },
+    });
+  };
+
   return (
-    <ReactFlow
-      nodeTypes={nodeTypes}
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      onNodeClick={onNodeClick}
-      onEdgeClick={onEdgeClick}
-    >
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Controls />
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          Controls for the flow graph.
-        </TooltipContent>
-      </Tooltip>
-
-      <Background />
-
-      <div
-        className="flex gap-4"
-        style={{
-          position: "absolute",
-          right: "5px",
-          bottom: "20px",
-          zIndex: 4, // ensure it is above the graph
-        }}
+    <>
+      <ReactFlow
+        nodeTypes={nodeTypes}
+        nodes={nodes}
+        edges={edges}
+        defaultEdgeOptions={{ labelBgPadding: [4, 2] }}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        onNodeClick={onNodeClick}
+        onNodeContextMenu={onNodeContextMenu}
+        onEdgeClick={onEdgeClick}
+        fitView
       >
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              type="button"
-              aria-label="Auto-align Graph"
-              onClick={async () => {
-                const changes = await autoAlign(nodes, edges);
-                onNodesChange(changes);
-              }}
-            >
-              <WandSparklesIcon className="size-[30px]" />
-            </Button>
+            <Controls />
           </TooltipTrigger>
-          <TooltipContent side="top" sideOffset={5}>
-            Auto-align the current graph.
+          <TooltipContent side="right">
+            Controls for the flow graph.
           </TooltipContent>
         </Tooltip>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              type="button"
-              aria-label="Save Graph"
-              onClick={injectGraph}
-            >
-              <Image
-                src="/assets/icons/send-horizontal.svg"
-                alt="send"
-                width={30}
-                height={30}
-              />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top" align="end" sideOffset={5}>
-            Save the current graph to a query.
-          </TooltipContent>
-        </Tooltip>
-      </div>
+        <div
+          className="flex gap-4"
+          style={{
+            position: "absolute",
+            right: "5px",
+            bottom: "20px",
+            zIndex: 4, // ensure it is above the graph
+          }}
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                type="button"
+                aria-label="Auto-align Graph"
+                onClick={async () => {
+                  const changes = await autoAlign(nodes, edges);
+                  onNodesChange(changes);
+                  window.requestAnimationFrame(() => fitView());
+                }}
+              >
+                <WandSparklesIcon className="size-[30px]" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={5}>
+              Auto-align the current graph.
+            </TooltipContent>
+          </Tooltip>
 
-      <Toolbar />
-    </ReactFlow>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                type="button"
+                aria-label="Save Graph"
+                onClick={injectGraph}
+              >
+                <Image
+                  src="/assets/icons/send-horizontal.svg"
+                  alt="send"
+                  width={30}
+                  height={30}
+                />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top" align="end" sideOffset={5}>
+              Save the current graph to a query.
+            </TooltipContent>
+          </Tooltip>
+        </div>
+
+        <Toolbar />
+        <MiniMap position="top-right" />
+        {contextMenu && (
+          <NodeContextMenu
+            {...contextMenu}
+            onClose={() => setContextMenu(null)}
+          />
+        )}
+      </ReactFlow>
+
+      <NodeSelectionMenu
+        ghostRef={activeGhost}
+        onClose={() => setActiveGhost(null)}
+      />
+    </>
   );
 }
 
@@ -376,7 +485,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
 
   return (
     <>
-      <div className="flex flex-col min-h-[550px] min-w-[320px] h-full max-h-[85vh] grow">
+      <div className="flex flex-col h-full grow">
         <nav className="flex flex-row justify-between items-center m-4 gap-4">
           <div className="flex flex-row gap-2 justify-center w-[180px]">
             <Switch
@@ -481,9 +590,9 @@ export function FlowModal() {
             </Tooltip>
             <DialogContent
               onOpenAutoFocus={(e) => e.preventDefault()}
-              className="min-h-[550px] min-w-[320px] h-full max-h-[85vh] w-full max-w-[85vw] flex flex-col gap-5 overflow-auto box-border"
+              className="size-full !rounded-none flex flex-col gap-5 overflow-auto max-w-[unset]"
             >
-              <div className="flex flex-row min-h-[550px] min-w-[320px] h-full max-h-[85vh]">
+              <div className="flex flex-row h-full items-stretch">
                 <GraphList />
                 <FlowEditor setOpen={setOpen} />
               </div>
