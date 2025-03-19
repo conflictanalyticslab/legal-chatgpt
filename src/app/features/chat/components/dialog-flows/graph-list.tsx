@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -37,12 +37,17 @@ export default function GraphList() {
     }))
   );
 
-  const { data: graphList } = useFetchUserDialogFlows();
-  const { data: universalGraphList } = useFetchUniversalDialogFlows();
+  const [fetchingGraphId, setFetchingGraphId] = useState<string | null>(null);
+
+  const user = useFetchUserDialogFlows();
+  const universal = useFetchUniversalDialogFlows();
 
   async function loadGraph(id: string, saveBlocked: boolean) {
     if (graphId === id) return;
+    setFetchingGraphId(id);
     const graph = await fetchDialogFlow(id);
+    setFetchingGraphId(null);
+
     setSaveBlocked(saveBlocked);
     setGraphId(id);
     setName(graph.name);
@@ -72,7 +77,6 @@ export default function GraphList() {
       <div className="h-14 flex items-center justify-start w-full">
         <Button
           className="hover:bg-neutral-200 border border-neutral-200 hover:border-neutral-300 gap-3 bg-white px-3 w-full"
-          variant={graphId === null ? "default" : "ghost"}
           onClick={() => newGraph()}
         >
           <>
@@ -83,46 +87,63 @@ export default function GraphList() {
       </div>
 
       <div className="flex flex-col gap-1 mt-2">
-        <Label className="text-[#838383] mb-2">User Created Graphs</Label>
-        {graphList?.map((item) => {
-          const isSelected = graphId === item.id;
-          return (
-            <Button
-              key={item.id}
-              onClick={() => loadGraph(item.id, false)}
-              className={cn(
-                "justify-start px-3",
-                !isSelected &&
-                  "hover:bg-neutral-200 border border-transparent hover:border-neutral-300"
-              )}
-              variant={isSelected ? "default" : "ghost"}
-            >
-              {item.name}
-            </Button>
-          );
-        })}
+        <Label className="text-neutral-500 mb-2">User Created Graphs</Label>
+        {!user.isPending ? (
+          (user.data || []).map((item) => {
+            const isFetching = fetchingGraphId === item.id;
+            const isSelected = fetchingGraphId
+              ? isFetching
+              : graphId === item.id;
+            return (
+              <Button
+                key={item.id}
+                onClick={() => loadGraph(item.id, false)}
+                className={cn(
+                  "justify-start px-3",
+                  !isSelected &&
+                    "hover:bg-neutral-200 border border-transparent hover:border-neutral-300"
+                )}
+                variant={isSelected ? "default" : "ghost"}
+              >
+                {isFetching ? "Loading..." : item.name}
+              </Button>
+            );
+          })
+        ) : (
+          <div className="text-sm flex items-center h-10 text-neutral-400">
+            Loading...
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-1 mt-4">
-        <Label className="text-[#838383] mb-2">Provided Graphs</Label>
-        {universalGraphList?.map((item) => {
-          const isSelected = graphId === item.id;
-
-          return (
-            <Button
-              key={item.id}
-              onClick={() => loadGraph(item.id, true)}
-              className={cn(
-                "justify-start px-3",
-                !isSelected &&
-                  "hover:bg-neutral-200 border border-transparent hover:border-neutral-300"
-              )}
-              variant={isSelected ? "default" : "ghost"}
-            >
-              {item.name}
-            </Button>
-          );
-        })}
+        <Label className="text-neutral-500 mb-2">Provided Graphs</Label>
+        {!universal.isPending ? (
+          (universal.data || []).map((item) => {
+            const isFetching = fetchingGraphId === item.id;
+            const isSelected = fetchingGraphId
+              ? isFetching
+              : graphId === item.id;
+            return (
+              <Button
+                key={item.id}
+                onClick={() => loadGraph(item.id, true)}
+                className={cn(
+                  "justify-start px-3",
+                  !isSelected &&
+                    "hover:bg-neutral-200 border border-transparent hover:border-neutral-300"
+                )}
+                variant={isSelected ? "default" : "ghost"}
+              >
+                {isFetching ? "Loading..." : item.name}
+              </Button>
+            );
+          })
+        ) : (
+          <div className="text-sm flex items-center h-10 text-neutral-400">
+            Loading...
+          </div>
+        )}
       </div>
     </div>
   );
