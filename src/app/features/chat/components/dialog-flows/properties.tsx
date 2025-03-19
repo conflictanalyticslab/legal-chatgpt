@@ -508,6 +508,7 @@ function SwitchNodePropertiesPanel({
   updateNode,
 }: NodePropertiesPanelProps<SwitchNode>) {
   const updateNodeInternals = useUpdateNodeInternals();
+  const { nodes, edges, setEdges, removeNode } = useDialogFlowStore();
 
   const [label, setLabel] = useState(node.data.label);
   const [otherwiseEnabled, setOtherwiseEnabled] = useState<boolean>(
@@ -549,23 +550,38 @@ function SwitchNodePropertiesPanel({
     updateNodeInternals(node.id);
   }, [node]);
 
-  const deleteCondition = useCallback(
-    (id: string) => {
-      updateNode(node.id, (node) => {
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            conditions: node.data.conditions.filter(
-              (condition) => condition.id !== id
-            ),
-          },
-        };
+  const onSourceChange = (id: string) => {
+    const _edges = edges.filter((edge) => {
+      return edge.source === node.id && edge.sourceHandle === id;
+    });
+    if (_edges.length) {
+      const connectedNodeIds = _edges.map((edge) => edge.target);
+      const ghost = nodes.find((node) => {
+        return connectedNodeIds.includes(node.id) && node.type === "ghost";
       });
-      updateNodeInternals(node.id);
-    },
-    [node]
-  );
+      if (ghost) removeNode(ghost.id);
+
+      const edgeIds = _edges.map((edge) => edge.id);
+      setEdges(edges.filter((edge) => !edgeIds.includes(edge.id)));
+    }
+  };
+
+  const deleteCondition = (id: string) => {
+    onSourceChange(id);
+
+    updateNode(node.id, (node) => {
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          conditions: node.data.conditions.filter(
+            (condition) => condition.id !== id
+          ),
+        },
+      };
+    });
+    updateNodeInternals(node.id);
+  };
 
   const updateCondition = useCallback(
     (
@@ -610,6 +626,8 @@ function SwitchNodePropertiesPanel({
   );
 
   const onOtherwiseChange = (checked: boolean) => {
+    onSourceChange("else");
+
     setOtherwiseEnabled(checked);
     updateNode(node.id, (node) => {
       return {
