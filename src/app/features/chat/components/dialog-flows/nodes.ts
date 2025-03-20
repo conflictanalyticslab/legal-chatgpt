@@ -47,7 +47,7 @@ type PDFData = {
 export type PDFNode = Node<PDFData, 'pdf'>;
 
 
-export type GhostNode = Node<Record<string, unknown>, 'ghost'>;
+export type GhostNode = Node<{standalone?: boolean}, 'ghost'>;
 
 /** The types of all nodes in the graph. */
 export type GraphFlowNode = ExampleNode | InstructionNode | ContextNode | SwitchNode | RelevantNode | KeywordExtractorNode | PDFNode | GhostNode;

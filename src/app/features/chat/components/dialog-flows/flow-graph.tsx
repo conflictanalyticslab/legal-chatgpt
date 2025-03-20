@@ -173,6 +173,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const {
     name,
     nodes,
+    setNodes,
     edges,
     onNodesChange,
     onEdgesChange,
@@ -198,6 +199,10 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       event.preventDefault();
 
       if (!type) return;
+
+      // prettier-ignore
+      const isStandaloneGhostExist = nodes.length === 1 && nodes.find((node) => node.type === "ghost" && node.data.standalone);
+      if (isStandaloneGhostExist) setNodes([]);
 
       const position = screenToFlowPosition({
         x: event.clientX,
@@ -383,7 +388,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
           />
         )}
 
-        <div className="flex gap-2 absolute bottom-[15px] right-[15px] z-10">
+        <div className="flex gap-2 absolute bottom-2 right-2 z-10">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

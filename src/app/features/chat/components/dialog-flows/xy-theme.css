@@ -32,6 +32,10 @@
   stroke: oklch(0.87 0 0); /* neutral.300 */
 }
 
+.react-flow__panel {
+  margin: 8px !important;
+}
+
 .react-flow__minimap {
   border: 1px solid #e5e5e5 /* neutral.200 */;
   border-radius: 4px;

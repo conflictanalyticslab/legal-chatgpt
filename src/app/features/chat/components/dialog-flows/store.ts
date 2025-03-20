@@ -2,7 +2,14 @@ import { createWithEqualityFn as create } from "zustand/traditional";
 import { GraphFlowEdge, GraphFlowNode, GraphFlowNodeTypes } from "./nodes";
 import { addEdge, applyEdgeChanges, applyNodeChanges, Connection, EdgeChange, NodeChange } from "@xyflow/react";
 
-const initialNodes: GraphFlowNode[] = [];
+const initialNodes: GraphFlowNode[] = [
+  {
+    id: "ghost",
+    type: "ghost",
+    position: { x: 0, y: 0 },
+    data: { standalone: true },
+  }
+];
 
 const initialEdges: GraphFlowEdge[] = [];
 

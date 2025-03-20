@@ -14,7 +14,7 @@ import {
 import { X } from "lucide-react";
 
 import { useDialogFlowStore } from "./store";
-import { createEmptyNode } from "./nodes";
+import { createEmptyNode, GhostNode } from "./nodes";
 
 interface NodeSelectionMenuProps {
   ghostRef: HTMLElement | null;
@@ -84,27 +84,31 @@ export default function NodeSelectionMenu({
               onClick={() => {
                 const ghostId = ghostRef.dataset.id!;
 
-                const ghost = nodes.find((n) => n.id === ghostId);
+                const ghost = nodes.find((n) => {
+                  return node.id === ghostId && node.type === "ghost";
+                }) as GhostNode | undefined;
                 if (!ghost) return;
 
                 const source = edges.find((edge) => edge.target === ghostId);
-                if (!source) return;
+                if (!source && !ghost.data.standalone) return;
 
                 removeNode(ghostId);
 
                 const node = createEmptyNode(type.id, ghost.position);
                 addNode(node);
 
-                setEdges(
-                  edges.map((edge) => {
-                    if (edge.target !== ghostId) return edge;
-                    return {
-                      ...edge,
-                      target: node.id,
-                      targetHandle: type.id === "relevant" ? "query" : null,
-                    };
-                  })
-                );
+                if (!ghost.data.standalone) {
+                  setEdges(
+                    edges.map((edge) => {
+                      if (edge.target !== ghostId) return edge;
+                      return {
+                        ...edge,
+                        target: node.id,
+                        targetHandle: type.id === "relevant" ? "query" : null,
+                      };
+                    })
+                  );
+                }
 
                 onClose();
               }}

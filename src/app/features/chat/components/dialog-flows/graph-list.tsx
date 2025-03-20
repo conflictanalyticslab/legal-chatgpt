@@ -34,7 +34,14 @@ function Header() {
     if (state.graphId === null) return;
     state.setGraphId(null);
     state.setName("Untitled");
-    state.setNodes([]);
+    state.setNodes([
+      {
+        id: "ghost",
+        type: "ghost",
+        position: { x: 0, y: 0 },
+        data: { standalone: true },
+      },
+    ]);
     state.setEdges([]);
     state.setLastSaved(null);
     toast({ title: `New Dialog Flow created` });

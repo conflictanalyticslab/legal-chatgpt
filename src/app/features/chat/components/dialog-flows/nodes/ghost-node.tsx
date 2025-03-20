@@ -1,7 +1,9 @@
-import { Handle, Position } from "@xyflow/react";
+import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { PlusCircle } from "lucide-react";
 
-export default function GhostNode() {
+import type { GhostNode } from "../nodes";
+
+export default function GhostNode({ data }: NodeProps<GhostNode>) {
   return (
     <div className="relative [--bg:theme(colors.neutral.300)]">
       <div className="bg-white p-1 relative z-10 rounded-full">
@@ -9,7 +11,7 @@ export default function GhostNode() {
           <PlusCircle className="size-8 text-neutral-700" />
         </div>
       </div>
-      <Handle type="target" position={Position.Left} />
+      {!data.standalone && <Handle type="target" position={Position.Left} />}
     </div>
   );
 }
