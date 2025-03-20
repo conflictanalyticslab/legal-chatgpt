@@ -1,17 +1,17 @@
 import React, { useState } from "react";
+import { useReactFlow } from "@xyflow/react";
+import { ChevronLeft, PlusSquare } from "lucide-react";
 
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
-import { ChevronLeft, PlusSquare } from "lucide-react";
 import {
   fetchDialogFlow,
   useFetchUniversalDialogFlows,
   useFetchUserDialogFlows,
 } from "./api";
 import { useDialogFlowStore } from "./store";
-import {} from "zustand/react/shallow";
-import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { useLayoutStore } from "./layout-store";
 
@@ -71,7 +71,7 @@ function Header() {
 }
 
 function Graphs() {
-  const [fetchingId, setFetchingId] = useState<string | null>(null);
+  const { fitView } = useReactFlow();
 
   const user = useFetchUserDialogFlows();
   const universal = useFetchUniversalDialogFlows();
@@ -94,8 +94,11 @@ function Graphs() {
       toast({
         title: `Dialog Flow '${graph.name}' loaded`,
       });
+      window.requestAnimationFrame(() => fitView());
     },
   }));
+
+  const [fetchingId, setFetchingId] = useState<string | null>(null);
 
   return (
     <div className="overflow-y-auto">
