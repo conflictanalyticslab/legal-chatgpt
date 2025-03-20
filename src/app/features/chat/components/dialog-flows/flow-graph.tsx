@@ -41,7 +41,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CircularDependencyError } from "@baileyherbert/dependency-graph";
 import { toast } from "@/components/ui/use-toast";
 import GraphList from "./graph-list";
-import { useSaveDialogFlow } from "./api";
+import { useGenerateDialogFlow, useSaveDialogFlow } from "./api";
 import { useDebouncedCallback } from "use-debounce";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -57,6 +57,7 @@ import {
   Brain,
   TextSearch,
   FileText,
+  RefreshCcw,
 } from "lucide-react";
 import autoAlign from "./auto-align";
 import { DIAMETER } from "./nodes/circular-node";
@@ -171,6 +172,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const [activeGhost, setActiveGhost] = useState<HTMLElement | null>(null);
 
   const {
+    graphId,
     name,
     nodes,
     setNodes,
@@ -371,6 +373,8 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     });
   };
 
+  const generate = useGenerateDialogFlow();
+
   return (
     <div
       className={cn(
@@ -404,6 +408,35 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         )}
 
         <div className="flex gap-2 absolute bottom-2.5 right-2.5 z-50">
+          {!graphId && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  type="button"
+                  aria-label="Generate Graph"
+                  onClick={async () => {
+                    const query = prompt("What would you like to generate?"); // TODO
+                    if (!query) return;
+                    generate.mutate(query);
+                  }}
+                  disabled={generate.isPending}
+                  className="p-2.5 h-[unset] border-neutral-200 aspect-square"
+                >
+                  <RefreshCcw
+                    className={cn(
+                      "size-6",
+                      generate.isPending && "animate-spin"
+                    )}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" sideOffset={5}>
+                Generate graph.
+              </TooltipContent>
+            </Tooltip>
+          )}
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -506,10 +539,11 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
   });
 
   useEffect(() => {
-    if (nodes.length === 0 || edges.length === 0) return;
+    if (nodes.length === 0) return;
+    if (nodes[0].type === "ghost" && nodes[0].data.standalone) return; // default ghost
     if (saveBlocked) return;
     debouncedSaveGraph();
-  }, [debouncedSaveGraph, nodes, edges, name, publicGraph]);
+  }, [debouncedSaveGraph, nodes, name, publicGraph]);
 
   return (
     <div className="flex flex-col h-full grow">
