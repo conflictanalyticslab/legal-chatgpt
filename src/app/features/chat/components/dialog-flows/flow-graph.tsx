@@ -276,22 +276,19 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       y = index < middleIndex ? y - offset : y + offset;
     }
 
-    const ghostId = `ghost-${node.id}-${Date.now()}`;
-    addNode({
-      id: ghostId,
-      type: "ghost",
-      position: {
-        x: node.position.x + 200,
-        y,
-      },
-      data: {},
-    });
+    const ghost = createEmptyNode("ghost", { x: node.position.x + 200, y });
+    addNode(ghost);
+    setCenter(
+      ghost.position.x + DIAMETER / 2,
+      ghost.position.y + DIAMETER / 2,
+      { duration: 500 }
+    );
 
     addEdge({
-      id: `e-${node.id}-${ghostId}`,
+      id: `e-${node.id}-${ghost.id}`,
       source: node.id,
       sourceHandle: handleId,
-      target: ghostId,
+      target: ghost.id,
     });
   };
 
