@@ -84,7 +84,7 @@ export default function NodeSelectionMenu({
               onClick={() => {
                 const ghostId = ghostRef.dataset.id!;
 
-                const ghost = nodes.find((n) => {
+                const ghost = nodes.find((node) => {
                   return node.id === ghostId && node.type === "ghost";
                 }) as GhostNode | undefined;
                 if (!ghost) return;
