@@ -51,7 +51,7 @@ function Header() {
   return (
     <div className="h-14 flex items-center w-full gap-2">
       <button
-        className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200"
+        className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white"
         onClick={close}
       >
         <ChevronLeft className="size-4" />

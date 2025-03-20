@@ -520,7 +520,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
         <div className="flex items-center gap-2">
           {!isGraphListVisibile ? (
             <button
-              className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200"
+              className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white"
               onClick={showGraphList}
             >
               <ChevronRight className="size-4" />

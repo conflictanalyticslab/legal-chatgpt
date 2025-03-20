@@ -711,7 +711,7 @@ export default function PropertiesPanel() {
           </Label>
 
           <button
-            className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200"
+            className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white"
             onClick={close}
           >
             <X className="size-4" />
