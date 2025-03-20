@@ -57,6 +57,7 @@ import {
   Brain,
   TextSearch,
   FileText,
+  RefreshCcw,
 } from "lucide-react";
 import autoAlign from "./auto-align";
 import { DIAMETER } from "./nodes/circular-node";
@@ -408,19 +409,32 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
 
         <div className="flex gap-2 absolute bottom-2.5 right-2.5 z-50">
           {!graphId && (
-            <Button
-              variant="ghost"
-              type="button"
-              aria-label="Auto-align Graph"
-              onClick={async () => {
-                const query = prompt("What would you like to generate?"); // TODO
-                if (!query) return;
-                generate.mutate(query);
-              }}
-              disabled={generate.isPending}
-            >
-              {generate.isPending ? "Generating..." : "Generate"}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  type="button"
+                  aria-label="Generate Graph"
+                  onClick={async () => {
+                    const query = prompt("What would you like to generate?"); // TODO
+                    if (!query) return;
+                    generate.mutate(query);
+                  }}
+                  disabled={generate.isPending}
+                  className="p-2.5 h-[unset] border-neutral-200 aspect-square"
+                >
+                  <RefreshCcw
+                    className={cn(
+                      "size-6",
+                      generate.isPending && "animate-spin"
+                    )}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" sideOffset={5}>
+                Generate graph.
+              </TooltipContent>
+            </Tooltip>
           )}
 
           <Tooltip>
@@ -526,6 +540,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
 
   useEffect(() => {
     if (nodes.length === 0) return;
+    if (nodes[0].type === "ghost" && nodes[0].data.standalone) return; // default ghost
     if (saveBlocked) return;
     debouncedSaveGraph();
   }, [debouncedSaveGraph, nodes, name, publicGraph]);
