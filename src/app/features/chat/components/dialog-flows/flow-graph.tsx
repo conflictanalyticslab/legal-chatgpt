@@ -403,7 +403,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
           />
         )}
 
-        <div className="flex gap-2 absolute bottom-2 right-2 z-10">
+        <div className="flex gap-2 absolute bottom-2.5 right-2.5 z-50">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
