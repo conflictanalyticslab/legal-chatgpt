@@ -701,8 +701,8 @@ export default function PropertiesPanel() {
   if (!item) return;
 
   return (
-    <div className="flex flex-col gap-4 fixed top-16 right-2 bg-neutral-100 rounded-lg border border-neutral-200 max-w-xs w-full py-2 shadow-lg shadow-neutral-100">
-      <div className="flex-col flex gap-2 px-2">
+    <div className="flex flex-col gap-4 fixed top-[67px] right-2.5 bg-neutral-100 rounded-lg border border-neutral-200 max-w-xs w-full py-2.5 shadow-lg shadow-neutral-100">
+      <div className="flex-col flex gap-2 px-2.5">
         <div className="flex items-center gap-4 justify-between">
           <Label className="text-[grey]">
             {item.type === "edge"
@@ -711,7 +711,7 @@ export default function PropertiesPanel() {
           </Label>
 
           <button
-            className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white"
+            className="size-9 flex items-center justify-center rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white"
             onClick={close}
           >
             <X className="size-4" />
@@ -721,7 +721,7 @@ export default function PropertiesPanel() {
         <hr className="border-neutral-200" />
       </div>
 
-      <div className="overflow-y-auto flex flex-col gap-4 flex-1 px-2">
+      <div className="overflow-y-auto flex flex-col gap-4 flex-1 px-2.5">
         {(() => {
           switch (item.type) {
             case "node": {

@@ -20,7 +20,7 @@ export default function GraphList() {
   if (!isVisible) return;
 
   return (
-    <div className="w-full px-2 max-w-xs">
+    <div className="w-full px-2.5 max-w-xs">
       <Header />
       <Graphs />
     </div>
@@ -51,7 +51,7 @@ function Header() {
   return (
     <div className="h-14 flex items-center w-full gap-2">
       <button
-        className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white"
+        className="size-9 flex items-center justify-center shrink-0 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white"
         onClick={close}
       >
         <ChevronLeft className="size-4" />

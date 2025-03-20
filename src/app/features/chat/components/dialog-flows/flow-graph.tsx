@@ -377,7 +377,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   return (
     <div
       className={cn(
-        "bg-white flex-1 border-x border-t border-neutral-200",
+        "bg-white flex-1 border-l border-t border-neutral-200",
         isGraphListVisibile && "rounded-tl-lg"
       )}
     >
@@ -516,11 +516,11 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
 
   return (
     <div className="flex flex-col h-full grow">
-      <nav className="grid grid-cols-3 gap-4 p-2 items-center pl-2">
+      <nav className="grid grid-cols-3 gap-4 py-2 items-center px-2.5">
         <div className="flex items-center gap-2">
           {!isGraphListVisibile ? (
             <button
-              className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white"
+              className="rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white size-9 flex items-center justify-center"
               onClick={showGraphList}
             >
               <ChevronRight className="size-4" />
@@ -559,7 +559,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
             </SelectContent>
           </Select>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <Switch
               checked={publicGraph}
               onCheckedChange={(checked) => setPublicGraph(checked)}
@@ -576,11 +576,11 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
 
               {publicGraph ? "Public" : "Private"}
             </Badge>
-
-            <DialogClose className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white">
-              <X className="size-4" />
-            </DialogClose>
           </div>
+
+          <DialogClose className="size-9 flex items-center justify-center rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white">
+            <X className="size-4" />
+          </DialogClose>
         </div>
       </nav>
 
