@@ -17,11 +17,12 @@ import { useLayoutStore } from "./layout-store";
 
 export default function GraphList() {
   const isVisible = useLayoutStore((state) => state.isGraphListVisibile);
+  if (!isVisible) return;
 
   return (
-    <div className={cn("w-full", isVisible ? "px-2 max-w-xs" : "max-w-0")}>
-      {isVisible && <Header />}
-      {isVisible && <Graphs />}
+    <div className="w-full px-2 max-w-xs">
+      <Header />
+      <Graphs />
     </div>
   );
 }

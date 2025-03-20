@@ -159,7 +159,7 @@ interface PropertiesStore {
 /**
  * Store for the selected item in the dialog flow editor
  */
-export const usePropertiesStore = create<PropertiesStore>((set, get) => ({
+export const usePropertiesStore = create<PropertiesStore>()((set, get) => ({
   selectedItem: null,
   setSelectedItem: (item) => {
     set({ selectedItem: item })

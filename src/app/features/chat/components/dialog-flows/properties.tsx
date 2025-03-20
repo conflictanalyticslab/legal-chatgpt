@@ -3,7 +3,6 @@ import Dropzone from "react-dropzone";
 import GPT4Tokenizer from "gpt4-tokenizer";
 import { useUpdateNodeInternals } from "@xyflow/react";
 
-import { useShallow } from "zustand/react/shallow";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,7 +29,7 @@ import { useGlobalContext } from "@/app/store/global-context";
 import { cn, titleCase } from "@/lib/utils";
 import { postPDF } from "@/app/api/(api-service-layer)/post-pdf";
 import { toast } from "@/components/ui/use-toast";
-import { ChevronRight } from "lucide-react";
+import { X } from "lucide-react";
 
 interface EdgePropertiesPanelProps {
   edge: GraphFlowEdge;
@@ -673,41 +672,49 @@ function SwitchNodePropertiesPanel({
   );
 }
 
-export type SelectedItem =
+type SelectedItem =
   | { type: "node"; node: GraphFlowNode }
   | { type: "edge"; edge: GraphFlowEdge };
 
-interface PropertiesPanelProps {
-  selectedItem: SelectedItem;
-}
+export default function PropertiesPanel() {
+  const { nodes, edges, updateNode, updateEdge } = useDialogFlowStore();
 
-export default function PropertiesPanel({
-  selectedItem,
-}: PropertiesPanelProps) {
-  const { setSelectedItem } = usePropertiesStore();
-  const { updateNode, updateEdge } = useDialogFlowStore(
-    useShallow((state) => ({
-      updateNode: state.updateNode,
-      updateEdge: state.updateEdge,
-    }))
-  );
+  const { item, close } = usePropertiesStore((state) => {
+    return {
+      item: (() => {
+        const item = state.selectedItem;
+        if (!item) return null;
+        switch (item.type) {
+          case "node":
+            const node = nodes.find((n) => n.id === item.id);
+            return node ? { type: "node", node } : null;
+          case "edge":
+            const edge = edges.find((e) => e.id === item.id);
+            return edge ? { type: "edge", edge } : null;
+        }
+      })() as SelectedItem,
+      close() {
+        state.setSelectedItem(null);
+      },
+    };
+  });
+  if (!item) return;
 
   return (
-    <div className="flex flex-col min-h-full gap-4">
+    <div className="flex flex-col gap-4 fixed top-16 right-2 bg-neutral-100 rounded-lg border border-neutral-200 max-w-xs w-full py-2 shadow-lg shadow-neutral-100">
       <div className="flex-col flex gap-2 px-2">
-        <div className="flex items-center gap-4 justify-between pt-2">
+        <div className="flex items-center gap-4 justify-between">
           <Label className="text-[grey]">
-            Editing{" "}
-            {selectedItem.type === "edge"
+            {item.type === "edge"
               ? "Edge"
-              : getNodeTypeDisplayText(selectedItem.node.type)}
+              : getNodeTypeDisplayText(item.node.type)}
           </Label>
 
           <button
             className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200"
-            onClick={() => setSelectedItem(null)}
+            onClick={close}
           >
-            <ChevronRight className="size-4" />
+            <X className="size-4" />
           </button>
         </div>
 
@@ -716,9 +723,9 @@ export default function PropertiesPanel({
 
       <div className="overflow-y-auto flex flex-col gap-4 flex-1 px-2">
         {(() => {
-          switch (selectedItem.type) {
+          switch (item.type) {
             case "node": {
-              const node = selectedItem.node;
+              const node = item.node;
               invariant(node.type, "Node type is undefined");
               switch (node.type) {
                 case "instruction":
@@ -793,10 +800,7 @@ export default function PropertiesPanel({
             }
             case "edge":
               return (
-                <EdgePropertiesPanel
-                  edge={selectedItem.edge}
-                  updateEdge={updateEdge}
-                />
+                <EdgePropertiesPanel edge={item.edge} updateEdge={updateEdge} />
               );
             default:
               return null;

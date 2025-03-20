@@ -63,7 +63,7 @@ export default function NodeSelectionMenu({
 
   return (
     <div ref={refs.setFloating} style={floatingStyles} {...getFloatingProps()}>
-      <div className="bg-white rounded-md shadow-lg border border-neutral-200 w-64 overflow-hidden">
+      <div className="bg-white rounded-md shadow-lg shadow-neutral-100 border border-neutral-200 w-64 overflow-hidden">
         <div className="flex justify-between items-center bg-neutral-50 p-2 pl-3 border-b border-neutral-200">
           <h3 className="text-sm font-medium text-neutral-700">
             Select Node Type

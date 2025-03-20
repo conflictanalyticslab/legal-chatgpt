@@ -34,7 +34,7 @@ import {
   GraphFlowNodeTypes,
   nodeTypes,
 } from "./nodes";
-import Properties, { SelectedItem } from "./properties";
+import Properties from "./properties";
 import { compileGraph } from "./compiler";
 import { useShallow } from "zustand/react/shallow";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -192,7 +192,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-  const { selectedItem, setSelectedItem } = usePropertiesStore();
+  const { setSelectedItem } = usePropertiesStore();
 
   const onDrop = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
@@ -372,8 +372,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     <div
       className={cn(
         "bg-white flex-1 border-x border-t border-neutral-200",
-        isGraphListVisibile && "rounded-tl-lg",
-        selectedItem && "rounded-tr-lg"
+        isGraphListVisibile && "rounded-tl-lg"
       )}
     >
       <ReactFlow
@@ -393,7 +392,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       >
         <Controls />
         <Toolbar />
-        <MiniMap position="top-right" />
+        <MiniMap position="top-left" />
         {contextMenu && (
           <NodeContextMenu
             {...contextMenu}
@@ -460,8 +459,6 @@ interface FlowEditorProps {
 }
 
 function FlowEditor({ setOpen }: FlowEditorProps) {
-  const { selectedItem: selectedItemId } = usePropertiesStore();
-
   const { isGraphListVisibile, showGraphList } = useLayoutStore((state) => ({
     isGraphListVisibile: state.isGraphListVisibile,
     showGraphList() {
@@ -496,29 +493,6 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
     }))
   );
 
-  const selectedItem = useMemo<SelectedItem | null>(() => {
-    if (!selectedItemId) return null;
-
-    switch (selectedItemId.type) {
-      case "node":
-        const node = nodes.find((n) => n.id === selectedItemId.id);
-        return node
-          ? {
-              type: "node",
-              node,
-            }
-          : null;
-      case "edge":
-        const edge = edges.find((e) => e.id === selectedItemId.id);
-        return edge
-          ? {
-              type: "edge",
-              edge,
-            }
-          : null;
-    }
-  }, [nodes, edges, selectedItemId]);
-
   const { mutate: saveGraph, isPending } = useSaveDialogFlow({
     onSuccess: () => {
       setLastSaved(new Date());
@@ -535,89 +509,77 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
   }, [debouncedSaveGraph, nodes, edges, name, publicGraph]);
 
   return (
-    <>
-      <div className="flex flex-col h-full grow">
-        <nav
-          className={cn(
-            "grid grid-cols-3 gap-4 p-2 items-center pl-2",
-            selectedItem ? "pr-2" : "pr-[50px]"
-          )}
-        >
-          <div className="flex items-center gap-2">
-            {!isGraphListVisibile ? (
-              <button
-                className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200"
-                onClick={showGraphList}
-              >
-                <ChevronRight className="size-4" />
-              </button>
-            ) : null}
-
-            <div className="text-left shrink-0 text-neutral-500 text-sm">
-              {isPending ? "Saving: " : "Last saved: "}
-              {lastSaved
-                ? lastSaved.toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "Never"}
-            </div>
-          </div>
-
-          <Input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Name your dialog flow"
-            className="text-center bg-transparent border-transparent focus:bg-white focus:border-neutral-300 hover:border-neutral-300"
-          />
-
-          <div className="flex gap-4 justify-end items-center">
-            <Select
-              value={model}
-              onValueChange={(value) => setModel(value as typeof model)}
+    <div className="flex flex-col h-full grow">
+      <nav className="grid grid-cols-3 gap-4 p-2 items-center pl-2">
+        <div className="flex items-center gap-2">
+          {!isGraphListVisibile ? (
+            <button
+              className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200"
+              onClick={showGraphList}
             >
-              <SelectTrigger className="border-neutral-200 bg-white shadow-none w-[100px] h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="GPT-4">GPT-4</SelectItem>
-                <SelectItem value="Claude">Claude</SelectItem>
-              </SelectContent>
-            </Select>
+              <ChevronRight className="size-4" />
+            </button>
+          ) : null}
 
-            <div className="flex gap-2">
-              <Switch
-                checked={publicGraph}
-                onCheckedChange={(checked) => setPublicGraph(checked)}
-              />
-              <Badge
-                variant={publicGraph ? "default" : "secondary"}
-                className="flex gap-2"
-              >
-                {publicGraph ? (
-                  <GlobeIcon className="h-4 w-4" />
-                ) : (
-                  <LockIcon className="h-4 w-4" />
-                )}
-
-                {publicGraph ? "Public" : "Private"}
-              </Badge>
-            </div>
+          <div className="text-left shrink-0 text-neutral-500 text-sm">
+            {isPending ? "Saving: " : "Last saved: "}
+            {lastSaved
+              ? lastSaved.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Never"}
           </div>
-        </nav>
+        </div>
 
-        <FlowGraph setOpen={setOpen} />
-      </div>
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Name your dialog flow"
+          className="text-center bg-transparent border-transparent focus:bg-white focus:border-neutral-300 hover:border-neutral-300"
+        />
 
-      <nav
-        className={cn(
-          "relative flex flex-col w-full overflow-hidden shrink-0 pt-14",
-          selectedItem ? "max-w-xs" : "max-w-0"
-        )}
-      >
-        {selectedItem && <Properties selectedItem={selectedItem} />}
+        <div className="flex gap-4 justify-end items-center">
+          <Select
+            value={model}
+            onValueChange={(value) => setModel(value as typeof model)}
+          >
+            <SelectTrigger className="border-neutral-200 bg-white shadow-none w-[100px] h-9">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="GPT-4">GPT-4</SelectItem>
+              <SelectItem value="Claude">Claude</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="flex gap-2">
+            <Switch
+              checked={publicGraph}
+              onCheckedChange={(checked) => setPublicGraph(checked)}
+            />
+            <Badge
+              variant={publicGraph ? "default" : "secondary"}
+              className="flex gap-2"
+            >
+              {publicGraph ? (
+                <GlobeIcon className="h-4 w-4" />
+              ) : (
+                <LockIcon className="h-4 w-4" />
+              )}
+
+              {publicGraph ? "Public" : "Private"}
+            </Badge>
+
+            <DialogClose className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white">
+              <X className="size-4" />
+            </DialogClose>
+          </div>
+        </div>
       </nav>
-    </>
+
+      <FlowGraph setOpen={setOpen} />
+    </div>
   );
 }
 
@@ -659,11 +621,9 @@ export function FlowModal() {
               useDefaultClose={false}
               onInteractOutside={(e) => e.preventDefault()}
             >
-              <DialogClose className="fixed top-[11px] right-2 p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white z-10">
-                <X className="size-4" />
-              </DialogClose>
               <GraphList />
               <FlowEditor setOpen={setOpen} />
+              <Properties />
             </DialogContent>
           </Dialog>
         </TooltipProvider>
