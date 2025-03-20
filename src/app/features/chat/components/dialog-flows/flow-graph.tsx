@@ -312,11 +312,24 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       if (error instanceof CircularDependencyError) {
         const node = nodes.find((n) => n.id === error.node);
         const path = error.path
-          .map((n) => nodes.find((x) => x.id === n)?.data.label)
+          .map((n) => {
+            const node = nodes.find((x) => x.id === n);
+            return node?.data
+              ? "label" in node.data
+                ? node.data.label
+                : node.type
+              : node?.type;
+          })
           .join(" -> ");
+
+        const label = node?.data
+          ? "label" in node.data
+            ? node.data.label
+            : node.type
+          : node?.type;
         toast({
           title: "Uh oh! Circular dependency detected.",
-          description: `${node?.data.label} is causing a circular dependency. The path is: ${path}.`,
+          description: `${label} is causing a circular dependency. The path is: ${path}.`,
           variant: "destructive",
         });
       } else if (error instanceof Error) {
