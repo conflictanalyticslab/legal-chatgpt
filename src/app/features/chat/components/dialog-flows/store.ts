@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { createWithEqualityFn as create } from "zustand/traditional";
 import { GraphFlowEdge, GraphFlowNode, GraphFlowNodeTypes } from "./nodes";
 import { addEdge, applyEdgeChanges, applyNodeChanges, Connection, EdgeChange, NodeChange } from "@xyflow/react";
 
@@ -40,7 +40,7 @@ interface DialogFlowStore {
  *
  * @see {@link useGlobalDialogFlowStore} for the compiled dialog flow to be used in the conversation query.
  */
-export const useDialogFlowStore = create<DialogFlowStore>((set, get) => ({
+export const useDialogFlowStore = create<DialogFlowStore>()((set, get) => ({
   graphId: null,
   name: 'Untitled',
   publicGraph: false,

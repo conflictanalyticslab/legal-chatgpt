@@ -70,6 +70,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DialogClose } from "@radix-ui/react-dialog";
+import { useLayoutStore } from "./layout-store";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -182,6 +183,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
 
   const { type } = useToolbarStore();
 
+  const { isGraphListVisibile } = useLayoutStore();
   const { setCompiledDialogFlow } = useGlobalDialogFlowStore();
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -352,7 +354,8 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     <div
       className={cn(
         "bg-white flex-1 border-x border-t border-neutral-200",
-        selectedItem ? "rounded-t-lg" : "rounded-tl-lg"
+        isGraphListVisibile && "rounded-tl-lg",
+        selectedItem && "rounded-tr-lg"
       )}
     >
       <ReactFlow
@@ -439,9 +442,14 @@ interface FlowEditorProps {
 }
 
 function FlowEditor({ setOpen }: FlowEditorProps) {
-  const { selectedItem: selectedItemId, setSelectedItem } =
-    usePropertiesStore();
+  const { selectedItem: selectedItemId } = usePropertiesStore();
 
+  const { isGraphListVisibile, showGraphList } = useLayoutStore((state) => ({
+    isGraphListVisibile: state.isGraphListVisibile,
+    showGraphList() {
+      state.setIsGraphListVisible(true);
+    },
+  }));
   const {
     name,
     setName,
@@ -513,18 +521,29 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
       <div className="flex flex-col h-full grow">
         <nav
           className={cn(
-            "grid grid-cols-3 gap-4 p-2 items-center pl-[15px]",
-            selectedItem ? "pr-[15px]" : "pr-[50px]"
+            "grid grid-cols-3 gap-4 p-2 items-center pl-2",
+            selectedItem ? "pr-2" : "pr-[50px]"
           )}
         >
-          <div className="text-left shrink-0 text-neutral-500 text-sm">
-            {isPending ? "Saving: " : "Last saved: "}
-            {lastSaved
-              ? lastSaved.toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "Never"}
+          <div className="flex items-center gap-2">
+            {!isGraphListVisibile ? (
+              <button
+                className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200"
+                onClick={showGraphList}
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            ) : null}
+
+            <div className="text-left shrink-0 text-neutral-500 text-sm">
+              {isPending ? "Saving: " : "Last saved: "}
+              {lastSaved
+                ? lastSaved.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "Never"}
+            </div>
           </div>
 
           <Input
@@ -539,7 +558,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
               value={model}
               onValueChange={(value) => setModel(value as typeof model)}
             >
-              <SelectTrigger className="border-neutral-200 bg-white shadow-none w-[100px]">
+              <SelectTrigger className="border-neutral-200 bg-white shadow-none w-[100px] h-9">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -574,16 +593,10 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
 
       <nav
         className={cn(
-          "relative flex flex-col w-full transition-all overflow-auto shrink-0 pt-14",
+          "relative flex flex-col w-full overflow-hidden shrink-0 pt-14",
           selectedItem ? "max-w-xs" : "max-w-0"
         )}
       >
-        <button
-          className="absolute top-14 right-2 p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200"
-          onClick={() => setSelectedItem(null)}
-        >
-          <ChevronRight className="size-4" />
-        </button>
         {selectedItem && <Properties selectedItem={selectedItem} />}
       </nav>
     </>

@@ -3,97 +3,101 @@ import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-import { PlusSquare } from "lucide-react";
+import { ChevronLeft, PlusSquare } from "lucide-react";
 import {
   fetchDialogFlow,
   useFetchUniversalDialogFlows,
   useFetchUserDialogFlows,
 } from "./api";
 import { useDialogFlowStore } from "./store";
-import { useShallow } from "zustand/react/shallow";
+import {} from "zustand/react/shallow";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+import { useLayoutStore } from "./layout-store";
 
 export default function GraphList() {
-  const {
-    graphId,
-    setGraphId,
-    setName,
-    setNodes,
-    setEdges,
-    setLastSaved,
-    setSaveBlocked,
-    setPublicGraph,
-  } = useDialogFlowStore(
-    useShallow((state) => ({
-      graphId: state.graphId,
-      setGraphId: state.setGraphId,
-      setName: state.setName,
-      setNodes: state.setNodes,
-      setEdges: state.setEdges,
-      setLastSaved: state.setLastSaved,
-      setSaveBlocked: state.setSaveBlocked,
-      setPublicGraph: state.setPublicGraph,
-    }))
-  );
+  const isVisible = useLayoutStore((state) => state.isGraphListVisibile);
 
-  const [fetchingGraphId, setFetchingGraphId] = useState<string | null>(null);
+  return (
+    <div className={cn("w-full", isVisible ? "px-2 max-w-xs" : "max-w-0")}>
+      {isVisible && <Header />}
+      {isVisible && <Graphs />}
+    </div>
+  );
+}
+
+function Header() {
+  const close = useLayoutStore((state) => {
+    return () => state.setIsGraphListVisible(false);
+  });
+  const newGraph = useDialogFlowStore((state) => () => {
+    if (state.graphId === null) return;
+    state.setGraphId(null);
+    state.setName("Untitled");
+    state.setNodes([]);
+    state.setEdges([]);
+    state.setLastSaved(null);
+    toast({ title: `New Dialog Flow created` });
+  });
+
+  return (
+    <div className="h-14 flex items-center w-full gap-2">
+      <button
+        className="p-2 rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200"
+        onClick={close}
+      >
+        <ChevronLeft className="size-4" />
+      </button>
+
+      <Button
+        className="hover:bg-neutral-200 border border-neutral-200 hover:border-neutral-300 gap-3 bg-white px-3 w-full h-9"
+        variant="ghost"
+        onClick={() => newGraph()}
+      >
+        <>
+          <PlusSquare className="h-5 w-5" />
+          New Graph
+        </>
+      </Button>
+    </div>
+  );
+}
+
+function Graphs() {
+  const [fetchingId, setFetchingId] = useState<string | null>(null);
 
   const user = useFetchUserDialogFlows();
   const universal = useFetchUniversalDialogFlows();
 
-  async function loadGraph(id: string, saveBlocked: boolean) {
-    if (graphId === id) return;
-    setFetchingGraphId(id);
-    const graph = await fetchDialogFlow(id);
-    setFetchingGraphId(null);
+  const { activeId, loadGraph } = useDialogFlowStore((state) => ({
+    activeId: state.graphId,
+    async loadGraph(id: string, isUniversal: boolean) {
+      if (state.graphId === id) return;
+      setFetchingId(id);
+      const graph = await fetchDialogFlow(id);
+      setFetchingId(null);
 
-    setSaveBlocked(saveBlocked);
-    setGraphId(id);
-    setName(graph.name);
-    setNodes(graph.nodes);
-    setEdges(graph.edges);
-    setLastSaved(new Date());
-    setPublicGraph(false);
-    toast({
-      title: `Dialog Flow '${graph.name}' loaded`,
-    });
-  }
-
-  function newGraph() {
-    if (graphId === null) return;
-    setGraphId(null);
-    setName("Untitled");
-    setNodes([]);
-    setEdges([]);
-    setLastSaved(null);
-    toast({
-      title: `New Dialog Flow created`,
-    });
-  }
+      state.setSaveBlocked(isUniversal);
+      state.setGraphId(id);
+      state.setName(graph.name);
+      state.setNodes(graph.nodes);
+      state.setEdges(graph.edges);
+      state.setLastSaved(new Date());
+      state.setPublicGraph(false);
+      toast({
+        title: `Dialog Flow '${graph.name}' loaded`,
+      });
+    },
+  }));
 
   return (
-    <div className="px-2 max-w-xs w-full">
-      <div className="h-14 flex items-center justify-start w-full">
-        <Button
-          className="hover:bg-neutral-200 border border-neutral-200 hover:border-neutral-300 gap-3 bg-white px-3 w-full"
-          onClick={() => newGraph()}
-        >
-          <>
-            <PlusSquare className="h-5 w-5" />
-            New Graph
-          </>
-        </Button>
-      </div>
-
+    <div className="overflow-y-auto">
       <div className="flex flex-col gap-1 mt-2">
         <Label className="text-neutral-500 mb-2">User Created Graphs</Label>
         {!user.isPending ? (
           (user.data || []).map((item) => {
-            const isFetching = fetchingGraphId === item.id;
-            const isSelected = fetchingGraphId
-              ? isFetching
-              : graphId === item.id;
+            const isFetching = fetchingId === item.id;
+            const isSelected = fetchingId ? isFetching : activeId === item.id;
             return (
               <Button
                 key={item.id}
@@ -120,10 +124,8 @@ export default function GraphList() {
         <Label className="text-neutral-500 mb-2">Provided Graphs</Label>
         {!universal.isPending ? (
           (universal.data || []).map((item) => {
-            const isFetching = fetchingGraphId === item.id;
-            const isSelected = fetchingGraphId
-              ? isFetching
-              : graphId === item.id;
+            const isFetching = fetchingId === item.id;
+            const isSelected = fetchingId ? isFetching : activeId === item.id;
             return (
               <Button
                 key={item.id}
