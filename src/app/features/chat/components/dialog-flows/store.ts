@@ -1,8 +1,15 @@
-import { create } from "zustand";
+import { createWithEqualityFn as create } from "zustand/traditional";
 import { GraphFlowEdge, GraphFlowNode, GraphFlowNodeTypes } from "./nodes";
 import { addEdge, applyEdgeChanges, applyNodeChanges, Connection, EdgeChange, NodeChange } from "@xyflow/react";
 
-const initialNodes: GraphFlowNode[] = [];
+const initialNodes: GraphFlowNode[] = [
+  {
+    id: "ghost",
+    type: "ghost",
+    position: { x: 0, y: 0 },
+    data: { standalone: true },
+  }
+];
 
 const initialEdges: GraphFlowEdge[] = [];
 
@@ -40,7 +47,7 @@ interface DialogFlowStore {
  *
  * @see {@link useGlobalDialogFlowStore} for the compiled dialog flow to be used in the conversation query.
  */
-export const useDialogFlowStore = create<DialogFlowStore>((set, get) => ({
+export const useDialogFlowStore = create<DialogFlowStore>()((set, get) => ({
   graphId: null,
   name: 'Untitled',
   publicGraph: false,
@@ -152,7 +159,7 @@ interface PropertiesStore {
 /**
  * Store for the selected item in the dialog flow editor
  */
-export const usePropertiesStore = create<PropertiesStore>((set, get) => ({
+export const usePropertiesStore = create<PropertiesStore>()((set, get) => ({
   selectedItem: null,
   setSelectedItem: (item) => {
     set({ selectedItem: item })

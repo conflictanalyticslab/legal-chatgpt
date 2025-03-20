@@ -58,6 +58,8 @@ export default function FlowContextMenu({
   const { removeNode } = useDialogFlowStore();
   const { setSelectedItem } = usePropertiesStore();
 
+  const label = "label" in node.data ? node.data.label : "";
+
   return (
     <div
       ref={refs.setFloating}
@@ -65,12 +67,12 @@ export default function FlowContextMenu({
       {...getFloatingProps()}
       className="z-[1000]"
     >
-      <div className="bg-white rounded-md shadow-lg border border-neutral-200 w-64 overflow-hidden">
-        <div className="flex justify-between items-center bg-neutral-50 p-2 pl-3 border-b border-neutral-200">
-          <h3 className="text-sm font-medium text-neutral-700">
-            {node.type === "ghost" ? "Add Node" : (node.data.label as string)}
-          </h3>
-        </div>
+      <div className="bg-white rounded-md shadow-lg shadow-neutral-100 border border-neutral-200 w-64 overflow-hidden">
+        {label && (
+          <div className="flex justify-between items-center bg-neutral-50 p-2.5 pl-3 border-b border-neutral-200">
+            <h3 className="text-sm font-medium text-neutral-700">{label}</h3>
+          </div>
+        )}
 
         <div className="flex flex-col gap-1 p-1 text-neutral-700 text-sm">
           {node.type !== "ghost" && (

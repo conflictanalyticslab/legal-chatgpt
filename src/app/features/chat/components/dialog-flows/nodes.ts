@@ -12,6 +12,8 @@ import KeywordExtractorNode from "./nodes/keyword-extractor-node";
 import PDFNode from "./nodes/pdf-node";
 import GhostNode from "./nodes/ghost-node";
 
+import { titleCase } from "@/lib/utils";
+
 export type ExampleNode = Node<{label: string, body: string}, 'example'>
 export type InstructionNode = Node<{label: string, body: string}, 'instruction'>
 export type ContextNode = Node<{label: string, body: string}, 'context'>
@@ -45,7 +47,7 @@ type PDFData = {
 export type PDFNode = Node<PDFData, 'pdf'>;
 
 
-export type GhostNode = Node<Record<string, unknown>, 'ghost'>;
+export type GhostNode = Node<{standalone?: boolean}, 'ghost'>;
 
 /** The types of all nodes in the graph. */
 export type GraphFlowNode = ExampleNode | InstructionNode | ContextNode | SwitchNode | RelevantNode | KeywordExtractorNode | PDFNode | GhostNode;
@@ -90,7 +92,7 @@ export function createEmptyNode(type: GraphFlowNodeTypes, position: XYPosition):
                 type,
                 position,
                 data: {
-                    label: type.charAt(0).toUpperCase() + type.substring(1).toLowerCase(),
+                    label: titleCase(type),
                     body: ''
                 }
             }

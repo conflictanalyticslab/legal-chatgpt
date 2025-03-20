@@ -29,13 +29,12 @@ import {
 } from "./store";
 import {
   createEmptyNode,
-  GhostNode,
   GraphFlowEdge,
   GraphFlowNode,
   GraphFlowNodeTypes,
   nodeTypes,
 } from "./nodes";
-import Properties, { SelectedItem } from "./properties";
+import Properties from "./properties";
 import { compileGraph } from "./compiler";
 import { useShallow } from "zustand/react/shallow";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -47,11 +46,31 @@ import { useDebouncedCallback } from "use-debounce";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { GlobeIcon, LockIcon, WandSparklesIcon } from "lucide-react";
+import {
+  ChevronRight,
+  GlobeIcon,
+  LockIcon,
+  WandSparklesIcon,
+  X,
+  StickyNote,
+  Info,
+  Brain,
+  TextSearch,
+  FileText,
+} from "lucide-react";
 import autoAlign from "./auto-align";
 import { DIAMETER } from "./nodes/circular-node";
 import NodeContextMenu from "./node-context-menu";
 import NodeSelectionMenu from "./node-selection-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DialogClose } from "@radix-ui/react-dialog";
+import { useLayoutStore } from "./layout-store";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -65,80 +84,96 @@ function Toolbar() {
   };
 
   return (
-    <div className="flex flex-row gap-2 z-10 bg-white absolute top-0 left-[50%] translate-x-[-50%] border-[1px] border-[#1a192b] p-4 rounded-lg gap-8">
-      <div
-        className="flex w-[100px] h-[100px] rounded-full bg-white border-[1px] border-[#1a192b] justify-center"
-        onDragStart={(e) => onDragStart(e, "example")}
-        draggable
-      >
-        <div className="text-[12px] self-center text-center">Example Node</div>
-      </div>
-
-      <div
-        className="flex w-[100px] h-[100px] justify-center bg-transparent"
-        onDragStart={(e) => onDragStart(e, "instruction")}
-        draggable
-      >
-        <div className="flex -translate-x-[0.5px] w-[75px] h-[75px] rotate-45 bg-transparent border-[1px] border-[#1a192b] rounded-md self-center">
-          <div className="-rotate-45 text-[12px] bg-transparent self-center text-center">
-            Instruction Node
+    <div className="bg-white absolute bottom-0 left-[50%] translate-x-[-50%] z-10 border border-b-0 border-neutral-200 px-4 pb-2 rounded-t-lg">
+      <div className="flex gap-4 -mt-10">
+        <div
+          className="flex flex-col gap-2 items-center group"
+          onDragStart={(e) => onDragStart(e, "example")}
+          draggable
+        >
+          <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
+            <StickyNote className="size-8 text-neutral-700" />
+          </div>
+          <div className="text-sm text-center">Example</div>
+        </div>
+        <div
+          className="flex flex-col gap-2 items-center group"
+          onDragStart={(e) => onDragStart(e, "instruction")}
+          draggable
+        >
+          <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
+            <Info className="size-8 text-neutral-700" />
+          </div>
+          <div className="text-sm text-center">Instruction</div>
+        </div>
+        <div
+          className="flex flex-col gap-2 items-center group"
+          onDragStart={(e) => onDragStart(e, "context")}
+          draggable
+        >
+          <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
+            <Brain className="size-8 text-neutral-700" />
+          </div>
+          <div className="text-sm text-center">Context</div>
+        </div>
+        <div
+          className="flex flex-col gap-2 items-center group"
+          onDragStart={(e) => onDragStart(e, "switch")}
+          draggable
+        >
+          <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
+            🚦
+          </div>
+          <div className="text-sm text-center">Switch</div>
+        </div>
+        <div
+          className="flex flex-col gap-2 items-center group"
+          onDragStart={(e) => onDragStart(e, "relevant")}
+          draggable
+        >
+          <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
+            🤔
+          </div>
+          <div className="text-sm text-center">Relevant</div>
+        </div>
+        <div
+          className="flex flex-col gap-2 items-center group"
+          onDragStart={(e) => onDragStart(e, "keyword-extractor")}
+          draggable
+        >
+          <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
+            <TextSearch className="size-8 text-neutral-700" />
+          </div>
+          <div className="text-sm text-center">
+            Keyword
+            <br />
+            Extractor
           </div>
         </div>
-      </div>
-
-      <div
-        className="flex w-[100px] h-[100px] bg-white border-[1px] border-[#1a192b] justify-center"
-        onDragStart={(e) => onDragStart(e, "context")}
-        draggable
-      >
-        <div className="text-[12px] self-center text-center">Context Node</div>
-      </div>
-
-      <div
-        className="flex w-[100px] h-[100px] bg-white border-[1px] border-[#1a192b] justify-center"
-        onDragStart={(e) => onDragStart(e, "switch")}
-        draggable
-      >
-        <div className="text-[12px] self-center text-center">Switch Node</div>
-      </div>
-
-      <div
-        className="flex w-[100px] h-[100px] bg-white border-[1px] border-[#1a192b] justify-center"
-        onDragStart={(e) => onDragStart(e, "relevant")}
-        draggable
-      >
-        <div className="text-[12px] self-center text-center">Relevant Node</div>
-      </div>
-
-      <div
-        className="flex w-[100px] h-[100px] bg-white border-[1px] border-[#1a192b] justify-center"
-        onDragStart={(e) => onDragStart(e, "keyword-extractor")}
-        draggable
-      >
-        <div className="text-[12px] self-center text-center">
-          Keyword Extractor Node
+        <div
+          className="flex flex-col gap-2 items-center group"
+          onDragStart={(e) => onDragStart(e, "pdf")}
+          draggable
+        >
+          <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
+            <FileText className="size-8 text-neutral-700" />
+          </div>
+          <div className="text-sm text-center">PDF</div>
         </div>
-      </div>
-
-      <div
-        className="flex w-[100px] h-[100px] bg-white border-[1px] border-[#1a192b] justify-center"
-        onDragStart={(e) => onDragStart(e, "pdf")}
-        draggable
-      >
-        <div className="text-[12px] self-center text-center">PDF Node</div>
       </div>
     </div>
   );
 }
 
 function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
-  const { screenToFlowPosition, fitView } = useReactFlow();
+  const { setCenter, screenToFlowPosition, fitView } = useReactFlow();
 
   const [activeGhost, setActiveGhost] = useState<HTMLElement | null>(null);
 
   const {
     name,
     nodes,
+    setNodes,
     edges,
     onNodesChange,
     onEdgesChange,
@@ -149,6 +184,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
 
   const { type } = useToolbarStore();
 
+  const { isGraphListVisibile } = useLayoutStore();
   const { setCompiledDialogFlow } = useGlobalDialogFlowStore();
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -163,6 +199,10 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       event.preventDefault();
 
       if (!type) return;
+
+      // prettier-ignore
+      const isStandaloneGhostExist = nodes.length === 1 && nodes.find((node) => node.type === "ghost" && node.data.standalone);
+      if (isStandaloneGhostExist) setNodes([]);
 
       const position = screenToFlowPosition({
         x: event.clientX,
@@ -184,7 +224,13 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       target.classList.contains("react-flow__handle") &&
       target.classList.contains("source");
     if (!isSourceHandle) {
-      return setSelectedItem({ id: node.id, type: "node" });
+      setSelectedItem({ id: node.id, type: "node" });
+      setCenter(
+        node.position.x + DIAMETER / 2,
+        node.position.y + DIAMETER / 2,
+        { duration: 500 }
+      );
+      return;
     }
 
     const handleId = target.dataset.handleid;
@@ -230,22 +276,19 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       y = index < middleIndex ? y - offset : y + offset;
     }
 
-    const ghostId = `ghost-${node.id}-${Date.now()}`;
-    addNode({
-      id: ghostId,
-      type: "ghost",
-      position: {
-        x: node.position.x + 200,
-        y,
-      },
-      data: {},
-    });
+    const ghost = createEmptyNode("ghost", { x: node.position.x + 200, y });
+    addNode(ghost);
+    setCenter(
+      ghost.position.x + DIAMETER / 2,
+      ghost.position.y + DIAMETER / 2,
+      { duration: 500 }
+    );
 
     addEdge({
-      id: `e-${node.id}-${ghostId}`,
+      id: `e-${node.id}-${ghost.id}`,
       source: node.id,
       sourceHandle: handleId,
-      target: ghostId,
+      target: ghost.id,
     });
   };
 
@@ -272,11 +315,24 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       if (error instanceof CircularDependencyError) {
         const node = nodes.find((n) => n.id === error.node);
         const path = error.path
-          .map((n) => nodes.find((x) => x.id === n)?.data.label)
+          .map((n) => {
+            const node = nodes.find((x) => x.id === n);
+            return node?.data
+              ? "label" in node.data
+                ? node.data.label
+                : node.type
+              : node?.type;
+          })
           .join(" -> ");
+
+        const label = node?.data
+          ? "label" in node.data
+            ? node.data.label
+            : node.type
+          : node?.type;
         toast({
           title: "Uh oh! Circular dependency detected.",
-          description: `${node?.data.label} is causing a circular dependency. The path is: ${path}.`,
+          description: `${label} is causing a circular dependency. The path is: ${path}.`,
           variant: "destructive",
         });
       } else if (error instanceof Error) {
@@ -316,7 +372,12 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   };
 
   return (
-    <>
+    <div
+      className={cn(
+        "bg-white flex-1 border-l border-t border-neutral-200",
+        isGraphListVisibile && "rounded-tl-lg"
+      )}
+    >
       <ReactFlow
         nodeTypes={nodeTypes}
         nodes={nodes}
@@ -332,28 +393,21 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         onEdgeClick={onEdgeClick}
         fitView
       >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Controls />
-          </TooltipTrigger>
-          <TooltipContent side="right">
-            Controls for the flow graph.
-          </TooltipContent>
-        </Tooltip>
+        <Controls />
+        <Toolbar />
+        <MiniMap position="top-left" />
+        {contextMenu && (
+          <NodeContextMenu
+            {...contextMenu}
+            onClose={() => setContextMenu(null)}
+          />
+        )}
 
-        <div
-          className="flex gap-4"
-          style={{
-            position: "absolute",
-            right: "5px",
-            bottom: "20px",
-            zIndex: 4, // ensure it is above the graph
-          }}
-        >
+        <div className="flex gap-2 absolute bottom-2.5 right-2.5 z-50">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 type="button"
                 aria-label="Auto-align Graph"
                 onClick={async () => {
@@ -361,8 +415,9 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
                   onNodesChange(changes);
                   window.requestAnimationFrame(() => fitView());
                 }}
+                className="p-2.5 h-[unset] border-neutral-200 aspect-square"
               >
-                <WandSparklesIcon className="size-[30px]" />
+                <WandSparklesIcon className="size-6" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top" sideOffset={5}>
@@ -373,16 +428,17 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 type="button"
                 aria-label="Save Graph"
                 onClick={injectGraph}
+                className="p-2.5 h-[unset] border-neutral-200 aspect-square"
               >
                 <Image
                   src="/assets/icons/send-horizontal.svg"
                   alt="send"
-                  width={30}
-                  height={30}
+                  width={24}
+                  height={24}
                 />
               </Button>
             </TooltipTrigger>
@@ -391,22 +447,13 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
             </TooltipContent>
           </Tooltip>
         </div>
-
-        <Toolbar />
-        <MiniMap position="top-right" />
-        {contextMenu && (
-          <NodeContextMenu
-            {...contextMenu}
-            onClose={() => setContextMenu(null)}
-          />
-        )}
       </ReactFlow>
 
       <NodeSelectionMenu
         ghostRef={activeGhost}
         onClose={() => setActiveGhost(null)}
       />
-    </>
+    </div>
   );
 }
 
@@ -415,8 +462,12 @@ interface FlowEditorProps {
 }
 
 function FlowEditor({ setOpen }: FlowEditorProps) {
-  const { selectedItem: selectedItemId } = usePropertiesStore();
-
+  const { isGraphListVisibile, showGraphList } = useLayoutStore((state) => ({
+    isGraphListVisibile: state.isGraphListVisibile,
+    showGraphList() {
+      state.setIsGraphListVisible(true);
+    },
+  }));
   const {
     name,
     setName,
@@ -445,29 +496,6 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
     }))
   );
 
-  const selectedItem = useMemo<SelectedItem | null>(() => {
-    if (!selectedItemId) return null;
-
-    switch (selectedItemId.type) {
-      case "node":
-        const node = nodes.find((n) => n.id === selectedItemId.id);
-        return node
-          ? {
-              type: "node",
-              node,
-            }
-          : null;
-      case "edge":
-        const edge = edges.find((e) => e.id === selectedItemId.id);
-        return edge
-          ? {
-              type: "edge",
-              edge,
-            }
-          : null;
-    }
-  }, [nodes, edges, selectedItemId]);
-
   const { mutate: saveGraph, isPending } = useSaveDialogFlow({
     onSuccess: () => {
       setLastSaved(new Date());
@@ -484,17 +512,58 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
   }, [debouncedSaveGraph, nodes, edges, name, publicGraph]);
 
   return (
-    <>
-      <div className="flex flex-col h-full grow">
-        <nav className="flex flex-row justify-between items-center m-4 gap-4">
-          <div className="flex flex-row gap-2 justify-center w-[180px]">
+    <div className="flex flex-col h-full grow">
+      <nav className="grid grid-cols-3 gap-4 py-2 items-center px-2.5">
+        <div className="flex items-center gap-2">
+          {!isGraphListVisibile ? (
+            <button
+              className="rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white size-9 flex items-center justify-center"
+              onClick={showGraphList}
+            >
+              <ChevronRight className="size-4" />
+            </button>
+          ) : null}
+
+          <div className="text-left shrink-0 text-neutral-500 text-sm">
+            {isPending ? "Saving: " : "Last saved: "}
+            {lastSaved
+              ? lastSaved.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Never"}
+          </div>
+        </div>
+
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Name your dialog flow"
+          className="text-center bg-transparent border-transparent focus:bg-white focus:border-neutral-300 hover:border-neutral-300"
+        />
+
+        <div className="flex gap-4 justify-end items-center">
+          <Select
+            value={model}
+            onValueChange={(value) => setModel(value as typeof model)}
+          >
+            <SelectTrigger className="border-neutral-200 bg-white shadow-none w-[100px] h-9">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="GPT-4">GPT-4</SelectItem>
+              <SelectItem value="Claude">Claude</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="flex gap-2 items-center">
             <Switch
               checked={publicGraph}
               onCheckedChange={(checked) => setPublicGraph(checked)}
             />
             <Badge
               variant={publicGraph ? "default" : "secondary"}
-              className="flex flex-row gap-2"
+              className="flex gap-2"
             >
               {publicGraph ? (
                 <GlobeIcon className="h-4 w-4" />
@@ -506,53 +575,14 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
             </Badge>
           </div>
 
-          <div className="flex flex-row gap-2 justify-center w-[180px]">
-            <Switch
-              checked={model === "GPT-4"}
-              onCheckedChange={(checked) =>
-                setModel(checked ? "GPT-4" : "Claude")
-              }
-            />
-            <Badge
-              variant={model === "GPT-4" ? "default" : "secondary"}
-              className="flex flex-row gap-2"
-            >
-              {model === "GPT-4" ? "GPT-4" : "Claude"}
-            </Badge>
-          </div>
-
-          <Input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Name your dialog flow"
-          />
-
-          <div className="w-[300px] flex flex-row justify-center">
-            <Badge variant={isPending ? "default" : "secondary"}>
-              {isPending ? "Saving: " : "Last saved: "}
-              {lastSaved
-                ? lastSaved.toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "Never"}
-            </Badge>
-          </div>
-        </nav>
-        <FlowGraph setOpen={setOpen} />
-      </div>
-
-      <nav
-        className={cn(
-          "relative transition-all flex flex-col w-[0px] border-l-[#e2e8f0] duration-300 ease-in-out overflow-auto scrollbar-thin",
-          {
-            "w-1/6": !!selectedItem,
-          }
-        )}
-      >
-        {selectedItem && <Properties selectedItem={selectedItem} />}
+          <DialogClose className="size-9 flex items-center justify-center rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white">
+            <X className="size-4" />
+          </DialogClose>
+        </div>
       </nav>
-    </>
+
+      <FlowGraph setOpen={setOpen} />
+    </div>
   );
 }
 
@@ -590,12 +620,13 @@ export function FlowModal() {
             </Tooltip>
             <DialogContent
               onOpenAutoFocus={(e) => e.preventDefault()}
-              className="size-full !rounded-none flex flex-col gap-5 overflow-auto max-w-[unset]"
+              className="size-full !rounded-none flex max-w-[unset] bg-neutral-100 p-0 outline-none border-0 gap-0"
+              useDefaultClose={false}
+              onInteractOutside={(e) => e.preventDefault()}
             >
-              <div className="flex flex-row h-full items-stretch">
-                <GraphList />
-                <FlowEditor setOpen={setOpen} />
-              </div>
+              <GraphList />
+              <FlowEditor setOpen={setOpen} />
+              <Properties />
             </DialogContent>
           </Dialog>
         </TooltipProvider>

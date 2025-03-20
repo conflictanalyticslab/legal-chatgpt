@@ -39,3 +39,7 @@ export type ApiResponse<T> = {
   error?: string | null;
   data: T | null;
 };
+
+export function titleCase(s: string) {
+  return s.charAt(0).toUpperCase() + s.substring(1).toLowerCase()
+}

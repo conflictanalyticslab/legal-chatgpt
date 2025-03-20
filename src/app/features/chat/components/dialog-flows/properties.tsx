@@ -3,7 +3,6 @@ import Dropzone from "react-dropzone";
 import GPT4Tokenizer from "gpt4-tokenizer";
 import { useUpdateNodeInternals } from "@xyflow/react";
 
-import { useShallow } from "zustand/react/shallow";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,10 +26,10 @@ import { Button } from "@/components/ui/button";
 import { ulid } from "ulid";
 import { Slider } from "@/components/ui/slider";
 import { useGlobalContext } from "@/app/store/global-context";
-import { cn } from "@/lib/utils";
+import { cn, titleCase } from "@/lib/utils";
 import { postPDF } from "@/app/api/(api-service-layer)/post-pdf";
-import { uploadPdfDocument } from "@/app/api/(api-service-layer)/upload-pdf-document";
 import { toast } from "@/components/ui/use-toast";
+import { X } from "lucide-react";
 
 interface EdgePropertiesPanelProps {
   edge: GraphFlowEdge;
@@ -63,29 +62,23 @@ function EdgePropertiesPanel({ edge, updateEdge }: EdgePropertiesPanelProps) {
   }, [edge]);
 
   return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
-        <Label className="text-[grey]">Editing Edge</Label>
+    <>
+      <div className="flex flex-col gap-2">
+        <Label className="text-neutral-500">Label:</Label>
+        <Input value={label} onChange={onLabelChange} />
       </div>
 
-      <div className="py-4">
-        <div className="flex flex-col">
-          <Label className="py-2">Label:</Label>
-          <Input value={label} onChange={onLabelChange} />
-        </div>
-
-        <div className="flex flex-col">
-          <Label className="py-2">Body:</Label>
-          <Textarea
-            placeholder="You can leave this empty"
-            wrap="soft"
-            value={body}
-            rows={10}
-            onChange={onBodyChange}
-          />
-        </div>
+      <div className="flex flex-col gap-2">
+        <Label className="text-neutral-500">Body:</Label>
+        <Textarea
+          placeholder="You can leave this empty"
+          wrap="soft"
+          value={body}
+          rows={10}
+          onChange={onBodyChange}
+        />
       </div>
-    </div>
+    </>
   );
 }
 
@@ -164,72 +157,63 @@ function PDFNodePropertiesPanel({
   }
 
   return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
-        <Label className="text-[grey]">Editing PDF Node</Label>
+    <>
+      <div className="flex flex-col gap-2">
+        <Label className="text-neutral-500">Label:</Label>
+        <Input value={label} onChange={(e) => onLabelChange(e.target.value)} />
       </div>
 
-      <div className="py-4">
-        <div className="flex flex-col">
-          <Label className="py-2">Label:</Label>
-          <Input
-            value={label}
-            onChange={(e) => onLabelChange(e.target.value)}
+      {content.length ? (
+        <div className="flex flex-col gap-2">
+          <Label className="text-neutral-500">Content:</Label>
+          <Textarea
+            value={content}
+            onChange={(e) => onContentChange(e.target.value)}
+            rows={10}
+            className="focus-visible:ring-0 focus-visible:ring-offset-0"
           />
         </div>
-
-        {content.length ? (
-          <div className="flex flex-col">
-            <Label className="py-2">Content:</Label>
-            <Textarea
-              value={content}
-              onChange={(e) => onContentChange(e.target.value)}
-              rows={10}
-              className="focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
-          </div>
-        ) : (
-          <div className="flex flex-col">
-            <Label className="py-2">File:</Label>
-            <Dropzone
-              accept={{ "application/pdf": [".pdf"] }}
-              maxFiles={1}
-              maxSize={5 * 1024 * 1024 /* 5 megabytes */}
-              onDropAccepted={async (files) => {
-                setIsUploading(true);
-                const res = await uploadFile(files[0]);
-                if (res.type === "success") {
-                  toast({ title: "PDF uploaded successfully!" });
-                  onLabelChange(res.label);
-                  onContentChange(res.content);
-                } else {
-                  toast({ title: res.message, variant: "destructive" });
-                }
-                setIsUploading(false);
-              }}
-              onDropRejected={() =>
-                setInfoAlert("File is too big. We have a 5 Mb limit.")
+      ) : (
+        <div className="flex flex-col gap-2">
+          <Label className="text-neutral-500">File:</Label>
+          <Dropzone
+            accept={{ "application/pdf": [".pdf"] }}
+            maxFiles={1}
+            maxSize={5 * 1024 * 1024 /* 5 megabytes */}
+            onDropAccepted={async (files) => {
+              setIsUploading(true);
+              const res = await uploadFile(files[0]);
+              if (res.type === "success") {
+                toast({ title: "PDF uploaded successfully!" });
+                onLabelChange(res.label);
+                onContentChange(res.content);
+              } else {
+                toast({ title: res.message, variant: "destructive" });
               }
-            >
-              {({ getRootProps, getInputProps, isDragActive }) => (
-                <div
-                  className={cn(
-                    "border-2 rounded-md border-dashed h-[250px] flex items-center justify-center ",
-                    isDragActive || isUploading
-                      ? "text-sky-500 border-sky-400/50 bg-sky-50/50"
-                      : "border-neutral-300 text-neutral-500"
-                  )}
-                  {...getRootProps()}
-                >
-                  <input {...getInputProps()} />
-                  <p>{isUploading ? "Uploading..." : "Drop the file here"}</p>
-                </div>
-              )}
-            </Dropzone>
-          </div>
-        )}
-      </div>
-    </div>
+              setIsUploading(false);
+            }}
+            onDropRejected={() =>
+              setInfoAlert("File is too big. We have a 5 Mb limit.")
+            }
+          >
+            {({ getRootProps, getInputProps, isDragActive }) => (
+              <div
+                className={cn(
+                  "border-2 rounded-md border-dashed h-[250px] flex items-center justify-center ",
+                  isDragActive || isUploading
+                    ? "text-sky-500 border-sky-400/50 bg-sky-50/50"
+                    : "border-neutral-300 text-neutral-500"
+                )}
+                {...getRootProps()}
+              >
+                <input {...getInputProps()} />
+                <p>{isUploading ? "Uploading..." : "Drop the file here"}</p>
+              </div>
+            )}
+          </Dropzone>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -254,17 +238,9 @@ function KeywordExtractorNodePropertiesPanel({
   }, [node]);
 
   return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
-        <Label className="text-[grey]">Editing Keyword Extractor Node</Label>
-      </div>
-
-      <div className="py-4">
-        <div className="flex flex-col">
-          <Label className="py-2">Label:</Label>
-          <Input value={label} onChange={onLabelChange} />
-        </div>
-      </div>
+    <div className="flex flex-col gap-2">
+      <Label className="text-neutral-500">Label:</Label>
+      <Input value={label} onChange={onLabelChange} />
     </div>
   );
 }
@@ -299,27 +275,22 @@ function RelevantNodePropertiesPanel({
   }, [node]);
 
   return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
-        <Label className="text-[grey]">Editing Relevant Node</Label>
+    <>
+      <div className="flex flex-col gap-2">
+        <Label className="text-neutral-500">Label:</Label>
+        <Input value={label} onChange={onLabelChange} />
       </div>
 
-      <div className="py-4">
-        <div className="flex flex-col">
-          <Label className="py-2">Label:</Label>
-          <Input value={label} onChange={onLabelChange} />
-        </div>
-        <div className="flex flex-col">
-          <Label className="py-2">Threshold:</Label>
-          <Slider
-            value={[threshold]}
-            onValueChange={onThresholdChange}
-            max={100}
-            step={1}
-          />
-        </div>
+      <div className="flex flex-col gap-2">
+        <Label className="text-neutral-500">Threshold:</Label>
+        <Slider
+          value={[threshold]}
+          onValueChange={onThresholdChange}
+          max={100}
+          step={1}
+        />
       </div>
-    </div>
+    </>
   );
 }
 
@@ -356,29 +327,23 @@ function GenericNodePropertiesPanel({
   }, [node]);
 
   return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
-        <Label className="text-[grey]">Editing {node.type} Node</Label>
+    <>
+      <div className="flex flex-col gap-2">
+        <Label className="text-neutral-500">Label:</Label>
+        <Input value={label} onChange={onLabelChange} />
       </div>
 
-      <div className="py-4">
-        <div className="flex flex-col">
-          <Label className="py-2">Label:</Label>
-          <Input value={label} onChange={onLabelChange} />
-        </div>
-
-        <div className="flex flex-col">
-          <Label className="py-2">Body:</Label>
-          <Textarea
-            placeholder="You can leave this empty"
-            wrap="soft"
-            value={body}
-            rows={10}
-            onChange={onBodyChange}
-          />
-        </div>
+      <div className="flex flex-col gap-2">
+        <Label className="text-neutral-500">Body:</Label>
+        <Textarea
+          placeholder="You can leave this empty"
+          wrap="soft"
+          value={body}
+          rows={10}
+          onChange={onBodyChange}
+        />
       </div>
-    </div>
+    </>
   );
 }
 
@@ -419,14 +384,14 @@ function OtherwisePropertiesPanel({
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="flex flex-col">
-        <Label className="py-2">Label:</Label>
+    <>
+      <div className="flex flex-col gap-2">
+        <Label className="text-neutral-500">Label:</Label>
         <Input value={label} onChange={onLabelChange} />
       </div>
 
-      <div className="flex flex-col">
-        <Label className="py-2">Body:</Label>
+      <div className="flex flex-col gap-2">
+        <Label className="text-neutral-500">Body:</Label>
         <Textarea
           placeholder="You can leave this empty"
           wrap="soft"
@@ -435,11 +400,12 @@ function OtherwisePropertiesPanel({
           onChange={onBodyChange}
         />
       </div>
-    </div>
+    </>
   );
 }
 
 interface ConditionPropertiesPanelProps {
+  index: number;
   condition: SwitchNode["data"]["conditions"][number];
   updateCondition: (
     id: string,
@@ -451,6 +417,7 @@ interface ConditionPropertiesPanelProps {
 }
 
 function ConditionPropertiesPanel({
+  index,
   condition,
   updateCondition,
   deleteCondition,
@@ -478,20 +445,36 @@ function ConditionPropertiesPanel({
     });
   };
 
+  // prettier-ignore
+  const color = SWITCH_NODE_CONDITION_COLORS[index % SWITCH_NODE_CONDITION_COLORS.length];
+
   return (
-    <div className="flex flex-col">
-      <div className="flex flex-col">
-        <div className="flex flex-row items-center gap-2">
-          <Label className="py-2">Label:</Label>
-          <Button variant="ghost" size="icon" onClick={deleteCondition}>
-            Delete
-          </Button>
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-row items-center gap-2 justify-between">
+        <div className="flex items-center gap-2">
+          <div
+            className="size-5 rounded-full border-2 border-white"
+            style={{ backgroundColor: condition.color || color }}
+          />
+          <span className="text-sm">Condition {index + 1}</span>
         </div>
+        <button
+          className="text-sm text-red-500 hover:underline rounded-md"
+          onClick={deleteCondition}
+        >
+          Delete
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label className="text-neutral-500">Label:</Label>
+
         <Input value={label} onChange={onLabelChange} />
       </div>
 
-      <div className="flex flex-col">
-        <Label className="py-2">Body:</Label>
+      <div className="flex flex-col gap-2">
+        <Label className="text-neutral-500">Body:</Label>
+
         <Textarea
           placeholder="You can leave this empty"
           wrap="soft"
@@ -531,6 +514,8 @@ function SwitchNodePropertiesPanel({
   }, [node]);
 
   const addCondition = useCallback(() => {
+    // prettier-ignore
+    const color = SWITCH_NODE_CONDITION_COLORS[node.data.conditions.length % SWITCH_NODE_CONDITION_COLORS.length];
     updateNode(node.id, (node) => {
       return {
         ...node,
@@ -542,7 +527,7 @@ function SwitchNodePropertiesPanel({
               id: ulid(),
               label: "If...",
               body: "",
-              color: SWITCH_NODE_CONDITION_COLORS[node.data.conditions.length % SWITCH_NODE_CONDITION_COLORS.length],
+              color,
             },
           ],
         },
@@ -649,138 +634,186 @@ function SwitchNodePropertiesPanel({
   };
 
   return (
-    <div className="px-4 flex flex-col divide-y">
-      <div className="py-4">
-        <Label className="text-[grey]">Editing Switch Node</Label>
+    <>
+      <div className="flex flex-col gap-2">
+        <Label className="text-neutral-500">Label:</Label>
+        <Input value={label} onChange={onLabelChange} />
       </div>
 
-      <div className="py-4">
-        <div className="flex flex-col mb-2">
-          <Label className="py-2">Label:</Label>
-          <Input value={label} onChange={onLabelChange} />
+      {node.data.conditions.map((condition, i) => (
+        <ConditionPropertiesPanel
+          index={i}
+          key={condition.id}
+          condition={condition}
+          updateCondition={updateCondition}
+          deleteCondition={() => deleteCondition(condition.id)}
+        />
+      ))}
+
+      <Button className="w-full shrink-0" size="sm" onClick={addCondition}>
+        Add Condition
+      </Button>
+
+      <div className="flex flex-row items-center gap-2 justify-between">
+        <Label className="text-neutral-500">Otherwise:</Label>
+        <Switch
+          checked={otherwiseEnabled}
+          onCheckedChange={onOtherwiseChange}
+        />
+      </div>
+
+      {node.data.otherwise && (
+        <OtherwisePropertiesPanel
+          otherwise={node.data.otherwise}
+          updateOtherwise={updateOtherwise}
+        />
+      )}
+    </>
+  );
+}
+
+type SelectedItem =
+  | { type: "node"; node: GraphFlowNode }
+  | { type: "edge"; edge: GraphFlowEdge };
+
+export default function PropertiesPanel() {
+  const { nodes, edges, updateNode, updateEdge } = useDialogFlowStore();
+
+  const { item, close } = usePropertiesStore((state) => {
+    return {
+      item: (() => {
+        const item = state.selectedItem;
+        if (!item) return null;
+        switch (item.type) {
+          case "node":
+            const node = nodes.find((n) => n.id === item.id);
+            return node ? { type: "node", node } : null;
+          case "edge":
+            const edge = edges.find((e) => e.id === item.id);
+            return edge ? { type: "edge", edge } : null;
+        }
+      })() as SelectedItem,
+      close() {
+        state.setSelectedItem(null);
+      },
+    };
+  });
+  if (!item) return;
+
+  return (
+    <div className="flex flex-col fixed top-[67px] right-2.5 bg-neutral-100 rounded-lg border border-neutral-200 max-w-xs w-full shadow-lg shadow-neutral-100 overflow-hidden max-h-[calc(100%-67px-10px-46px-10px)]">
+      <div className="flex-col flex gap-2 px-2.5 pt-2.5">
+        <div className="flex items-center gap-4 justify-between">
+          <Label className="text-[grey]">
+            {item.type === "edge"
+              ? "Edge"
+              : getNodeTypeDisplayText(item.node.type)}
+          </Label>
+
+          <button
+            className="size-9 flex items-center justify-center rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white"
+            onClick={close}
+          >
+            <X className="size-4" />
+          </button>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-row items-center gap-2">
-            <Label className="py-2">Conditions:</Label>
-            <Button variant="ghost" size="icon" onClick={addCondition}>
-              Add
-            </Button>
-          </div>
-          {node.data.conditions.map((condition) => (
-            <ConditionPropertiesPanel
-              key={condition.id}
-              condition={condition}
-              updateCondition={updateCondition}
-              deleteCondition={() => deleteCondition(condition.id)}
-            />
-          ))}
-        </div>
+        <hr className="border-neutral-200" />
+      </div>
 
-        <div className="flex flex-col">
-          <div className="flex flex-row items-center gap-2">
-            <Label className="py-2">Otherwise:</Label>
-            <Switch
-              checked={otherwiseEnabled}
-              onCheckedChange={onOtherwiseChange}
-            />
-          </div>
-
-          {node.data.otherwise && (
-            <OtherwisePropertiesPanel
-              otherwise={node.data.otherwise}
-              updateOtherwise={updateOtherwise}
-            />
-          )}
-        </div>
+      <div className="overflow-y-auto flex flex-col gap-4 flex-1 p-2.5 pt-4">
+        {(() => {
+          switch (item.type) {
+            case "node": {
+              const node = item.node;
+              invariant(node.type, "Node type is undefined");
+              switch (node.type) {
+                case "instruction":
+                case "context":
+                case "example":
+                  return (
+                    <GenericNodePropertiesPanel
+                      node={node}
+                      updateNode={(id, fn) =>
+                        updateNode(
+                          id,
+                          fn as (node: GraphFlowNode) => GraphFlowNode
+                        )
+                      }
+                    />
+                  );
+                case "switch":
+                  return (
+                    <SwitchNodePropertiesPanel
+                      node={node}
+                      updateNode={(id, fn) =>
+                        updateNode(
+                          id,
+                          fn as (node: GraphFlowNode) => GraphFlowNode
+                        )
+                      }
+                    />
+                  );
+                case "relevant":
+                  return (
+                    <RelevantNodePropertiesPanel
+                      node={node}
+                      updateNode={(id, fn) =>
+                        updateNode(
+                          id,
+                          fn as (node: GraphFlowNode) => GraphFlowNode
+                        )
+                      }
+                    />
+                  );
+                case "keyword-extractor":
+                  return (
+                    <KeywordExtractorNodePropertiesPanel
+                      node={node}
+                      updateNode={(id, fn) =>
+                        updateNode(
+                          id,
+                          fn as (node: GraphFlowNode) => GraphFlowNode
+                        )
+                      }
+                    />
+                  );
+                case "pdf":
+                  return (
+                    <PDFNodePropertiesPanel
+                      node={node}
+                      updateNode={(id, fn) =>
+                        updateNode(
+                          id,
+                          fn as (node: GraphFlowNode) => GraphFlowNode
+                        )
+                      }
+                    />
+                  );
+                case "ghost":
+                  return null;
+                default: {
+                  const exhaustiveCheck: never = node.type;
+                  throw new Error(`Unhandled node type: ${exhaustiveCheck}`);
+                }
+              }
+            }
+            case "edge":
+              return (
+                <EdgePropertiesPanel edge={item.edge} updateEdge={updateEdge} />
+              );
+            default:
+              return null;
+          }
+        })()}
       </div>
     </div>
   );
 }
 
-export type SelectedItem =
-  | { type: "node"; node: GraphFlowNode }
-  | { type: "edge"; edge: GraphFlowEdge };
-
-interface PropertiesPanelProps {
-  selectedItem: SelectedItem;
-}
-
-export default function PropertiesPanel({
-  selectedItem,
-}: PropertiesPanelProps) {
-  const { updateNode, updateEdge } = useDialogFlowStore(
-    useShallow((state) => ({
-      updateNode: state.updateNode,
-      updateEdge: state.updateEdge,
-    }))
-  );
-
-  switch (selectedItem.type) {
-    case "node": {
-      const node = selectedItem.node;
-      invariant(node.type, "Node type is undefined");
-      switch (node.type) {
-        case "instruction":
-        case "context":
-        case "example":
-          return (
-            <GenericNodePropertiesPanel
-              node={node}
-              updateNode={(id, fn) =>
-                updateNode(id, fn as (node: GraphFlowNode) => GraphFlowNode)
-              }
-            />
-          );
-        case "switch":
-          return (
-            <SwitchNodePropertiesPanel
-              node={node}
-              updateNode={(id, fn) =>
-                updateNode(id, fn as (node: GraphFlowNode) => GraphFlowNode)
-              }
-            />
-          );
-        case "relevant":
-          return (
-            <RelevantNodePropertiesPanel
-              node={node}
-              updateNode={(id, fn) =>
-                updateNode(id, fn as (node: GraphFlowNode) => GraphFlowNode)
-              }
-            />
-          );
-        case "keyword-extractor":
-          return (
-            <KeywordExtractorNodePropertiesPanel
-              node={node}
-              updateNode={(id, fn) =>
-                updateNode(id, fn as (node: GraphFlowNode) => GraphFlowNode)
-              }
-            />
-          );
-        case "pdf":
-          return (
-            <PDFNodePropertiesPanel
-              node={node}
-              updateNode={(id, fn) =>
-                updateNode(id, fn as (node: GraphFlowNode) => GraphFlowNode)
-              }
-            />
-          );
-        case "ghost":
-          return null;
-        default: {
-          const exhaustiveCheck: never = node.type;
-          throw new Error(`Unhandled node type: ${exhaustiveCheck}`);
-        }
-      }
-    }
-    case "edge":
-      return (
-        <EdgePropertiesPanel edge={selectedItem.edge} updateEdge={updateEdge} />
-      );
-    default:
-      return null;
-  }
+function getNodeTypeDisplayText(type: GraphFlowNode["type"]) {
+  if (!type) return null;
+  if (type === "keyword-extractor") return "Keyword Extractor Node";
+  if (type === "pdf") return "PDF Node";
+  return `${titleCase(type)} Node`;
 }
