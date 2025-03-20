@@ -166,7 +166,7 @@ function Toolbar() {
 }
 
 function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
-  const { screenToFlowPosition, fitView } = useReactFlow();
+  const { setCenter, screenToFlowPosition, fitView } = useReactFlow();
 
   const [activeGhost, setActiveGhost] = useState<HTMLElement | null>(null);
 
@@ -224,7 +224,13 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       target.classList.contains("react-flow__handle") &&
       target.classList.contains("source");
     if (!isSourceHandle) {
-      return setSelectedItem({ id: node.id, type: "node" });
+      setSelectedItem({ id: node.id, type: "node" });
+      setCenter(
+        node.position.x + DIAMETER / 2,
+        node.position.y + DIAMETER / 2,
+        { duration: 500 }
+      );
+      return;
     }
 
     const handleId = target.dataset.handleid;
