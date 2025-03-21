@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
   const graphs = getFirestore().collection("graphs");
   try {
-    const { id, name, public: isPublic = false, ...data } = await req.json();
+    const { id, name, ...data } = await req.json();
 
     let graphId = id;
     if (id) {
@@ -42,11 +42,17 @@ export async function POST(req: Request) {
 
         graphId = doc.id;
       } else {
-        graph.update({ user_id: isPublic ? null : user_id, name, ...data });
+        if (saved.user_id !== user_id) {
+          return NextResponse.json(
+            { success: false, error: "Forbidden", data: null },
+            { status: 403 }
+          );
+        }
+        graph.update({ user_id, name, ...data });
       }
     } else {
       const graph = graphs.doc();
-      await graph.create({ user_id: isPublic ? null : user_id, name, ...data });
+      await graph.create({ user_id, name, ...data });
 
       graphId = graph.id;
     }
