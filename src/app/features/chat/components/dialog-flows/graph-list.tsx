@@ -102,7 +102,7 @@ function Graphs() {
   const [fetchingId, setFetchingId] = useState<string | null>(null);
 
   return (
-    <div className="overflow-y-auto">
+    <div className="overflow-y-auto h-[calc(100%-56px)] pb-2">
       <div className="flex flex-col gap-1 mt-2">
         <Label className="text-neutral-500 mb-2">User Created Graphs</Label>
         {!user.isPending ? (
