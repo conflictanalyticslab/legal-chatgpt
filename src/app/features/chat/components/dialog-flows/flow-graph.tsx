@@ -597,14 +597,13 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
             />
             <Badge
               variant={publicGraph ? "default" : "secondary"}
-              className="flex gap-2"
+              className="flex gap-2 p-1 pr-3"
             >
               {publicGraph ? (
-                <GlobeIcon className="h-4 w-4" />
+                <GlobeIcon className="size-4" />
               ) : (
-                <LockIcon className="h-4 w-4" />
+                <LockIcon className="size-4" />
               )}
-
               {publicGraph ? "Public" : "Private"}
             </Badge>
           </div>

@@ -172,6 +172,7 @@ interface DialogFlow {
   name: string;
   nodes: GraphFlowNode[];
   edges: GraphFlowEdge[];
+  public?: boolean;
 }
 
 export async function fetchDialogFlow(graphId: string): Promise<DialogFlow> {
