@@ -26,10 +26,20 @@ export async function GET(_: Request) {
       {
         success: true,
         error: null,
-        data: snapshot.docs.map((doc) => {
-          const data = doc.data();
-          return { id: doc.id, name: data.name };
-        }),
+        data: snapshot.docs
+          .map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              name: data.name,
+              updated_at: (data.updated_at as number) || null,
+            };
+          })
+          .sort((a, b) => {
+            if (a.updated_at === null) return 1;
+            if (b.updated_at === null) return -1;
+            return b.updated_at - a.updated_at;
+          }),
       },
       { status: 200 }
     );

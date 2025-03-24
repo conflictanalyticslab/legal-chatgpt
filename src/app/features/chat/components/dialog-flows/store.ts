@@ -20,7 +20,7 @@ interface DialogFlowStore {
   model: 'GPT-4' | 'Claude';
   nodes: GraphFlowNode[];
   edges: GraphFlowEdge[];
-  lastSaved: Date | null;
+  lastSaved: number | null;
   saveBlocked: boolean;
   setGraphId: (graphId: string | null) => void;
   setName: (name: string) => void;
@@ -35,7 +35,7 @@ interface DialogFlowStore {
   updateNode: (nodeId: string, mutateFn: (node: GraphFlowNode) => GraphFlowNode) => void;
   removeNode: (nodeId: string) => void;
   updateEdge: (edgeId: string, mutateFn: (edge: GraphFlowEdge) => GraphFlowEdge) => void;
-  setLastSaved: (lastSaved: Date | null) => void;
+  setLastSaved: (lastSaved: number | null) => void;
   setSaveBlocked: (saveBlocked: boolean) => void;
   setModel: (model: 'GPT-4' | 'Claude') => void;
 }

@@ -90,7 +90,7 @@ function Graphs() {
       state.setName(graph.name);
       state.setNodes(graph.nodes);
       state.setEdges(graph.edges);
-      state.setLastSaved(new Date());
+      state.setLastSaved(graph.updated_at || null);
       state.setPublicGraph(graph.public || false);
       toast({
         title: `Dialog Flow '${graph.name}' loaded`,

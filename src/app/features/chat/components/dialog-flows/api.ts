@@ -1,11 +1,10 @@
 import { auth } from "@/lib/firebase/firebase-admin/firebase";
 import {
   useMutation,
-  UseMutationOptions,
   useQuery,
   useQueryClient,
+  type UseMutationOptions,
 } from "@tanstack/react-query";
-import { useShallow } from "zustand/react/shallow";
 import { useDialogFlowStore } from "./store";
 import invariant from "tiny-invariant";
 import { GraphFlowEdge, GraphFlowNode } from "./nodes";
@@ -13,23 +12,13 @@ import { toast } from "@/components/ui/use-toast";
 import autoAlign from "./auto-align";
 import { DIAMETER } from "./nodes/circular-node";
 
-export function useSaveDialogFlow(options: UseMutationOptions = {}) {
-  const { graphId, setGraphId, name, publicGraph, nodes, edges } =
-    useDialogFlowStore(
-      useShallow((state) => ({
-        graphId: state.graphId,
-        setGraphId: state.setGraphId,
-        name: state.name,
-        publicGraph: state.publicGraph,
-        nodes: state.nodes,
-        edges: state.edges,
-      }))
-    );
+export function useSaveDialogFlow() {
+  // prettier-ignore
+  const { graphId, setGraphId, setLastSaved, name, publicGraph, nodes, edges } = useDialogFlowStore();
 
   const queryClient = useQueryClient();
 
   return useMutation({
-    ...options,
     mutationFn: async () => {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
@@ -47,14 +36,18 @@ export function useSaveDialogFlow(options: UseMutationOptions = {}) {
           edges: edges,
         }),
       });
-      return (await response.json()).data as string;
+      return (await response.json()).data as { id: string; updated_at: number };
     },
-    onSuccess: (id, variables, context) => {
-      options.onSuccess?.(id, variables, context);
-      setGraphId(id);
+    onMutate() {
+      setLastSaved(Date.now());
+    },
+    onSuccess: (graph) => {
+      setGraphId(graph.id);
+      setLastSaved(graph.updated_at);
       queryClient.invalidateQueries({ queryKey: ["dialog-flows"] });
     },
     onError: (error) => {
+      setLastSaved(null);
       toast({
         variant: "destructive",
         title: "Error occurred while saving graph",
@@ -64,15 +57,22 @@ export function useSaveDialogFlow(options: UseMutationOptions = {}) {
   });
 }
 
-export function useGenerateDialogFlow() {
-  const {
-    setName,
-    setNodes,
-    setEdges,
-    onNodesChange,
-    setLastSaved,
-    setPublicGraph,
-  } = useDialogFlowStore();
+export function useGenerateDialogFlow(
+  options: Pick<
+    UseMutationOptions<
+      {
+        title: string;
+        nodes: GraphFlowNode[];
+        edges: GraphFlowEdge[];
+      },
+      Error,
+      string
+    >,
+    "onSuccess"
+  >
+) {
+  const { setName, setNodes, setEdges, onNodesChange, setPublicGraph } =
+    useDialogFlowStore();
 
   return useMutation<
     {
@@ -96,7 +96,7 @@ export function useGenerateDialogFlow() {
       });
       return (await response.json()).data;
     },
-    onSuccess: async (data) => {
+    onSuccess: async (data, variables, context) => {
       const changes = await autoAlign(
         data.nodes.map((node) => ({
           ...node,
@@ -112,9 +112,9 @@ export function useGenerateDialogFlow() {
       setNodes(data.nodes);
       setEdges(data.edges);
       onNodesChange(changes);
-      setLastSaved(new Date());
       setPublicGraph(false);
       toast({ title: `Dialog Flow '${data.title}' generated` });
+      options?.onSuccess?.(data, variables, context);
     },
     onError: (error) => {
       toast({
@@ -173,6 +173,7 @@ interface DialogFlow {
   nodes: GraphFlowNode[];
   edges: GraphFlowEdge[];
   public?: boolean;
+  updated_at?: number;
 }
 
 export async function fetchDialogFlow(graphId: string): Promise<DialogFlow> {

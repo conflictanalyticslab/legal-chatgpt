@@ -23,6 +23,7 @@ export async function POST(req: Request) {
     const { id, name, ...data } = await req.json();
 
     let graphId = id;
+    const updated_at = Date.now();
     if (id) {
       const graph = graphs.doc(id);
 
@@ -38,7 +39,10 @@ export async function POST(req: Request) {
       if (!saved.user_id /* universal */) {
         // create a user-owned copy from universal graph
         const doc = graphs.doc();
-        doc.set({ user_id, name: `${saved.name}_copy` }, { merge: true });
+        doc.set(
+          { user_id, name: `${saved.name}_copy`, updated_at },
+          { merge: true }
+        );
 
         graphId = doc.id;
       } else {
@@ -48,16 +52,23 @@ export async function POST(req: Request) {
             { status: 403 }
           );
         }
-        graph.update({ user_id, name, ...data });
+        graph.update({ user_id, name, ...data, updated_at });
       }
     } else {
       const graph = graphs.doc();
-      await graph.create({ user_id, name, ...data });
+      await graph.create({ user_id, name, ...data, updated_at });
 
       graphId = graph.id;
     }
 
-    return NextResponse.json({ success: true, error: null, data: graphId });
+    return NextResponse.json({
+      success: true,
+      error: null,
+      data: {
+        id: graphId,
+        updated_at,
+      },
+    });
   } catch (error: unknown) {
     return NextResponse.json(apiErrorResponse(error), { status: 400 });
   }

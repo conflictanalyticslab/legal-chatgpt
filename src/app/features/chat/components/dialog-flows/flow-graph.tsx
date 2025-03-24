@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -36,13 +36,12 @@ import {
 } from "./nodes";
 import Properties from "./properties";
 import { compileGraph } from "./compiler";
-import { useShallow } from "zustand/react/shallow";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CircularDependencyError } from "@baileyherbert/dependency-graph";
 import { toast } from "@/components/ui/use-toast";
 import GraphList from "./graph-list";
 import { useGenerateDialogFlow, useSaveDialogFlow } from "./api";
-import { useDebouncedCallback } from "use-debounce";
+import { useDebounce } from "use-debounce";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -187,6 +186,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const { type } = useToolbarStore();
 
   const { isGraphListVisibile } = useLayoutStore();
+  const { saveBlocked } = useDialogFlowStore();
   const { setCompiledDialogFlow } = useGlobalDialogFlowStore();
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -292,6 +292,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       sourceHandle: handleId,
       target: ghost.id,
     });
+    setUpdate((prev) => prev + 1);
   };
 
   const onEdgeClick = (event: React.MouseEvent, edge: GraphFlowEdge) => {
@@ -373,7 +374,21 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     });
   };
 
-  const generate = useGenerateDialogFlow();
+  const save = useSaveDialogFlow();
+  const generate = useGenerateDialogFlow({
+    onSuccess() {
+      setUpdate((prev) => prev + 1);
+    },
+  });
+
+  const [update, setUpdate] = useState(0);
+  const [debouncedUpdate] = useDebounce(update, 1000);
+
+  useEffect(() => {
+    if (saveBlocked || !debouncedUpdate) return;
+    if (nodes.length === 1 && nodes[0].type === "ghost") return;
+    save.mutate();
+  }, [debouncedUpdate]);
 
   return (
     <div
@@ -387,11 +402,23 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         nodes={nodes}
         edges={edges}
         defaultEdgeOptions={{ labelBgPadding: [4, 2] }}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        onNodesChange={(changes) => {
+          onNodesChange(changes);
+          setUpdate((prev) => prev + 1);
+        }}
+        onEdgesChange={(changes) => {
+          onEdgesChange(changes);
+          setUpdate((prev) => prev + 1);
+        }}
+        onConnect={(connection) => {
+          onConnect(connection);
+          setUpdate((prev) => prev + 1);
+        }}
         onDragOver={onDragOver}
-        onDrop={onDrop}
+        onDrop={(e) => {
+          onDrop(e);
+          setUpdate((prev) => prev + 1);
+        }}
         onNodeClick={onNodeClick}
         onNodeContextMenu={onNodeContextMenu}
         onEdgeClick={onEdgeClick}
@@ -444,8 +471,8 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
                 type="button"
                 aria-label="Auto-align Graph"
                 onClick={async () => {
-                  const changes = await autoAlign(nodes, edges);
-                  onNodesChange(changes);
+                  onNodesChange(await autoAlign(nodes, edges));
+                  setUpdate((prev) => prev + 1);
                   window.requestAnimationFrame(() => fitView());
                 }}
                 className="p-2.5 h-[unset] border-neutral-200 aspect-square"
@@ -506,44 +533,21 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
     setName,
     publicGraph,
     setPublicGraph,
-    nodes,
-    edges,
     lastSaved,
-    setLastSaved,
     saveBlocked,
     model,
     setModel,
-  } = useDialogFlowStore(
-    useShallow((state) => ({
-      name: state.name,
-      setName: state.setName,
-      publicGraph: state.publicGraph,
-      setPublicGraph: state.setPublicGraph,
-      nodes: state.nodes,
-      edges: state.edges,
-      lastSaved: state.lastSaved,
-      setLastSaved: state.setLastSaved,
-      saveBlocked: state.saveBlocked,
-      model: state.model,
-      setModel: state.setModel,
-    }))
-  );
+  } = useDialogFlowStore();
 
-  const { mutate: saveGraph, isPending } = useSaveDialogFlow({
-    onSuccess: () => {
-      setLastSaved(new Date());
-    },
-  });
-  const debouncedSaveGraph = useDebouncedCallback(saveGraph, 1500, {
-    maxWait: 5000,
-  });
+  const save = useSaveDialogFlow();
+
+  const [update, setUpdate] = useState(0);
+  const [debouncedUpdate] = useDebounce(update, 1000);
 
   useEffect(() => {
-    if (nodes.length === 0) return;
-    if (nodes[0].type === "ghost" && nodes[0].data.standalone) return; // default ghost
-    if (saveBlocked) return;
-    debouncedSaveGraph();
-  }, [debouncedSaveGraph, nodes, name, publicGraph]);
+    if (saveBlocked || !debouncedUpdate) return;
+    save.mutate();
+  }, [debouncedUpdate]);
 
   return (
     <div className="flex flex-col h-full grow">
@@ -558,20 +562,23 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
             </button>
           ) : null}
 
-          <div className="text-left shrink-0 text-neutral-500 text-sm">
-            {isPending ? "Saving: " : "Last saved: "}
-            {lastSaved
-              ? lastSaved.toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "Never"}
-          </div>
+          {lastSaved ? (
+            <div className="text-left shrink-0 text-neutral-500 text-sm">
+              Last saved:{" "}
+              {new Date(lastSaved).toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </div>
+          ) : null}
         </div>
 
         <Input
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            setUpdate((prev) => prev + 1);
+          }}
           placeholder="Name your dialog flow"
           className="text-center bg-transparent border-transparent focus:bg-white focus:border-neutral-300 hover:border-neutral-300"
         />
@@ -593,7 +600,10 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
           <div className="flex gap-2 items-center">
             <Switch
               checked={publicGraph}
-              onCheckedChange={(checked) => setPublicGraph(checked)}
+              onCheckedChange={(checked) => {
+                setPublicGraph(checked);
+                setUpdate((prev) => prev + 1);
+              }}
             />
             <Badge
               variant={publicGraph ? "default" : "secondary"}
