@@ -192,6 +192,7 @@ interface DialogFlow {
   nodes: GraphFlowNode[];
   edges: GraphFlowEdge[];
   public?: boolean;
+  shared_with?: string[];
   updated_at?: number;
 }
 

@@ -125,6 +125,7 @@ function Section({ title, graphs, isLoading }: SectionProps) {
       state.setName(graph.name);
       state.setNodes(graph.nodes);
       state.setEdges(graph.edges);
+      state.setSharedWith(graph.shared_with || []);
       state.setLastSaved(graph.updated_at || null);
       state.setPublicGraph(graph.public || false);
       toast({
