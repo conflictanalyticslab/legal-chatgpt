@@ -8,8 +8,10 @@ import { toast } from "@/components/ui/use-toast";
 
 import {
   fetchDialogFlow,
-  useFetchUniversalDialogFlows,
   useFetchUserDialogFlows,
+  useFetchSharedDialogFlows,
+  useFetchUniversalDialogFlows,
+  type DialogFlowListItem,
 } from "./api";
 import { useDialogFlowStore } from "./store";
 import { cn } from "@/lib/utils";
@@ -44,6 +46,7 @@ function Header() {
       },
     ]);
     state.setEdges([]);
+    state.setOrigin("user");
     state.setLastSaved(null);
     toast({ title: `New Dialog Flow created` });
   });
@@ -72,26 +75,63 @@ function Header() {
 }
 
 function Graphs() {
-  const { fitView } = useReactFlow();
-
   const user = useFetchUserDialogFlows();
+  const shared = useFetchSharedDialogFlows();
   const universal = useFetchUniversalDialogFlows();
 
-  const { activeId, loadGraph } = useDialogFlowStore((state) => ({
-    activeId: state.graphId,
-    async loadGraph(id: string, isUniversal: boolean) {
-      if (state.graphId === id) return;
-      setFetchingId(id);
-      const graph = await fetchDialogFlow(id);
-      setFetchingId(null);
+  return (
+    <div className="overflow-y-auto h-[calc(100%-56px)] pb-2">
+      <Section
+        origin="user"
+        title="User Created Graphs"
+        graphs={user.data || []}
+        isLoading={user.isPending}
+      />
 
-      state.setSaveBlocked(isUniversal);
+      {!shared.isPending && shared.data?.length ? (
+        <Section origin="shared" title="Shared Graphs" graphs={shared.data} />
+      ) : null}
+
+      <Section
+        origin="universal"
+        title="Provided Graphs"
+        graphs={universal.data || []}
+        isLoading={universal.isPending}
+      />
+    </div>
+  );
+}
+
+type SectionProps = {
+  origin: "user" | "shared" | "universal";
+  title: string;
+  graphs: DialogFlowListItem[];
+  isLoading?: boolean;
+};
+
+function Section({ origin, title, graphs, isLoading }: SectionProps) {
+  const { fitView } = useReactFlow();
+
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const { activeId, fetchingId, loadGraph } = useDialogFlowStore((state) => ({
+    activeId: state.graphId,
+    fetchingId: state.fetchingId,
+
+    async loadGraph(id: string) {
+      if (state.graphId === id) return;
+      state.setFetchingId(id);
+      const graph = await fetchDialogFlow(id);
+      state.setFetchingId(null);
+
+      state.setOrigin(origin);
       state.setGraphId(id);
       state.setName(graph.name);
       state.setNodes(graph.nodes);
       state.setEdges(graph.edges);
-      state.setLastSaved(new Date());
-      state.setPublicGraph(false);
+      state.setSharedWith(graph.shared_with || []);
+      state.setLastSaved(graph.updated_at || null);
+      state.setPublicGraph(graph.public || false);
       toast({
         title: `Dialog Flow '${graph.name}' loaded`,
       });
@@ -99,20 +139,18 @@ function Graphs() {
     },
   }));
 
-  const [fetchingId, setFetchingId] = useState<string | null>(null);
-
   return (
-    <div className="overflow-y-auto">
-      <div className="flex flex-col gap-1 mt-2">
-        <Label className="text-neutral-500 mb-2">User Created Graphs</Label>
-        {!user.isPending ? (
-          (user.data || []).map((item) => {
+    <div className="flex flex-col gap-1 mt-2">
+      <Label className="text-neutral-500 mb-2">{title}</Label>
+      {!isLoading ? (
+        <>
+          {(isExpanded ? graphs : graphs.slice(0, 5)).map((item) => {
             const isFetching = fetchingId === item.id;
             const isSelected = fetchingId ? isFetching : activeId === item.id;
             return (
               <Button
                 key={item.id}
-                onClick={() => loadGraph(item.id, false)}
+                onClick={() => loadGraph(item.id)}
                 className={cn(
                   "justify-start px-3",
                   !isSelected &&
@@ -123,41 +161,21 @@ function Graphs() {
                 {isFetching ? "Loading..." : item.name}
               </Button>
             );
-          })
-        ) : (
-          <div className="text-sm flex items-center h-10 text-neutral-400">
-            Loading...
-          </div>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1 mt-4">
-        <Label className="text-neutral-500 mb-2">Provided Graphs</Label>
-        {!universal.isPending ? (
-          (universal.data || []).map((item) => {
-            const isFetching = fetchingId === item.id;
-            const isSelected = fetchingId ? isFetching : activeId === item.id;
-            return (
-              <Button
-                key={item.id}
-                onClick={() => loadGraph(item.id, true)}
-                className={cn(
-                  "justify-start px-3",
-                  !isSelected &&
-                    "hover:bg-neutral-200 border border-transparent hover:border-neutral-300"
-                )}
-                variant={isSelected ? "default" : "ghost"}
-              >
-                {isFetching ? "Loading..." : item.name}
-              </Button>
-            );
-          })
-        ) : (
-          <div className="text-sm flex items-center h-10 text-neutral-400">
-            Loading...
-          </div>
-        )}
-      </div>
+          })}
+          {graphs.length > 5 ? (
+            <button
+              className="font-semibold self-start text-sm px-3 hover:underline"
+              onClick={() => setIsExpanded((prev) => !prev)}
+            >
+              {isExpanded ? "Show Less" : "Show All"}
+            </button>
+          ) : null}
+        </>
+      ) : (
+        <div className="text-sm flex items-center h-10 text-neutral-400">
+          Loading...
+        </div>
+      )}
     </div>
   );
 }

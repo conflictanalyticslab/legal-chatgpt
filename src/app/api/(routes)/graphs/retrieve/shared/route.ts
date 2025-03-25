@@ -20,7 +20,8 @@ export async function GET(_: Request) {
   try {
     const snapshot = await getFirestore()
       .collection("graphs")
-      .where("user_id", "==", null)
+      .where("shared_with", "array-contains", decodedToken.user_id)
+      .where("public", "==", true)
       .get();
     return NextResponse.json(
       {

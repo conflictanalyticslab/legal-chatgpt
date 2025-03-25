@@ -1,11 +1,10 @@
 import { auth } from "@/lib/firebase/firebase-admin/firebase";
 import {
   useMutation,
-  UseMutationOptions,
   useQuery,
   useQueryClient,
+  type UseMutationOptions,
 } from "@tanstack/react-query";
-import { useShallow } from "zustand/react/shallow";
 import { useDialogFlowStore } from "./store";
 import invariant from "tiny-invariant";
 import { GraphFlowEdge, GraphFlowNode } from "./nodes";
@@ -13,23 +12,21 @@ import { toast } from "@/components/ui/use-toast";
 import autoAlign from "./auto-align";
 import { DIAMETER } from "./nodes/circular-node";
 
-export function useSaveDialogFlow(options: UseMutationOptions = {}) {
-  const { graphId, setGraphId, name, publicGraph, nodes, edges } =
-    useDialogFlowStore(
-      useShallow((state) => ({
-        graphId: state.graphId,
-        setGraphId: state.setGraphId,
-        name: state.name,
-        publicGraph: state.publicGraph,
-        nodes: state.nodes,
-        edges: state.edges,
-      }))
-    );
+export function useSaveDialogFlow() {
+  const {
+    graphId,
+    setGraphId,
+    setLastSaved,
+    setName,
+    name,
+    publicGraph,
+    nodes,
+    edges,
+  } = useDialogFlowStore();
 
   const queryClient = useQueryClient();
 
   return useMutation({
-    ...options,
     mutationFn: async () => {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
@@ -47,14 +44,23 @@ export function useSaveDialogFlow(options: UseMutationOptions = {}) {
           edges: edges,
         }),
       });
-      return (await response.json()).data as string;
+      return (await response.json()).data as {
+        id: string;
+        name: string;
+        updated_at: number;
+      };
     },
-    onSuccess: (id, variables, context) => {
-      options.onSuccess?.(id, variables, context);
-      setGraphId(id);
+    onMutate() {
+      setLastSaved(Date.now());
+    },
+    onSuccess: (graph) => {
+      setGraphId(graph.id);
+      setName(graph.name);
+      setLastSaved(graph.updated_at);
       queryClient.invalidateQueries({ queryKey: ["dialog-flows"] });
     },
     onError: (error) => {
+      if (!graphId) setLastSaved(null);
       toast({
         variant: "destructive",
         title: "Error occurred while saving graph",
@@ -64,15 +70,22 @@ export function useSaveDialogFlow(options: UseMutationOptions = {}) {
   });
 }
 
-export function useGenerateDialogFlow() {
-  const {
-    setName,
-    setNodes,
-    setEdges,
-    onNodesChange,
-    setLastSaved,
-    setPublicGraph,
-  } = useDialogFlowStore();
+export function useGenerateDialogFlow(
+  options: Pick<
+    UseMutationOptions<
+      {
+        title: string;
+        nodes: GraphFlowNode[];
+        edges: GraphFlowEdge[];
+      },
+      Error,
+      string
+    >,
+    "onSuccess"
+  >
+) {
+  const { setName, setNodes, setEdges, onNodesChange, setPublicGraph } =
+    useDialogFlowStore();
 
   return useMutation<
     {
@@ -96,7 +109,7 @@ export function useGenerateDialogFlow() {
       });
       return (await response.json()).data;
     },
-    onSuccess: async (data) => {
+    onSuccess: async (data, variables, context) => {
       const changes = await autoAlign(
         data.nodes.map((node) => ({
           ...node,
@@ -112,9 +125,9 @@ export function useGenerateDialogFlow() {
       setNodes(data.nodes);
       setEdges(data.edges);
       onNodesChange(changes);
-      setLastSaved(new Date());
       setPublicGraph(false);
       toast({ title: `Dialog Flow '${data.title}' generated` });
+      options?.onSuccess?.(data, variables, context);
     },
     onError: (error) => {
       toast({
@@ -126,9 +139,66 @@ export function useGenerateDialogFlow() {
   });
 }
 
-interface DialogFlowListItem {
+export function useShareDialogFlow(
+  options: Pick<
+    UseMutationOptions<
+      { id: string; updated_at: number },
+      Error,
+      { add: string[]; delete: string[] }
+    >,
+    "onSuccess"
+  >
+) {
+  const { sharedWith, graphId, setSharedWith, setLastSaved } =
+    useDialogFlowStore();
+
+  return useMutation({
+    mutationFn: async (body: { add: string[]; delete: string[] }) => {
+      invariant(auth.currentUser, "User is not authenticated");
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch(`/api/graphs/share/${graphId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      return (await response.json()).data as {
+        id: string;
+        updated_at: number;
+        shared_with: {
+          add: string;
+          delete: string;
+        };
+      };
+    },
+    onMutate() {
+      setLastSaved(Date.now());
+    },
+    onSuccess: (graph, variables, context) => {
+      setSharedWith([
+        // prettier-ignore
+        ...sharedWith.filter((email) => !graph.shared_with.delete.includes(email)),
+        ...graph.shared_with.add,
+      ]);
+      setLastSaved(graph.updated_at);
+      options?.onSuccess?.(graph, variables, context);
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error occurred while sharing graph",
+        description: error.message,
+      });
+    },
+  });
+}
+
+export interface DialogFlowListItem {
   id: string;
   name: string;
+  updated_at: number | null;
 }
 
 export function useFetchUserDialogFlows() {
@@ -138,6 +208,24 @@ export function useFetchUserDialogFlows() {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
       const response = await fetch("/api/graphs/retrieve/all", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return (await response.json()).data;
+    },
+  });
+}
+
+export function useFetchSharedDialogFlows() {
+  return useQuery<DialogFlowListItem[]>({
+    queryKey: ["shared-dialog-flows"],
+    queryFn: async () => {
+      invariant(auth.currentUser, "User is not authenticated");
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch("/api/graphs/retrieve/shared", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -172,6 +260,9 @@ interface DialogFlow {
   name: string;
   nodes: GraphFlowNode[];
   edges: GraphFlowEdge[];
+  public?: boolean;
+  shared_with?: string[];
+  updated_at?: number;
 }
 
 export async function fetchDialogFlow(graphId: string): Promise<DialogFlow> {

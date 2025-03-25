@@ -15,14 +15,18 @@ const initialEdges: GraphFlowEdge[] = [];
 
 interface DialogFlowStore {
   graphId: string | null;
+  origin: "user" | 'shared' | 'universal';
+  fetchingId: string | null;
   name: string;
   publicGraph: boolean;
   model: 'GPT-4' | 'Claude';
   nodes: GraphFlowNode[];
   edges: GraphFlowEdge[];
-  lastSaved: Date | null;
-  saveBlocked: boolean;
+  sharedWith: string[];
+  lastSaved: number | null;
   setGraphId: (graphId: string | null) => void;
+  setOrigin: (origin: DialogFlowStore['origin']) => void;
+  setFetchingId: (fetchingId: string | null) => void;
   setName: (name: string) => void;
   setPublicGraph: (publicGraph: boolean) => void;
   onNodesChange: (changes: NodeChange<GraphFlowNode>[]) => void;
@@ -35,8 +39,8 @@ interface DialogFlowStore {
   updateNode: (nodeId: string, mutateFn: (node: GraphFlowNode) => GraphFlowNode) => void;
   removeNode: (nodeId: string) => void;
   updateEdge: (edgeId: string, mutateFn: (edge: GraphFlowEdge) => GraphFlowEdge) => void;
-  setLastSaved: (lastSaved: Date | null) => void;
-  setSaveBlocked: (saveBlocked: boolean) => void;
+  setSharedWith: (sharedWith: string[]) => void;
+  setLastSaved: (lastSaved: number | null) => void;
   setModel: (model: 'GPT-4' | 'Claude') => void;
 }
 
@@ -49,15 +53,23 @@ interface DialogFlowStore {
  */
 export const useDialogFlowStore = create<DialogFlowStore>()((set, get) => ({
   graphId: null,
+  origin: 'user',
+  fetchingId: null,
   name: 'Untitled',
   publicGraph: false,
   model: 'GPT-4',
   nodes: initialNodes,
   edges: initialEdges,
+  sharedWith: [],
   lastSaved: null,
-  saveBlocked: false,
   setGraphId: (graphId) => {
     set({ graphId })
+  },
+  setOrigin: (origin) => {
+    set({ origin })
+  },
+  setFetchingId: (fetchingId) => {
+    set({ fetchingId })
   },
   setName: (name) => {
     set({ name })
@@ -121,11 +133,11 @@ export const useDialogFlowStore = create<DialogFlowStore>()((set, get) => ({
     );
     set({ edges: updatedEdges })
   },
+  setSharedWith: (sharedWith) => {
+    set({ sharedWith })
+  },
   setLastSaved: (lastSaved) => {
     set({ lastSaved })
-  },
-  setSaveBlocked: (saveBlocked) => {
-    set({ saveBlocked })
   },
   setModel: (model) => {
     set({ model })
