@@ -13,8 +13,16 @@ import autoAlign from "./auto-align";
 import { DIAMETER } from "./nodes/circular-node";
 
 export function useSaveDialogFlow() {
-  // prettier-ignore
-  const { graphId, setGraphId, setLastSaved, name, publicGraph, nodes, edges } = useDialogFlowStore();
+  const {
+    graphId,
+    setGraphId,
+    setLastSaved,
+    setName,
+    name,
+    publicGraph,
+    nodes,
+    edges,
+  } = useDialogFlowStore();
 
   const queryClient = useQueryClient();
 
@@ -36,18 +44,23 @@ export function useSaveDialogFlow() {
           edges: edges,
         }),
       });
-      return (await response.json()).data as { id: string; updated_at: number };
+      return (await response.json()).data as {
+        id: string;
+        name: string;
+        updated_at: number;
+      };
     },
     onMutate() {
       setLastSaved(Date.now());
     },
     onSuccess: (graph) => {
       setGraphId(graph.id);
+      setName(graph.name);
       setLastSaved(graph.updated_at);
       queryClient.invalidateQueries({ queryKey: ["dialog-flows"] });
     },
     onError: (error) => {
-      setLastSaved(null);
+      if (!graphId) setLastSaved(null);
       toast({
         variant: "destructive",
         title: "Error occurred while saving graph",

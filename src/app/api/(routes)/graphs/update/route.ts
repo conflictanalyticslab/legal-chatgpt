@@ -20,9 +20,10 @@ export async function POST(req: Request) {
 
   const graphs = getFirestore().collection("graphs");
   try {
-    const { id, name, ...data } = await req.json();
+    const { id, ...data } = await req.json();
 
     let graphId = id;
+    let name = data.name;
     const updated_at = Date.now();
     if (id) {
       const graph = graphs.doc(id);
@@ -37,14 +38,12 @@ export async function POST(req: Request) {
 
       const saved = res.data()!;
       if (!saved.user_id /* universal */) {
-        // create a user-owned copy from universal graph
         const doc = graphs.doc();
-        doc.set(
-          { user_id, name: `${saved.name}_copy`, updated_at },
-          { merge: true }
-        );
-
         graphId = doc.id;
+        name = `${saved.name}_copy`;
+
+        // create a user-owned copy from universal graph
+        doc.create({ user_id, ...data, name, updated_at });
       } else {
         if (saved.user_id !== user_id) {
           return NextResponse.json(
@@ -52,13 +51,13 @@ export async function POST(req: Request) {
             { status: 403 }
           );
         }
-        graph.update({ user_id, name, ...data, updated_at });
+        graph.update({ ...data, updated_at });
       }
     } else {
       const graph = graphs.doc();
-      await graph.create({ user_id, name, ...data, updated_at });
-
       graphId = graph.id;
+
+      await graph.create({ user_id, ...data, updated_at });
     }
 
     return NextResponse.json({
@@ -66,6 +65,7 @@ export async function POST(req: Request) {
       error: null,
       data: {
         id: graphId,
+        name,
         updated_at,
       },
     });
