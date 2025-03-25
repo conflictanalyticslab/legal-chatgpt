@@ -15,6 +15,7 @@ const initialEdges: GraphFlowEdge[] = [];
 
 interface DialogFlowStore {
   graphId: string | null;
+  origin: "user" | 'shared' | 'universal';
   fetchingId: string | null;
   name: string;
   publicGraph: boolean;
@@ -23,8 +24,8 @@ interface DialogFlowStore {
   edges: GraphFlowEdge[];
   sharedWith: string[];
   lastSaved: number | null;
-  saveBlocked: boolean;
   setGraphId: (graphId: string | null) => void;
+  setOrigin: (origin: DialogFlowStore['origin']) => void;
   setFetchingId: (fetchingId: string | null) => void;
   setName: (name: string) => void;
   setPublicGraph: (publicGraph: boolean) => void;
@@ -40,7 +41,6 @@ interface DialogFlowStore {
   updateEdge: (edgeId: string, mutateFn: (edge: GraphFlowEdge) => GraphFlowEdge) => void;
   setSharedWith: (sharedWith: string[]) => void;
   setLastSaved: (lastSaved: number | null) => void;
-  setSaveBlocked: (saveBlocked: boolean) => void;
   setModel: (model: 'GPT-4' | 'Claude') => void;
 }
 
@@ -53,6 +53,7 @@ interface DialogFlowStore {
  */
 export const useDialogFlowStore = create<DialogFlowStore>()((set, get) => ({
   graphId: null,
+  origin: 'user',
   fetchingId: null,
   name: 'Untitled',
   publicGraph: false,
@@ -61,9 +62,11 @@ export const useDialogFlowStore = create<DialogFlowStore>()((set, get) => ({
   edges: initialEdges,
   sharedWith: [],
   lastSaved: null,
-  saveBlocked: false,
   setGraphId: (graphId) => {
     set({ graphId })
+  },
+  setOrigin: (origin) => {
+    set({ origin })
   },
   setFetchingId: (fetchingId) => {
     set({ fetchingId })
@@ -135,9 +138,6 @@ export const useDialogFlowStore = create<DialogFlowStore>()((set, get) => ({
   },
   setLastSaved: (lastSaved) => {
     set({ lastSaved })
-  },
-  setSaveBlocked: (saveBlocked) => {
-    set({ saveBlocked })
   },
   setModel: (model) => {
     set({ model })

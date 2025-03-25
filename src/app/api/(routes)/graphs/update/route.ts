@@ -45,7 +45,8 @@ export async function POST(req: Request) {
         // create a user-owned copy from universal graph
         doc.create({ user_id, ...data, name, updated_at });
       } else {
-        if (saved.user_id !== user_id) {
+        const isShared = (saved.shared_with || []).includes(user_id);
+        if (saved.user_id !== user_id && !isShared) {
           return NextResponse.json(
             { success: false, error: "Forbidden", data: null },
             { status: 403 }

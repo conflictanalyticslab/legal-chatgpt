@@ -46,6 +46,7 @@ function Header() {
       },
     ]);
     state.setEdges([]);
+    state.setOrigin("user");
     state.setLastSaved(null);
     toast({ title: `New Dialog Flow created` });
   });
@@ -81,16 +82,18 @@ function Graphs() {
   return (
     <div className="overflow-y-auto h-[calc(100%-56px)] pb-2">
       <Section
+        origin="user"
         title="User Created Graphs"
         graphs={user.data || []}
         isLoading={user.isPending}
       />
 
       {!shared.isPending && shared.data?.length ? (
-        <Section title="Shared Graphs" graphs={shared.data} />
+        <Section origin="shared" title="Shared Graphs" graphs={shared.data} />
       ) : null}
 
       <Section
+        origin="universal"
         title="Provided Graphs"
         graphs={universal.data || []}
         isLoading={universal.isPending}
@@ -100,12 +103,13 @@ function Graphs() {
 }
 
 type SectionProps = {
+  origin: "user" | "shared" | "universal";
   title: string;
   graphs: DialogFlowListItem[];
   isLoading?: boolean;
 };
 
-function Section({ title, graphs, isLoading }: SectionProps) {
+function Section({ origin, title, graphs, isLoading }: SectionProps) {
   const { fitView } = useReactFlow();
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -114,13 +118,13 @@ function Section({ title, graphs, isLoading }: SectionProps) {
     activeId: state.graphId,
     fetchingId: state.fetchingId,
 
-    async loadGraph(id: string, isUniversal: boolean) {
+    async loadGraph(id: string) {
       if (state.graphId === id) return;
       state.setFetchingId(id);
       const graph = await fetchDialogFlow(id);
       state.setFetchingId(null);
 
-      state.setSaveBlocked(isUniversal);
+      state.setOrigin(origin);
       state.setGraphId(id);
       state.setName(graph.name);
       state.setNodes(graph.nodes);
@@ -146,7 +150,7 @@ function Section({ title, graphs, isLoading }: SectionProps) {
             return (
               <Button
                 key={item.id}
-                onClick={() => loadGraph(item.id, false)}
+                onClick={() => loadGraph(item.id)}
                 className={cn(
                   "justify-start px-3",
                   !isSelected &&

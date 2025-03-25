@@ -187,7 +187,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const { type } = useToolbarStore();
 
   const { isGraphListVisibile } = useLayoutStore();
-  const { saveBlocked } = useDialogFlowStore();
+  const { origin } = useDialogFlowStore();
   const { setCompiledDialogFlow } = useGlobalDialogFlowStore();
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -386,7 +386,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const [debouncedUpdate] = useDebounce(update, 1000);
 
   useEffect(() => {
-    if (saveBlocked || !debouncedUpdate) return;
+    if (!debouncedUpdate) return;
     if (nodes.length === 1 && nodes[0].type === "ghost") return;
     save.mutate();
   }, [debouncedUpdate]);
@@ -473,7 +473,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
                 aria-label="Auto-align Graph"
                 onClick={async () => {
                   onNodesChange(await autoAlign(nodes, edges));
-                  setUpdate((prev) => prev + 1);
+                  if (origin !== "universal") setUpdate((prev) => prev + 1);
                   window.requestAnimationFrame(() => fitView());
                 }}
                 className="p-2.5 h-[unset] border-neutral-200 aspect-square"
@@ -530,12 +530,12 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
     },
   }));
   const {
+    origin,
     name,
     setName,
     publicGraph,
     setPublicGraph,
     lastSaved,
-    saveBlocked,
     model,
     setModel,
   } = useDialogFlowStore();
@@ -546,7 +546,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
   const [debouncedUpdate] = useDebounce(update, 1000);
 
   useEffect(() => {
-    if (saveBlocked || !debouncedUpdate) return;
+    if (!debouncedUpdate) return;
     save.mutate();
   }, [debouncedUpdate]);
 
@@ -587,44 +587,49 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
             setName(e.target.value);
             setUpdate((prev) => prev + 1);
           }}
+          disabled={origin === "universal"}
           placeholder="Name your dialog flow"
           className="text-center bg-transparent border-transparent focus:bg-white focus:border-neutral-300 hover:border-neutral-300"
         />
 
         <div className="flex gap-4 justify-end items-center">
-          <Select
-            value={model}
-            onValueChange={(value) => setModel(value as typeof model)}
-          >
-            <SelectTrigger className="border-neutral-200 bg-white shadow-none w-[100px] h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="GPT-4">GPT-4</SelectItem>
-              <SelectItem value="Claude">Claude</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <div className="flex gap-2 items-center">
-            <Switch
-              checked={publicGraph}
-              onCheckedChange={(checked) => {
-                setPublicGraph(checked);
-                setUpdate((prev) => prev + 1);
-              }}
-            />
-            <Badge
-              variant={publicGraph ? "default" : "secondary"}
-              className="flex gap-2 p-1 pr-3"
+          {origin === "user" && (
+            <Select
+              value={model}
+              onValueChange={(value) => setModel(value as typeof model)}
             >
-              {publicGraph ? (
-                <GlobeIcon className="size-4" />
-              ) : (
-                <LockIcon className="size-4" />
-              )}
-              {publicGraph ? "Public" : "Private"}
-            </Badge>
-          </div>
+              <SelectTrigger className="border-neutral-200 bg-white shadow-none w-[100px] h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="GPT-4">GPT-4</SelectItem>
+                <SelectItem value="Claude">Claude</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+
+          {origin === "user" && (
+            <div className="flex gap-2 items-center">
+              <Switch
+                checked={publicGraph}
+                onCheckedChange={(checked) => {
+                  setPublicGraph(checked);
+                  setUpdate((prev) => prev + 1);
+                }}
+              />
+              <Badge
+                variant={publicGraph ? "default" : "secondary"}
+                className="flex gap-2 p-1 pr-3"
+              >
+                {publicGraph ? (
+                  <GlobeIcon className="size-4" />
+                ) : (
+                  <LockIcon className="size-4" />
+                )}
+                {publicGraph ? "Public" : "Private"}
+              </Badge>
+            </div>
+          )}
 
           <DialogClose className="size-9 flex items-center justify-center rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white">
             <X className="size-4" />

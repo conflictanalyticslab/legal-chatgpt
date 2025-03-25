@@ -16,7 +16,7 @@ import { useDialogFlowStore } from "./store";
 import { useShareDialogFlow } from "./api";
 
 export default function Share() {
-  const { graphId, publicGraph, sharedWith } = useDialogFlowStore();
+  const { graphId, origin, publicGraph, sharedWith } = useDialogFlowStore();
 
   const [isOpen, setIsOpen] = useState(false);
   const [emails, setEmails] = useState<string[]>([]);
@@ -86,7 +86,7 @@ export default function Share() {
     share.mutate({ add: added, delete: deleted });
   };
 
-  if (!graphId || !publicGraph) return null;
+  if (!graphId || !publicGraph || origin !== "user") return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
