@@ -593,7 +593,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
         />
 
         <div className="flex gap-4 justify-end items-center">
-          {origin === "user" && (
+          {/* {origin === "user" && (
             <Select
               value={model}
               onValueChange={(value) => setModel(value as typeof model)}
@@ -606,7 +606,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
                 <SelectItem value="Claude">Claude</SelectItem>
               </SelectContent>
             </Select>
-          )}
+          )} */}
 
           {origin === "user" && (
             <div className="flex gap-2 items-center">
