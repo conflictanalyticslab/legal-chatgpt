@@ -126,6 +126,62 @@ export function useGenerateDialogFlow(
   });
 }
 
+export function useShareDialogFlow(
+  options: Pick<
+    UseMutationOptions<
+      { id: string; updated_at: number },
+      Error,
+      { add: string[]; delete: string[] }
+    >,
+    "onSuccess"
+  >
+) {
+  const { sharedWith, graphId, setSharedWith, setLastSaved } =
+    useDialogFlowStore();
+
+  return useMutation({
+    mutationFn: async (body: { add: string[]; delete: string[] }) => {
+      invariant(auth.currentUser, "User is not authenticated");
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch(`/api/graphs/share/${graphId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      return (await response.json()).data as {
+        id: string;
+        updated_at: number;
+        shared_with: {
+          add: string;
+          delete: string;
+        };
+      };
+    },
+    onMutate() {
+      setLastSaved(Date.now());
+    },
+    onSuccess: (graph, variables, context) => {
+      setSharedWith([
+        // prettier-ignore
+        ...sharedWith.filter((email) => !graph.shared_with.delete.includes(email)),
+        ...graph.shared_with.add,
+      ]);
+      setLastSaved(graph.updated_at);
+      options?.onSuccess?.(graph, variables, context);
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error occurred while sharing graph",
+        description: error.message,
+      });
+    },
+  });
+}
+
 export interface DialogFlowListItem {
   id: string;
   name: string;

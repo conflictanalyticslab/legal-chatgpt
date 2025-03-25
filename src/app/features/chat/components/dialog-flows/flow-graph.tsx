@@ -71,6 +71,7 @@ import {
 } from "@/components/ui/select";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { useLayoutStore } from "./layout-store";
+import Share from "./share";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
@@ -551,7 +552,12 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
 
   return (
     <div className="flex flex-col h-full grow">
-      <nav className="grid grid-cols-3 gap-4 py-2 items-center px-2.5">
+      <nav
+        className={cn(
+          "grid grid-cols-3 gap-4 py-2 items-center pr-2.5",
+          !isGraphListVisibile && "pl-2.5"
+        )}
+      >
         <div className="flex items-center gap-2">
           {!isGraphListVisibile ? (
             <button
@@ -561,6 +567,8 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
               <ChevronRight className="size-4" />
             </button>
           ) : null}
+
+          <Share />
 
           {lastSaved ? (
             <div className="text-left shrink-0 text-neutral-500 text-sm">
