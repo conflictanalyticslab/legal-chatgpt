@@ -126,9 +126,10 @@ export function useGenerateDialogFlow(
   });
 }
 
-interface DialogFlowListItem {
+export interface DialogFlowListItem {
   id: string;
   name: string;
+  updated_at: number | null;
 }
 
 export function useFetchUserDialogFlows() {
@@ -138,6 +139,24 @@ export function useFetchUserDialogFlows() {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
       const response = await fetch("/api/graphs/retrieve/all", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return (await response.json()).data;
+    },
+  });
+}
+
+export function useFetchSharedDialogFlows() {
+  return useQuery<DialogFlowListItem[]>({
+    queryKey: ["shared-dialog-flows"],
+    queryFn: async () => {
+      invariant(auth.currentUser, "User is not authenticated");
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch("/api/graphs/retrieve/shared", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

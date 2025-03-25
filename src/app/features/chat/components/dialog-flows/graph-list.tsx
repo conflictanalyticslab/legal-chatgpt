@@ -8,8 +8,10 @@ import { toast } from "@/components/ui/use-toast";
 
 import {
   fetchDialogFlow,
-  useFetchUniversalDialogFlows,
   useFetchUserDialogFlows,
+  useFetchSharedDialogFlows,
+  useFetchUniversalDialogFlows,
+  type DialogFlowListItem,
 } from "./api";
 import { useDialogFlowStore } from "./store";
 import { cn } from "@/lib/utils";
@@ -72,18 +74,51 @@ function Header() {
 }
 
 function Graphs() {
-  const { fitView } = useReactFlow();
-
   const user = useFetchUserDialogFlows();
+  const shared = useFetchSharedDialogFlows();
   const universal = useFetchUniversalDialogFlows();
 
-  const { activeId, loadGraph } = useDialogFlowStore((state) => ({
+  return (
+    <div className="overflow-y-auto h-[calc(100%-56px)] pb-2">
+      <Section
+        title="User Created Graphs"
+        graphs={user.data || []}
+        isLoading={user.isPending}
+      />
+
+      {!shared.isPending && shared.data?.length ? (
+        <Section title="Shared Graphs" graphs={shared.data} />
+      ) : null}
+
+      <Section
+        title="Provided Graphs"
+        graphs={universal.data || []}
+        isLoading={universal.isPending}
+      />
+    </div>
+  );
+}
+
+type SectionProps = {
+  title: string;
+  graphs: DialogFlowListItem[];
+  isLoading?: boolean;
+};
+
+function Section({ title, graphs, isLoading }: SectionProps) {
+  const { fitView } = useReactFlow();
+
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const { activeId, fetchingId, loadGraph } = useDialogFlowStore((state) => ({
     activeId: state.graphId,
+    fetchingId: state.fetchingId,
+
     async loadGraph(id: string, isUniversal: boolean) {
       if (state.graphId === id) return;
-      setFetchingId(id);
+      state.setFetchingId(id);
       const graph = await fetchDialogFlow(id);
-      setFetchingId(null);
+      state.setFetchingId(null);
 
       state.setSaveBlocked(isUniversal);
       state.setGraphId(id);
@@ -99,14 +134,12 @@ function Graphs() {
     },
   }));
 
-  const [fetchingId, setFetchingId] = useState<string | null>(null);
-
   return (
-    <div className="overflow-y-auto h-[calc(100%-56px)] pb-2">
-      <div className="flex flex-col gap-1 mt-2">
-        <Label className="text-neutral-500 mb-2">User Created Graphs</Label>
-        {!user.isPending ? (
-          (user.data || []).map((item) => {
+    <div className="flex flex-col gap-1 mt-2">
+      <Label className="text-neutral-500 mb-2">{title}</Label>
+      {!isLoading ? (
+        <>
+          {(isExpanded ? graphs : graphs.slice(0, 5)).map((item) => {
             const isFetching = fetchingId === item.id;
             const isSelected = fetchingId ? isFetching : activeId === item.id;
             return (
@@ -123,41 +156,21 @@ function Graphs() {
                 {isFetching ? "Loading..." : item.name}
               </Button>
             );
-          })
-        ) : (
-          <div className="text-sm flex items-center h-10 text-neutral-400">
-            Loading...
-          </div>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1 mt-4">
-        <Label className="text-neutral-500 mb-2">Provided Graphs</Label>
-        {!universal.isPending ? (
-          (universal.data || []).map((item) => {
-            const isFetching = fetchingId === item.id;
-            const isSelected = fetchingId ? isFetching : activeId === item.id;
-            return (
-              <Button
-                key={item.id}
-                onClick={() => loadGraph(item.id, true)}
-                className={cn(
-                  "justify-start px-3",
-                  !isSelected &&
-                    "hover:bg-neutral-200 border border-transparent hover:border-neutral-300"
-                )}
-                variant={isSelected ? "default" : "ghost"}
-              >
-                {isFetching ? "Loading..." : item.name}
-              </Button>
-            );
-          })
-        ) : (
-          <div className="text-sm flex items-center h-10 text-neutral-400">
-            Loading...
-          </div>
-        )}
-      </div>
+          })}
+          {graphs.length > 5 ? (
+            <button
+              className="font-semibold self-start text-sm px-3 hover:underline"
+              onClick={() => setIsExpanded((prev) => !prev)}
+            >
+              {isExpanded ? "Show Less" : "Show All"}
+            </button>
+          ) : null}
+        </>
+      ) : (
+        <div className="text-sm flex items-center h-10 text-neutral-400">
+          Loading...
+        </div>
+      )}
     </div>
   );
 }
