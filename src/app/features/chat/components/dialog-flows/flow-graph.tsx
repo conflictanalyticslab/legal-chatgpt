@@ -307,7 +307,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     }))
   );
 
-  const { mutate: saveGraph, isPending } = useSaveDialogFlow({
+  const { mutate: saveGraph } = useSaveDialogFlow({
     onSuccess: () => {
       setLastSaved(new Date());
     },
@@ -375,7 +375,6 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   // Saves the current user's graph at a given time.
   function saveCurrentGraph() {
     try {
-      
       saveGraph();
 
       toast({
