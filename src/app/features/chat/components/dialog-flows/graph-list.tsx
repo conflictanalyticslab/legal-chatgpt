@@ -77,6 +77,7 @@ function Graphs() {
   const user = useFetchUserDialogFlows();
   const universal = useFetchUniversalDialogFlows();
 
+  // Loads the current globalDialogFlowStore.
   const { activeId, loadGraph } = useDialogFlowStore((state) => ({
     activeId: state.graphId,
     async loadGraph(id: string, isUniversal: boolean) {
