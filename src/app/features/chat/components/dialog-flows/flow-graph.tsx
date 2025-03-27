@@ -37,7 +37,7 @@ import {
 import Properties from "./properties";
 import { compileGraph } from "./compiler";
 import { useShallow } from "zustand/react/shallow";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, UseMutateFunction } from "@tanstack/react-query";
 import { CircularDependencyError } from "@baileyherbert/dependency-graph";
 import { toast } from "@/components/ui/use-toast";
 import GraphList from "./graph-list";
@@ -167,7 +167,13 @@ function Toolbar() {
   );
 }
 
-function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
+function FlowGraph({ 
+  setOpen, 
+  saveGraph 
+}: { 
+  setOpen: (open: boolean) => void, 
+  saveGraph: UseMutateFunction<string, Error, void, unknown>
+}) {
   const { setCenter, screenToFlowPosition, fitView } = useReactFlow();
 
   const [activeGhost, setActiveGhost] = useState<HTMLElement | null>(null);
@@ -306,12 +312,6 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       setLastSaved: state.setLastSaved,
     }))
   );
-
-  const { mutate: saveGraph } = useSaveDialogFlow({
-    onSuccess: () => {
-      setLastSaved(new Date());
-    },
-  });
 
   function injectGraph() {
     try {
@@ -623,7 +623,6 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
   // Lines saveGraph, debouncedSaveGraph, control saving on node change
     // this also affects the useChange
   // isPending depends on saveGraph, debouncedSaveGraph
-
   const { mutate: saveGraph, isPending } = useSaveDialogFlow({
     onSuccess: () => {
       setLastSaved(new Date());
@@ -710,7 +709,8 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
         </div>
       </nav>
 
-      <FlowGraph setOpen={setOpen} />
+        {/* Pass our saveGraph to flowGraph via props so that the page's isPending is updated when user presses the save button. */}
+      <FlowGraph setOpen={setOpen} saveGraph={saveGraph}/> 
     </div>
   );
 }
