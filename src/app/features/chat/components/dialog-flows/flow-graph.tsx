@@ -197,7 +197,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-  const { setSelectedItem } = usePropertiesStore();
+  const { setSelectedItem } = usePropertiesStore(); // May be source of overwrite bug ... keep track of this
 
   const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -303,6 +303,12 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     setSelectedItem({ id: edge.id, type: "edge" });
   };
 
+  // const { setLastSaved } = useDialogFlowStore(
+  //   useShallow((state) => ({
+  //     setLastSaved: state.setLastSaved,
+  //   }))
+  // );
+
   function injectGraph() {
     try {
       const prompt = compileGraph(nodes, edges);
@@ -310,13 +316,66 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       setCompiledDialogFlow({
         prompt,
         name,
-      });
+      }); 
 
-      setOpen(false);
+      setOpen(false); // Closes the current window.
 
       toast({
         title: `Dialog Flow activated: ${name}`,
         description: "The dialog flow has been activated in the conversation.",
+      });
+    } catch (error) {
+      if (error instanceof CircularDependencyError) {
+        const node = nodes.find((n) => n.id === error.node);
+        const path = error.path
+          .map((n) => {
+            const node = nodes.find((x) => x.id === n);
+            return node?.data
+              ? "label" in node.data
+                ? node.data.label
+                : node.type
+              : node?.type;
+          })
+          .join(" -> ");
+
+        const label = node?.data
+          ? "label" in node.data
+            ? node.data.label
+            : node.type
+          : node?.type;
+        toast({
+          title: "Uh oh! Circular dependency detected.",
+          description: `${label} is causing a circular dependency. The path is: ${path}.`,
+          variant: "destructive",
+        });
+      } else if (error instanceof Error) {
+        toast({
+          title: "Uh oh! Something went wrong.",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Uh oh! Something went wrong.",
+          description:
+            "Unknown error has occurred. Contact support if this persists.",
+          variant: "destructive",
+        });
+      }
+
+      console.error(error);
+    }
+  }
+
+
+  // Saves the current user's graph at a given time.
+  function saveCurrentGraph() {
+    try {
+      setUpdate((prev) => prev + 1);
+
+      toast({
+        title: `Dialog Flow saved: ${name}`,
+        description: "The dialog flow has been saved to cloud.",
       });
     } catch (error) {
       if (error instanceof CircularDependencyError) {
@@ -500,6 +559,28 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
                 variant="outline"
                 type="button"
                 aria-label="Save Graph"
+                onClick={saveCurrentGraph}
+                className="p-2.5 h-[unset] border-neutral-200 aspect-square"
+              >
+                <Image
+                  src="/assets/icons/save-cloud.svg"
+                  alt="send"
+                  width={24}
+                  height={24}
+                />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top" align="end" sideOffset={5}>
+              Save the current graph.
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                type="button"
+                aria-label="Save & Use Graph"
                 onClick={injectGraph}
                 className="p-2.5 h-[unset] border-neutral-200 aspect-square"
               >
@@ -512,7 +593,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top" align="end" sideOffset={5}>
-              Save the current graph to a query.
+              Save and send the current graph to a query.
             </TooltipContent>
           </Tooltip>
         </div>
@@ -645,7 +726,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
         </div>
       </nav>
 
-      <FlowGraph setOpen={setOpen} />
+      <FlowGraph setOpen={setOpen}/> 
     </div>
   );
 }
