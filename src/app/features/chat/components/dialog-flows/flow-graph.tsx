@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -61,7 +61,9 @@ import {
 import autoAlign from "./auto-align";
 import { DIAMETER } from "./nodes/circular-node";
 import NodeContextMenu from "./node-context-menu";
-import NodeSelectionMenu from "./node-selection-menu";
+import NodeSelectionMenu, {
+  type NodeSelectionMenuHandle,
+} from "./node-selection-menu";
 import {
   Select,
   SelectContent,
@@ -171,7 +173,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const isLocked = useStore((s) => !s.nodesConnectable);
   const { setCenter, screenToFlowPosition, fitView } = useReactFlow();
 
-  const [activeGhost, setActiveGhost] = useState<HTMLElement | null>(null);
+  const nodeSelectionMenuRef = useRef<NodeSelectionMenuHandle>(null);
 
   const {
     graphId,
@@ -220,7 +222,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const onNodeClick = (e: React.MouseEvent, node: GraphFlowNode) => {
     if (node.type === "ghost") {
       if (isLocked) return;
-      return setActiveGhost(e.currentTarget as HTMLElement);
+      return nodeSelectionMenuRef.current?.open("add", node);
     }
 
     const target = e.target as HTMLElement;
@@ -498,6 +500,10 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         {contextMenu && (
           <NodeContextMenu
             {...contextMenu}
+            onReplace={() => {
+              setContextMenu(null);
+              nodeSelectionMenuRef.current?.open("replace", contextMenu.node);
+            }}
             onClose={() => setContextMenu(null)}
           />
         )}
@@ -600,8 +606,8 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       </ReactFlow>
 
       <NodeSelectionMenu
-        ghostRef={activeGhost}
-        onClose={() => setActiveGhost(null)}
+        ref={nodeSelectionMenuRef}
+        onReplace={() => setUpdate((prev) => prev + 1)}
       />
     </div>
   );

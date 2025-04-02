@@ -1,3 +1,4 @@
+import { useEdges } from "@xyflow/react";
 import {
   useFloating,
   useInteractions,
@@ -13,12 +14,14 @@ import { useDialogFlowStore, usePropertiesStore } from "./store";
 type ContextMenuProps = {
   node: GraphFlowNode;
   position: { x: number; y: number };
+  onReplace(): void;
   onClose: () => void;
 };
 
 export default function FlowContextMenu({
   node,
   position,
+  onReplace,
   onClose,
 }: ContextMenuProps) {
   const { refs, floatingStyles, context } = useFloating({
@@ -58,6 +61,8 @@ export default function FlowContextMenu({
   const { removeNode } = useDialogFlowStore();
   const { setSelectedItem } = usePropertiesStore();
 
+  const isReplaceable = useIsReplaceable(node);
+
   const label = "label" in node.data ? node.data.label : "";
 
   return (
@@ -87,6 +92,15 @@ export default function FlowContextMenu({
             </button>
           )}
 
+          {isReplaceable ? (
+            <button
+              className="w-full text-left px-3 py-2 hover:bg-neutral-100/75 rounded-md transition-colors"
+              onClick={() => onReplace()}
+            >
+              Replace Node
+            </button>
+          ) : null}
+
           <button
             className="w-full text-left px-3 py-2 hover:bg-neutral-100/75 rounded-md transition-colors text-red-500"
             onClick={() => {
@@ -100,4 +114,25 @@ export default function FlowContextMenu({
       </div>
     </div>
   );
+}
+
+function useIsReplaceable(node: GraphFlowNode) {
+  const isTargetConnected = useEdges().some((edge) => edge.target === node.id);
+  const isSourceConnected = useEdges().some((edge) => edge.source === node.id);
+  if (!isTargetConnected && !isSourceConnected) return true;
+
+  switch (node.type) {
+    case "example":
+    case "instruction":
+    case "context":
+    case "keyword-extractor":
+      return true;
+    case "switch":
+      if (isSourceConnected) return false;
+      return true;
+    case "pdf":
+      return true;
+    default:
+      return false;
+  }
 }
