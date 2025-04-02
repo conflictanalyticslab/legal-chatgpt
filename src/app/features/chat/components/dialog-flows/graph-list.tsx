@@ -33,6 +33,7 @@ function Header() {
   const close = useLayoutStore((state) => {
     return () => state.setIsGraphListVisible(false);
   });
+  const temporal = useDialogFlowStore.temporal.getState();
   const newGraph = useDialogFlowStore((state) => () => {
     if (state.graphId === null) return;
     state.setGraphId(null);
@@ -48,6 +49,7 @@ function Header() {
     state.setEdges([]);
     state.setOrigin("user");
     state.setLastSaved(null);
+    temporal.clear();
     toast({ title: `New Dialog Flow created` });
   });
 
@@ -114,6 +116,7 @@ function Section({ origin, title, graphs, isLoading }: SectionProps) {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const temporal = useDialogFlowStore.temporal.getState();
   const { activeId, fetchingId, loadGraph } = useDialogFlowStore((state) => ({
     activeId: state.graphId,
     fetchingId: state.fetchingId,
@@ -132,10 +135,9 @@ function Section({ origin, title, graphs, isLoading }: SectionProps) {
       state.setSharedWith(graph.shared_with || []);
       state.setLastSaved(graph.updated_at || null);
       state.setPublicGraph(graph.public || false);
-      toast({
-        title: `Dialog Flow '${graph.name}' loaded`,
-      });
       window.requestAnimationFrame(() => fitView());
+      temporal.clear();
+      toast({ title: `Dialog Flow '${graph.name}' loaded` });
     },
   }));
 

@@ -1,6 +1,7 @@
 import React from "react";
 import {
   Handle as BaseHandle,
+  useStore,
   useEdges,
   Position,
   type NodeProps,
@@ -21,6 +22,8 @@ export const SWITCH_NODE_CONDITION_COLORS = [
 
 export default function SwitchNode({ id, data }: NodeProps<SwitchNode>) {
   const sourceAngles = calculateHandleAngles(data.conditions.length + 1, 0);
+
+  const isConnectable = useStore((s) => s.nodesConnectable);
   const connectedSources = useEdges().reduce((handleIds, edge) => {
     if (edge.source !== id || !edge.sourceHandle) return handleIds;
     return [...handleIds, edge.sourceHandle];
@@ -28,13 +31,22 @@ export default function SwitchNode({ id, data }: NodeProps<SwitchNode>) {
 
   return (
     <CircularNode icon="🚦" label={data.label}>
-      <BaseHandle type="target" position={Position.Left} />
+      <BaseHandle
+        type="target"
+        position={Position.Left}
+        className={!isConnectable ? "!cursor-default" : undefined}
+      />
       {data.conditions.map((condition, i) => (
         <Handle
           key={i}
           id={condition.id}
           angle={sourceAngles[i]}
-          color={condition.color || SWITCH_NODE_CONDITION_COLORS[i % SWITCH_NODE_CONDITION_COLORS.length]}
+          color={
+            condition.color ||
+            SWITCH_NODE_CONDITION_COLORS[
+              i % SWITCH_NODE_CONDITION_COLORS.length
+            ]
+          }
           isConnected={connectedSources.includes(condition.id)}
         />
       ))}
@@ -59,11 +71,15 @@ type HandleProps = {
 
 function Handle({ id, angle, color, isConnected }: HandleProps) {
   const coords = angleToCoordinates(angle, RADIUS);
+
+  const isConnectable = useStore((s) => s.nodesConnectable);
+
   return (
     <div
       className={cn(
         "absolute !left-[var(--left)] !top-[var(--top)] -translate-x-1/2 -translate-y-1/2",
-        !isConnected &&
+        isConnectable &&
+          !isConnected &&
           "group/handle hover:!left-[calc(var(--left)+var(--hover-left))] hover:!top-[calc(var(--top)+var(--hover-top))] transition-[top,left] before:content-[''] before:size-6 before:-ml-6 flex"
       )}
       style={
@@ -80,9 +96,12 @@ function Handle({ id, angle, color, isConnected }: HandleProps) {
         id={id}
         type="source"
         position={Position.Right}
-        className="!static flex items-center justify-center text-[var(--text)] !transform-none"
+        className={cn(
+          "!static flex items-center justify-center text-[var(--text)] !transform-none",
+          !isConnectable && "!cursor-default"
+        )}
       >
-        {!isConnected && (
+        {isConnectable && !isConnected && (
           <Plus className="size-4 opacity-0 group-hover/handle:opacity-100 transition-opacity pointer-events-none" />
         )}
       </BaseHandle>
