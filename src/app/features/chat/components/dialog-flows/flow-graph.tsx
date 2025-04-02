@@ -732,7 +732,9 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
         </div>
       </nav>
 
-      <FlowGraph setOpen={setOpen}/> 
+      <FlowGraph setOpen={setOpen} />
+
+      <Properties onUpdate={() => setUpdate((prev) => prev + 1)} />
     </div>
   );
 }
@@ -777,7 +779,6 @@ export function FlowModal() {
             >
               <GraphList />
               <FlowEditor setOpen={setOpen} />
-              <Properties />
             </DialogContent>
           </Dialog>
         </TooltipProvider>

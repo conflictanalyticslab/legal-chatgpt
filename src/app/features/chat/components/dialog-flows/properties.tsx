@@ -676,7 +676,7 @@ type SelectedItem =
   | { type: "node"; node: GraphFlowNode }
   | { type: "edge"; edge: GraphFlowEdge };
 
-export default function PropertiesPanel() {
+export default function PropertiesPanel({ onUpdate }: { onUpdate(): void }) {
   const { nodes, edges, updateNode, updateEdge } = useDialogFlowStore();
 
   const { item, close } = usePropertiesStore((state) => {
@@ -734,60 +734,65 @@ export default function PropertiesPanel() {
                   return (
                     <GenericNodePropertiesPanel
                       node={node}
-                      updateNode={(id, fn) =>
+                      updateNode={(id, fn) => {
                         updateNode(
                           id,
                           fn as (node: GraphFlowNode) => GraphFlowNode
-                        )
-                      }
+                        );
+                        onUpdate();
+                      }}
                     />
                   );
                 case "switch":
                   return (
                     <SwitchNodePropertiesPanel
                       node={node}
-                      updateNode={(id, fn) =>
+                      updateNode={(id, fn) => {
                         updateNode(
                           id,
                           fn as (node: GraphFlowNode) => GraphFlowNode
-                        )
-                      }
+                        );
+                        onUpdate();
+                      }}
                     />
                   );
                 case "relevant":
                   return (
                     <RelevantNodePropertiesPanel
                       node={node}
-                      updateNode={(id, fn) =>
+                      updateNode={(id, fn) => {
                         updateNode(
                           id,
                           fn as (node: GraphFlowNode) => GraphFlowNode
-                        )
-                      }
+                        );
+                        onUpdate();
+                      }}
                     />
                   );
                 case "keyword-extractor":
                   return (
                     <KeywordExtractorNodePropertiesPanel
                       node={node}
-                      updateNode={(id, fn) =>
+                      updateNode={(id, fn) => {
                         updateNode(
                           id,
                           fn as (node: GraphFlowNode) => GraphFlowNode
-                        )
-                      }
+                        );
+                        onUpdate();
+                      }}
                     />
                   );
                 case "pdf":
                   return (
                     <PDFNodePropertiesPanel
                       node={node}
-                      updateNode={(id, fn) =>
+                      updateNode={(id, fn) => {
                         updateNode(
                           id,
                           fn as (node: GraphFlowNode) => GraphFlowNode
-                        )
-                      }
+                        );
+                        onUpdate();
+                      }}
                     />
                   );
                 case "ghost":
@@ -800,7 +805,13 @@ export default function PropertiesPanel() {
             }
             case "edge":
               return (
-                <EdgePropertiesPanel edge={item.edge} updateEdge={updateEdge} />
+                <EdgePropertiesPanel
+                  edge={item.edge}
+                  updateEdge={(id, fn) => {
+                    updateEdge(id, fn);
+                    onUpdate();
+                  }}
+                />
               );
             default:
               return null;
