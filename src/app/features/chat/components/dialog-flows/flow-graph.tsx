@@ -409,10 +409,12 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         defaultEdgeOptions={{ labelBgPadding: [4, 2] }}
         onNodesChange={(changes) => {
           onNodesChange(changes);
+          if (changes.every((change) => change.type === "select")) return;
           setUpdate((prev) => prev + 1);
         }}
         onEdgesChange={(changes) => {
           onEdgesChange(changes);
+          if (changes.every((change) => change.type === "select")) return;
           setUpdate((prev) => prev + 1);
         }}
         onConnect={(connection) => {
