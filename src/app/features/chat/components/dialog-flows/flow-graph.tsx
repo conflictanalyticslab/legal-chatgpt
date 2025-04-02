@@ -4,6 +4,7 @@ import {
   ReactFlowProvider,
   useReactFlow,
   MiniMap,
+  useStore,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/base.css";
@@ -167,6 +168,7 @@ function Toolbar() {
 }
 
 function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
+  const isLocked = useStore((s) => !s.nodesConnectable);
   const { setCenter, screenToFlowPosition, fitView } = useReactFlow();
 
   const [activeGhost, setActiveGhost] = useState<HTMLElement | null>(null);
@@ -197,28 +199,27 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
 
   const { setSelectedItem } = usePropertiesStore();
 
-  const onDrop = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
-      event.preventDefault();
+  const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (isLocked) return;
 
-      if (!type) return;
+    if (!type) return;
 
-      // prettier-ignore
-      const isStandaloneGhostExist = nodes.length === 1 && nodes.find((node) => node.type === "ghost" && node.data.standalone);
-      if (isStandaloneGhostExist) setNodes([]);
+    // prettier-ignore
+    const isStandaloneGhostExist = nodes.length === 1 && nodes.find((node) => node.type === "ghost" && node.data.standalone);
+    if (isStandaloneGhostExist) setNodes([]);
 
-      const position = screenToFlowPosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
-      const node = createEmptyNode(type, position);
-      addNode(node);
-    },
-    [type, screenToFlowPosition, addNode]
-  );
+    const position = screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
+    const node = createEmptyNode(type, position);
+    addNode(node);
+  };
 
   const onNodeClick = (e: React.MouseEvent, node: GraphFlowNode) => {
     if (node.type === "ghost") {
+      if (isLocked) return;
       return setActiveGhost(e.currentTarget as HTMLElement);
     }
 
@@ -235,6 +236,8 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       );
       return;
     }
+
+    if (isLocked) return;
 
     const handleId = target.dataset.handleid;
 
@@ -296,7 +299,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     setUpdate((prev) => prev + 1);
   };
 
-  const onEdgeClick = (event: React.MouseEvent, edge: GraphFlowEdge) => {
+  const onEdgeClick = (e: React.MouseEvent, edge: GraphFlowEdge) => {
     setSelectedItem({ id: edge.id, type: "edge" });
   };
 
@@ -365,6 +368,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const onNodeContextMenu = (e: React.MouseEvent, node: GraphFlowNode) => {
     e.preventDefault();
+    if (isLocked) return;
 
     setContextMenu({
       node,
@@ -426,7 +430,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         fitView
       >
         <Controls />
-        <Toolbar />
+        {!isLocked && <Toolbar />}
         <MiniMap position="top-left" />
         {contextMenu && (
           <NodeContextMenu

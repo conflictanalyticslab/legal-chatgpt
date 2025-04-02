@@ -17,9 +17,10 @@ import {
 import { shallow } from "zustand/shallow";
 
 import { useDialogFlowStore } from "./store";
+import { cn } from "@/lib/utils";
 
 const selector = (s: ReactFlowState) => ({
-  isInteractive: s.nodesDraggable || s.nodesConnectable || s.elementsSelectable,
+  isInteractive: s.nodesDraggable || s.nodesConnectable,
   minZoomReached: s.transform[2] <= s.minZoom,
   maxZoomReached: s.transform[2] >= s.maxZoom,
 });
@@ -52,7 +53,7 @@ export default function Controls() {
   }, []);
 
   return (
-    <div className="absolute bottom-2.5 left-2.5 border border-neutral-200 rounded-sm flex flex-col overflow-hidden z-10">
+    <div className="absolute bottom-2.5 left-2.5 border border-neutral-200 rounded-sm flex flex-col overflow-hidden z-10 text-neutral-950">
       <button
         className="hover:bg-neutral-100 aspect-square p-1.5 disabled:bg-neutral-100 disabled:cursor-not-allowed"
         onClick={() => zoomIn()}
@@ -74,12 +75,16 @@ export default function Controls() {
         <Maximize className="size-4" />
       </button>
       <button
-        className="hover:bg-neutral-100 aspect-square p-1.5"
+        className={cn(
+          "aspect-square p-1.5",
+          isInteractive
+            ? "hover:bg-neutral-100"
+            : "bg-neutral-950 text-white hover:bg-neutral-900"
+        )}
         onClick={() => {
           store.setState({
             nodesDraggable: !isInteractive,
             nodesConnectable: !isInteractive,
-            elementsSelectable: !isInteractive,
           });
         }}
       >

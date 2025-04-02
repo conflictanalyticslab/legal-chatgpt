@@ -1,4 +1,10 @@
-import { Handle, Position, useEdges, type NodeProps } from "@xyflow/react";
+import {
+  Handle,
+  useStore,
+  useEdges,
+  Position,
+  type NodeProps,
+} from "@xyflow/react";
 import { FileText, Plus } from "lucide-react";
 
 import CircularNode from "./circular-node";
@@ -7,6 +13,7 @@ import type { PDFNode } from "../nodes";
 import { cn } from "@/lib/utils";
 
 export default function PDFNode({ id, data }: NodeProps<PDFNode>) {
+  const isConnectable = useStore((s) => s.nodesConnectable);
   const isSourceConnected = useEdges().some((edge) => edge.source === id);
 
   return (
@@ -19,10 +26,13 @@ export default function PDFNode({ id, data }: NodeProps<PDFNode>) {
         position={Position.Right}
         className={cn(
           "flex items-center justify-center text-[var(--text)]",
-          !isSourceConnected && "group-hover:-mr-3 transition-[margin]"
+          isConnectable &&
+            !isSourceConnected &&
+            "group-hover:-mr-3 transition-[margin]",
+          !isConnectable && "!cursor-default"
         )}
       >
-        {!isSourceConnected && (
+        {isConnectable && !isSourceConnected && (
           <Plus className="size-4 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
         )}
       </Handle>
