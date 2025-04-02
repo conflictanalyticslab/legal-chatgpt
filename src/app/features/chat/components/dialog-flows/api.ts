@@ -14,6 +14,7 @@ import { DIAMETER } from "./nodes/circular-node";
 
 export function useSaveDialogFlow() {
   const {
+    origin,
     graphId,
     setGraphId,
     setLastSaved,
@@ -57,13 +58,50 @@ export function useSaveDialogFlow() {
       setGraphId(graph.id);
       setName(graph.name);
       setLastSaved(graph.updated_at);
-      queryClient.invalidateQueries({ queryKey: ["dialog-flows"] });
+
+      switch (origin) {
+        case "user":
+          queryClient.invalidateQueries({ queryKey: ["dialog-flows"] });
+          break;
+        case "shared":
+          queryClient.invalidateQueries({ queryKey: ["shared-dialog-flows"] });
+          break;
+      }
     },
     onError: (error) => {
       if (!graphId) setLastSaved(null);
       toast({
         variant: "destructive",
         title: "Error occurred while saving graph",
+        description: error.message,
+      });
+    },
+  });
+}
+
+export function useDeleteDialogFlow() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      invariant(auth.currentUser, "User is not authenticated");
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch(`/api/graphs/delete/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return (await response.json()).success;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dialog-flows"] });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error occurred while deleting graph",
         description: error.message,
       });
     },

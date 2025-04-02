@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useReactFlow } from "@xyflow/react";
-import { ChevronLeft, PlusSquare } from "lucide-react";
+import { ChevronLeft, PlusSquare, Trash } from "lucide-react";
 
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -12,10 +12,35 @@ import {
   useFetchSharedDialogFlows,
   useFetchUniversalDialogFlows,
   type DialogFlowListItem,
+  useDeleteDialogFlow,
 } from "./api";
 import { useDialogFlowStore } from "./store";
 import { cn } from "@/lib/utils";
 import { useLayoutStore } from "./layout-store";
+
+function useNewGraph() {
+  const { setCenter } = useReactFlow();
+  const temporal = useDialogFlowStore.temporal.getState();
+  return useDialogFlowStore((state) => () => {
+    if (state.graphId === null) return;
+    state.setGraphId(null);
+    state.setName("Untitled");
+    state.setNodes([
+      {
+        id: "ghost",
+        type: "ghost",
+        position: { x: 0, y: 0 },
+        data: { standalone: true },
+      },
+    ]);
+    state.setEdges([]);
+    state.setOrigin("user");
+    state.setLastSaved(null);
+    temporal.clear();
+    toast({ title: `New Dialog Flow created` });
+    window.requestAnimationFrame(() => setCenter(0, 0, { zoom: 1 }));
+  });
+}
 
 export default function GraphList() {
   const isVisible = useLayoutStore((state) => state.isGraphListVisibile);
@@ -33,25 +58,8 @@ function Header() {
   const close = useLayoutStore((state) => {
     return () => state.setIsGraphListVisible(false);
   });
-  const temporal = useDialogFlowStore.temporal.getState();
-  const newGraph = useDialogFlowStore((state) => () => {
-    if (state.graphId === null) return;
-    state.setGraphId(null);
-    state.setName("Untitled");
-    state.setNodes([
-      {
-        id: "ghost",
-        type: "ghost",
-        position: { x: 0, y: 0 },
-        data: { standalone: true },
-      },
-    ]);
-    state.setEdges([]);
-    state.setOrigin("user");
-    state.setLastSaved(null);
-    temporal.clear();
-    toast({ title: `New Dialog Flow created` });
-  });
+
+  const newGraph = useNewGraph();
 
   return (
     <div className="h-14 flex items-center w-full gap-2">
@@ -117,6 +125,7 @@ function Section({ origin, title, graphs, isLoading }: SectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const temporal = useDialogFlowStore.temporal.getState();
+  const newGraph = useNewGraph();
   const { activeId, fetchingId, loadGraph } = useDialogFlowStore((state) => ({
     activeId: state.graphId,
     fetchingId: state.fetchingId,
@@ -141,6 +150,8 @@ function Section({ origin, title, graphs, isLoading }: SectionProps) {
     },
   }));
 
+  const del = useDeleteDialogFlow();
+
   return (
     <div className="flex flex-col gap-1 mt-2">
       <Label className="text-neutral-500 mb-2">{title}</Label>
@@ -148,20 +159,44 @@ function Section({ origin, title, graphs, isLoading }: SectionProps) {
         <>
           {(isExpanded ? graphs : graphs.slice(0, 5)).map((item) => {
             const isFetching = fetchingId === item.id;
+            const isDeleting = del.variables === item.id && del.isPending;
             const isSelected = fetchingId ? isFetching : activeId === item.id;
             return (
-              <Button
+              <div
                 key={item.id}
-                onClick={() => loadGraph(item.id)}
                 className={cn(
-                  "justify-start px-3",
-                  !isSelected &&
-                    "hover:bg-neutral-200 border border-transparent hover:border-neutral-300"
+                  "justify-start flex items-center h-10 rounded-md text-sm group",
+                  isSelected
+                    ? "bg-neutral-950 text-white"
+                    : "hover:bg-neutral-200 border border-transparent hover:border-neutral-300",
+                  isDeleting && "text-neutral-400"
                 )}
-                variant={isSelected ? "default" : "ghost"}
               >
-                {isFetching ? "Loading..." : item.name}
-              </Button>
+                <button
+                  className="px-3 flex-1 py-2 text-left truncate"
+                  onClick={() => loadGraph(item.id)}
+                >
+                  {isFetching
+                    ? "Loading..."
+                    : isDeleting
+                    ? "Deleting..."
+                    : item.name}
+                </button>
+                {origin === "user" && !isDeleting && (
+                  <button
+                    className={cn(
+                      "aspect-square flex items-center justify-center shrink-0 group-hover:text-red-500 hover:bg-red-500 size-10 -m-px rounded-r-md hover:!text-red-100",
+                      isSelected ? "text-neutral-700" : "text-neutral-300"
+                    )}
+                    onClick={() => {
+                      del.mutate(item.id);
+                      if (isSelected) newGraph();
+                    }}
+                  >
+                    <Trash className="size-4" />
+                  </button>
+                )}
+              </div>
             );
           })}
           {graphs.length > 5 ? (
