@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
-  Controls,
   useReactFlow,
   MiniMap,
 } from "@xyflow/react";
@@ -72,6 +71,7 @@ import {
 import { DialogClose } from "@radix-ui/react-dialog";
 import { useLayoutStore } from "./layout-store";
 import Share from "./share";
+import Controls from "./controls";
 
 function Toolbar() {
   const { setType } = useToolbarStore();
