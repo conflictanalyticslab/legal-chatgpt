@@ -45,6 +45,6 @@ export async function GET(_: Request) {
       { status: 200 }
     );
   } catch (error: unknown) {
-    return NextResponse.json(apiErrorResponse(error), { status: 400 });
+    return NextResponse.json(apiErrorResponse(error), { status: 500 });
   }
 }

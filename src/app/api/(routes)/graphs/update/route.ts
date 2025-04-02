@@ -71,6 +71,6 @@ export async function POST(req: Request) {
       },
     });
   } catch (error: unknown) {
-    return NextResponse.json(apiErrorResponse(error), { status: 400 });
+    return NextResponse.json(apiErrorResponse(error), { status: 500 });
   }
 }
