@@ -252,6 +252,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     });
     if (hasGhostNode) return;
 
+    const x = node.position.x + 200;
     let y = node.position.y;
     if (handleId && (node.type === "switch" || node.type === "relevant")) {
       let index = 0;
@@ -280,11 +281,15 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
           return;
       }
 
-      const offset = Math.abs(index - middleIndex) * (DIAMETER + 10);
+      const offset = Math.abs(index - middleIndex) * ((DIAMETER / 2) * 3);
       y = index < middleIndex ? y - offset : y + offset;
+    } else {
+      while (nodes.some((n) => n.position.x === x && n.position.y === y)) {
+        y = y - (DIAMETER / 2) * 3;
+      }
     }
 
-    const ghost = createEmptyNode("ghost", { x: node.position.x + 200, y });
+    const ghost = createEmptyNode("ghost", { x, y });
     addNode(ghost);
     setCenter(
       ghost.position.x + DIAMETER / 2,
