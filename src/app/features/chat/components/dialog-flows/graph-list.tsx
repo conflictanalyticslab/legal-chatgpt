@@ -5,6 +5,17 @@ import { ChevronLeft, PlusSquare, Trash } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 import {
   fetchDialogFlow,
@@ -183,18 +194,41 @@ function Section({ origin, title, graphs, isLoading }: SectionProps) {
                     : item.name}
                 </button>
                 {origin === "user" && !isDeleting && (
-                  <button
-                    className={cn(
-                      "aspect-square flex items-center justify-center shrink-0 group-hover:text-red-500 hover:bg-red-500 size-10 -m-px rounded-r-md hover:!text-red-100",
-                      isSelected ? "text-neutral-700" : "text-neutral-300"
-                    )}
-                    onClick={() => {
-                      del.mutate(item.id);
-                      if (isSelected) newGraph();
-                    }}
-                  >
-                    <Trash className="size-4" />
-                  </button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className={cn(
+                          "aspect-square flex items-center justify-center shrink-0 group-hover:text-red-500 hover:bg-red-500 size-10 -m-px rounded-r-md hover:!text-red-100",
+                          isSelected ? "text-neutral-700" : "text-neutral-300"
+                        )}
+                      >
+                        <Trash className="size-4" />
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete your graph.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-red-500 text-white hover:bg-red-400"
+                          onClick={() => {
+                            del.mutate(item.id);
+                            if (isSelected) newGraph();
+                          }}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
               </div>
             );
