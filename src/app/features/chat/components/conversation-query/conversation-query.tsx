@@ -3,7 +3,7 @@ import { useGlobalContext } from "@/app/store/global-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { SquareMinus } from "lucide-react";
+import { Edit, SquareMinus } from "lucide-react";
 
 import UploadDocument from "../upload-document/upload-document";
 import { FlowModal } from "../dialog-flows/flow-graph";
@@ -29,10 +29,10 @@ export function ConversationQuery() {
 
   return (
     <form
-      className="shadow-none bg-[#f5f5f7] w-full ml-auto md:mx-auto h-[80px] flex items-start justify-center"
+      className="shadow-none bg-[#f5f5f7] md:w-chat ml-auto md:mx-auto h-[80px] flex flex-col justify-center"
       onSubmit={handleSubmit}
     >
-      <div className="relative flex h-[45px] md:h-[56px] w-full md:w-chat mx-2">
+      <div className="relative flex h-[45px] md:h-[56px] w-full shrink-0">
         <UploadDocument />
 
         <FlowModal />
@@ -64,28 +64,43 @@ export function ConversationQuery() {
             </div>
           </Button>
         )}
-        <label className="text-[grey] text-sm absolute left-[45px] md:left-auto bottom-[-20px] italic ">
+      </div>
+
+      <div className="flex justify-between items-center -mt-2 z-10">
+        <label className="text-[grey] text-sm italic">
           {num === 0
             ? "No more prompts allowed. Please enter your final feedback."
             : `Prompts left: ${num}`}
         </label>
-        <label className="text-[grey] text-sm absolute bottom-[-20px] right-[30px] italic ">
-          {compiledDialogFlow
-            ? "Dialog Flow in use: " + compiledDialogFlow.name
-            : "Dialog Flow not in use"}
-        </label>
 
-        {compiledDialogFlow && (
-          <Button
-            variant={"ghost"}
-            className="bg-transparent absolute bottom-[-30px] right-[-20px] italic"
-            onClick={() => {
-              setCompiledDialogFlow(null);
-            }}
-          >
-            <SquareMinus />
-          </Button>
-        )}
+        <div className="flex items-center">
+          <label className="text-[grey] text-sm italic ">
+            {compiledDialogFlow
+              ? "Dialog Flow in use: " + compiledDialogFlow.name
+              : "Dialog Flow not in use"}
+          </label>
+
+          {compiledDialogFlow && (
+            <>
+              <Button
+                variant={"ghost"}
+                className="bg-transparent -mr-4"
+                onClick={() => alert("TODO")}
+              >
+                <Edit />
+              </Button>
+              <Button
+                variant={"ghost"}
+                className="bg-transparent -mr-4"
+                onClick={() => {
+                  setCompiledDialogFlow(null);
+                }}
+              >
+                <SquareMinus />
+              </Button>
+            </>
+          )}
+        </div>
       </div>
     </form>
   );
