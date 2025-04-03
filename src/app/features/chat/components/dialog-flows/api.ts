@@ -60,11 +60,11 @@ export function useSaveDialogFlow() {
       setLastSaved(graph.updated_at);
 
       switch (origin) {
-        case "user":
-          queryClient.invalidateQueries({ queryKey: ["dialog-flows"] });
-          break;
         case "shared":
           queryClient.invalidateQueries({ queryKey: ["shared-dialog-flows"] });
+          break;
+        default:
+          queryClient.invalidateQueries({ queryKey: ["dialog-flows"] });
           break;
       }
     },

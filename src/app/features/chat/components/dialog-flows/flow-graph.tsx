@@ -476,6 +476,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         onNodesChange={(changes) => {
           onNodesChange(changes);
           if (changes.every((change) => change.type === "select")) return;
+          if (changes.every((change) => change.type === "dimensions")) return;
           setUpdate((prev) => prev + 1);
         }}
         onEdgesChange={(changes) => {
