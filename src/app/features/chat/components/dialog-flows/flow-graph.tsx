@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -61,7 +61,9 @@ import {
 import autoAlign from "./auto-align";
 import { DIAMETER } from "./nodes/circular-node";
 import NodeContextMenu from "./node-context-menu";
-import NodeSelectionMenu from "./node-selection-menu";
+import NodeSelectionMenu, {
+  type NodeSelectionMenuHandle,
+} from "./node-selection-menu";
 import {
   Select,
   SelectContent,
@@ -171,7 +173,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const isLocked = useStore((s) => !s.nodesConnectable);
   const { setCenter, screenToFlowPosition, fitView } = useReactFlow();
 
-  const [activeGhost, setActiveGhost] = useState<HTMLElement | null>(null);
+  const nodeSelectionMenuRef = useRef<NodeSelectionMenuHandle>(null);
 
   const {
     graphId,
@@ -220,7 +222,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const onNodeClick = (e: React.MouseEvent, node: GraphFlowNode) => {
     if (node.type === "ghost") {
       if (isLocked) return;
-      return setActiveGhost(e.currentTarget as HTMLElement);
+      return nodeSelectionMenuRef.current?.open("add", node);
     }
 
     const target = e.target as HTMLElement;
@@ -250,6 +252,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     });
     if (hasGhostNode) return;
 
+    const x = node.position.x + 200;
     let y = node.position.y;
     if (handleId && (node.type === "switch" || node.type === "relevant")) {
       let index = 0;
@@ -278,11 +281,15 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
           return;
       }
 
-      const offset = Math.abs(index - middleIndex) * (DIAMETER + 10);
+      const offset = Math.abs(index - middleIndex) * ((DIAMETER / 2) * 3);
       y = index < middleIndex ? y - offset : y + offset;
+    } else {
+      while (nodes.some((n) => n.position.x === x && n.position.y === y)) {
+        y = y - (DIAMETER / 2) * 3;
+      }
     }
 
-    const ghost = createEmptyNode("ghost", { x: node.position.x + 200, y });
+    const ghost = createEmptyNode("ghost", { x, y });
     addNode(ghost);
     setCenter(
       ghost.position.x + DIAMETER / 2,
@@ -410,6 +417,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         onNodesChange={(changes) => {
           onNodesChange(changes);
           if (changes.every((change) => change.type === "select")) return;
+          if (changes.every((change) => change.type === "dimensions")) return;
           setUpdate((prev) => prev + 1);
         }}
         onEdgesChange={(changes) => {
@@ -439,6 +447,10 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         {contextMenu && (
           <NodeContextMenu
             {...contextMenu}
+            onReplace={() => {
+              setContextMenu(null);
+              nodeSelectionMenuRef.current?.open("replace", contextMenu.node);
+            }}
             onClose={() => setContextMenu(null)}
           />
         )}
@@ -519,8 +531,8 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       </ReactFlow>
 
       <NodeSelectionMenu
-        ghostRef={activeGhost}
-        onClose={() => setActiveGhost(null)}
+        ref={nodeSelectionMenuRef}
+        onReplace={() => setUpdate((prev) => prev + 1)}
       />
     </div>
   );
@@ -646,6 +658,8 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
       </nav>
 
       <FlowGraph setOpen={setOpen} />
+
+      <Properties onUpdate={() => setUpdate((prev) => prev + 1)} />
     </div>
   );
 }
@@ -690,7 +704,6 @@ export function FlowModal() {
             >
               <GraphList />
               <FlowEditor setOpen={setOpen} />
-              <Properties />
             </DialogContent>
           </Dialog>
         </TooltipProvider>
