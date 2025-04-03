@@ -236,6 +236,7 @@ export const usePropertiesStore = create<PropertiesStore>()((set, get) => ({
 interface CompiledDialogFlow {
   name: string;
   prompt: string;
+  isCustom?: boolean;
 }
 interface GlobalDialogFlowStore {
   compiledDialogFlow: CompiledDialogFlow | null;
