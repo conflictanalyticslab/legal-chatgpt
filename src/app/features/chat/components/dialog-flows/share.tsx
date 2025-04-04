@@ -86,7 +86,7 @@ export default function Share() {
     share.mutate({ add: added, delete: deleted });
   };
 
-  if (!graphId || !publicGraph || origin !== "user") return null;
+  if (!graphId || origin !== "user") return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>

@@ -61,6 +61,7 @@ export function useSaveDialogFlow() {
 
       switch (origin) {
         case "shared":
+          queryClient.invalidateQueries({ queryKey: ["public-dialog-flows"] });
           queryClient.invalidateQueries({ queryKey: ["shared-dialog-flows"] });
           break;
         default:
@@ -246,6 +247,24 @@ export function useFetchUserDialogFlows() {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
       const response = await fetch("/api/graphs/retrieve/all", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return (await response.json()).data;
+    },
+  });
+}
+
+export function useFetchPublicDialogFlows() {
+  return useQuery<DialogFlowListItem[]>({
+    queryKey: ["public-dialog-flows"],
+    queryFn: async () => {
+      invariant(auth.currentUser, "User is not authenticated");
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch("/api/graphs/retrieve/public", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

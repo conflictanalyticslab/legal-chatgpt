@@ -20,6 +20,7 @@ import {
 import {
   fetchDialogFlow,
   useFetchUserDialogFlows,
+  useFetchPublicDialogFlows,
   useFetchSharedDialogFlows,
   useFetchUniversalDialogFlows,
   type DialogFlowListItem,
@@ -97,6 +98,7 @@ function Header() {
 
 function Graphs() {
   const user = useFetchUserDialogFlows();
+  const pub = useFetchPublicDialogFlows();
   const shared = useFetchSharedDialogFlows();
   const universal = useFetchUniversalDialogFlows();
 
@@ -104,10 +106,14 @@ function Graphs() {
     <div className="overflow-y-auto h-[calc(100%-56px)] pb-2">
       <Section
         origin="user"
-        title="User Created Graphs"
+        title="Your Graphs"
         graphs={user.data || []}
         isLoading={user.isPending}
       />
+
+      {!pub.isPending && pub.data?.length ? (
+        <Section origin="shared" title="Public Graphs" graphs={pub.data} />
+      ) : null}
 
       {!shared.isPending && shared.data?.length ? (
         <Section origin="shared" title="Shared Graphs" graphs={shared.data} />

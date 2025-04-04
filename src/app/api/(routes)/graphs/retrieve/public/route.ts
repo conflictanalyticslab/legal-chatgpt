@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, FieldPath } from "firebase-admin/firestore";
 
 import { getAuthenticatedUser } from "@/lib/auth/get-authenticated-user";
 import { initBackendFirebaseApp } from "@/lib/middleware/init-backend-firebase-app";
@@ -20,8 +20,8 @@ export async function GET(_: Request) {
   try {
     const snapshot = await getFirestore()
       .collection("graphs")
-      .where("shared_with", "array-contains", decodedToken.user_id)
-      .where("public", "==", false)
+      .where("user_id", "!=", decodedToken.user_id)
+      .where("public", "==", true)
       .get();
     return NextResponse.json(
       {
