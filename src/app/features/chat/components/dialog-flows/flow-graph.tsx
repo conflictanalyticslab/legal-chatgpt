@@ -81,7 +81,7 @@ import { useLayoutStore } from "./layout-store";
 import Share from "./share";
 import Controls from "./controls";
 
-function Toolbar() {
+function Toolbar({ onAdd }: { onAdd(): void }) {
   const viewport = useViewport();
   const { setType } = useToolbarStore();
   const { nodes, setNodes, addNode } = useDialogFlowStore();
@@ -109,6 +109,7 @@ function Toolbar() {
       y: (rect.height / 2 - viewport.y) / viewport.zoom - DIAMETER / 2,
     });
     addNode(node);
+    onAdd();
   };
 
   return (
@@ -517,10 +518,12 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         onReconnect={(oldEdge, newConnection) => {
           edgeReconnectSuccessful.current = true;
           setEdges(reconnectEdge(oldEdge, newConnection, edges));
+          setUpdate((prev) => prev + 1);
         }}
         onReconnectEnd={(_, edge) => {
           if (!edgeReconnectSuccessful.current) {
             setEdges(edges.filter((e) => e.id !== edge.id));
+            setUpdate((prev) => prev + 1);
           }
           edgeReconnectSuccessful.current = true;
         }}
@@ -545,7 +548,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       >
         <Background variant={BackgroundVariant.Dots} gap={[20, 20]} />
         <Controls />
-        {!isLocked && <Toolbar />}
+        {!isLocked && <Toolbar onAdd={() => setUpdate((prev) => prev + 1)} />}
         <MiniMap position="top-left" />
         {contextMenu && (
           <NodeContextMenu
