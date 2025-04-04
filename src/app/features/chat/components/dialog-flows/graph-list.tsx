@@ -35,6 +35,7 @@ function useNewGraph() {
   const temporal = useDialogFlowStore.temporal.getState();
   return useDialogFlowStore((state) => () => {
     if (state.graphId === null) return;
+    state.setOrigin("user");
     state.setGraphId(null);
     state.setName("Untitled");
     state.setNodes([
@@ -46,8 +47,9 @@ function useNewGraph() {
       },
     ]);
     state.setEdges([]);
-    state.setOrigin("user");
+    state.setSharedWith([]);
     state.setLastSaved(null);
+    state.setPublicGraph(false);
     temporal.clear();
     toast({ title: `New Dialog Flow created` });
     window.requestAnimationFrame(() => setCenter(0, 0, { zoom: 1 }));
