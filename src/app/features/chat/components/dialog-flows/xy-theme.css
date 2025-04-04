@@ -13,7 +13,19 @@
 }
 
 .react-flow__node.selected .icon-outer {
-  background-color: var(--border-selected) !important;
+  background-color: var(--border-selected);
+}
+
+.react-flow__node:hover:not(.selected) .icon-outer {
+  background-color: var(--border-hover);
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: #a3a3a3 !important;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #737373 !important;
 }
 
 .react-flow__handle	{
