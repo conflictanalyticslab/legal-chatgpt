@@ -171,7 +171,7 @@ function Toolbar() {
 
 function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const isLocked = useStore((s) => !s.nodesConnectable);
-  const { setCenter, screenToFlowPosition, fitView } = useReactFlow();
+  const { screenToFlowPosition, fitView } = useReactFlow();
 
   const nodeSelectionMenuRef = useRef<NodeSelectionMenuHandle>(null);
 
@@ -231,11 +231,6 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       target.classList.contains("source");
     if (!isSourceHandle) {
       setSelectedItem({ id: node.id, type: "node" });
-      setCenter(
-        node.position.x + DIAMETER / 2,
-        node.position.y + DIAMETER / 2,
-        { duration: 500 }
-      );
       return;
     }
 
@@ -291,11 +286,6 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
 
     const ghost = createEmptyNode("ghost", { x, y });
     addNode(ghost);
-    setCenter(
-      ghost.position.x + DIAMETER / 2,
-      ghost.position.y + DIAMETER / 2,
-      { duration: 500 }
-    );
 
     addEdge({
       id: `e-${node.id}-${ghost.id}`,
@@ -323,7 +313,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       setCompiledDialogFlow({
         prompt,
         name,
-      }); 
+      });
 
       setOpen(false); // Closes the current window.
 
@@ -373,7 +363,6 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       console.error(error);
     }
   }
-
 
   // Saves the current user's graph at a given time.
   function saveCurrentGraph() {
