@@ -185,7 +185,7 @@ export function DatasetSelection() {
                 className="cursor-pointer"
                 htmlFor={PineconeNamespaces.courtlistener_search_opinions}
               >
-                Procedure on Dismissal
+                Courtlistener Search Opinions
               </Label>
             </span>
           </RadioGroup>
