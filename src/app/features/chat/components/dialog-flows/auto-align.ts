@@ -1,3 +1,4 @@
+import type { XYPosition } from "@xyflow/react";
 import ELK from "elkjs/lib/elk.bundled.js";
 
 import type { GraphFlowNode, GraphFlowEdge } from "./nodes";
@@ -42,9 +43,16 @@ export default async function autoAlign(
   return layoutedGraph.children.map((node) => ({
     id: node.id,
     type: "position" as const,
-    position: {
+    position: snapToGrid({
       x: node.x!,
       y: node.y!,
-    },
+    }),
   }));
+}
+
+function snapToGrid(pos: XYPosition) {
+  return {
+    x: Math.round(pos.x / 10) * 10,
+    y: Math.round(pos.y / 10) * 10,
+  };
 }

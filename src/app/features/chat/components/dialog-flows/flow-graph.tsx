@@ -7,6 +7,8 @@ import {
   useStore,
   reconnectEdge,
   SelectionMode,
+  Background,
+  BackgroundVariant,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/base.css";
@@ -510,7 +512,11 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         selectionOnDrag
         panOnDrag={[1, 2]}
         selectionMode={SelectionMode.Partial}
+        snapToGrid
+        snapGrid={[10, 10]}
+        onlyRenderVisibleElements
       >
+        <Background variant={BackgroundVariant.Dots} gap={[20, 20]} />
         <Controls />
         {!isLocked && <Toolbar />}
         <MiniMap position="top-left" />
