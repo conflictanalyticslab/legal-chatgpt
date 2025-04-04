@@ -9,6 +9,7 @@ import {
   SelectionMode,
   Background,
   BackgroundVariant,
+  useViewport,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/base.css";
@@ -81,7 +82,9 @@ import Share from "./share";
 import Controls from "./controls";
 
 function Toolbar() {
+  const viewport = useViewport();
   const { setType } = useToolbarStore();
+  const { nodes, setNodes, addNode } = useDialogFlowStore();
 
   const onDragStart = (
     event: React.DragEvent<HTMLDivElement>,
@@ -91,12 +94,30 @@ function Toolbar() {
     event.dataTransfer.effectAllowed = "move";
   };
 
+  const onClick = (type: GraphFlowNodeTypes) => {
+    // prettier-ignore
+    const isStandaloneGhostExist = nodes.length === 1 && nodes.find((node) => node.type === "ghost" && node.data.standalone);
+    if (isStandaloneGhostExist) setNodes([]);
+
+    const el = document.querySelector(".react-flow");
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+
+    const node = createEmptyNode(type, {
+      x: (rect.width / 2 - viewport.x) / viewport.zoom - DIAMETER / 2,
+      y: (rect.height / 2 - viewport.y) / viewport.zoom - DIAMETER / 2,
+    });
+    addNode(node);
+  };
+
   return (
     <div className="bg-white absolute bottom-0 left-[50%] translate-x-[-50%] z-10 border border-b-0 border-neutral-200 px-4 pb-2 rounded-t-lg">
       <div className="flex gap-4 -mt-10">
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "example")}
+          onClick={() => onClick("example")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -107,6 +128,7 @@ function Toolbar() {
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "instruction")}
+          onClick={() => onClick("instruction")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -117,6 +139,7 @@ function Toolbar() {
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "context")}
+          onClick={() => onClick("context")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -127,6 +150,7 @@ function Toolbar() {
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "switch")}
+          onClick={() => onClick("switch")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -137,6 +161,7 @@ function Toolbar() {
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "relevant")}
+          onClick={() => onClick("relevant")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -147,6 +172,7 @@ function Toolbar() {
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "keyword-extractor")}
+          onClick={() => onClick("keyword-extractor")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -161,6 +187,7 @@ function Toolbar() {
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "pdf")}
+          onClick={() => onClick("pdf")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
