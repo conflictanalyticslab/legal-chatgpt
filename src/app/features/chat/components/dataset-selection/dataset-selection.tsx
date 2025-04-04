@@ -176,6 +176,18 @@ export function DatasetSelection() {
                 Procedure on Dismissal
               </Label>
             </span>
+            <span className="flex justify-start items-center gap-2">
+              <RadioGroupItem
+                id={PineconeNamespaces.courtlistener_search_opinions}
+                value={PineconeNamespaces.courtlistener_search_opinions}
+              />
+              <Label
+                className="cursor-pointer"
+                htmlFor={PineconeNamespaces.courtlistener_search_opinions}
+              >
+                Courtlistener Search Opinions
+              </Label>
+            </span>
           </RadioGroup>
         </AccordionContent>
       </AccordionItem>

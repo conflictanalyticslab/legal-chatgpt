@@ -21,7 +21,7 @@ export enum PineconeNamespaces {
   without_cause_termination = "without_cause_termination",
   reasonable_notice_termination = "reasonable_notice_termination",
   minimum_standards_termination = "minimum_standards_termination",
-  
+  courtlistener_search_opinions="courtlistener_search_opinions",
   constructive_dismissal = "constructive_dismissal",
   factors_affecting_notice = "factors_affecting_notice",
   just_cause_dismissal = "just_cause_dismissal",
