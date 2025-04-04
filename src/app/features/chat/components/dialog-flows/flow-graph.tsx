@@ -5,6 +5,7 @@ import {
   useReactFlow,
   MiniMap,
   useStore,
+  reconnectEdge,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/base.css";
@@ -181,6 +182,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     nodes,
     setNodes,
     edges,
+    setEdges,
     onNodesChange,
     onEdgesChange,
     onConnect,
@@ -295,6 +297,8 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     });
     setUpdate((prev) => prev + 1);
   };
+
+  const edgeReconnectSuccessful = useRef(true);
 
   const onEdgeClick = (e: React.MouseEvent, edge: GraphFlowEdge) => {
     setSelectedItem({ id: edge.id, type: "edge" });
@@ -476,6 +480,19 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         onConnect={(connection) => {
           onConnect(connection);
           setUpdate((prev) => prev + 1);
+        }}
+        onReconnectStart={() => {
+          edgeReconnectSuccessful.current = false;
+        }}
+        onReconnect={(oldEdge, newConnection) => {
+          edgeReconnectSuccessful.current = true;
+          setEdges(reconnectEdge(oldEdge, newConnection, edges));
+        }}
+        onReconnectEnd={(_, edge) => {
+          if (!edgeReconnectSuccessful.current) {
+            setEdges(edges.filter((e) => e.id !== edge.id));
+          }
+          edgeReconnectSuccessful.current = true;
         }}
         onDragOver={onDragOver}
         onDrop={(e) => {
