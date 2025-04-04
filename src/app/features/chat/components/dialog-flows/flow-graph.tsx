@@ -6,6 +6,7 @@ import {
   MiniMap,
   useStore,
   reconnectEdge,
+  SelectionMode,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/base.css";
@@ -505,6 +506,10 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         fitView
         minZoom={0.1}
         maxZoom={2}
+        panOnScroll
+        selectionOnDrag
+        panOnDrag={[1, 2]}
+        selectionMode={SelectionMode.Partial}
       >
         <Controls />
         {!isLocked && <Toolbar />}
