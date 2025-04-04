@@ -1,10 +1,4 @@
-import {
-  Handle,
-  useStore,
-  useEdges,
-  Position,
-  type NodeProps,
-} from "@xyflow/react";
+import { Handle, useStore, Position, type NodeProps } from "@xyflow/react";
 import { Brain, Plus } from "lucide-react";
 
 import CircularNode from "./circular-node";
@@ -14,7 +8,6 @@ import { cn } from "@/lib/utils";
 
 export default function ContextNode({ id, data }: NodeProps<ContextNode>) {
   const isConnectable = useStore((s) => s.nodesConnectable);
-  const isSourceConnected = useEdges().some((edge) => edge.source === id);
 
   return (
     <CircularNode
@@ -31,13 +24,12 @@ export default function ContextNode({ id, data }: NodeProps<ContextNode>) {
         position={Position.Right}
         className={cn(
           "flex items-center justify-center text-[var(--text)]",
-          isConnectable &&
-            !isSourceConnected &&
-            "group-hover:-mr-3 transition-[margin]",
-          !isConnectable && "!cursor-default"
+          isConnectable
+            ? "group-hover:-mr-3 transition-[margin]"
+            : "!cursor-default"
         )}
       >
-        {isConnectable && !isSourceConnected && (
+        {isConnectable && (
           <Plus className="size-4 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
         )}
       </Handle>
