@@ -106,7 +106,7 @@ function Graphs() {
     <div className="overflow-y-auto h-[calc(100%-56px)] pb-2">
       <Section
         origin="user"
-        title="User Created Graphs"
+        title="Your Graphs"
         graphs={user.data || []}
         isLoading={user.isPending}
       />
