@@ -34,7 +34,7 @@ export async function POST(
   }
 
   const graph = res.data()!;
-  if (graph.user_id !== user_id || !graph.public) {
+  if (graph.user_id !== user_id) {
     return NextResponse.json(
       { success: false, error: "Not Found", data: null },
       { status: 404 }

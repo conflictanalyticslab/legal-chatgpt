@@ -5,6 +5,11 @@ import {
   useReactFlow,
   MiniMap,
   useStore,
+  reconnectEdge,
+  SelectionMode,
+  Background,
+  BackgroundVariant,
+  useViewport,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/base.css";
@@ -76,8 +81,10 @@ import { useLayoutStore } from "./layout-store";
 import Share from "./share";
 import Controls from "./controls";
 
-function Toolbar() {
+function Toolbar({ onAdd }: { onAdd(): void }) {
+  const viewport = useViewport();
   const { setType } = useToolbarStore();
+  const { nodes, setNodes, addNode } = useDialogFlowStore();
 
   const onDragStart = (
     event: React.DragEvent<HTMLDivElement>,
@@ -87,12 +94,31 @@ function Toolbar() {
     event.dataTransfer.effectAllowed = "move";
   };
 
+  const onClick = (type: GraphFlowNodeTypes) => {
+    // prettier-ignore
+    const isStandaloneGhostExist = nodes.length === 1 && nodes.find((node) => node.type === "ghost" && node.data.standalone);
+    if (isStandaloneGhostExist) setNodes([]);
+
+    const el = document.querySelector(".react-flow");
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+
+    const node = createEmptyNode(type, {
+      x: (rect.width / 2 - viewport.x) / viewport.zoom - DIAMETER / 2,
+      y: (rect.height / 2 - viewport.y) / viewport.zoom - DIAMETER / 2,
+    });
+    addNode(node);
+    onAdd();
+  };
+
   return (
     <div className="bg-white absolute bottom-0 left-[50%] translate-x-[-50%] z-10 border border-b-0 border-neutral-200 px-4 pb-2 rounded-t-lg">
       <div className="flex gap-4 -mt-10">
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "example")}
+          onClick={() => onClick("example")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -103,6 +129,7 @@ function Toolbar() {
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "instruction")}
+          onClick={() => onClick("instruction")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -113,6 +140,7 @@ function Toolbar() {
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "context")}
+          onClick={() => onClick("context")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -123,6 +151,7 @@ function Toolbar() {
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "switch")}
+          onClick={() => onClick("switch")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -133,6 +162,7 @@ function Toolbar() {
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "relevant")}
+          onClick={() => onClick("relevant")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -143,6 +173,7 @@ function Toolbar() {
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "keyword-extractor")}
+          onClick={() => onClick("keyword-extractor")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -157,6 +188,7 @@ function Toolbar() {
         <div
           className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "pdf")}
+          onClick={() => onClick("pdf")}
           draggable
         >
           <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
@@ -171,16 +203,16 @@ function Toolbar() {
 
 function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const isLocked = useStore((s) => !s.nodesConnectable);
-  const { setCenter, screenToFlowPosition, fitView } = useReactFlow();
+  const { screenToFlowPosition } = useReactFlow();
 
   const nodeSelectionMenuRef = useRef<NodeSelectionMenuHandle>(null);
 
   const {
-    graphId,
-    name,
+    origin,
     nodes,
     setNodes,
     edges,
+    setEdges,
     onNodesChange,
     onEdgesChange,
     onConnect,
@@ -191,15 +223,13 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const { type } = useToolbarStore();
 
   const { isGraphListVisibile } = useLayoutStore();
-  const { origin } = useDialogFlowStore();
-  const { setCompiledDialogFlow } = useGlobalDialogFlowStore();
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-  const { setSelectedItem } = usePropertiesStore(); // May be source of overwrite bug ... keep track of this
+  const { setSelectedItem } = usePropertiesStore();
 
   const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -231,11 +261,6 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       target.classList.contains("source");
     if (!isSourceHandle) {
       setSelectedItem({ id: node.id, type: "node" });
-      setCenter(
-        node.position.x + DIAMETER / 2,
-        node.position.y + DIAMETER / 2,
-        { duration: 500 }
-      );
       return;
     }
 
@@ -291,11 +316,6 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
 
     const ghost = createEmptyNode("ghost", { x, y });
     addNode(ghost);
-    setCenter(
-      ghost.position.x + DIAMETER / 2,
-      ghost.position.y + DIAMETER / 2,
-      { duration: 500 }
-    );
 
     addEdge({
       id: `e-${node.id}-${ghost.id}`,
@@ -306,9 +326,162 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     setUpdate((prev) => prev + 1);
   };
 
+  const edgeReconnectSuccessful = useRef(true);
+
   const onEdgeClick = (e: React.MouseEvent, edge: GraphFlowEdge) => {
     setSelectedItem({ id: edge.id, type: "edge" });
   };
+
+  type ContextMenu = {
+    node: GraphFlowNode;
+    position: { x: number; y: number };
+  };
+  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  const onNodeContextMenu = (e: React.MouseEvent, node: GraphFlowNode) => {
+    e.preventDefault();
+    if (isLocked) return;
+
+    setContextMenu({
+      node,
+      position: {
+        x: e.clientX,
+        y: e.clientY,
+      },
+    });
+  };
+
+  const save = useSaveDialogFlow();
+
+  const [update, setUpdate] = useState(0);
+  const [debouncedUpdate] = useDebounce(update, 1000);
+
+  useEffect(() => {
+    if (!debouncedUpdate) return;
+    if (nodes.length === 1 && nodes[0].type === "ghost") return;
+    save.mutate();
+  }, [debouncedUpdate]);
+
+  return (
+    <div
+      className={cn(
+        "bg-white flex-1 border-l border-t border-neutral-200",
+        isGraphListVisibile && "rounded-tl-lg"
+      )}
+    >
+      <ReactFlow
+        nodeTypes={nodeTypes}
+        nodes={nodes}
+        edges={edges}
+        defaultEdgeOptions={{ labelBgPadding: [4, 2] }}
+        onNodesChange={(changes) => {
+          onNodesChange(changes);
+          if (changes.every((change) => change.type === "select")) return;
+          if (changes.every((change) => change.type === "dimensions")) return;
+          setUpdate((prev) => prev + 1);
+        }}
+        onEdgesChange={(changes) => {
+          onEdgesChange(changes);
+          if (changes.every((change) => change.type === "select")) return;
+          setUpdate((prev) => prev + 1);
+        }}
+        onConnect={(connection) => {
+          onConnect(connection);
+          setUpdate((prev) => prev + 1);
+        }}
+        onReconnectStart={() => {
+          edgeReconnectSuccessful.current = false;
+        }}
+        onReconnect={(oldEdge, newConnection) => {
+          edgeReconnectSuccessful.current = true;
+          setEdges(reconnectEdge(oldEdge, newConnection, edges));
+          setUpdate((prev) => prev + 1);
+        }}
+        onReconnectEnd={(_, edge) => {
+          if (!edgeReconnectSuccessful.current) {
+            setEdges(edges.filter((e) => e.id !== edge.id));
+            setUpdate((prev) => prev + 1);
+          }
+          edgeReconnectSuccessful.current = true;
+        }}
+        onDragOver={onDragOver}
+        onDrop={(e) => {
+          onDrop(e);
+          setUpdate((prev) => prev + 1);
+        }}
+        onNodeClick={onNodeClick}
+        onNodeContextMenu={onNodeContextMenu}
+        onEdgeClick={onEdgeClick}
+        fitView
+        minZoom={0.1}
+        maxZoom={2}
+        panOnScroll
+        selectionOnDrag
+        panOnDrag={[1, 2]}
+        selectionMode={SelectionMode.Partial}
+        snapToGrid
+        snapGrid={[10, 10]}
+        onlyRenderVisibleElements
+      >
+        <Background variant={BackgroundVariant.Dots} gap={[20, 20]} />
+        <Controls />
+        {!isLocked && <Toolbar onAdd={() => setUpdate((prev) => prev + 1)} />}
+        {origin === "universal" && (
+          <Button
+            className="absolute bottom-2.5 left-[50%] translate-x-[-50%] z-10"
+            onClick={() => save.mutate()}
+            disabled={save.isPending}
+          >
+            {save.isPending ? "Copying..." : "Make a Copy"}
+          </Button>
+        )}
+        <MiniMap position="top-left" />
+        {contextMenu && (
+          <NodeContextMenu
+            {...contextMenu}
+            onReplace={() => {
+              setContextMenu(null);
+              nodeSelectionMenuRef.current?.open("replace", contextMenu.node);
+            }}
+            onClose={() => setContextMenu(null)}
+          />
+        )}
+      </ReactFlow>
+
+      <NodeSelectionMenu
+        ref={nodeSelectionMenuRef}
+        onReplace={() => setUpdate((prev) => prev + 1)}
+      />
+    </div>
+  );
+}
+
+interface FlowEditorProps {
+  setOpen: (open: boolean) => void;
+}
+
+function FlowEditor({ setOpen }: FlowEditorProps) {
+  const { fitView } = useReactFlow();
+  const { isGraphListVisibile, showGraphList } = useLayoutStore((state) => ({
+    isGraphListVisibile: state.isGraphListVisibile,
+    showGraphList() {
+      state.setIsGraphListVisible(true);
+    },
+  }));
+  const {
+    origin,
+    graphId,
+    name,
+    setName,
+    nodes,
+    onNodesChange,
+    edges,
+    publicGraph,
+    setPublicGraph,
+    lastSaved,
+    model,
+    setModel,
+  } = useDialogFlowStore();
+  const { setCompiledDialogFlow } = useGlobalDialogFlowStore();
 
   // const { setLastSaved } = useDialogFlowStore(
   //   useShallow((state) => ({
@@ -323,7 +496,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       setCompiledDialogFlow({
         prompt,
         name,
-      }); 
+      });
 
       setOpen(false); // Closes the current window.
 
@@ -373,7 +546,6 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       console.error(error);
     }
   }
-
 
   // Saves the current user's graph at a given time.
   function saveCurrentGraph() {
@@ -427,221 +599,12 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
     }
   }
 
-  type ContextMenu = {
-    node: GraphFlowNode;
-    position: { x: number; y: number };
-  };
-  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
-  const onNodeContextMenu = (e: React.MouseEvent, node: GraphFlowNode) => {
-    e.preventDefault();
-    if (isLocked) return;
-
-    setContextMenu({
-      node,
-      position: {
-        x: e.clientX,
-        y: e.clientY,
-      },
-    });
-  };
-
   const save = useSaveDialogFlow();
   const generate = useGenerateDialogFlow({
     onSuccess() {
       setUpdate((prev) => prev + 1);
     },
   });
-
-  const [update, setUpdate] = useState(0);
-  const [debouncedUpdate] = useDebounce(update, 1000);
-
-  useEffect(() => {
-    if (!debouncedUpdate) return;
-    if (nodes.length === 1 && nodes[0].type === "ghost") return;
-    save.mutate();
-  }, [debouncedUpdate]);
-
-  return (
-    <div
-      className={cn(
-        "bg-white flex-1 border-l border-t border-neutral-200",
-        isGraphListVisibile && "rounded-tl-lg"
-      )}
-    >
-      <ReactFlow
-        nodeTypes={nodeTypes}
-        nodes={nodes}
-        edges={edges}
-        defaultEdgeOptions={{ labelBgPadding: [4, 2] }}
-        onNodesChange={(changes) => {
-          onNodesChange(changes);
-          if (changes.every((change) => change.type === "select")) return;
-          if (changes.every((change) => change.type === "dimensions")) return;
-          setUpdate((prev) => prev + 1);
-        }}
-        onEdgesChange={(changes) => {
-          onEdgesChange(changes);
-          if (changes.every((change) => change.type === "select")) return;
-          setUpdate((prev) => prev + 1);
-        }}
-        onConnect={(connection) => {
-          onConnect(connection);
-          setUpdate((prev) => prev + 1);
-        }}
-        onDragOver={onDragOver}
-        onDrop={(e) => {
-          onDrop(e);
-          setUpdate((prev) => prev + 1);
-        }}
-        onNodeClick={onNodeClick}
-        onNodeContextMenu={onNodeContextMenu}
-        onEdgeClick={onEdgeClick}
-        fitView
-        minZoom={0.1}
-        maxZoom={2}
-      >
-        <Controls />
-        {!isLocked && <Toolbar />}
-        <MiniMap position="top-left" />
-        {contextMenu && (
-          <NodeContextMenu
-            {...contextMenu}
-            onReplace={() => {
-              setContextMenu(null);
-              nodeSelectionMenuRef.current?.open("replace", contextMenu.node);
-            }}
-            onClose={() => setContextMenu(null)}
-          />
-        )}
-
-        <div className="flex gap-2 absolute bottom-2.5 right-2.5 z-50">
-          {!graphId && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  type="button"
-                  aria-label="Generate Graph"
-                  onClick={async () => {
-                    const query = prompt("What would you like to generate?"); // TODO
-                    if (!query) return;
-                    generate.mutate(query);
-                  }}
-                  disabled={generate.isPending}
-                  className="p-2.5 h-[unset] border-neutral-200 aspect-square"
-                >
-                  <RefreshCcw
-                    className={cn(
-                      "size-6",
-                      generate.isPending && "animate-spin"
-                    )}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top" sideOffset={5}>
-                Generate graph.
-              </TooltipContent>
-            </Tooltip>
-          )}
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                type="button"
-                aria-label="Auto-align Graph"
-                onClick={async () => {
-                  onNodesChange(await autoAlign(nodes, edges));
-                  if (origin !== "universal") setUpdate((prev) => prev + 1);
-                  window.requestAnimationFrame(() => fitView());
-                }}
-                className="p-2.5 h-[unset] border-neutral-200 aspect-square"
-              >
-                <WandSparklesIcon className="size-6" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" sideOffset={5}>
-              Auto-align the current graph.
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                type="button"
-                aria-label="Save Graph"
-                onClick={saveCurrentGraph}
-                className="p-2.5 h-[unset] border-neutral-200 aspect-square"
-              >
-                <Image
-                  src="/assets/icons/save-cloud.svg"
-                  alt="send"
-                  width={24}
-                  height={24}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" align="end" sideOffset={5}>
-              Save the current graph.
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                type="button"
-                aria-label="Save & Use Graph"
-                onClick={injectGraph}
-                className="p-2.5 h-[unset] border-neutral-200 aspect-square"
-              >
-                <Image
-                  src="/assets/icons/send-horizontal.svg"
-                  alt="send"
-                  width={24}
-                  height={24}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" align="end" sideOffset={5}>
-              Save and send the current graph to a query.
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </ReactFlow>
-
-      <NodeSelectionMenu
-        ref={nodeSelectionMenuRef}
-        onReplace={() => setUpdate((prev) => prev + 1)}
-      />
-    </div>
-  );
-}
-
-interface FlowEditorProps {
-  setOpen: (open: boolean) => void;
-}
-
-function FlowEditor({ setOpen }: FlowEditorProps) {
-  const { isGraphListVisibile, showGraphList } = useLayoutStore((state) => ({
-    isGraphListVisibile: state.isGraphListVisibile,
-    showGraphList() {
-      state.setIsGraphListVisible(true);
-    },
-  }));
-  const {
-    origin,
-    name,
-    setName,
-    publicGraph,
-    setPublicGraph,
-    lastSaved,
-    model,
-    setModel,
-  } = useDialogFlowStore();
-
-  const save = useSaveDialogFlow();
 
   const [update, setUpdate] = useState(0);
   const [debouncedUpdate] = useDebounce(update, 1000);
@@ -731,6 +694,106 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
               </Badge>
             </div>
           )}
+
+          <div className="flex gap-2">
+            {!graphId && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    aria-label="Generate Graph"
+                    onClick={async () => {
+                      const query = prompt("What would you like to generate?"); // TODO
+                      if (!query) return;
+                      generate.mutate(query);
+                    }}
+                    disabled={generate.isPending}
+                    className="size-9 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-200 p-0"
+                  >
+                    <RefreshCcw
+                      className={cn(
+                        "size-4",
+                        generate.isPending && "animate-spin"
+                      )}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={5}>
+                  Generate graph.
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {origin !== "universal" && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    aria-label="Auto-align Graph"
+                    onClick={async () => {
+                      onNodesChange(await autoAlign(nodes, edges));
+                      setUpdate((prev) => prev + 1);
+                      window.requestAnimationFrame(() => fitView());
+                    }}
+                    className="size-9 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-200 p-0"
+                  >
+                    <WandSparklesIcon className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={5}>
+                  Auto-align the current graph.
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {origin !== "universal" && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    aria-label="Save Graph"
+                    onClick={saveCurrentGraph}
+                    className="size-9 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-200 p-0"
+                  >
+                    <Image
+                      src="/assets/icons/save-cloud.svg"
+                      alt="save"
+                      width={16}
+                      height={16}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" align="end" sideOffset={5}>
+                  Save the current graph.
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  type="button"
+                  aria-label="Save & Use Graph"
+                  onClick={injectGraph}
+                  className="size-9 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-200 p-0"
+                >
+                  <Image
+                    src="/assets/icons/send-horizontal.svg"
+                    alt="send"
+                    width={16}
+                    height={16}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" align="end" sideOffset={5}>
+                Save and send the current graph to a query.
+              </TooltipContent>
+            </Tooltip>
+          </div>
 
           <DialogClose className="size-9 flex items-center justify-center rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white">
             <X className="size-4" />

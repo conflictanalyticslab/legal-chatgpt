@@ -19,20 +19,9 @@ import { shallow } from "zustand/shallow";
 import { useDialogFlowStore } from "./store";
 import { cn } from "@/lib/utils";
 
-const selector = (s: ReactFlowState) => ({
-  isInteractive: s.nodesDraggable || s.nodesConnectable,
-  minZoomReached: s.transform[2] <= s.minZoom,
-  maxZoomReached: s.transform[2] >= s.maxZoom,
-});
-
 export default function Controls() {
-  const store = useStoreApi();
-  const { isInteractive, minZoomReached, maxZoomReached } = useStore(
-    selector,
-    shallow
-  );
-  const { zoomIn, zoomOut, fitView } = useReactFlow();
-  const temporal = useDialogFlowStore.temporal.getState();
+  const controls = useControls();
+  const { origin } = useDialogFlowStore();
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -40,9 +29,9 @@ export default function Controls() {
         if (event.key === "z") {
           event.preventDefault();
           if (event.shiftKey) {
-            temporal.redo();
+            controls.redo();
           } else {
-            temporal.undo();
+            controls.undo();
           }
         }
       }
@@ -56,58 +45,107 @@ export default function Controls() {
     <div className="absolute bottom-2.5 left-2.5 border border-neutral-200 rounded-sm flex flex-col overflow-hidden z-10 text-neutral-950">
       <button
         className="hover:bg-neutral-100 aspect-square p-1.5 disabled:bg-neutral-100 disabled:cursor-not-allowed"
-        onClick={() => zoomIn()}
-        disabled={maxZoomReached}
+        onClick={() => controls.zoomIn()}
+        disabled={controls.maxZoomReached}
       >
         <Plus className="size-4" />
       </button>
       <button
         className="hover:bg-neutral-100 aspect-square p-1.5 disabled:bg-neutral-100 disabled:cursor-not-allowed"
-        onClick={() => zoomOut()}
-        disabled={minZoomReached}
+        onClick={() => controls.zoomOut()}
+        disabled={controls.minZoomReached}
       >
         <Minus className="size-4" />
       </button>
       <button
         className="hover:bg-neutral-100 aspect-square p-1.5"
-        onClick={() => fitView()}
+        onClick={() => controls.fitView()}
       >
         <Maximize className="size-4" />
       </button>
-      <button
-        className={cn(
-          "aspect-square p-1.5",
-          isInteractive
-            ? "hover:bg-neutral-100"
-            : "bg-neutral-950 text-white hover:bg-neutral-900"
-        )}
-        onClick={() => {
-          store.setState({
-            nodesDraggable: !isInteractive,
-            nodesConnectable: !isInteractive,
-          });
-        }}
-      >
-        {isInteractive ? (
-          <LockOpen className="size-4" />
-        ) : (
-          <Lock className="size-4" />
-        )}
-      </button>
+      {origin !== "universal" && (
+        <button
+          className={cn(
+            "aspect-square p-1.5",
+            controls.isInteractive
+              ? "hover:bg-neutral-100"
+              : "bg-neutral-950 text-white hover:bg-neutral-900"
+          )}
+          onClick={() => {
+            if (controls.isInteractive) {
+              controls.lock();
+            } else {
+              controls.unlock();
+            }
+          }}
+        >
+          {controls.isInteractive ? (
+            <LockOpen className="size-4" />
+          ) : (
+            <Lock className="size-4" />
+          )}
+        </button>
+      )}
       <button
         className="hover:bg-neutral-100 aspect-square p-1.5 disabled:bg-neutral-100 disabled:cursor-not-allowed"
-        onClick={() => temporal.undo()}
-        disabled={!temporal.pastStates.length}
+        onClick={() => controls.undo()}
+        disabled={!controls.isUndoable}
       >
         <Undo className="size-4" />
       </button>
       <button
         className="hover:bg-neutral-100 aspect-square p-1.5 disabled:bg-neutral-100 disabled:cursor-not-allowed"
-        onClick={() => temporal.redo()}
-        disabled={!temporal.futureStates.length}
+        onClick={() => controls.redo()}
+        disabled={!controls.isRedoable}
       >
         <Redo className="size-4" />
       </button>
     </div>
   );
+}
+
+const selector = (s: ReactFlowState) => ({
+  isInteractive: s.nodesDraggable || s.nodesConnectable,
+  minZoomReached: s.transform[2] <= s.minZoom,
+  maxZoomReached: s.transform[2] >= s.maxZoom,
+});
+
+export function useControls() {
+  const store = useStoreApi();
+  const { isInteractive, minZoomReached, maxZoomReached } = useStore(
+    selector,
+    shallow
+  );
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
+  const temporal = useDialogFlowStore.temporal.getState();
+
+  return {
+    isInteractive,
+    lock() {
+      store.setState({
+        nodesDraggable: false,
+        nodesConnectable: false,
+      });
+    },
+    unlock() {
+      store.setState({
+        nodesDraggable: true,
+        nodesConnectable: true,
+      });
+    },
+
+    fitView,
+
+    maxZoomReached,
+    zoomIn,
+
+    minZoomReached,
+    zoomOut,
+
+    isUndoable: !!temporal.pastStates.length,
+    undo: temporal.undo,
+
+    isRedoable: !!temporal.futureStates.length,
+    redo: temporal.redo,
+  };
 }
