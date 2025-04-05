@@ -208,6 +208,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const nodeSelectionMenuRef = useRef<NodeSelectionMenuHandle>(null);
 
   const {
+    origin,
     nodes,
     setNodes,
     edges,
@@ -424,6 +425,15 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         <Background variant={BackgroundVariant.Dots} gap={[20, 20]} />
         <Controls />
         {!isLocked && <Toolbar onAdd={() => setUpdate((prev) => prev + 1)} />}
+        {origin === "universal" && (
+          <Button
+            className="absolute bottom-2.5 left-[50%] translate-x-[-50%] z-10"
+            onClick={() => save.mutate()}
+            disabled={save.isPending}
+          >
+            {save.isPending ? "Copying..." : "Make a Copy"}
+          </Button>
+        )}
         <MiniMap position="top-left" />
         {contextMenu && (
           <NodeContextMenu
@@ -715,48 +725,52 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
               </Tooltip>
             )}
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  type="button"
-                  aria-label="Auto-align Graph"
-                  onClick={async () => {
-                    onNodesChange(await autoAlign(nodes, edges));
-                    if (origin !== "universal") setUpdate((prev) => prev + 1);
-                    window.requestAnimationFrame(() => fitView());
-                  }}
-                  className="size-9 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-200 p-0"
-                >
-                  <WandSparklesIcon className="size-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top" sideOffset={5}>
-                Auto-align the current graph.
-              </TooltipContent>
-            </Tooltip>
+            {origin !== "universal" && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    aria-label="Auto-align Graph"
+                    onClick={async () => {
+                      onNodesChange(await autoAlign(nodes, edges));
+                      setUpdate((prev) => prev + 1);
+                      window.requestAnimationFrame(() => fitView());
+                    }}
+                    className="size-9 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-200 p-0"
+                  >
+                    <WandSparklesIcon className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={5}>
+                  Auto-align the current graph.
+                </TooltipContent>
+              </Tooltip>
+            )}
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  type="button"
-                  aria-label="Save Graph"
-                  onClick={saveCurrentGraph}
-                  className="size-9 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-200 p-0"
-                >
-                  <Image
-                    src="/assets/icons/save-cloud.svg"
-                    alt="save"
-                    width={16}
-                    height={16}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top" align="end" sideOffset={5}>
-                Save the current graph.
-              </TooltipContent>
-            </Tooltip>
+            {origin !== "universal" && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    aria-label="Save Graph"
+                    onClick={saveCurrentGraph}
+                    className="size-9 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-200 p-0"
+                  >
+                    <Image
+                      src="/assets/icons/save-cloud.svg"
+                      alt="save"
+                      width={16}
+                      height={16}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" align="end" sideOffset={5}>
+                  Save the current graph.
+                </TooltipContent>
+              </Tooltip>
+            )}
 
             <Tooltip>
               <TooltipTrigger asChild>

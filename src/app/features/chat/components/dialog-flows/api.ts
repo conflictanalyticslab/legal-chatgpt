@@ -11,10 +11,13 @@ import { GraphFlowEdge, GraphFlowNode } from "./nodes";
 import { toast } from "@/components/ui/use-toast";
 import autoAlign from "./auto-align";
 import { DIAMETER } from "./nodes/circular-node";
+import { useControls } from "./controls";
 
 export function useSaveDialogFlow() {
+  const controls = useControls();
   const {
     origin,
+    setOrigin,
     graphId,
     setGraphId,
     setLastSaved,
@@ -55,14 +58,19 @@ export function useSaveDialogFlow() {
       setLastSaved(Date.now());
     },
     onSuccess: (graph) => {
+      if (origin === "universal") {
+        setOrigin("user");
+        controls.unlock();
+      }
       setGraphId(graph.id);
       setName(graph.name);
       setLastSaved(graph.updated_at);
 
       switch (origin) {
         case "shared":
-          queryClient.invalidateQueries({ queryKey: ["public-dialog-flows"] });
-          queryClient.invalidateQueries({ queryKey: ["shared-dialog-flows"] });
+          queryClient.invalidateQueries({
+            queryKey: ["public-dialog-flows", "shared-dialog-flows"],
+          });
           break;
         default:
           queryClient.invalidateQueries({ queryKey: ["dialog-flows"] });

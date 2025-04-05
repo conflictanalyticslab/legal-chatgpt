@@ -29,6 +29,7 @@ import {
 import { useDialogFlowStore } from "./store";
 import { cn } from "@/lib/utils";
 import { useLayoutStore } from "./layout-store";
+import { useControls } from "./controls";
 
 function useNewGraph() {
   const { setCenter } = useReactFlow();
@@ -140,6 +141,7 @@ type SectionProps = {
 
 function Section({ origin, title, graphs, isLoading }: SectionProps) {
   const { fitView } = useReactFlow();
+  const controls = useControls();
 
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -156,6 +158,12 @@ function Section({ origin, title, graphs, isLoading }: SectionProps) {
       state.setFetchingId(null);
 
       state.setOrigin(origin);
+      if (origin === "universal") {
+        controls.lock();
+      } else {
+        controls.unlock();
+      }
+
       state.setGraphId(id);
       state.setName(graph.name);
       state.setNodes(graph.nodes);
