@@ -50,6 +50,7 @@ export function usePdfSearch() {
         namespace === PineconeNamespaces.constructive_dismissal ||
         namespace === PineconeNamespaces.factors_affecting_notice ||
         namespace === PineconeNamespaces.just_cause_dismissal ||
+        namespace === PineconeNamespaces.courtlistener_search_opinions ||
         namespace === PineconeNamespaces.procedure_on_dismissal;
       const useKeywordPromise =
         namespace === PineconeNamespaces.canadian_law ||
