@@ -21,8 +21,6 @@ export async function POST(req: NextRequest, res: NextRequest) {
   let req_json = await req.json();
 
   const firestore = getFirestore();
-  console.log("req_json: ", req_json);
-  console.log("decodedToken: ", decodedToken);
   const graphQuery = await firestore
     .collection("graphs")
     .where("user_id", "==", decodedToken.user_id)
@@ -37,7 +35,7 @@ export async function POST(req: NextRequest, res: NextRequest) {
   }
 
   const iterator = makeIterator(req_json);
-  const stream = iteratorToStream(iterator);
+  const stream = await iteratorToStream(iterator);
 
   return new Response(stream);
 }

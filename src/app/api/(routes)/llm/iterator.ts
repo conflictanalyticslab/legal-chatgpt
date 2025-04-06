@@ -31,7 +31,7 @@ import { createDocumentPrompt } from "@/app/(private)/chat/lib/pdfs/pdf-utils";
  * @param iterator
  * @returns
  */
-export function iteratorToStream(iterator: any) {
+export async function iteratorToStream(iterator: any) {
   return new ReadableStream({
     async pull(controller) {
       const { value, done } = await iterator.next();

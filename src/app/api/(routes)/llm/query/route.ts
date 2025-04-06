@@ -5,7 +5,7 @@ import { makeIterator, iteratorToStream } from "../iterator";
 export async function POST(req: NextRequest, res: NextRequest) {
 
   const iterator = makeIterator(await req.json());
-  const stream = iteratorToStream(iterator);
+  const stream = await iteratorToStream(iterator);
 
   return new Response(stream);
 }
