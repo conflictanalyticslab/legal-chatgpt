@@ -62,7 +62,7 @@
     "langchain": "^0.2.4",
     "lucide": "^0.394.0",
     "lucide-react": "^0.445.0",
-    "netlify-cli": "^17.23.2",
+    "netlify-cli": "^19.1.5",
     "next": "^14.1.0",
     "npm": "^10.8.2",
     "npx": "^10.2.2",
