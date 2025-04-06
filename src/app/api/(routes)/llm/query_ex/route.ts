@@ -21,16 +21,20 @@ export async function POST(req: NextRequest, res: NextRequest) {
   let req_json = await req.json();
 
   const firestore = getFirestore();
-
+  console.log("req_json: ", req_json);
+  console.log("decodedToken: ", decodedToken);
   const graphQuery = await firestore
     .collection("graphs")
-    .where("userUid", "==", decodedToken.user_id)
-    .where("id", "==", req_json.dialogFlowId)
+    .where("user_id", "==", decodedToken.user_id)
+    .where("name", "==", req_json.dialogFlow)
     .get();
-  const data = graphQuery.docs[0].data();
-  const graphDoc= { nodes:data.nodes, edges:data.edges, uid: graphQuery.docs[0].id };
-
-  req_json.dialogFlow = compileGraph(graphDoc.nodes, graphDoc.edges);
+  const data = graphQuery.docs[0]?.data();
+  if (!data) {
+    req_json.dialogFlow = null
+  } else {
+    const graphDoc= { nodes:data.nodes, edges:data.edges, uid: graphQuery.docs[0].id };
+    req_json.dialogFlow = compileGraph(graphDoc.nodes, graphDoc.edges);
+  }
 
   const iterator = makeIterator(req_json);
   const stream = iteratorToStream(iterator);
