@@ -30,6 +30,12 @@ export async function POST(req: NextRequest, res: NextRequest) {
   if (!data) {
     req_json.dialogFlow = null
   } else {
+    if (!data.nodes || !data.edges) {
+      return NextResponse.json(
+        { error: "Graph data is missing" },
+        { status: 500 }
+      );
+    }
     const graphDoc= { nodes:data.nodes, edges:data.edges, uid: graphQuery.docs[0].id };
     req_json.dialogFlow = compileGraph(graphDoc.nodes, graphDoc.edges);
   }
