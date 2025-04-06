@@ -4,6 +4,7 @@ import { PineconeNamespaces } from "@/app/(private)/chat/enum/enums";
 import { UploadedDocument } from "@/app/features/chat/models/types";
 import { usePdfSearch } from "@/app/features/chat/hooks/use-pdf-search";
 import { auth } from "@/lib/firebase/firebase-admin/firebase";
+import { list } from "postcss";
 
 /**
  * Custom hook to fetch data with RAG
@@ -36,7 +37,7 @@ export function useFetchLLM() {
   const fetchLLMResponse = async (
     fullConversation: any,
     queryInput: string,
-    includedDocuments: UploadedDocument,
+    includedDocuments: Array<string>,
     dialogFlow: string | null
   ) => {
     try {
