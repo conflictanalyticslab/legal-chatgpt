@@ -93,6 +93,30 @@ export function DatasetSelection() {
             </span>
             <span className="flex justify-start items-center gap-2">
               <RadioGroupItem
+                id={PineconeNamespaces.swiss_law_en}
+                value={PineconeNamespaces.swiss_law_en}
+              />
+              <Label
+                className="cursor-pointer"
+                htmlFor={PineconeNamespaces.swiss_law_en}
+              >
+                Swiss Law (EN)
+              </Label>
+            </span>
+            <span className="flex justify-start items-center gap-2">
+              <RadioGroupItem
+                id={PineconeNamespaces.swiss_law_de}
+                value={PineconeNamespaces.swiss_law_de}
+              />
+              <Label
+                className="cursor-pointer"
+                htmlFor={PineconeNamespaces.swiss_law_de}
+              >
+                Swiss Law (DE)
+              </Label>
+            </span>
+            <span className="flex justify-start items-center gap-2">
+              <RadioGroupItem
                 id={PineconeNamespaces.minimum_standards_termination}
                 value={PineconeNamespaces.minimum_standards_termination}
               />
