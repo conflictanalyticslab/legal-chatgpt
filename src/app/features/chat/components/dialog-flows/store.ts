@@ -239,6 +239,9 @@ interface CompiledDialogFlow {
   isCustom?: boolean;
 }
 interface GlobalDialogFlowStore {
+  isOutdated: boolean;
+  setIsOutdated(isOutdated: boolean): void;
+
   compiledDialogFlow: CompiledDialogFlow | null;
   setCompiledDialogFlow: (
     compiledDialogFlow: CompiledDialogFlow | null
@@ -250,9 +253,14 @@ interface GlobalDialogFlowStore {
  */
 export const useGlobalDialogFlowStore = create<GlobalDialogFlowStore>(
   (set) => ({
+    isOutdated: false,
+    setIsOutdated: (isOutdated) => {
+      set({ isOutdated });
+    },
+
     compiledDialogFlow: null,
     setCompiledDialogFlow: (compiledDialogFlow) => {
-      set({ compiledDialogFlow });
+      set({ isOutdated: false, compiledDialogFlow });
     },
   })
 );
