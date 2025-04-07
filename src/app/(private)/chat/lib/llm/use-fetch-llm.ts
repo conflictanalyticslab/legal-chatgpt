@@ -1,7 +1,6 @@
 import { useGlobalContext } from "../../../../store/global-context";
 import { errorResponse } from "@/lib/utils";
 import { PineconeNamespaces } from "@/app/(private)/chat/enum/enums";
-import { UploadedDocument } from "@/app/features/chat/models/types";
 import { usePdfSearch } from "@/app/features/chat/hooks/use-pdf-search";
 import { auth } from "@/lib/firebase/firebase-admin/firebase";
 
@@ -36,7 +35,7 @@ export function useFetchLLM() {
   const fetchLLMResponse = async (
     fullConversation: any,
     queryInput: string,
-    includedDocuments: UploadedDocument,
+    includedDocuments: Array<string>,
     dialogFlow: string | null
   ) => {
     try {
