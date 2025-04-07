@@ -867,7 +867,7 @@ function SaveCompiledDialogFlow() {
           Prompt
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-5xl aspect-square p-4 flex flex-col gap-4 w-full">
+      <DialogContent className="max-w-5xl h-[1024px] max-h-[calc(100vh-48px)] p-4 flex flex-col gap-4 w-full !top-6 !translate-y-[unset]">
         <DialogHeader>
           <DialogTitle className="flex gap-2 items-center pt-1">
             <span>Dialog Flow Prompt</span>
