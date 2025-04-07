@@ -8,7 +8,7 @@ export enum DocumentQueryOptions {
 }
 
 export enum PineconeIndexes {
-  staticDocuments = "legal-pdf-documents",
+  staticDocuments = "swiss", //legal-pdf-documents",
   dynamicDocuments = "global-search",
 }
 
