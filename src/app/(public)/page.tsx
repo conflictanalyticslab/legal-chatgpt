@@ -162,27 +162,6 @@ export default function Page() {
           },
         ]}
       />
-
-      {/* Video  */}
-      <div
-        id="video-page"
-        className="bg-[white] w-[100%] min-h-[100vh] flex flex-col gap-[30px] items-center justify-center relative "
-      >
-        <Container className="text-center flex flex-col items-center gap-[15px] pt-[100px] my-0">
-          <h1 className="text-5xl font-bold">OpenJustice Demo</h1>
-          <p className="text-xl text-[#646464]">
-            Watch our demo and learn more about OpenJustice.
-          </p>
-        </Container>
-        <div className=" flex min-h-[300px] sm:min-h-[400px] md:min-h-[400px] lg:min-h-[600px] mx-auto mb-[150px]">
-          <iframe
-            src="https://www.youtube.com/embed/pmF9FYCWT5A?rel=0"
-            className=" max-w-[1000px] w-[90vw] sm:w-[80vw] lg:w-[70vw] rounded-lg shadow-lg"
-            title="Conflict Analytics OpenJustice Demo FINAL.mp4"
-          ></iframe>
-        </div>
-      </div>
-
     </main>
   );
 }
