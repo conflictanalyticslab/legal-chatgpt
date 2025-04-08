@@ -1,5 +1,6 @@
 import {
   Handle as BaseHandle,
+  useStore,
   useEdges,
   Position,
   type NodeProps,
@@ -15,6 +16,7 @@ import { angleToCoordinates, calculateHandleAngles } from "./helpers";
 export default function RelevantNode({ id, data }: NodeProps<RelevantNode>) {
   const targetAngles = calculateHandleAngles(2, 180);
   const sourceAngles = calculateHandleAngles(2, 0);
+
   const connectedSources = useEdges().reduce((handleIds, edge) => {
     if (edge.source !== id || !edge.sourceHandle) return handleIds;
     return [...handleIds, edge.sourceHandle];
@@ -57,12 +59,18 @@ type HandleProps = {
 
 function Target({ id, angle, color }: HandleProps) {
   const coords = angleToCoordinates(angle, RADIUS);
+
+  const isConnectable = useStore((s) => s.nodesConnectable);
+
   return (
     <BaseHandle
       id={id}
       type="target"
       position={Position.Left}
-      className="flex items-center justify-center text-[var(--text)]"
+      className={cn(
+        "flex items-center justify-center text-[var(--text)]",
+        !isConnectable && "!cursor-default"
+      )}
       style={
         {
           left: RADIUS + coords.x,
@@ -81,11 +89,15 @@ function Source({
   isConnected,
 }: HandleProps & { isConnected: boolean }) {
   const coords = angleToCoordinates(angle, RADIUS);
+
+  const isConnectable = useStore((s) => s.nodesConnectable);
+
   return (
     <div
       className={cn(
         "absolute !left-[var(--left)] !top-[var(--top)] -translate-x-1/2 -translate-y-1/2",
-        !isConnected &&
+        isConnectable &&
+          !isConnected &&
           "group/handle hover:!left-[calc(var(--left)+var(--hover-left))] hover:!top-[calc(var(--top)+var(--hover-top))] transition-[top,left] before:content-[''] before:size-6 before:-ml-6 flex"
       )}
       style={
@@ -102,9 +114,12 @@ function Source({
         id={id}
         type="source"
         position={Position.Right}
-        className="!static flex items-center justify-center text-[var(--text)] !transform-none"
+        className={cn(
+          "!static flex items-center justify-center text-[var(--text)] !transform-none",
+          !isConnectable && "!cursor-default"
+        )}
       >
-        {!isConnected && (
+        {isConnectable && !isConnected && (
           <Plus className="size-4 opacity-0 group-hover/handle:opacity-100 transition-opacity pointer-events-none" />
         )}
       </BaseHandle>

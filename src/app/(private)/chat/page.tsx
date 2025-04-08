@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useGlobalContext } from "../../store/global-context";
+import { ExternalLink, X } from "lucide-react";
 
 import {
   AlertDialog,
@@ -148,6 +149,8 @@ export default function Chat() {
             "w-full h-[100%] grid grid-rows-[1fr_auto] pt-[60px] lg:pt-[30px] relative"
           )}
         >
+          <DiscordCTA />
+
           {/* Open Justice Background Information */}
           {showStartupImage && (
             <div className="relative self-center w-full md:w-chat mx-auto">
@@ -217,5 +220,44 @@ export default function Chat() {
         </Dialog>
       </div>
     </>
+  );
+}
+
+function DiscordCTA() {
+  const [isVisible, setIsVisible] = useState(true);
+  if (!isVisible) return;
+
+  return (
+    <div className="w-chat bg-[#5865F2]/10 text-[#5865F2] p-1.5 pl-4 rounded-lg flex justify-between items-center gap-3 absolute top-2 left-1/2 -translate-x-1/2 z-10">
+      <div className="flex items-center gap-4">
+        <img src="/assets/logos/discord-blurple.svg" className="h-[16px]" />
+        <span className="font-semibold">Join our community</span>
+      </div>
+
+      <div className="items-center gap-1.5 flex">
+        <Button
+          size="sm"
+          className="bg-white text-[#5865F2] hover:bg-gray-100"
+          asChild
+        >
+          <a
+            href="https://discord.gg/ykxbDAD5"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>Join Discord</span>
+            <ExternalLink className="ml-2 h-4 w-4" />
+          </a>
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="size-9"
+          onClick={() => setIsVisible(false)}
+        >
+          <X className="size-4" />
+        </Button>
+      </div>
+    </div>
   );
 }

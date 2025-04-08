@@ -20,9 +20,11 @@ export async function POST(req: Request) {
 
   const graphs = getFirestore().collection("graphs");
   try {
-    const { id, name, public: isPublic = false, ...data } = await req.json();
+    const { id, ...data } = await req.json();
 
     let graphId = id;
+    let name = data.name;
+    const updated_at = Date.now();
     if (id) {
       const graph = graphs.doc(id);
 
@@ -36,23 +38,39 @@ export async function POST(req: Request) {
 
       const saved = res.data()!;
       if (!saved.user_id /* universal */) {
-        // create a user-owned copy from universal graph
         const doc = graphs.doc();
-        doc.set({ user_id, name: `${saved.name}_copy` }, { merge: true });
-
         graphId = doc.id;
+        name = `${saved.name}_copy`;
+
+        // create a user-owned copy from universal graph
+        doc.create({ user_id, ...data, name, updated_at });
       } else {
-        graph.update({ user_id: isPublic ? null : user_id, name, ...data });
+        const isShared = (saved.shared_with || []).includes(user_id);
+        if (saved.user_id !== user_id && !isShared) {
+          return NextResponse.json(
+            { success: false, error: "Forbidden", data: null },
+            { status: 403 }
+          );
+        }
+        graph.update({ ...data, updated_at });
       }
     } else {
       const graph = graphs.doc();
-      await graph.create({ user_id: isPublic ? null : user_id, name, ...data });
-
       graphId = graph.id;
+
+      await graph.create({ user_id, ...data, updated_at });
     }
 
-    return NextResponse.json({ success: true, error: null, data: graphId });
+    return NextResponse.json({
+      success: true,
+      error: null,
+      data: {
+        id: graphId,
+        name,
+        updated_at,
+      },
+    });
   } catch (error: unknown) {
-    return NextResponse.json(apiErrorResponse(error), { status: 400 });
+    return NextResponse.json(apiErrorResponse(error), { status: 500 });
   }
 }
