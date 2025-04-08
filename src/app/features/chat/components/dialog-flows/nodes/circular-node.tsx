@@ -18,7 +18,7 @@ export default function CircularNode({
   return (
     <div
       className={cn(
-        "group relative [--bg:theme(colors.neutral.200)] [--border-selected:theme(colors.neutral.300)] [--text:black]",
+        "group relative [--bg:theme(colors.neutral.200)] [--border-selected:theme(colors.neutral.500)] [--border-hover:theme(colors.neutral.400)] [--text:black]",
         className
       )}
     >

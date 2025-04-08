@@ -1,7 +1,6 @@
 import {
   Handle as BaseHandle,
   useStore,
-  useEdges,
   Position,
   type NodeProps,
 } from "@xyflow/react";
@@ -16,11 +15,6 @@ import { angleToCoordinates, calculateHandleAngles } from "./helpers";
 export default function RelevantNode({ id, data }: NodeProps<RelevantNode>) {
   const targetAngles = calculateHandleAngles(2, 180);
   const sourceAngles = calculateHandleAngles(2, 0);
-
-  const connectedSources = useEdges().reduce((handleIds, edge) => {
-    if (edge.source !== id || !edge.sourceHandle) return handleIds;
-    return [...handleIds, edge.sourceHandle];
-  }, [] as string[]);
 
   return (
     <CircularNode icon="🤔" label={data.label}>
@@ -39,13 +33,11 @@ export default function RelevantNode({ id, data }: NodeProps<RelevantNode>) {
         id="relevant"
         angle={sourceAngles[0]}
         color="#fef3c7" /* amber.100 */
-        isConnected={connectedSources.includes("relevant")}
       />
       <Source
         id="notRelevant"
         angle={sourceAngles[1]}
         color="#ffe4e6" /* rose.100 */
-        isConnected={connectedSources.includes("notRelevant")}
       />
     </CircularNode>
   );
@@ -82,12 +74,7 @@ function Target({ id, angle, color }: HandleProps) {
   );
 }
 
-function Source({
-  id,
-  angle,
-  color,
-  isConnected,
-}: HandleProps & { isConnected: boolean }) {
+function Source({ id, angle, color }: HandleProps) {
   const coords = angleToCoordinates(angle, RADIUS);
 
   const isConnectable = useStore((s) => s.nodesConnectable);
@@ -97,7 +84,6 @@ function Source({
       className={cn(
         "absolute !left-[var(--left)] !top-[var(--top)] -translate-x-1/2 -translate-y-1/2",
         isConnectable &&
-          !isConnected &&
           "group/handle hover:!left-[calc(var(--left)+var(--hover-left))] hover:!top-[calc(var(--top)+var(--hover-top))] transition-[top,left] before:content-[''] before:size-6 before:-ml-6 flex"
       )}
       style={
@@ -119,7 +105,7 @@ function Source({
           !isConnectable && "!cursor-default"
         )}
       >
-        {isConnectable && !isConnected && (
+        {isConnectable && (
           <Plus className="size-4 opacity-0 group-hover/handle:opacity-100 transition-opacity pointer-events-none" />
         )}
       </BaseHandle>

@@ -16,7 +16,7 @@ import { useDialogFlowStore } from "./store";
 import { useShareDialogFlow } from "./api";
 
 export default function Share() {
-  const { graphId, origin, publicGraph, sharedWith } = useDialogFlowStore();
+  const { graphId, origin, sharedWith } = useDialogFlowStore();
 
   const [isOpen, setIsOpen] = useState(false);
   const [emails, setEmails] = useState<string[]>([]);

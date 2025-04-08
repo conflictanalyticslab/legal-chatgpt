@@ -74,8 +74,9 @@ export default function FlowContextMenu({
     >
       <div className="bg-white rounded-md shadow-lg shadow-neutral-100 border border-neutral-200 w-64 overflow-hidden">
         {label && (
-          <div className="flex justify-between items-center bg-neutral-50 p-2.5 pl-3 border-b border-neutral-200">
+          <div className="flex flex-col gap-1 bg-neutral-50 p-2.5 pl-3 border-b border-neutral-200">
             <h3 className="text-sm font-medium text-neutral-700">{label}</h3>
+            <Description node={node} />
           </div>
         )}
 
@@ -114,6 +115,61 @@ export default function FlowContextMenu({
       </div>
     </div>
   );
+}
+
+function Description({ node }: Pick<ContextMenuProps, "node">) {
+  switch (node.type) {
+    case "switch":
+      return (
+        <div className="flex flex-col gap-1 text-neutral-500 text-sm">
+          {node.data.conditions.map((condition) => (
+            <div key={condition.id} className="flex items-center gap-2">
+              <div
+                className="size-[18px] rounded-full border-2 border-white"
+                style={{ backgroundColor: condition.color }}
+              />
+              <span>{condition.label}</span>
+            </div>
+          ))}
+
+          {node.data.otherwise && (
+            <div className="flex items-center gap-2">
+              <div
+                className="size-[18px] rounded-full border-2 border-white"
+                style={{ backgroundColor: node.data.otherwise.color }}
+              />
+              <span>Otherwise</span>
+            </div>
+          )}
+        </div>
+      );
+    case "relevant":
+      return (
+        <div className="flex flex-col gap-1 text-neutral-500 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="bg-[#ecfccb] size-[18px] rounded-full border-2 border-white" />
+            <span>Query</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="bg-[#fef3c7] size-[18px] rounded-full border-2 border-white" />
+            <span>Relevant</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="bg-[#e0f2fe] size-[18px] rounded-full border-2 border-white" />
+            <span>Subject</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="bg-[#ffe4e6] size-[18px] rounded-full border-2 border-white" />
+            <span>Not Relevant</span>
+          </div>
+        </div>
+      );
+    default:
+      return null;
+  }
 }
 
 function useIsReplaceable(node: GraphFlowNode) {

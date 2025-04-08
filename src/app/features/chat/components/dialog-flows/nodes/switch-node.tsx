@@ -2,7 +2,6 @@ import React from "react";
 import {
   Handle as BaseHandle,
   useStore,
-  useEdges,
   Position,
   type NodeProps,
 } from "@xyflow/react";
@@ -24,10 +23,6 @@ export default function SwitchNode({ id, data }: NodeProps<SwitchNode>) {
   const sourceAngles = calculateHandleAngles(data.conditions.length + 1, 0);
 
   const isConnectable = useStore((s) => s.nodesConnectable);
-  const connectedSources = useEdges().reduce((handleIds, edge) => {
-    if (edge.source !== id || !edge.sourceHandle) return handleIds;
-    return [...handleIds, edge.sourceHandle];
-  }, [] as string[]);
 
   return (
     <CircularNode icon="🚦" label={data.label}>
@@ -47,7 +42,6 @@ export default function SwitchNode({ id, data }: NodeProps<SwitchNode>) {
               i % SWITCH_NODE_CONDITION_COLORS.length
             ]
           }
-          isConnected={connectedSources.includes(condition.id)}
         />
       ))}
       {data.otherwise && (
@@ -55,7 +49,6 @@ export default function SwitchNode({ id, data }: NodeProps<SwitchNode>) {
           id="else"
           angle={sourceAngles[sourceAngles.length - 1]}
           color={data.otherwise.color || "#e0f2fe" /* sky.100 */}
-          isConnected={connectedSources.includes("else")}
         />
       )}
     </CircularNode>
@@ -66,10 +59,9 @@ type HandleProps = {
   id: string;
   angle: number;
   color: string;
-  isConnected: boolean;
 };
 
-function Handle({ id, angle, color, isConnected }: HandleProps) {
+function Handle({ id, angle, color }: HandleProps) {
   const coords = angleToCoordinates(angle, RADIUS);
 
   const isConnectable = useStore((s) => s.nodesConnectable);
@@ -79,7 +71,6 @@ function Handle({ id, angle, color, isConnected }: HandleProps) {
       className={cn(
         "absolute !left-[var(--left)] !top-[var(--top)] -translate-x-1/2 -translate-y-1/2",
         isConnectable &&
-          !isConnected &&
           "group/handle hover:!left-[calc(var(--left)+var(--hover-left))] hover:!top-[calc(var(--top)+var(--hover-top))] transition-[top,left] before:content-[''] before:size-6 before:-ml-6 flex"
       )}
       style={
@@ -101,7 +92,7 @@ function Handle({ id, angle, color, isConnected }: HandleProps) {
           !isConnectable && "!cursor-default"
         )}
       >
-        {isConnectable && !isConnected && (
+        {isConnectable && (
           <Plus className="size-4 opacity-0 group-hover/handle:opacity-100 transition-opacity pointer-events-none" />
         )}
       </BaseHandle>

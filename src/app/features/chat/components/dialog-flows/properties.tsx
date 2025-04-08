@@ -37,6 +37,8 @@ interface EdgePropertiesPanelProps {
 }
 
 function EdgePropertiesPanel({ edge, updateEdge }: EdgePropertiesPanelProps) {
+  const { origin } = useDialogFlowStore();
+
   const [label, setLabel] = useState(edge.label as string);
   const [body, setBody] = useState(edge.data?.body ?? "");
 
@@ -65,7 +67,11 @@ function EdgePropertiesPanel({ edge, updateEdge }: EdgePropertiesPanelProps) {
     <>
       <div className="flex flex-col gap-2">
         <Label className="text-neutral-500">Label:</Label>
-        <Input value={label} onChange={onLabelChange} />
+        <Input
+          value={label}
+          onChange={onLabelChange}
+          disabled={origin === "universal"}
+        />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -76,6 +82,7 @@ function EdgePropertiesPanel({ edge, updateEdge }: EdgePropertiesPanelProps) {
           value={body}
           rows={10}
           onChange={onBodyChange}
+          disabled={origin === "universal"}
         />
       </div>
     </>
@@ -92,6 +99,7 @@ function PDFNodePropertiesPanel({
   updateNode,
 }: NodePropertiesPanelProps<PDFNode>) {
   const { setInfoAlert } = useGlobalContext();
+  const { origin } = useDialogFlowStore();
 
   const [label, setLabel] = useState(node.data.label);
   const [content, setContent] = useState(node.data.content);
@@ -160,7 +168,11 @@ function PDFNodePropertiesPanel({
     <>
       <div className="flex flex-col gap-2">
         <Label className="text-neutral-500">Label:</Label>
-        <Input value={label} onChange={(e) => onLabelChange(e.target.value)} />
+        <Input
+          value={label}
+          onChange={(e) => onLabelChange(e.target.value)}
+          disabled={origin === "universal"}
+        />
       </div>
 
       {content.length ? (
@@ -171,6 +183,7 @@ function PDFNodePropertiesPanel({
             onChange={(e) => onContentChange(e.target.value)}
             rows={10}
             className="focus-visible:ring-0 focus-visible:ring-offset-0"
+            disabled={origin === "universal"}
           />
         </div>
       ) : (
@@ -195,6 +208,7 @@ function PDFNodePropertiesPanel({
             onDropRejected={() =>
               setInfoAlert("File is too big. We have a 5 Mb limit.")
             }
+            disabled={origin === "universal"}
           >
             {({ getRootProps, getInputProps, isDragActive }) => (
               <div
@@ -221,6 +235,8 @@ function KeywordExtractorNodePropertiesPanel({
   node,
   updateNode,
 }: NodePropertiesPanelProps<KeywordExtractorNode>) {
+  const { origin } = useDialogFlowStore();
+
   const [label, setLabel] = useState(node.data.label);
 
   const onLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -240,7 +256,11 @@ function KeywordExtractorNodePropertiesPanel({
   return (
     <div className="flex flex-col gap-2">
       <Label className="text-neutral-500">Label:</Label>
-      <Input value={label} onChange={onLabelChange} />
+      <Input
+        value={label}
+        onChange={onLabelChange}
+        disabled={origin === "universal"}
+      />
     </div>
   );
 }
@@ -249,6 +269,8 @@ function RelevantNodePropertiesPanel({
   node,
   updateNode,
 }: NodePropertiesPanelProps<RelevantNode>) {
+  const { origin } = useDialogFlowStore();
+
   const [label, setLabel] = useState(node.data.label);
   const [threshold, setThreshold] = useState(node.data.threshold);
 
@@ -278,7 +300,11 @@ function RelevantNodePropertiesPanel({
     <>
       <div className="flex flex-col gap-2">
         <Label className="text-neutral-500">Label:</Label>
-        <Input value={label} onChange={onLabelChange} />
+        <Input
+          value={label}
+          onChange={onLabelChange}
+          disabled={origin === "universal"}
+        />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -288,6 +314,7 @@ function RelevantNodePropertiesPanel({
           onValueChange={onThresholdChange}
           max={100}
           step={1}
+          disabled={origin === "universal"}
         />
       </div>
     </>
@@ -298,6 +325,8 @@ function GenericNodePropertiesPanel({
   node,
   updateNode,
 }: NodePropertiesPanelProps<InstructionNode | ContextNode | ExampleNode>) {
+  const { origin } = useDialogFlowStore();
+
   const [label, setLabel] = useState(node.data.label);
   const [body, setBody] = useState(node.data.body);
 
@@ -330,7 +359,11 @@ function GenericNodePropertiesPanel({
     <>
       <div className="flex flex-col gap-2">
         <Label className="text-neutral-500">Label:</Label>
-        <Input value={label} onChange={onLabelChange} />
+        <Input
+          value={label}
+          onChange={onLabelChange}
+          disabled={origin === "universal"}
+        />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -341,6 +374,7 @@ function GenericNodePropertiesPanel({
           value={body}
           rows={10}
           onChange={onBodyChange}
+          disabled={origin === "universal"}
         />
       </div>
     </>
@@ -360,6 +394,8 @@ function OtherwisePropertiesPanel({
   otherwise,
   updateOtherwise,
 }: OtherwisePropertiesPanelProps) {
+  const { origin } = useDialogFlowStore();
+
   const [label, setLabel] = useState(otherwise.label);
   const [body, setBody] = useState(otherwise.body);
 
@@ -387,7 +423,11 @@ function OtherwisePropertiesPanel({
     <>
       <div className="flex flex-col gap-2">
         <Label className="text-neutral-500">Label:</Label>
-        <Input value={label} onChange={onLabelChange} />
+        <Input
+          value={label}
+          onChange={onLabelChange}
+          disabled={origin === "universal"}
+        />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -398,6 +438,7 @@ function OtherwisePropertiesPanel({
           value={body}
           rows={2}
           onChange={onBodyChange}
+          disabled={origin === "universal"}
         />
       </div>
     </>
@@ -422,6 +463,8 @@ function ConditionPropertiesPanel({
   updateCondition,
   deleteCondition,
 }: ConditionPropertiesPanelProps) {
+  const { origin } = useDialogFlowStore();
+
   const [label, setLabel] = useState(condition.label);
   const [body, setBody] = useState(condition.body);
 
@@ -458,18 +501,24 @@ function ConditionPropertiesPanel({
           />
           <span className="text-sm">Condition {index + 1}</span>
         </div>
-        <button
-          className="text-sm text-red-500 hover:underline rounded-md"
-          onClick={deleteCondition}
-        >
-          Delete
-        </button>
+        {origin !== "universal" && (
+          <button
+            className="text-sm text-red-500 hover:underline rounded-md"
+            onClick={deleteCondition}
+          >
+            Delete
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col gap-2">
         <Label className="text-neutral-500">Label:</Label>
 
-        <Input value={label} onChange={onLabelChange} />
+        <Input
+          value={label}
+          onChange={onLabelChange}
+          disabled={origin === "universal"}
+        />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -481,6 +530,7 @@ function ConditionPropertiesPanel({
           value={body}
           rows={2}
           onChange={onBodyChange}
+          disabled={origin === "universal"}
         />
       </div>
     </div>
@@ -492,7 +542,7 @@ function SwitchNodePropertiesPanel({
   updateNode,
 }: NodePropertiesPanelProps<SwitchNode>) {
   const updateNodeInternals = useUpdateNodeInternals();
-  const { nodes, edges, setEdges, removeNode } = useDialogFlowStore();
+  const { origin, nodes, edges, setEdges, removeNode } = useDialogFlowStore();
 
   const [label, setLabel] = useState(node.data.label);
   const [otherwiseEnabled, setOtherwiseEnabled] = useState<boolean>(
@@ -637,7 +687,11 @@ function SwitchNodePropertiesPanel({
     <>
       <div className="flex flex-col gap-2">
         <Label className="text-neutral-500">Label:</Label>
-        <Input value={label} onChange={onLabelChange} />
+        <Input
+          value={label}
+          onChange={onLabelChange}
+          disabled={origin === "universal"}
+        />
       </div>
 
       {node.data.conditions.map((condition, i) => (
@@ -650,15 +704,18 @@ function SwitchNodePropertiesPanel({
         />
       ))}
 
-      <Button className="w-full shrink-0" size="sm" onClick={addCondition}>
-        Add Condition
-      </Button>
+      {origin !== "universal" && (
+        <Button className="w-full shrink-0" size="sm" onClick={addCondition}>
+          Add Condition
+        </Button>
+      )}
 
       <div className="flex flex-row items-center gap-2 justify-between">
         <Label className="text-neutral-500">Otherwise:</Label>
         <Switch
           checked={otherwiseEnabled}
           onCheckedChange={onOtherwiseChange}
+          disabled={origin === "universal"}
         />
       </div>
 
@@ -677,7 +734,7 @@ type SelectedItem =
   | { type: "edge"; edge: GraphFlowEdge };
 
 export default function PropertiesPanel({ onUpdate }: { onUpdate(): void }) {
-  const { nodes, edges, updateNode, updateEdge } = useDialogFlowStore();
+  const { origin, nodes, edges, updateNode, updateEdge } = useDialogFlowStore();
 
   const { item, close } = usePropertiesStore((state) => {
     return {
@@ -735,6 +792,7 @@ export default function PropertiesPanel({ onUpdate }: { onUpdate(): void }) {
                     <GenericNodePropertiesPanel
                       node={node}
                       updateNode={(id, fn) => {
+                        if (origin === "universal") return;
                         updateNode(
                           id,
                           fn as (node: GraphFlowNode) => GraphFlowNode
@@ -748,6 +806,7 @@ export default function PropertiesPanel({ onUpdate }: { onUpdate(): void }) {
                     <SwitchNodePropertiesPanel
                       node={node}
                       updateNode={(id, fn) => {
+                        if (origin === "universal") return;
                         updateNode(
                           id,
                           fn as (node: GraphFlowNode) => GraphFlowNode
@@ -761,6 +820,7 @@ export default function PropertiesPanel({ onUpdate }: { onUpdate(): void }) {
                     <RelevantNodePropertiesPanel
                       node={node}
                       updateNode={(id, fn) => {
+                        if (origin === "universal") return;
                         updateNode(
                           id,
                           fn as (node: GraphFlowNode) => GraphFlowNode
@@ -774,6 +834,7 @@ export default function PropertiesPanel({ onUpdate }: { onUpdate(): void }) {
                     <KeywordExtractorNodePropertiesPanel
                       node={node}
                       updateNode={(id, fn) => {
+                        if (origin === "universal") return;
                         updateNode(
                           id,
                           fn as (node: GraphFlowNode) => GraphFlowNode
@@ -787,6 +848,7 @@ export default function PropertiesPanel({ onUpdate }: { onUpdate(): void }) {
                     <PDFNodePropertiesPanel
                       node={node}
                       updateNode={(id, fn) => {
+                        if (origin === "universal") return;
                         updateNode(
                           id,
                           fn as (node: GraphFlowNode) => GraphFlowNode
@@ -808,6 +870,7 @@ export default function PropertiesPanel({ onUpdate }: { onUpdate(): void }) {
                 <EdgePropertiesPanel
                   edge={item.edge}
                   updateEdge={(id, fn) => {
+                    if (origin === "universal") return;
                     updateEdge(id, fn);
                     onUpdate();
                   }}
