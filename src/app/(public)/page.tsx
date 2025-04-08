@@ -203,7 +203,7 @@ export default function Page() {
         </Container>
         <div className=" flex min-h-[300px] sm:min-h-[400px] md:min-h-[400px] lg:min-h-[600px] mx-auto mb-[150px]">
           <iframe
-            src="https://www.youtube.com/watch?v=Mc14ei6I0yk"
+            src="https://www.youtube.com/embed/Mc14ei6I0yk"
             className=" max-w-[1000px] w-[90vw] sm:w-[80vw] lg:w-[70vw] rounded-lg shadow-lg"
             title="Conflict Analytics OpenJustice Demo.mp4"
           ></iframe>
