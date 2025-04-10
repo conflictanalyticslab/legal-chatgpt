@@ -17,7 +17,6 @@ import "./xy-theme.css";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   Tooltip,
   TooltipContent,
@@ -76,10 +75,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DialogClose } from "@radix-ui/react-dialog";
 import { useLayoutStore } from "./layout-store";
 import Share from "./share";
 import Controls from "./controls";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 function Toolbar({ onAdd }: { onAdd(): void }) {
   const viewport = useViewport();
@@ -223,6 +231,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
   const { type } = useToolbarStore();
 
   const { isGraphListVisibile } = useLayoutStore();
+  const { setIsOutdated } = useGlobalDialogFlowStore();
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -324,6 +333,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
       target: ghost.id,
     });
     setUpdate((prev) => prev + 1);
+    setIsOutdated(true);
   };
 
   const edgeReconnectSuccessful = useRef(true);
@@ -378,15 +388,18 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
           if (changes.every((change) => change.type === "select")) return;
           if (changes.every((change) => change.type === "dimensions")) return;
           setUpdate((prev) => prev + 1);
+          setIsOutdated(true);
         }}
         onEdgesChange={(changes) => {
           onEdgesChange(changes);
           if (changes.every((change) => change.type === "select")) return;
           setUpdate((prev) => prev + 1);
+          setIsOutdated(true);
         }}
         onConnect={(connection) => {
           onConnect(connection);
           setUpdate((prev) => prev + 1);
+          setIsOutdated(true);
         }}
         onReconnectStart={() => {
           edgeReconnectSuccessful.current = false;
@@ -395,11 +408,13 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
           edgeReconnectSuccessful.current = true;
           setEdges(reconnectEdge(oldEdge, newConnection, edges));
           setUpdate((prev) => prev + 1);
+          setIsOutdated(true);
         }}
         onReconnectEnd={(_, edge) => {
           if (!edgeReconnectSuccessful.current) {
             setEdges(edges.filter((e) => e.id !== edge.id));
             setUpdate((prev) => prev + 1);
+            setIsOutdated(true);
           }
           edgeReconnectSuccessful.current = true;
         }}
@@ -407,6 +422,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         onDrop={(e) => {
           onDrop(e);
           setUpdate((prev) => prev + 1);
+          setIsOutdated(true);
         }}
         onNodeClick={onNodeClick}
         onNodeContextMenu={onNodeContextMenu}
@@ -449,7 +465,10 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
 
       <NodeSelectionMenu
         ref={nodeSelectionMenuRef}
-        onReplace={() => setUpdate((prev) => prev + 1)}
+        onReplace={() => {
+          setUpdate((prev) => prev + 1);
+          setIsOutdated(true);
+        }}
       />
     </div>
   );
@@ -481,7 +500,12 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
     model,
     setModel,
   } = useDialogFlowStore();
-  const { setCompiledDialogFlow } = useGlobalDialogFlowStore();
+  const {
+    isOutdated,
+    setIsOutdated,
+    compiledDialogFlow,
+    setCompiledDialogFlow,
+  } = useGlobalDialogFlowStore();
 
   // const { setLastSaved } = useDialogFlowStore(
   //   useShallow((state) => ({
@@ -491,12 +515,12 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
 
   function injectGraph() {
     try {
-      const prompt = compileGraph(nodes, edges);
-
-      setCompiledDialogFlow({
-        prompt,
-        name,
-      });
+      if (isOutdated || !compiledDialogFlow) {
+        const prompt = compileGraph(nodes, edges);
+        setCompiledDialogFlow({ prompt, name });
+      } else {
+        setCompiledDialogFlow({ name, prompt: compiledDialogFlow.prompt });
+      }
 
       setOpen(false); // Closes the current window.
 
@@ -603,6 +627,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
   const generate = useGenerateDialogFlow({
     onSuccess() {
       setUpdate((prev) => prev + 1);
+      setIsOutdated(true);
     },
   });
 
@@ -795,6 +820,8 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
             </Tooltip>
           </div>
 
+          {graphId && <SaveCompiledDialogFlow />}
+
           <DialogClose className="size-9 flex items-center justify-center rounded-md hover:bg-neutral-200 hover:border-neutral-300 border border-neutral-200 bg-white">
             <X className="size-4" />
           </DialogClose>
@@ -803,8 +830,82 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
 
       <FlowGraph setOpen={setOpen} />
 
-      <Properties onUpdate={() => setUpdate((prev) => prev + 1)} />
+      <Properties
+        onUpdate={() => {
+          setUpdate((prev) => prev + 1);
+          setIsOutdated(true);
+        }}
+      />
     </div>
+  );
+}
+
+function SaveCompiledDialogFlow() {
+  const { name, nodes, edges } = useDialogFlowStore();
+  const { isOutdated, compiledDialogFlow, setCompiledDialogFlow } =
+    useGlobalDialogFlowStore();
+
+  const [value, setValue] = useState("");
+  const hasChanges = value !== compiledDialogFlow?.prompt;
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          className="hover:bg-neutral-200 border border-neutral-200 hover:border-neutral-300 bg-white px-3 h-9"
+          variant="ghost"
+          onClick={() => {
+            if (isOutdated || !compiledDialogFlow) {
+              const prompt = compileGraph(nodes, edges);
+              setCompiledDialogFlow({ prompt, name });
+              setValue(prompt);
+            } else {
+              setValue(compiledDialogFlow.prompt);
+            }
+          }}
+        >
+          Prompt
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-5xl h-[1024px] max-h-[calc(100vh-48px)] p-4 flex flex-col gap-4 w-full !top-6 !translate-y-[unset]">
+        <DialogHeader>
+          <DialogTitle className="flex gap-2 items-center pt-1">
+            <span>Dialog Flow Prompt</span>
+            {hasChanges && (
+              <span className="text-xs text-amber-500 font-normal">
+                Unsaved changes
+              </span>
+            )}
+          </DialogTitle>
+          <DialogDescription>
+            Edit the prompt to adjust how responses are generated. Changes apply
+            only to this session and won't be saved.
+          </DialogDescription>
+        </DialogHeader>
+
+        <Textarea
+          className="flex-1"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+
+        <DialogClose asChild>
+          <Button
+            className={cn("w-full", !hasChanges && "opacity-50")}
+            disabled={!hasChanges}
+            onClick={() => {
+              setCompiledDialogFlow({
+                name: compiledDialogFlow!.name,
+                prompt: value.trim(),
+                isCustom: true,
+              });
+            }}
+          >
+            Save
+          </Button>
+        </DialogClose>
+      </DialogContent>
+    </Dialog>
   );
 }
 

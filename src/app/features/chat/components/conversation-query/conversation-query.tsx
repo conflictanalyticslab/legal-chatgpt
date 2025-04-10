@@ -1,20 +1,10 @@
-import { useState } from "react";
 import { useGlobalContext } from "@/app/store/global-context";
-import { Edit, SquareMinus } from "lucide-react";
+import { SquareMinus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
+
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { Textarea } from "@/components/ui/textarea";
 
 import UploadDocument from "../upload-document/upload-document";
 import { FlowModal } from "../dialog-flows/flow-graph";
@@ -94,77 +84,18 @@ export function ConversationQuery() {
           </label>
 
           {compiledDialogFlow && (
-            <>
-              <SaveCompiledDialogFlow />
-              <Button
-                variant={"ghost"}
-                className="bg-transparent -mr-4"
-                onClick={() => {
-                  setCompiledDialogFlow(null);
-                }}
-              >
-                <SquareMinus />
-              </Button>
-            </>
+            <Button
+              variant={"ghost"}
+              className="bg-transparent -mr-4"
+              onClick={() => {
+                setCompiledDialogFlow(null);
+              }}
+            >
+              <SquareMinus />
+            </Button>
           )}
         </div>
       </div>
     </form>
-  );
-}
-
-function SaveCompiledDialogFlow() {
-  const { compiledDialogFlow, setCompiledDialogFlow } =
-    useGlobalDialogFlowStore();
-
-  const [value, setValue] = useState(() => compiledDialogFlow?.prompt || "");
-  const hasChanges = value !== compiledDialogFlow?.prompt;
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant={"ghost"} className="bg-transparent -mr-4">
-          <Edit />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-5xl aspect-square p-4 flex flex-col gap-4 w-full">
-        <DialogHeader>
-          <DialogTitle className="flex gap-2 items-center pt-1">
-            <span>Dialog Flow Prompt</span>
-            {hasChanges && (
-              <span className="text-xs text-amber-500 font-normal">
-                Unsaved changes
-              </span>
-            )}
-          </DialogTitle>
-          <DialogDescription>
-            Edit the prompt to adjust how responses are generated. Changes apply
-            only to this session and won't be saved.
-          </DialogDescription>
-        </DialogHeader>
-
-        <Textarea
-          className="flex-1"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-
-        <DialogClose asChild>
-          <Button
-            className={cn("w-full", !hasChanges && "opacity-50")}
-            disabled={!hasChanges}
-            onClick={() => {
-              setCompiledDialogFlow({
-                name: compiledDialogFlow!.name,
-                prompt: value.trim(),
-                isCustom: true,
-              });
-            }}
-          >
-            Save
-          </Button>
-        </DialogClose>
-      </DialogContent>
-    </Dialog>
   );
 }
