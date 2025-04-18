@@ -50,7 +50,8 @@ export function usePdfSearch() {
         namespace === PineconeNamespaces.constructive_dismissal ||
         namespace === PineconeNamespaces.factors_affecting_notice ||
         namespace === PineconeNamespaces.just_cause_dismissal ||
-        namespace === PineconeNamespaces.procedure_on_dismissal;
+        namespace === PineconeNamespaces.procedure_on_dismissal ||
+        namespace === PineconeNamespaces.edilex;
       const useKeywordPromise =
         namespace === PineconeNamespaces.canadian_law ||
         namespace === PineconeNamespaces.unitedStates_law;

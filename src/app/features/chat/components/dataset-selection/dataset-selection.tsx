@@ -176,6 +176,18 @@ export function DatasetSelection() {
                 Procedure on Dismissal
               </Label>
             </span>
+            <span className="flex justify-start items-center gap-2">
+              <RadioGroupItem
+                id={PineconeNamespaces.edilex}
+                value={PineconeNamespaces.edilex}
+              />
+              <Label
+                className="cursor-pointer"
+                htmlFor={PineconeNamespaces.edilex}
+              >
+                Edilex
+              </Label>
+            </span>
           </RadioGroup>
         </AccordionContent>
       </AccordionItem>
