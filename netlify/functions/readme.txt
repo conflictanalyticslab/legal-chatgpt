@@ -7,8 +7,8 @@ has the function logs and other info about your deployed functions. If you canno
 the existing functions under function directory.
 
 NOTE: Do not allow CORS on netlify functions, since netlify functions are hosted on the same server as OJ server, so they should send request to the 
-same origin within the server and CORS shouldn't be a problem. CORS acts as a firewall to protect access from outside of the origin, do not enable
-CORS unless you absolutely have to.
+same origin within the server and CORS shouldn't be a problem. CORS acts as a sign on a door saying “this isn’t for you” for browsers but doesn't stop 
+users from accessing the endpoint using services like Postman or curl, do not enable CORS unless you absolutely have to.
 
 saveConversation.ts:
 Post handler that saves conversation to firestore
