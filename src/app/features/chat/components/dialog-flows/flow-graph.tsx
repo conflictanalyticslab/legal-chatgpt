@@ -516,7 +516,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
   function injectGraph() {
     try {
       if (isOutdated || !compiledDialogFlow) {
-        const prompt = compileGraph(nodes, edges);
+        const prompt = compileGraph(graphId, nodes, edges); // has access to graphId
         setCompiledDialogFlow({ prompt, name });
       } else {
         setCompiledDialogFlow({ name, prompt: compiledDialogFlow.prompt });
@@ -841,7 +841,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
 }
 
 function SaveCompiledDialogFlow() {
-  const { name, nodes, edges } = useDialogFlowStore();
+  const { graphId, name, nodes, edges } = useDialogFlowStore();
   const { isOutdated, compiledDialogFlow, setCompiledDialogFlow } =
     useGlobalDialogFlowStore();
 
@@ -856,7 +856,7 @@ function SaveCompiledDialogFlow() {
           variant="ghost"
           onClick={() => {
             if (isOutdated || !compiledDialogFlow) {
-              const prompt = compileGraph(nodes, edges);
+              const prompt = compileGraph(graphId, nodes, edges); // does not have access to graphId
               setCompiledDialogFlow({ prompt, name });
               setValue(prompt);
             } else {
