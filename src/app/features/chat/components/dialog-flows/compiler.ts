@@ -3,7 +3,7 @@ import { DependencyGraph } from "@baileyherbert/dependency-graph";
 import invariant from "tiny-invariant";
 import { GraphFlowEdge, GraphFlowNode } from "./nodes";
 
-interface NodeMetadata{
+type NodeMetadata = {
   graphId: string;
   label: string | undefined;
   specialInfo: {}; 
@@ -72,15 +72,6 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
     if (!node) continue;
     const describeRelationships = (edges: GraphFlowEdge[]) => edges.map((e) => e.data?.body ? `Node ${e.source} (${e.data.body})` : `Node ${e.source}`).join(", ");
 
-    /**
-      * We only need nodeId, type, dependencies, and dependents to represent each node
-      * Reconstruct the dialog flow as nodeId: metadata (AKA not nodeId)
-      * and send to /api/graphs/vectorize
-      * nodeIds should be universally uniquely identifiable (bc they're ulids)
-        * https://github.com/ulid/javascript
-      * ALSO: switch and relevant nodes contain special information (i.e. switch nodes, instruction nodes) - we MUST handle this during compilation
-        *  This also means we should generate the multiple choice questions for the switch nodes on the back-end
-     */
     dfToVectorize[nodeId] = {
       graphId: graphId,
       label : node.type,
@@ -117,7 +108,16 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
         break;
       }
       case "switch": {
-        let nodeConditions = [];
+        let nodeConditions : {[k : string] : GraphFlowEdge[]} = {};
+        let nodeOtherwise : {
+          continue : boolean,
+          information : string,
+          edges: GraphFlowEdge[]
+        } = {
+          continue: false,
+          information : "",
+          edges : []
+        };
 
         const prompt = [
           `Node ${nodeId} is a switch node.`,
@@ -125,16 +125,21 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
         for (const condition of node.data.conditions) {
           const conditionEdges = dependents.filter((e) => e.sourceHandle === condition.id);
           prompt.push(`When ${describeRelationships(dependencies)} qualifies the condition ${condition.body}, you should refer to ${describeRelationships(conditionEdges)}`);
-          nodeConditions.push({ [condition.body] : conditionEdges});
+          nodeConditions[condition.body] = conditionEdges;
         }
         if (node.data.otherwise) {
           const otherwiseEdges = dependents.filter((e) => e.sourceHandle === "else");
           prompt.push(`Otherwise, ${node.data.otherwise.body} is provided by ${describeRelationships(otherwiseEdges)}`);
+          nodeOtherwise.continue = true;
+          nodeOtherwise.information = node.data.otherwise.body;
+          nodeOtherwise.edges = otherwiseEdges;
         }
         
+        // Otherwise can be empty to mean termination, empty to signify DF leaf, or be empty due to being disabled
+        // This removes ambiguity in empty otherwise's
         dfToVectorize[nodeId].specialInfo = {
           conditions : nodeConditions,
-          otherwise : dependents.filter((e) => e.sourceHandle === "else")
+          otherwise : nodeOtherwise
         };
         prompts.push(prompt.join("\n"));
         break;
@@ -182,6 +187,7 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
     }
   }
 
+  // console.log(dfToVectorize);
   requestVectorization(dfToVectorize);
 
   return prompts.join("\n\n");
@@ -189,6 +195,8 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
 
 async function requestVectorization(dfToVectorize: {[k: string]: {};}){
   invariant(auth.currentUser, "User is not authenticated");
+  invariant(Object.keys(dfToVectorize).length > 0, "Dialog flow must have at least 1 node")
+
   const token = await auth.currentUser.getIdToken();
   const response = await fetch("/api/graphs/vectorize", {
     method: "POST",
