@@ -1,6 +1,15 @@
+import { auth } from "@/lib/firebase/firebase-admin/firebase";
 import { DependencyGraph } from "@baileyherbert/dependency-graph";
 import invariant from "tiny-invariant";
 import { GraphFlowEdge, GraphFlowNode } from "./nodes";
+
+type NodeMetadata = {
+  graphId: string;
+  label: string | undefined;
+  specialInfo: {}; 
+  dependencies: GraphFlowEdge[];
+  dependents: GraphFlowEdge[];
+}
 
 /**
  * Validates the given graph and returns the order of the nodes.
@@ -32,7 +41,9 @@ export function validateGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
  * @param edges The edges to compile.
  * @returns The prompts for the conversation query.
  */
-export function compileGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
+export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
+  invariant(graphId, "graphId is undefined");
+
   const order = validateGraph(nodes, edges);
 
   const prompts: string[] = [];
@@ -45,6 +56,14 @@ export function compileGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
   ];
   prompts.push(intro.join("\n"));
 
+  let dfToVectorize : {[k:string] : NodeMetadata } = Object.fromEntries(order.map(nodeId => [nodeId, {
+    graphId: "",
+    label: undefined,
+    specialInfo: {}, 
+    dependencies: [], 
+    dependents: [] 
+  }]));
+
   for (const nodeId of order) {
     const node = nodes.find((n) => n.id === nodeId);
     const dependencies = edges.filter((e) => e.target === nodeId);
@@ -52,6 +71,14 @@ export function compileGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
 
     if (!node) continue;
     const describeRelationships = (edges: GraphFlowEdge[]) => edges.map((e) => e.data?.body ? `Node ${e.source} (${e.data.body})` : `Node ${e.source}`).join(", ");
+
+    dfToVectorize[nodeId] = {
+      graphId: graphId,
+      label : node.type,
+      specialInfo : {},
+      dependencies: dependencies,
+      dependents: dependents
+    }
 
     invariant(node.type, "Node type is undefined");
 
@@ -81,17 +108,39 @@ export function compileGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
         break;
       }
       case "switch": {
+        let nodeConditions : {[k : string] : GraphFlowEdge[]} = {};
+        let nodeOtherwise : {
+          continue : boolean,
+          information : string,
+          edges: GraphFlowEdge[]
+        } = {
+          continue: false,
+          information : "",
+          edges : []
+        };
+
         const prompt = [
           `Node ${nodeId} is a switch node.`,
         ];
         for (const condition of node.data.conditions) {
           const conditionEdges = dependents.filter((e) => e.sourceHandle === condition.id);
           prompt.push(`When ${describeRelationships(dependencies)} qualifies the condition ${condition.body}, you should refer to ${describeRelationships(conditionEdges)}`);
+          nodeConditions[condition.body] = conditionEdges;
         }
         if (node.data.otherwise) {
           const otherwiseEdges = dependents.filter((e) => e.sourceHandle === "else");
           prompt.push(`Otherwise, ${node.data.otherwise.body} is provided by ${describeRelationships(otherwiseEdges)}`);
+          nodeOtherwise.continue = true;
+          nodeOtherwise.information = node.data.otherwise.body;
+          nodeOtherwise.edges = otherwiseEdges;
         }
+        
+        // Otherwise can be empty to mean termination, empty to signify DF leaf, or be empty due to being disabled
+        // This removes ambiguity in empty otherwise's
+        dfToVectorize[nodeId].specialInfo = {
+          conditions : nodeConditions,
+          otherwise : nodeOtherwise
+        };
         prompts.push(prompt.join("\n"));
         break;
       }
@@ -105,6 +154,11 @@ export function compileGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
           `Otherwise, you should refer to ${describeRelationships(isNotRelevantEdges)}`,
         ];
         prompts.push(prompt.join("\n"));
+        dfToVectorize[nodeId].specialInfo = {
+          threshold : node.data.threshold,
+          relevant : isRelevantEdges,
+          irrelevant : isNotRelevantEdges
+        };
         break;
       }
       case "keyword-extractor": {
@@ -133,5 +187,28 @@ export function compileGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
     }
   }
 
+  // console.log(dfToVectorize);
+  requestVectorization(dfToVectorize);
+
   return prompts.join("\n\n");
+}
+
+async function requestVectorization(dfToVectorize: {[k: string]: {};}){
+  invariant(auth.currentUser, "User is not authenticated");
+  invariant(Object.keys(dfToVectorize).length > 0, "Dialog flow must have at least 1 node")
+
+  const token = await auth.currentUser.getIdToken();
+  const response = await fetch("/api/graphs/vectorize", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      dfToVectorize
+    }),
+  });
+
+  // No requirements ATM for what to return
+  return (await response.json()).data as {};
 }

@@ -24,6 +24,11 @@ export async function getRetriever(
     apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY || "",
   });
 
+  /**
+  * Note: vectorStore requires @pinecone-database/pinecone to be version 2.2.2
+  * and @langchain/pinecone to be 0.0.7 for pineconeIndex to work.
+  * source: https://github.com/langchain-ai/langchainjs/discussions/4423
+  */
   const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
     pineconeIndex: pinecone.Index(indexName),
     // Maximum number of batch requests to allow at once. Each batch is 1000 vectors.
