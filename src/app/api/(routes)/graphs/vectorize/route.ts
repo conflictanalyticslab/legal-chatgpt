@@ -2,11 +2,7 @@ import { NextResponse } from "next/server";
 import { Pinecone } from '@pinecone-database/pinecone'
 import { getAuthenticatedUser } from "@/lib/auth/get-authenticated-user";
 import { GraphFlowEdge } from "@/app/features/chat/components/dialog-flows/nodes";
-
-type Embedding = {
-  values: number[],
-  vectorType: 'dense' | 'sparse'
-}
+import { OpenAIEmbeddings } from "@langchain/openai";
 
 type Node = {
   graphId: string;
@@ -18,6 +14,11 @@ type Node = {
 
 // Initialize Pinecone client 
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY ? process.env.PINECONE_API_KEY : "PINECONE KEY NOT FOUND" });
+
+const embeddings = new OpenAIEmbeddings({
+  apiKey: process.env.OPENAI_API_KEY || "",
+});
+const dimension = 1536; // Dimensionality of OpenAI embeddings
 
 export async function POST(req: Request) {
 
@@ -64,11 +65,11 @@ export async function POST(req: Request) {
     } 
     
     try {
-      const embedding = await vectorizeString(node.label)
+      const nodeEmbedding = await vectorizeString(node.label)
 
       await namespace.upsert([{
         id: key,
-        values: embedding.values,
+        values: nodeEmbedding,
         metadata:{
           // General node info
           label: node.label,
@@ -96,7 +97,7 @@ export async function POST(req: Request) {
   const questionEmbedding = await vectorizeString("MC Questions");
   await namespace.upsert([{
     id: "MC Questions",
-    values: questionEmbedding.values,
+    values: questionEmbedding,
     metadata:{
       /**
        * When fetching & traversing a DF, users should recombine the following to get the questions.
@@ -119,25 +120,22 @@ export async function POST(req: Request) {
 
 const createVectorizedDFIndex = async (indexName:string) => {
   console.log(`Creating index ${indexName}...`);
-  await pc.createIndexForModel({
+  await pc.createIndex({
     name: indexName,
-    cloud: 'aws',
-    region: 'us-east-1',
-    embed: {
-      model: 'llama-text-embed-v2',
-      fieldMap: { text: 'chunk_text' },
+    dimension: dimension,
+    metric: "cosine", // Default for semantic search
+    spec: {
+      serverless: {
+        cloud: "aws", // or "gcp"
+        region: "us-east-1",
+      },
     },
-    waitUntilReady: true,
   });
   console.log(`Created index ${indexName}.`);
 }
 
 const vectorizeString = async (input:string) => {
-  const embeddings = await pc.inference.embed(
-    'multilingual-e5-large',
-    [input],
-    { inputType: 'query', truncate: 'END' }
-  )
+  const res = await embeddings.embedQuery(input);
 
-  return embeddings.data[0] as Embedding
+  return res
 }
