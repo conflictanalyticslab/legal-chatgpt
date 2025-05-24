@@ -5,14 +5,8 @@ import { NextResponse } from "next/server";
 import { Pinecone as PineconeClient } from '@pinecone-database/pinecone'
 import { getAuthenticatedUser } from "@/lib/auth/get-authenticated-user";
 import { GraphFlowNode } from "@/app/features/chat/components/dialog-flows/nodes"
+import invariant from "tiny-invariant";
         
-/**
- *  1. Make all calls to Pinecone & OpenAI through generic langchain calls  [X]
- *  2. Make all nodes GraphFlowNodes [X]
- *  3. Vectorize largest public DF (Constructive Dismissal) onto OJ DB + track time [X]
- *    - 161824ms for ON Constructive Dismissal
- */
-
 
 const embeddings = new OpenAIEmbeddings({
   apiKey: process.env.OPENAI_API_KEY || "",
@@ -34,11 +28,13 @@ export async function POST(req: Request) {
   const dfToVectorize : {[k : string] : GraphFlowNode | null} = body.df;
   
   // Initialize Pinecone client
-  const pc = new PineconeClient({ apiKey: process.env.PINECONE_API_KEY ? process.env.PINECONE_API_KEY : "PINECONE KEY NOT FOUND" });
+  const pc = new PineconeClient({ apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY ? process.env.NEXT_PUBLIC_PINECONE_API_KEY : "PINECONE KEY NOT FOUND" });
+  
   const indexName = "vectorized-dialogflows";  
   const namespace = body.name;  // Note: unlike indexes, namepsaces are created automatically
   const vectorStore = await getPineconeStore(indexName, namespace, pc);
-  
+  invariant(vectorStore, "Error occured when attempting to initialize vector DB connection.")
+
   let questions : {[key : string] : string} = {} // nodeID : question
   for(var key in dfToVectorize){
     if((await fetchNode(key, vectorStore)).length > 0) await vectorStore.delete({ filter: {external_id: key} }); // Delete old copy
@@ -111,6 +107,7 @@ export async function POST(req: Request) {
   // Debug code for if vectorization isn't working
   // for(var key in dfToVectorize){
   //   const result = await fetchNode(key, vectorStore);
+  //   console.log(key);
   //   console.log(result);
   // }
 
@@ -135,33 +132,23 @@ const createVectorizedDFIndex = async (pc:PineconeClient, indexName:string) => {
       },
     }
   });
-  console.log(`Created index ${indexName}.`);
 }
 
 const getPineconeStore = async (indexName: string, namespace: string, pc: PineconeClient ) => {
-  try{
-    const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
-      pineconeIndex: pc.Index(indexName),
-      // Maximum number of batch requests to allow at once. Each batch is 1000 vectors.
-      maxConcurrency: 5,
-      namespace, 
-    });
-    return vectorStore;
-
-  } catch(err){
-    // Create required index
+  const indexes = (await pc.listIndexes()).indexes;
+  if(!indexes || !indexes.map((idx: any) => idx.name).includes(indexName)){
     console.log(`Could not find index '${indexName}' in vector database indexes.`);
     await createVectorizedDFIndex(pc, indexName);
     console.log(`Created index ${indexName}.`);
-    
-    // Fetch Pinecone index that we created above using same code
-    const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
-      pineconeIndex: pc.Index(indexName),
-      maxConcurrency: 5,
-      namespace,
-    });
-    return vectorStore;
-  }
+  } 
+  
+  const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
+    pineconeIndex: pc.Index(indexName),
+    // Maximum number of batch requests to allow at once. Each batch is 1000 vectors.
+    maxConcurrency: 5,
+    namespace, 
+  });
+  return vectorStore;
 }
 
 const fetchNode = async (nodeId: string, vectorStore: PineconeStore) => {
