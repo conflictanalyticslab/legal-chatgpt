@@ -3,14 +3,6 @@ import { DependencyGraph } from "@baileyherbert/dependency-graph";
 import invariant from "tiny-invariant";
 import { GraphFlowEdge, GraphFlowNode } from "./nodes";
 
-type NodeMetadata = {
-  graphId: string;
-  label: string | undefined;
-  specialInfo: {}; 
-  dependencies: GraphFlowEdge[];
-  dependents: GraphFlowEdge[];
-}
-
 /**
  * Validates the given graph and returns the order of the nodes.
  *
@@ -56,13 +48,8 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
   ];
   prompts.push(intro.join("\n"));
 
-  let dfToVectorize : {[k:string] : NodeMetadata } = Object.fromEntries(order.map(nodeId => [nodeId, {
-    graphId: "",
-    label: undefined,
-    specialInfo: {}, 
-    dependencies: [], 
-    dependents: [] 
-  }]));
+  // Data structure to store DF nodes and send it to back-end
+  let dfToVectorize : {[k:string] : GraphFlowNode | null } = Object.fromEntries(order.map(nodeId => [nodeId, null]));
 
   for (const nodeId of order) {
     const node = nodes.find((n) => n.id === nodeId);
@@ -72,13 +59,7 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
     if (!node) continue;
     const describeRelationships = (edges: GraphFlowEdge[]) => edges.map((e) => e.data?.body ? `Node ${e.source} (${e.data.body})` : `Node ${e.source}`).join(", ");
 
-    dfToVectorize[nodeId] = {
-      graphId: graphId,
-      label : node.type,
-      specialInfo : {},
-      dependencies: dependencies,
-      dependents: dependents
-    }
+    dfToVectorize[nodeId] = node;
 
     invariant(node.type, "Node type is undefined");
 
@@ -108,39 +89,18 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
         break;
       }
       case "switch": {
-        let nodeConditions : {[k : string] : GraphFlowEdge[]} = {};
-        let nodeOtherwise : {
-          continue : boolean,
-          information : string,
-          edges: GraphFlowEdge[]
-        } = {
-          continue: false,
-          information : "",
-          edges : []
-        };
-
         const prompt = [
           `Node ${nodeId} is a switch node.`,
         ];
         for (const condition of node.data.conditions) {
           const conditionEdges = dependents.filter((e) => e.sourceHandle === condition.id);
           prompt.push(`When ${describeRelationships(dependencies)} qualifies the condition ${condition.body}, you should refer to ${describeRelationships(conditionEdges)}`);
-          nodeConditions[condition.body] = conditionEdges;
         }
         if (node.data.otherwise) {
           const otherwiseEdges = dependents.filter((e) => e.sourceHandle === "else");
           prompt.push(`Otherwise, ${node.data.otherwise.body} is provided by ${describeRelationships(otherwiseEdges)}`);
-          nodeOtherwise.continue = true;
-          nodeOtherwise.information = node.data.otherwise.body;
-          nodeOtherwise.edges = otherwiseEdges;
         }
         
-        // Otherwise can be empty to mean termination, empty to signify DF leaf, or be empty due to being disabled
-        // This removes ambiguity in empty otherwise's
-        dfToVectorize[nodeId].specialInfo = {
-          conditions : nodeConditions,
-          otherwise : nodeOtherwise
-        };
         prompts.push(prompt.join("\n"));
         break;
       }
@@ -154,11 +114,6 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
           `Otherwise, you should refer to ${describeRelationships(isNotRelevantEdges)}`,
         ];
         prompts.push(prompt.join("\n"));
-        dfToVectorize[nodeId].specialInfo = {
-          threshold : node.data.threshold,
-          relevant : isRelevantEdges,
-          irrelevant : isNotRelevantEdges
-        };
         break;
       }
       case "keyword-extractor": {
@@ -188,12 +143,12 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
   }
 
   // console.log(dfToVectorize);
-  requestVectorization(dfToVectorize);
+  requestVectorization(graphId, dfToVectorize);
 
   return prompts.join("\n\n");
 }
 
-async function requestVectorization(dfToVectorize: {[k: string]: {};}){
+async function requestVectorization(graphId : string, dfToVectorize: {[k: string]: GraphFlowNode | null;}){
   invariant(auth.currentUser, "User is not authenticated");
   invariant(Object.keys(dfToVectorize).length > 0, "Dialog flow must have at least 1 node")
 
@@ -205,7 +160,8 @@ async function requestVectorization(dfToVectorize: {[k: string]: {};}){
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      dfToVectorize
+      name : graphId,
+      df : dfToVectorize
     }),
   });
 
