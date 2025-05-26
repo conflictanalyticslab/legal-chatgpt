@@ -1,18 +1,12 @@
 import { Document } from "@langchain/core/documents";
 import { PineconeStore } from "@langchain/pinecone";
-import { OpenAIEmbeddings } from "@langchain/openai";
 import { NextResponse } from "next/server";
-import { Pinecone as PineconeClient } from '@pinecone-database/pinecone'
+import { initPineconeClient } from "@/app/api/(routes)/graphs/vectorize/init-pinecone-client"
 import { getAuthenticatedUser } from "@/lib/auth/get-authenticated-user";
 import { GraphFlowNode } from "@/app/features/chat/components/dialog-flows/nodes"
+import { embeddings, dimension } from "@/app/api/(routes)/graphs/vectorize/node-embeddings";
 import invariant from "tiny-invariant";
         
-
-const embeddings = new OpenAIEmbeddings({
-  apiKey: process.env.OPENAI_API_KEY || "",
-});
-const dimension = 1536; // Dimensionality of OpenAI embeddings
-
 
 export async function POST(req: Request) {
   const decodedToken = await getAuthenticatedUser();
@@ -27,13 +21,18 @@ export async function POST(req: Request) {
   const body = await req.json();
   const dfToVectorize : {[k : string] : GraphFlowNode | null} = body.df;
   
-  // Initialize Pinecone client
-  const pc = new PineconeClient({ apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY ? process.env.NEXT_PUBLIC_PINECONE_API_KEY : "PINECONE KEY NOT FOUND" });
-  
   const indexName = "vectorized-dialogflows";  
+  const pc = await initPineconeClient(indexName, dimension);
+
   const namespace = body.name;  // Note: unlike indexes, namepsaces are created automatically
-  const vectorStore = await getPineconeStore(indexName, namespace, pc);
+  const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
+    pineconeIndex: pc.Index(indexName),
+    // Maximum number of batch requests to allow at once. Each batch is 1000 vectors.
+    maxConcurrency: 5,
+    namespace, 
+  });
   invariant(vectorStore, "Error occured when attempting to initialize vector DB connection.")
+
 
   let questions : {[key : string] : string} = {} // nodeID : question
   for(var key in dfToVectorize){
@@ -104,7 +103,7 @@ export async function POST(req: Request) {
     console.log(`Failed to vectorize GraphRAG MC Questions: ${err}`)
   }
 
-  // Debug code for if vectorization isn't working
+  // Debug code to test vectorization
   // for(var key in dfToVectorize){
   //   const result = await fetchNode(key, vectorStore);
   //   console.log(key);
@@ -119,39 +118,10 @@ export async function POST(req: Request) {
   });
 }
 
-const createVectorizedDFIndex = async (pc:PineconeClient, indexName:string) => {
-  console.log(`Creating index ${indexName}...`);
-  await pc.createIndex({
-    name: indexName,
-    dimension: dimension,
-    metric: "cosine", // Default for semantic search
-    spec: {
-      serverless: {
-        cloud: "aws", // or "gcp"
-        region: "us-east-1",
-      },
-    }
-  });
-}
-
-const getPineconeStore = async (indexName: string, namespace: string, pc: PineconeClient ) => {
-  const indexes = (await pc.listIndexes()).indexes;
-  if(!indexes || !indexes.map((idx: any) => idx.name).includes(indexName)){
-    console.log(`Could not find index '${indexName}' in vector database indexes.`);
-    await createVectorizedDFIndex(pc, indexName);
-    console.log(`Created index ${indexName}.`);
-  } 
-  
-  const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
-    pineconeIndex: pc.Index(indexName),
-    // Maximum number of batch requests to allow at once. Each batch is 1000 vectors.
-    maxConcurrency: 5,
-    namespace, 
-  });
-  return vectorStore;
-}
-
 const fetchNode = async (nodeId: string, vectorStore: PineconeStore) => {
-  // A node is always closest to itself in a vector space, so fetch k=1 should always return the desired node
+  /**
+   * A node is always closest to itself in a vector space,
+   * so fetch k=1 should always return the desired node
+   */
   return await vectorStore.similaritySearch(nodeId, 1); 
 }
