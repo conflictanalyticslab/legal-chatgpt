@@ -37,11 +37,10 @@ export async function POST(req: Request) {
       }
 
       const saved = res.data()!;
-      if (!saved.user_id /* universal */) {
+      if (saved.public || !saved.user_id /* universal */) {
         const doc = graphs.doc();
         graphId = doc.id;
         name = `${saved.name}_copy`;
-
         // create a user-owned copy from universal graph
         doc.create({ user_id, ...data, name, updated_at });
       } else {
