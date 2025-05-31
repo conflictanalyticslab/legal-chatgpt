@@ -63,9 +63,6 @@ export async function* makeIterator({
   dialogFlow: string;
 }) {
   try {
-    // admin.auth().verifyIdToken(token as string);
-    const decodedToken = await getAuthenticatedUser();
-    if (decodedToken instanceof NextResponse) return decodedToken;
 
     // ********************************* LLM INITIALIZATION ********************************* //
     const llm = new ChatOpenAI({

@@ -37,7 +37,7 @@ export async function POST(req: NextRequest, res: NextRequest) {
       );
     }
     const graphDoc= { nodes:data.nodes, edges:data.edges, uid: graphQuery.docs[0].id };
-    req_json.dialogFlow = compileGraph(graphDoc.nodes, graphDoc.edges);
+    req_json.dialogFlow = compileGraph(req_json.dialogFlow, graphDoc.nodes, graphDoc.edges);
   }
 
   const iterator = makeIterator(req_json);

@@ -68,13 +68,6 @@ import NodeContextMenu from "./node-context-menu";
 import NodeSelectionMenu, {
   type NodeSelectionMenuHandle,
 } from "./node-selection-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useLayoutStore } from "./layout-store";
 import Share from "./share";
 import Controls from "./controls";
@@ -88,6 +81,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+
 
 function Toolbar({ onAdd }: { onAdd(): void }) {
   const viewport = useViewport();
@@ -497,8 +491,6 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
     publicGraph,
     setPublicGraph,
     lastSaved,
-    model,
-    setModel,
   } = useDialogFlowStore();
   const {
     isOutdated,
@@ -516,7 +508,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
   function injectGraph() {
     try {
       if (isOutdated || !compiledDialogFlow) {
-        const prompt = compileGraph(nodes, edges);
+        const prompt = compileGraph(graphId, nodes, edges); // has access to graphId
         setCompiledDialogFlow({ prompt, name });
       } else {
         setCompiledDialogFlow({ name, prompt: compiledDialogFlow.prompt });
@@ -773,29 +765,33 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
               </Tooltip>
             )}
 
-            {origin !== "universal" && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    type="button"
-                    aria-label="Save Graph"
-                    onClick={saveCurrentGraph}
-                    className="size-9 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-200 p-0"
-                  >
-                    <Image
-                      src="/assets/icons/save-cloud.svg"
-                      alt="save"
-                      width={16}
-                      height={16}
-                    />
-                  </Button>
-                </TooltipTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  type="button"
+                  aria-label="Save Graph"
+                  onClick={saveCurrentGraph}
+                  className="size-9 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-200 p-0"
+                >
+                  <Image
+                    src="/assets/icons/save-cloud.svg"
+                    alt="save"
+                    width={16}
+                    height={16}
+                  />
+                </Button>
+              </TooltipTrigger>
+              {origin !== "universal" ? (
                 <TooltipContent side="top" align="end" sideOffset={5}>
                   Save the current graph.
                 </TooltipContent>
-              </Tooltip>
-            )}
+              ) : (
+                <TooltipContent side="top" align="end" sideOffset={5}>
+                  Save the current graph as a copy.
+                </TooltipContent>
+              )}
+            </Tooltip>
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -841,7 +837,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
 }
 
 function SaveCompiledDialogFlow() {
-  const { name, nodes, edges } = useDialogFlowStore();
+  const { graphId, name, nodes, edges } = useDialogFlowStore();
   const { isOutdated, compiledDialogFlow, setCompiledDialogFlow } =
     useGlobalDialogFlowStore();
 
@@ -856,7 +852,7 @@ function SaveCompiledDialogFlow() {
           variant="ghost"
           onClick={() => {
             if (isOutdated || !compiledDialogFlow) {
-              const prompt = compileGraph(nodes, edges);
+              const prompt = compileGraph(graphId, nodes, edges); // does not have access to graphId
               setCompiledDialogFlow({ prompt, name });
               setValue(prompt);
             } else {
