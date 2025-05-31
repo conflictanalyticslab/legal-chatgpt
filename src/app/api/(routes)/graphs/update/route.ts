@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     let graphId = id;
     let name = data.name;
     const updated_at = Date.now();
-    if (id) {
+    if (id) { // if id is provided, update the existing graph
       const graph = graphs.doc(id);
 
       const res = await graph.get();
@@ -37,13 +37,14 @@ export async function POST(req: Request) {
       }
 
       const saved = res.data()!;
-      if (saved.public || !saved.user_id /* universal */) {
+      if (data.public) {  // graph is public
         const doc = graphs.doc();
         graphId = doc.id;
         name = `${saved.name}_copy`;
-        // create a user-owned copy from universal graph
-        doc.create({ user_id, ...data, name, updated_at });
-      } else {
+
+        // create a private user-owned copy from public graphs
+        doc.create({ user_id, ...data, name, updated_at, public: false });
+      } else {  // graph is private
         const isShared = (saved.shared_with || []).includes(user_id);
         if (saved.user_id !== user_id && !isShared) {
           return NextResponse.json(
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
             { status: 403 }
           );
         }
+        // user is the owner or is shared with
         graph.update({ ...data, updated_at });
       }
     } else {
