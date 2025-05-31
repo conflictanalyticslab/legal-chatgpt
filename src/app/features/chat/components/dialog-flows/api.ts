@@ -58,10 +58,6 @@ export function useSaveDialogFlow() {
       setLastSaved(Date.now());
     },
     onSuccess: (graph) => {
-      if (origin === "universal") {
-        setOrigin("user");
-        controls.unlock();
-      }
       setGraphId(graph.id);
       setName(graph.name);
       setLastSaved(graph.updated_at);
@@ -291,24 +287,6 @@ export function useFetchSharedDialogFlows() {
       invariant(auth.currentUser, "User is not authenticated");
       const token = await auth.currentUser.getIdToken();
       const response = await fetch("/api/graphs/retrieve/shared", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return (await response.json()).data;
-    },
-  });
-}
-
-export function useFetchUniversalDialogFlows() {
-  return useQuery<DialogFlowListItem[]>({
-    queryKey: ["universal-dialog-flows"],
-    queryFn: async () => {
-      invariant(auth.currentUser, "User is not authenticated");
-      const token = await auth.currentUser.getIdToken();
-      const response = await fetch("/api/graphs/retrieve/universal", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
