@@ -121,13 +121,6 @@ function Graphs() {
       {!shared.isPending && shared.data?.length ? (
         <Section origin="shared" title="Shared Graphs" graphs={shared.data} />
       ) : null}
-
-      <Section
-        origin="universal"
-        title="Provided Graphs"
-        graphs={universal.data || []}
-        isLoading={universal.isPending}
-      />
     </div>
   );
 }
