@@ -22,7 +22,6 @@ import {
   useFetchUserDialogFlows,
   useFetchPublicDialogFlows,
   useFetchSharedDialogFlows,
-  useFetchUniversalDialogFlows,
   type DialogFlowListItem,
   useDeleteDialogFlow,
 } from "./api";
@@ -103,7 +102,6 @@ function Graphs() {
   const user = useFetchUserDialogFlows();
   const pub = useFetchPublicDialogFlows();
   const shared = useFetchSharedDialogFlows();
-  const universal = useFetchUniversalDialogFlows();
 
   return (
     <div className="overflow-y-auto h-[calc(100%-56px)] pb-2">
@@ -121,19 +119,12 @@ function Graphs() {
       {!shared.isPending && shared.data?.length ? (
         <Section origin="shared" title="Shared Graphs" graphs={shared.data} />
       ) : null}
-
-      <Section
-        origin="universal"
-        title="Provided Graphs"
-        graphs={universal.data || []}
-        isLoading={universal.isPending}
-      />
     </div>
   );
 }
 
 type SectionProps = {
-  origin: "user" | "shared" | "universal";
+  origin: "user" | "shared";
   title: string;
   graphs: DialogFlowListItem[];
   isLoading?: boolean;
@@ -158,11 +149,7 @@ function Section({ origin, title, graphs, isLoading }: SectionProps) {
       state.setFetchingId(null);
 
       state.setOrigin(origin);
-      if (origin === "universal") {
-        controls.lock();
-      } else {
-        controls.unlock();
-      }
+      controls.unlock();
 
       state.setGraphId(id);
       state.setName(graph.name);

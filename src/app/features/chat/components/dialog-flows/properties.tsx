@@ -70,7 +70,6 @@ function EdgePropertiesPanel({ edge, updateEdge }: EdgePropertiesPanelProps) {
         <Input
           value={label}
           onChange={onLabelChange}
-          disabled={origin === "universal"}
         />
       </div>
 
@@ -82,7 +81,6 @@ function EdgePropertiesPanel({ edge, updateEdge }: EdgePropertiesPanelProps) {
           value={body}
           rows={10}
           onChange={onBodyChange}
-          disabled={origin === "universal"}
         />
       </div>
     </>
@@ -171,7 +169,6 @@ function PDFNodePropertiesPanel({
         <Input
           value={label}
           onChange={(e) => onLabelChange(e.target.value)}
-          disabled={origin === "universal"}
         />
       </div>
 
@@ -183,7 +180,7 @@ function PDFNodePropertiesPanel({
             onChange={(e) => onContentChange(e.target.value)}
             rows={10}
             className="focus-visible:ring-0 focus-visible:ring-offset-0"
-            disabled={origin === "universal"}
+
           />
         </div>
       ) : (
@@ -208,7 +205,7 @@ function PDFNodePropertiesPanel({
             onDropRejected={() =>
               setInfoAlert("File is too big. We have a 5 Mb limit.")
             }
-            disabled={origin === "universal"}
+
           >
             {({ getRootProps, getInputProps, isDragActive }) => (
               <div
@@ -259,7 +256,6 @@ function KeywordExtractorNodePropertiesPanel({
       <Input
         value={label}
         onChange={onLabelChange}
-        disabled={origin === "universal"}
       />
     </div>
   );
@@ -303,7 +299,6 @@ function RelevantNodePropertiesPanel({
         <Input
           value={label}
           onChange={onLabelChange}
-          disabled={origin === "universal"}
         />
       </div>
 
@@ -314,7 +309,6 @@ function RelevantNodePropertiesPanel({
           onValueChange={onThresholdChange}
           max={100}
           step={1}
-          disabled={origin === "universal"}
         />
       </div>
     </>
@@ -362,7 +356,6 @@ function GenericNodePropertiesPanel({
         <Input
           value={label}
           onChange={onLabelChange}
-          disabled={origin === "universal"}
         />
       </div>
 
@@ -374,7 +367,6 @@ function GenericNodePropertiesPanel({
           value={body}
           rows={10}
           onChange={onBodyChange}
-          disabled={origin === "universal"}
         />
       </div>
     </>
@@ -426,7 +418,6 @@ function OtherwisePropertiesPanel({
         <Input
           value={label}
           onChange={onLabelChange}
-          disabled={origin === "universal"}
         />
       </div>
 
@@ -438,7 +429,6 @@ function OtherwisePropertiesPanel({
           value={body}
           rows={2}
           onChange={onBodyChange}
-          disabled={origin === "universal"}
         />
       </div>
     </>
@@ -517,7 +507,6 @@ function ConditionPropertiesPanel({
         <Input
           value={label}
           onChange={onLabelChange}
-          disabled={origin === "universal"}
         />
       </div>
 
@@ -530,7 +519,6 @@ function ConditionPropertiesPanel({
           value={body}
           rows={2}
           onChange={onBodyChange}
-          disabled={origin === "universal"}
         />
       </div>
     </div>
@@ -690,7 +678,6 @@ function SwitchNodePropertiesPanel({
         <Input
           value={label}
           onChange={onLabelChange}
-          disabled={origin === "universal"}
         />
       </div>
 
@@ -715,7 +702,6 @@ function SwitchNodePropertiesPanel({
         <Switch
           checked={otherwiseEnabled}
           onCheckedChange={onOtherwiseChange}
-          disabled={origin === "universal"}
         />
       </div>
 
