@@ -435,7 +435,7 @@ function FlowGraph({ setOpen }: { setOpen: (open: boolean) => void }) {
         <Background variant={BackgroundVariant.Dots} gap={[20, 20]} />
         <Controls />
         {!isLocked && <Toolbar onAdd={() => setUpdate((prev) => prev + 1)} />}
-        {origin === "universal" && (
+        {origin === "shared" && (
           <Button
             className="absolute bottom-2.5 left-[50%] translate-x-[-50%] z-10"
             onClick={() => save.mutate()}
@@ -567,7 +567,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
   function saveCurrentGraph() {
     try {
       setUpdate((prev) => prev + 1);
-
+      
       toast({
         title: `Dialog Flow saved: ${name}`,
         description: "The dialog flow has been saved to cloud.",
@@ -742,7 +742,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
               </Tooltip>
             )}
 
-            {origin !== "universal" && (
+            {origin !== "shared" && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -782,7 +782,7 @@ function FlowEditor({ setOpen }: FlowEditorProps) {
                   />
                 </Button>
               </TooltipTrigger>
-              {origin !== "universal" ? (
+              {origin !== "shared" ? (
                 <TooltipContent side="top" align="end" sideOffset={5}>
                   Save the current graph.
                 </TooltipContent>
