@@ -1,4 +1,5 @@
 import { Pinecone as PineconeClient } from "@pinecone-database/pinecone";
+import { Document } from "@langchain/core/documents";
 import { PineconeStore } from "@langchain/pinecone";
 import { embeddings, dimension } from "./OpenAI";
 
@@ -7,11 +8,19 @@ export const initPineconeStore = async (
   namespace: string
 ) => {
   // Initialize Pinecone client
+  // const pc = new PineconeClient({
+  //   apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY
+  //     ? process.env.NEXT_PUBLIC_PINECONE_API_KEY
+  //     : "PINECONE KEY NOT FOUND",
+  // });
+
+  // Test env
   const pc = new PineconeClient({
-    apiKey: process.env.NEXT_PUBLIC_PINECONE_API_KEY
-      ? process.env.NEXT_PUBLIC_PINECONE_API_KEY
-      : "PINECONE KEY NOT FOUND",
+  apiKey: process.env.PINECONE_API_KEY
+    ? process.env.PINECONE_API_KEY
+    : "PINECONE KEY NOT FOUND",
   });
+
 
   const indexes = (await pc.listIndexes()).indexes;
   if (!indexes || !indexes.map((idx: any) => idx.name).includes(indexName)) {

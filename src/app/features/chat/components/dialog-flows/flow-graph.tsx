@@ -856,7 +856,7 @@ function SaveCompiledDialogFlow() {
           variant="ghost"
           onClick={() => {
             if (isOutdated || !compiledDialogFlow) {
-              const prompt = compileGraph(graphId, nodes, edges); // does not have access to graphId
+              const prompt = compileGraph(graphId, nodes, edges); 
               setCompiledDialogFlow({ prompt, name });
               setValue(prompt);
             } else {
