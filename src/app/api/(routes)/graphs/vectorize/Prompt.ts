@@ -19,6 +19,7 @@ INSTRUCTIONS FOR RESPONSE:
 3. The nodes are always connected in the order they are given; use this order to understand the logical flow of the legal reasoning.
 4. Do NOT include information that cannot be traced back to one or more of the provided nodes.
 5. Your response must be well-structured, legally sound, and reference the workflow nodes throughout.
+6. Your response MUST be a valid JSON object with exactly two keys: "answer_chunks" and "full_answer".
 
 ====================================
 NODE STRUCTURE:

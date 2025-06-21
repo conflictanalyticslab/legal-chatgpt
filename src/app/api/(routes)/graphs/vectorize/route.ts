@@ -4,13 +4,12 @@ import { initPineconeStore } from "@/app/api/(routes)/graphs/vectorize/PineconeS
 import { initBackendFirebaseApp } from "@/lib/middleware/init-backend-firebase-app";
 import { getAuthenticatedUser } from "@/lib/auth/get-authenticated-user";
 import { GraphFlowNode, GraphFlowEdge } from "@/app/features/chat/components/dialog-flows/nodes";
+import { queryOpenAI } from "@/app/features/chat/lib/query-open-ai";
 import { graphRagPrompt } from "./Prompt";
 import invariant from "tiny-invariant";
 
-import { FieldPath, getFirestore } from "firebase-admin/firestore";
+import { getFirestore } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
-import { getDocumentText } from "@/lib/firebase/client/get-documents";
-import { apiErrorResponse } from "@/lib/utils";
 
 
 export async function POST(req: Request) {
@@ -119,7 +118,31 @@ export async function POST(req: Request) {
     // console.log(result);
   // }
   
-  
+  // Test our node compilation using random nodes
+  /** 
+   * Traversal of Federal Act Data Protection: 
+   * 
+   * 01JR5MBCQWXPZD4X0C0DQCSV32 
+   * -> 01JR5M72QD68SDBQGMYVKZE0YX 
+   * -> 01JR5MEBQZANQCM4B3CB64SNZ4 / Material Scope (No) 
+   * -> 01JR5MRSQK60GCC34A811129MW / Territorial Scope (No) 
+   * -> 01JR5MXH1AVZ10H0E6DJ1DD2CY / Personal Scope (No) 
+   * -> 01JR5N5PZE522RT30C5E0V79C7 
+   * -> 01JR5P0FT19TMYB1NGT5FT9FVF
+   */ 
+
+  // Testing using federal act data protection DF
+  // const exampleTraversal = ["01JR5MBCQWXPZD4X0C0DQCSV32", 
+  //                           "01JR5M72QD68SDBQGMYVKZE0YX",
+  //                         "01JR5MEBQZANQCM4B3CB64SNZ4",
+  //                       "01JR5MRSQK60GCC34A811129MW",
+  //                     "01JR5MXH1AVZ10H0E6DJ1DD2CY",
+  //                   "01JR5N5PZE522RT30C5E0V79C7",
+  //                 "01JR5P0FT19TMYB1NGT5FT9FVF"]
+
+  // const prompt = "My client was phished at work, resulting in a severe data breach of millions of users. Describe what actions he should take to minimize legal repercussions."
+  // const response = await compilation(body.name, prompt, exampleTraversal, vectorStore);
+  // console.log(response);
 
   // Generic response
   return NextResponse.json({
@@ -138,24 +161,13 @@ const fetchNode = async (nodeId: string, vectorStore: VectorStore) => {
   return (await vectorStore.similaritySearch(nodeId, 1));
 };
 
+
 /**
- * Compilation: step
- * it's going to be very similar to DF 1.0, 
- * the only difference is instead of being given a full context, 
- * you're given a list of ids for documents on pinecone
- * and you use that to form an answer
- * 
- * you want to return a data structure that shows:
- * A clear answer that preferably follow the format and a similar prompt to the current llm prompt
- * Answer in chunks, each chunks tied to the id of where that information came from
- * 
- * TODO: Feed an example traversal to leaf into an LLM + an example user question, examine response vs. current OJ 
- */
-/**
- * 
- * @param dfId 
+ * Given the ID of a dialog flow, the user's query, the list of external IDs of nodes to consider, and the vector DB client,
+ * return a response using graphRAG.
+ * @param dfId ID of the Dialog Flow (same as the one used for retrieval and the vector DB namespace)
  * @param externalIds Ids of nodes used, in order of intended traversal.
- * @param vectorStore 
+ * @param vectorStore The vector DB client.
  * @returns 
  */
 const compilation = async (dfId:string, query:string, externalIds: string[], vectorStore: VectorStore) => {
@@ -319,13 +331,27 @@ const compilation = async (dfId:string, query:string, externalIds: string[], vec
         }   
     }
 
+    // Query AI
     const finalPrompt = `Query: ${query}
 Legal_Workflow:${prompts.join("\n")}`
+    const response = await queryOpenAI({
+      model: "gpt-4-turbo-2024-04-09",
+      messages: [
+        {
+          role: "system",
+          content: graphRagPrompt.join('\n'),
+        },
+        {
+          role: "user",
+          content: finalPrompt,
+        },
+      ],
+      response_format: {
+        type: "json_object",
+      },
+      temperature: 0,
+    });
 
-    console.log(finalPrompt);
 
-    // Query openai, system & user
-    const response = "";
-
-    return response;
+    return response.choices[0].message.content;
 }
