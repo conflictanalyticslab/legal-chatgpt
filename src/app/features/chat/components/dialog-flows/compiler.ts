@@ -36,6 +36,14 @@ export function validateGraph(nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
 export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edges: GraphFlowEdge[]) {
   invariant(graphId, "graphId is undefined");
 
+  // const {
+  //   documents,
+  //   includedDocuments
+  // } = useGlobalContext()
+  // console.log(documents.join(", "));
+  // console.log(includedDocuments.join(", "));
+
+
   const order = validateGraph(nodes, edges);
 
   const prompts: string[] = [];
@@ -49,7 +57,12 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
   prompts.push(intro.join("\n"));
 
   // Data structure to store DF nodes and send it to back-end
-  let dfToVectorize : {[k:string] : GraphFlowNode | null } = Object.fromEntries(order.map(nodeId => [nodeId, null]));
+  let dfToVectorize : {
+    [k:string] : {node:GraphFlowNode, 
+                  dependencies: GraphFlowEdge[], 
+                  dependents:GraphFlowEdge[] } 
+                  | null 
+    } = Object.fromEntries(order.map(nodeId => [nodeId, null]));
 
   for (const nodeId of order) {
     const node = nodes.find((n) => n.id === nodeId);
@@ -59,7 +72,11 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
     if (!node) continue;
     const describeRelationships = (edges: GraphFlowEdge[]) => edges.map((e) => e.data?.body ? `Node ${e.source} (${e.data.body})` : `Node ${e.source}`).join(", ");
 
-    dfToVectorize[nodeId] = node;
+    dfToVectorize[nodeId] = {
+      node: node,
+      dependencies: dependencies,
+      dependents: dependents
+    };
 
     invariant(node.type, "Node type is undefined");
 
@@ -142,13 +159,13 @@ export function compileGraph(graphId: string | null, nodes: GraphFlowNode[], edg
     }
   }
 
-  // console.log(dfToVectorize);
+  console.log(dfToVectorize);
   requestVectorization(graphId, dfToVectorize);
 
   return prompts.join("\n\n");
 }
 
-async function requestVectorization(graphId : string, dfToVectorize: {[k: string]: GraphFlowNode | null;}){
+async function requestVectorization(graphId : string, dfToVectorize: {[k: string]: {node: GraphFlowNode, dependencies: GraphFlowEdge[], dependents:GraphFlowEdge[]} | null }){
   invariant(auth.currentUser, "User is not authenticated");
   invariant(Object.keys(dfToVectorize).length > 0, "Dialog flow must have at least 1 node")
 
