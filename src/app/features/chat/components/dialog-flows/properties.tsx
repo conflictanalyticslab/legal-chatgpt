@@ -20,6 +20,8 @@ import {
 } from "./nodes";
 import { SWITCH_NODE_CONDITION_COLORS } from "./nodes/switch-node";
 
+import { ExtractorNodePropertiesPanel } from "./nodes/extractor-node";
+
 import invariant from "tiny-invariant";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -87,7 +89,7 @@ function EdgePropertiesPanel({ edge, updateEdge }: EdgePropertiesPanelProps) {
   );
 }
 
-interface NodePropertiesPanelProps<T extends GraphFlowNode> {
+export interface NodePropertiesPanelProps<T extends GraphFlowNode> {
   node: T;
   updateNode: (id: string, fn: (node: T) => T) => void;
 }
@@ -818,6 +820,20 @@ export default function PropertiesPanel({ onUpdate }: { onUpdate(): void }) {
                 case "keyword-extractor":
                   return (
                     <KeywordExtractorNodePropertiesPanel
+                      node={node}
+                      updateNode={(id, fn) => {
+                        if (origin === "universal") return;
+                        updateNode(
+                          id,
+                          fn as (node: GraphFlowNode) => GraphFlowNode
+                        );
+                        onUpdate();
+                      }}
+                    />
+                  );
+                case "extractor":
+                  return (
+                    <ExtractorNodePropertiesPanel
                       node={node}
                       updateNode={(id, fn) => {
                         if (origin === "universal") return;
