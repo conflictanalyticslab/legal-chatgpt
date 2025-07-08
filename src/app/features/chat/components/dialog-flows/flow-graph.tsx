@@ -189,6 +189,19 @@ function Toolbar({ onAdd }: { onAdd(): void }) {
         </div>
         <div
           className="flex flex-col gap-2 items-center group"
+          onDragStart={(e) => onDragStart(e, "extractor")}
+          onClick={() => onClick("extractor")}
+          draggable
+        >
+          <div className="w-[80px] h-[80px] rounded-full bg-neutral-200 flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:-translate-y-1 transition-all">
+            <Brain className="size-8 text-neutral-700" />
+          </div>
+          <div className="text-sm text-center">
+            Extractor
+          </div>
+        </div>
+        <div
+          className="flex flex-col gap-2 items-center group"
           onDragStart={(e) => onDragStart(e, "pdf")}
           onClick={() => onClick("pdf")}
           draggable

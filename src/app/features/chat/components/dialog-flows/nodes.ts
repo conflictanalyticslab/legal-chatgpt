@@ -9,6 +9,7 @@ import ContextNode from "./nodes/context-node";
 import SwitchNode from "./nodes/switch-node";
 import RelevantNode from "./nodes/relevant-node";
 import KeywordExtractorNode from "./nodes/keyword-extractor-node";
+import ExtractorNode from "./nodes/extractor-node";
 import PDFNode from "./nodes/pdf-node";
 import GhostNode from "./nodes/ghost-node";
 
@@ -17,6 +18,20 @@ import { titleCase } from "@/lib/utils";
 export type ExampleNode = Node<{label: string, body: string}, 'example'>
 export type InstructionNode = Node<{label: string, body: string}, 'instruction'>
 export type ContextNode = Node<{label: string, body: string}, 'context'>
+type Precedent = {
+    type: string;
+    citation: string; // might replace with a citation class later for easier formatting...?
+    body: string;
+}
+type ExtractorData = {
+    label: string;
+    factDescription: string;
+    factPrompt: string;
+    searchCaseLaw: boolean;
+    criteria: Array<{id: string, label: string, description: string, precedent: Precedent}>;
+
+}
+export type ExtractorNode = Node<ExtractorData, 'extractor'>
 
 type SwitchData = {
     label: string;
@@ -44,13 +59,14 @@ type PDFData = {
   content: string;
 };
 
+
 export type PDFNode = Node<PDFData, 'pdf'>;
 
 
 export type GhostNode = Node<{standalone?: boolean}, 'ghost'>;
 
 /** The types of all nodes in the graph. */
-export type GraphFlowNode = ExampleNode | InstructionNode | ContextNode | SwitchNode | RelevantNode | KeywordExtractorNode | PDFNode | GhostNode;
+export type GraphFlowNode = ExampleNode | InstructionNode | ContextNode | SwitchNode | RelevantNode | KeywordExtractorNode | ExtractorNode | PDFNode | GhostNode;
 
 /** Shorthand to get the type values of all node types without the undefined type. */
 export type GraphFlowNodeTypes = Exclude<GraphFlowNode['type'], undefined>;
@@ -72,6 +88,7 @@ export const nodeTypes: NodeTypesRecord = {
     switch: SwitchNode,
     relevant: RelevantNode,
     "keyword-extractor": KeywordExtractorNode,
+    extractor: ExtractorNode,
     pdf: PDFNode,
     ghost: GhostNode,
 };
@@ -141,6 +158,30 @@ export function createEmptyNode(type: GraphFlowNodeTypes, position: XYPosition):
                 position,
                 data: {
                     label: 'Keyword Extractor',
+                }
+            }
+        case 'extractor':
+            return {
+                id: ulid(),
+                type,
+                position,
+                data: {
+                    label: 'Extractor',
+                    factDescription: '',
+                    factPrompt: '',
+                    searchCaseLaw: false,
+                    criteria: [
+                        {
+                            id: ulid(),
+                            label: 'If...',
+                            description: '',
+                            precedent: {type: "",
+                  citation: "",
+                  body: "",
+                }, /* rose.100 */
+                        },
+                    ],
+
                 }
             }
         case 'pdf':

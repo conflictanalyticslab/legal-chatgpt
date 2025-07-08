@@ -37,6 +37,7 @@ const NODE_TYPES = [
   { id: "switch", label: "Switch" },
   { id: "relevant", label: "Relevant" },
   { id: "keyword-extractor", label: "Keyword Extractor" },
+  { id: "extractor", label: "Extractor" },
 ] as { id: GraphFlowNodeTypes; label: string }[];
 
 export default forwardRef<NodeSelectionMenuHandle, NodeSelectionProps>(
@@ -214,7 +215,8 @@ function useGetReplacementNodeTypes() {
       "instruction",
       "context",
       "switch",
-      "keyword-extractor",
+      "extractor",
+      "keyword-extractor"
     ].filter((type) => type !== node.type);
     if (!isTargetConnected && !isSourceConnected) {
       return [...types, "pdf", "relevant"];
@@ -224,6 +226,12 @@ function useGetReplacementNodeTypes() {
       case "example":
       case "instruction":
       case "context":
+      case "extractor":
+        if (!isTargetConnected) types.push("pdf");
+        return types.filter((type) => {
+          if (isSourceConnected && type === "switch") return false;
+          return true;
+        });      
       case "keyword-extractor":
         if (!isTargetConnected) types.push("pdf");
         return types.filter((type) => {
