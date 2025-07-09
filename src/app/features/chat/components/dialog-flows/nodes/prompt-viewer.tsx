@@ -13,8 +13,9 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useDialogFlowStore, useGlobalDialogFlowStore } from "../store";
 import { Textarea } from "@/components/ui/textarea";
-import { ExtractorNode } from "../nodes";
+import { ExtractorNode, PrecedentTypes } from "../nodes";
 import { cn } from "@/lib/utils";
+
 
 
 function compileExtractionPrompt(node: ExtractorNode) {
@@ -23,34 +24,46 @@ function compileExtractionPrompt(node: ExtractorNode) {
   const nodeId = node.id;
 
   const intro = [
-    "You are a helpful assistant tasked to extract facts from a case and assess the client's relevance to a body of law."
+    "You are a helpful assistant tasked to extract facts from a case and assess the client's relevance to a number of legal citations.",
+    "Each citation has a description and possibly a list of previous judgements derived from lower court decisions.",
   ];
   prompts.push(intro.join("\n"));
 
-  // Data structure to store DF nodes and send it to back-end
-  // let dfToVectorize : {[k:string] : GraphFlowNode | null } = Object.fromEntries(order.map(nodeId => [nodeId, null]));
+  // add facts of the case
+  prompts.push(node.data.factPrompt)
 
   for (const criterion of node.data.criteria) {
 
     if (!node) continue;
-    // const describeRelationships = (edges: GraphFlowEdge[]) => edges.map((e) => e.data?.body ? `Node ${e.source} (${e.data.body})` : `Node ${e.source}`).join(", ");
 
-    // invariant(node.type, "Node type is undefined");
+    // add body
+    const body = [
+      "*************************",
+      "Name: " + criterion.label,
+      "Citation: " + criterion.citation,
+      "Description: " + criterion.description,
+    ];
+    prompts.push(body.join('\n'))
 
-    switch (criterion.precedent.type) {
-      case "": {
+    // check type
+    switch (criterion.type) {
+      case PrecedentTypes.STATUTE: {
         const prompt = [
-          `Node ${nodeId} is an example node.`,
+          `This is a statute.`,
         ];
-        prompts.push(prompt.join("\n"));
+        prompts.push(prompt.join('\n'));
         break;
       }
-      case "instruction": {
+      case PrecedentTypes.REGULATION: {
         const prompt = [
           `Node ${nodeId} is an instruction node.`,
           // dependencies.length > 0 ? `When ${describeRelationships(dependencies)}, you must ${node.data.body}.` : `You must ${node.data.body}.`,
         ];
         prompts.push(prompt.join("\n"));
+        break;
+      }
+      case PrecedentTypes.UNKNOWN: {
+        // `The type of this node is unknown.`
         break;
       }
       default: {
@@ -59,10 +72,9 @@ function compileExtractionPrompt(node: ExtractorNode) {
         throw new Error(`Unhandled node type: ${node.type}`);
       }
     }
-  }
+    // perform RAG, on the facts, on cases that cite this precedent
 
-  // console.log(dfToVectorize);
-  // requestVectorization(graphId, dfToVectorize);
+  }
 
   return prompts.join("\n\n");
 }
@@ -97,7 +109,7 @@ export function PromptViewer(node: ExtractorNode) {
        <DialogContent className="max-w-5xl h-[1024px] max-h-[calc(100vh-48px)] p-4 flex flex-col gap-4 w-full !top-6 !translate-y-[unset]">
          <DialogHeader>
            <DialogTitle className="flex gap-2 items-center pt-1">
-             <span>Dialog Flow Prompt</span>
+             <span>Extractor Node Prompt</span>
              {hasChanges && (
                <span className="text-xs text-amber-500 font-normal">
                  Unsaved changes

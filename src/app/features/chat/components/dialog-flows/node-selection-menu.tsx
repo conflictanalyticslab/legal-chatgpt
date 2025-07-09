@@ -20,6 +20,7 @@ import {
   GhostNode,
   GraphFlowNode,
   GraphFlowNodeTypes,
+  PrecedentTypes
 } from "./nodes";
 
 export type NodeSelectionMenuHandle = {

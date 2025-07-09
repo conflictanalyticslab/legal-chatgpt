@@ -8,16 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useUpdateNodeInternals } from "@xyflow/react";
 import { PromptViewer } from "./prompt-viewer";
+import "../xy-theme.css";
+import "@xyflow/react/dist/base.css";
 
 import CircularNode from "./circular-node";
 import type {NodePropertiesPanelProps} from "../properties";
-import { useDialogFlowStore, useGlobalDialogFlowStore} from "../store";
-import { GraphFlowEdge, GraphFlowNode } from "../nodes";
-import invariant from "tiny-invariant";
+import { useDialogFlowStore} from "../store";
+import { PrecedentTypes } from "../nodes";
 
 import type { ExtractorNode } from "../nodes";
 import { cn } from "@/lib/utils";
 import { ulid } from "ulid";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { usePdfSearch } from "../../../hooks/use-pdf-search";
+import { useGlobalContext } from "@/app/store/global-context";
+
+
 
 export default function ExtractorNode({
   id,
@@ -75,7 +81,28 @@ function CriteriaPropertiesPanel({
 
   const [label, setLabel] = useState(criteria.label);
   const [desc, setDesc] = useState(criteria.description);
+  const [precedent, setPrecedent] = useState(criteria.citation);
+  // const [t, setType] = useState(criteria.precedent.type);
 
+  const onBodyChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDesc(event.target.value);
+    updateCriteria(criteria.id, (thatCriteria) => {
+      return {
+        ...thatCriteria,
+        description: event.target.value,
+      };
+    });
+  };
+  
+  const onPrecedentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPrecedent(event.target.value);
+    updateCriteria(criteria.id, (thatCriteria) => {
+      return {
+        ...thatCriteria,
+        citation: event.target.value,
+      };
+    });
+  };
   const onLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLabel(event.target.value);
     updateCriteria(criteria.id, (thatCriteria) => {
@@ -85,16 +112,18 @@ function CriteriaPropertiesPanel({
       };
     });
   };
+  // const onTypeChange = (event: React.ChangeEvent<>) => {
+  //   setType(event.target.value);
+  //   updateCriteria(criteria.id, (thatCriteria) => {
+  //     return {
+  //       ...thatCriteria,
+  //       precedent: {id: thatCriteria.precedent.id,
+  //                   type: event.target.value,
+  //                   citation: thatCriteria.precedent.citation},
+  //     };
+  //   });
+  // };
 
-  const onBodyChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setDesc(event.target.value);
-    updateCriteria(criteria.id, (thatCriteria) => {
-      return {
-        ...thatCriteria,
-        body: event.target.value,
-      };
-    });
-  };
 
   // prettier-ignore
   // const color = SWITCH_NODE_CONDITION_COLORS[index % SWITCH_NODE_CONDITION_COLORS.length];
@@ -103,10 +132,10 @@ function CriteriaPropertiesPanel({
     <div className="flex flex-col gap-2">
       <div className="flex flex-row items-center gap-2 justify-between">
         <div className="flex items-center gap-2">
-          <div
+          {/* <div
             className="size-5 rounded-full border-2 border-white"
             // style={{ backgroundColor: criteria.color}}
-          />
+          /> */}
           <span className="text-sm">Criteria {index + 1}</span>
         </div>
         {origin !== "universal" && (
@@ -118,27 +147,46 @@ function CriteriaPropertiesPanel({
           </button>
         )}
       </div>
-
       <div className="flex flex-col gap-2">
         <Label className="text-neutral-500">Label:</Label>
 
         <Input
+          placeholder="A high-level name for the criteria"
+          // wrap="soft"
           value={label}
           onChange={onLabelChange}
         />
       </div>
-
       <div className="flex flex-col gap-2">
-        <Label className="text-neutral-500">Body:</Label>
+        <Label className="text-neutral-500">Citation:</Label>
 
         <Textarea
-          placeholder="You can leave this empty"
+          placeholder="Cite a source where this criteria is from"
+          wrap="soft"
+          value={precedent}
+          // rows
+          onChange={onPrecedentChange}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        
+        <Label className="text-neutral-500">Description:</Label>
+
+        <Textarea
+          placeholder="Describe or quote the criteria to assess"
           wrap="soft"
           value={desc}
           rows={2}
           onChange={onBodyChange}
-        />
+        />        
       </div>
+        {/* <select value={t} onChange={onTypeChange}>
+          {Object.keys(PrecedentTypes).map(key => (
+          <option key={key} value={key}>
+            {PrecedentTypes[key]}
+          </option>
+        ))}
+      </select> */}
     </div>
   );
 }
@@ -150,16 +198,26 @@ export function ExtractorNodePropertiesPanel({
   const updateNodeInternals = useUpdateNodeInternals();
   const { origin } = useDialogFlowStore();
 
-  const [label, setLabel] = useState(node.data.factDescription);
+  const [label, setLabel] = useState(node.data.label);
   const [desc, setDesc] = useState(node.data.factPrompt);
 
+  const [doSearch, setDoSearch] = useState(node.data.searchCaseLaw);
   
-  const {
-      isOutdated,
-      setIsOutdated,
-      compiledDialogFlow,
-      setCompiledDialogFlow,
-    } = useGlobalDialogFlowStore();
+  const { pdfSearch } = usePdfSearch();
+  const { pdfLoading } =
+      useGlobalContext();
+  
+  const handleSearchDocuments = async (query: string, namespace: string) => {
+    if (pdfLoading) return;
+    pdfSearch(query, namespace);
+  };
+
+  // const {
+  //     isOutdated,
+  //     setIsOutdated,
+  //     compiledDialogFlow,
+  //     setCompiledDialogFlow,
+  //   } = useGlobalDialogFlowStore();
   
 
   const onLabelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,17 +225,17 @@ export function ExtractorNodePropertiesPanel({
     updateNode(node.id, (thatNode) => {
       return {
         ...thatNode,
-        data: { ...thatNode.data, factDescription: event.target.value},
+        data: { ...thatNode.data, label: event.target.value},
       };
     });
   };
 
   useEffect(() => {
-    setLabel(node.data.factDescription);
+    setLabel(node.data.label);
   }, [node]);
 
   
-  const onDescChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onDescChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setDesc(event.target.value);
     updateNode(node.id, (thatNode) => {
       return {
@@ -216,13 +274,13 @@ export function ExtractorNodePropertiesPanel({
       ) => ExtractorNode["data"]["criteria"][number]
     ) => {
       updateNode(node.id, (node) => {
-        const conditions = node.data.criteria.map((criterion) =>
+        const criteria = node.data.criteria.map((criterion) =>
           criterion.id === id ? fn(criterion) : criterion
         );
 
         return {
           ...node,
-          data: { ...node.data, conditions },
+          data: { ...node.data, criteria },
         };
       });
     },
@@ -237,43 +295,14 @@ export function ExtractorNodePropertiesPanel({
           ...node,
           data: {
             ...node.data,
-            conditions: [
+            criteria: [
               ...node.data.criteria,
               {
                 id: ulid(),
-                label: "If...",
+                label: "",
                 description: "",
-                precedent: "",
-                // color: "",
-                // color,
-              },
-            ],
-          },
-        };
-      });
-      updateNodeInternals(node.id);
-    }, [node]);
-
-    const compilePrompt = useCallback(() => {
-      // prettier-ignore
-      // const color = SWITCH_NODE_CONDITION_COLORS[node.data.conditions.length % SWITCH_NODE_CONDITION_COLORS.length];
-      updateNode(node.id, (node) => {
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            conditions: [
-              ...node.data.criteria,
-              {
-                id: ulid(),
-                label: "If...",
-                description: "",
-                precedent: {type: "",
-                  citation: "",
-                  body: "",
-                },
-                // color: "",
-                // color,
+                type: PrecedentTypes.UNKNOWN,
+                citation: "",
               },
             ],
           },
@@ -308,11 +337,31 @@ export function ExtractorNodePropertiesPanel({
           onChange={onLabelChange}
         />
        <Label className="text-neutral-500">Fact to extract:</Label>
-       <Input
+       <Textarea
          value={desc}
+         placeholder="e.g. Check for possible signs of harassment in the workplace"
         //  defaultValue={'e.g. Check for possible signs of harassment in the workplace'}
          onChange={onDescChange}
        />
+       <div className="flex flex-row items-center gap-2 justify-between">
+          <Label className="text-neutral-500">Search Case Law</Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              
+              <Switch
+                // color=""
+                checked={doSearch}
+                onCheckedChange={(checked) => {
+                  setDoSearch(checked);
+                  // setUpdate((prev) => prev + 1);
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={5}>
+              Search for cases with similar facts that contain any of the specified citations.
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
       {node.data.criteria.map((criteria, i) => (
         <CriteriaPropertiesPanel

@@ -18,17 +18,30 @@ import { titleCase } from "@/lib/utils";
 export type ExampleNode = Node<{label: string, body: string}, 'example'>
 export type InstructionNode = Node<{label: string, body: string}, 'instruction'>
 export type ContextNode = Node<{label: string, body: string}, 'context'>
-type Precedent = {
-    type: string;
+
+
+export enum PrecedentTypes {
+    STATUTE = "statute",
+    REGULATION = "regulation",
+    SUPREME_COURT = "supreme_court",
+    COURT_OF_APPEAL = "court_of_appeal",
+    LOWER_COURT = "lower_court",
+    UNKNOWN = "unspecified",
+};
+
+export type Criteria = {
+    id: string, 
+    label: string, 
+    description: string,
+    type: PrecedentTypes;
     citation: string; // might replace with a citation class later for easier formatting...?
-    body: string;
 }
 type ExtractorData = {
     label: string;
     factDescription: string;
     factPrompt: string;
     searchCaseLaw: boolean;
-    criteria: Array<{id: string, label: string, description: string, precedent: Precedent}>;
+    criteria: Array<Criteria>;
 
 }
 export type ExtractorNode = Node<ExtractorData, 'extractor'>
@@ -173,12 +186,10 @@ export function createEmptyNode(type: GraphFlowNodeTypes, position: XYPosition):
                     criteria: [
                         {
                             id: ulid(),
-                            label: 'If...',
+                            label: '',
                             description: '',
-                            precedent: {type: "",
-                  citation: "",
-                  body: "",
-                }, /* rose.100 */
+                            type: PrecedentTypes.UNKNOWN,
+                            citation: "",
                         },
                     ],
 
