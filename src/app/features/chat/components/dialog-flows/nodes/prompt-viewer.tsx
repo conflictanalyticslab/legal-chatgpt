@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useDialogFlowStore, useGlobalDialogFlowStore } from "../store";
 import { Textarea } from "@/components/ui/textarea";
-import { ExtractorNode, PrecedentTypes } from "../nodes";
+import { ExtractorNode} from "../nodes";
+import { PrecedentTypes } from "../facts";
 import { cn } from "@/lib/utils";
 
 
@@ -73,7 +74,7 @@ function compileExtractionPrompt(node: ExtractorNode) {
       }
     }
     // perform RAG, on the facts, on cases that cite this precedent
-
+    prompts.push("These are a list of similar cases that cite the above sources:")
   }
 
   return prompts.join("\n\n");

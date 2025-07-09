@@ -14,20 +14,11 @@ import PDFNode from "./nodes/pdf-node";
 import GhostNode from "./nodes/ghost-node";
 
 import { titleCase } from "@/lib/utils";
+import { PrecedentTypes } from "./facts";
 
 export type ExampleNode = Node<{label: string, body: string}, 'example'>
 export type InstructionNode = Node<{label: string, body: string}, 'instruction'>
 export type ContextNode = Node<{label: string, body: string}, 'context'>
-
-
-export enum PrecedentTypes {
-    STATUTE = "statute",
-    REGULATION = "regulation",
-    SUPREME_COURT = "supreme_court",
-    COURT_OF_APPEAL = "court_of_appeal",
-    LOWER_COURT = "lower_court",
-    UNKNOWN = "unspecified",
-};
 
 export type Criteria = {
     id: string, 

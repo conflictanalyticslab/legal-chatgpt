@@ -14,7 +14,7 @@ import "@xyflow/react/dist/base.css";
 import CircularNode from "./circular-node";
 import type {NodePropertiesPanelProps} from "../properties";
 import { useDialogFlowStore} from "../store";
-import { PrecedentTypes } from "../nodes";
+import { PrecedentTypes } from "../facts";
 
 import type { ExtractorNode } from "../nodes";
 import { cn } from "@/lib/utils";
@@ -22,8 +22,7 @@ import { ulid } from "ulid";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { usePdfSearch } from "../../../hooks/use-pdf-search";
 import { useGlobalContext } from "@/app/store/global-context";
-
-
+import { SearchResults } from "../facts";
 
 export default function ExtractorNode({
   id,
@@ -178,7 +177,7 @@ function CriteriaPropertiesPanel({
           value={desc}
           rows={2}
           onChange={onBodyChange}
-        />        
+        />
       </div>
         {/* <select value={t} onChange={onTypeChange}>
           {Object.keys(PrecedentTypes).map(key => (
@@ -202,15 +201,6 @@ export function ExtractorNodePropertiesPanel({
   const [desc, setDesc] = useState(node.data.factPrompt);
 
   const [doSearch, setDoSearch] = useState(node.data.searchCaseLaw);
-  
-  const { pdfSearch } = usePdfSearch();
-  const { pdfLoading } =
-      useGlobalContext();
-  
-  const handleSearchDocuments = async (query: string, namespace: string) => {
-    if (pdfLoading) return;
-    pdfSearch(query, namespace);
-  };
 
   // const {
   //     isOutdated,
@@ -378,7 +368,9 @@ export function ExtractorNodePropertiesPanel({
           Add Criteria
         </Button>
       )}
-      
+      {doSearch && (
+        <SearchResults />
+      )}
         <PromptViewer id={""} position={{
         x: 0,
         y: 0
